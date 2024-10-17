@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ModelOrder {
-
+    @SuppressWarnings("unchecked")
     private static final Class<Model>[] array = new Class[]{
             BaseModel.class
             , AntForestV2.class
