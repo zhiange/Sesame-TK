@@ -1,5 +1,6 @@
 package tkaxv7s.xposed.sesame.data;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import tkaxv7s.xposed.sesame.util.Log;
 
 public final class ViewAppInfo {
 
+    @SuppressLint("StaticFieldLeak")
     @Getter
     private static Context context = null;
 
