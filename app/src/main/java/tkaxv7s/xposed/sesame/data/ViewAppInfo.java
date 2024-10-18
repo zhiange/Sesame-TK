@@ -43,13 +43,14 @@ public final class ViewAppInfo {
         }
     }
 
-    public static RunType checkRunType() {
+    public static void checkRunType() {
         if (runType != null) {
-            return runType;
+            return;
         }
         try {
             if (context == null) {
-                return runType = RunType.DISABLE;
+                runType = RunType.DISABLE;
+                return;
             }
             ContentResolver contentResolver = context.getContentResolver();
             Uri uri = Uri.parse("content://me.weishu.exposed.CP/");
@@ -63,7 +64,8 @@ public final class ViewAppInfo {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 } catch (Throwable e1) {
-                    return runType = RunType.DISABLE;
+                    runType = RunType.DISABLE;
+                    return;
                 }
             }
             if (result == null) {
@@ -71,15 +73,18 @@ public final class ViewAppInfo {
             }
 
             if (result == null) {
-                return runType = RunType.DISABLE;
+                runType = RunType.DISABLE;
+                return;
             }
             if (result.getBoolean("active", false)) {
-                return runType = RunType.MODEL;
+                runType = RunType.MODEL;
+                return;
             }
-            return runType = RunType.DISABLE;
+            runType = RunType.DISABLE;
+            return;
         } catch (Throwable ignored) {
         }
-        return runType = RunType.DISABLE;
+        runType = RunType.DISABLE;
     }
 
     public static void setRunTypeByCode(Integer runTypeCode) {
