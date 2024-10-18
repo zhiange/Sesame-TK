@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class NewSettingsActivity extends BaseActivity {
 
@@ -105,6 +106,7 @@ public class NewSettingsActivity extends BaseActivity {
                 // 强制在当前 WebView 中加载 url
                 Uri requestUrl = request.getUrl();
                 String scheme = requestUrl.getScheme();
+                assert scheme != null;
                 if (
                         scheme.equalsIgnoreCase("http")
                                 || scheme.equalsIgnoreCase("https")
@@ -408,7 +410,7 @@ public class NewSettingsActivity extends BaseActivity {
                         configV2File = FileUtil.getConfigV2File(userId);
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (FileUtil.streamTo(getContentResolver().openInputStream(data.getData()), outputStream)) {
+                    if (FileUtil.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
                         Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                         if (!StringUtil.isEmpty(userId)) {
                             try {
