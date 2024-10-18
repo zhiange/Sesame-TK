@@ -2,9 +2,12 @@
 <androidx.appcompat.widget.Toolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/x_toolbar"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/x_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/MenuTheme"
-        android:background="@color/colorPrimary">
+        android:textSize="8sp"
+        android:background="@color/colorPrimary"
+    tools:ignore="SmallSp">
 </androidx.appcompat.widget.Toolbar>

@@ -1,10 +1,19 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
 
 android {
     def version = project.getProperties().get("version")
     if (version == null || "unspecified".equalsIgnoreCase(version)) {
-        version = "TEST"
+        // 生成编译时间字符串
+        def currentTime = new Date()
+        def dateFormat = new SimpleDateFormat("yyMMdd-HHmm") // 修改这里
+        // 如果需要使用编译时间，可以将其包含在版本中
+        version = "alpha-${dateFormat.format(currentTime)}"
+    } else {
+        version = "alpha-byseven"
     }
+
 
     compileSdk 34
     defaultConfig {
