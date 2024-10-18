@@ -77,32 +77,36 @@ public abstract class BaseTask {
         return childTaskMap.size();
     }
 
-    public Boolean startTask() {
-        return startTask(false);
+    public void startTask() {
+        startTask(false);
     }
 
-    public synchronized Boolean startTask(Boolean force) {
+    public synchronized void startTask(Boolean force) {
+        // 检查线程状态，如果线程存在且处于活动状态，则不再启动
         if (thread != null && thread.isAlive()) {
+            // 如果不强制则返回失败
             if (!force) {
-                return false;
+                return;
             }
+            // 停止当前任务
             stopTask();
         }
+        // 创建新线程并指定任务
         thread = new Thread(this::run);
         try {
+            // 检查任务状态
             if (check()) {
-                thread.start();
+                thread.start();// 启动线程
+                // 启动子任务
                 for (BaseTask childTask : childTaskMap.values()) {
                     if (childTask != null) {
-                        childTask.startTask();
+                        childTask.startTask();// 启动每个子任务
                     }
                 }
-                return true;
             }
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
-        return false;
     }
 
     public synchronized void stopTask() {
