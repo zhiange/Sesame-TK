@@ -13,11 +13,8 @@ public enum ModelType {
 
     private final Integer code;
 
-    private final String name;
-
     ModelType(Integer code, String name) {
         this.code = code;
-        this.name = name;
     }
 
     private static final Map<Integer, ModelType> MAP;
