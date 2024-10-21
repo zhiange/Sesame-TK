@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -260,7 +261,7 @@ public class SettingsActivity extends BaseActivity {
                         configV2File = FileUtil.getConfigV2File(userId);
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (FileUtil.streamTo(getContentResolver().openInputStream(data.getData()), outputStream)) {
+                    if (FileUtil.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
                         Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                         if (!StringUtil.isEmpty(userId)) {
                             try {
