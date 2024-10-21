@@ -17,10 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class ModelTask extends Model {
 
+    // 存储所有主任务与线程的映射
     private static final Map<ModelTask, Thread> MAIN_TASK_MAP = new ConcurrentHashMap<>();
 
+    // 主任务线程池，线程池大小为模型数组长度，最大线程数无限制，空闲时间30秒
     private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(getModelArray().length, Integer.MAX_VALUE, 30L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
 
+    // 存储子任务的映射
     private final Map<String, ChildModelTask> childTaskMap = new ConcurrentHashMap<>();
 
     private ChildTaskExecutor childTaskExecutor;
@@ -50,43 +53,88 @@ public abstract class ModelTask extends Model {
     public ModelTask() {
     }
 
+    /**
+     * 准备任务执行环境
+     */
     @Override
     public final void prepare() {
         childTaskExecutor = newTimedTaskExecutor();
     }
 
+    /**
+     * 获取任务ID
+     * @return 任务ID
+     */
     public String getId() {
         return toString();
     }
 
+    /**
+     * 获取任务类型
+     * @return 任务类型为TASK
+     */
     public ModelType getType() {
         return ModelType.TASK;
     }
 
+    /**
+     * 获取任务名称
+     * @return 任务名称
+     */
     public abstract String getName();
 
+    /**
+     * 获取任务的字段
+     * @return 任务字段
+     */
     public abstract ModelFields getFields();
 
+    /**
+     * 检查任务是否可执行
+     * @return Boolean值，表示是否通过检查
+     */
     public abstract Boolean check();
 
+    /**
+     * 是否为同步任务
+     * @return Boolean值，表示是否为同步任务
+     */
     public Boolean isSync() {
         return false;
     }
 
+    /**
+     * 执行任务
+     */
     public abstract void run();
 
+    /**
+     * 检查任务是否包含指定的子任务
+     * @param childId 子任务ID
+     * @return 是否包含该子任务
+     */
     public Boolean hasChildTask(String childId) {
         return childTaskMap.containsKey(childId);
     }
 
+    /**
+     * 获取指定ID的子任务
+     * @param childId 子任务ID
+     * @return 子任务对象
+     */
     public ChildModelTask getChildTask(String childId) {
         return childTaskMap.get(childId);
     }
 
-    public Boolean addChildTask(ChildModelTask childTask) {
+    /**
+     * 添加子任务
+     *
+     * @param childTask 子任务对象
+     */
+    public void addChildTask(ChildModelTask childTask) {
         String childId = childTask.getId();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return childTask == childTaskMap.compute(childId, (key, value) -> {
+            childTaskMap.compute(childId, (key, value) -> {
                 if (value != null) {
                     value.cancel();
                 }
@@ -105,13 +153,15 @@ public abstract class ModelTask extends Model {
                 childTask.modelTask = this;
                 if (childTaskExecutor.addChildTask(childTask)) {
                     childTaskMap.put(childId, childTask);
-                    return true;
                 }
-                return false;
             }
         }
     }
 
+    /**
+     * 移除指定ID的子任务
+     * @param childId 子任务ID
+     */
     public void removeChildTask(String childId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             childTaskMap.compute(childId, (key, value) -> {
@@ -131,14 +181,27 @@ public abstract class ModelTask extends Model {
         }
     }
 
+    /**
+     * 获取当前任务的子任务数量
+     * @return 子任务数量
+     */
     public Integer countChildTask() {
         return childTaskMap.size();
     }
 
+    /**
+     * 启动任务
+     * @return 是否成功启动任务
+     */
     public Boolean startTask() {
         return startTask(false);
     }
 
+    /**
+     * 启动任务
+     * @param force 是否强制启动
+     * @return 是否成功启动任务
+     */
     public synchronized Boolean startTask(Boolean force) {
         if (MAIN_TASK_MAP.containsKey(this)) {
             if (!force) {
@@ -161,6 +224,9 @@ public abstract class ModelTask extends Model {
         return false;
     }
 
+    /**
+     * 停止当前任务及其所有子任务
+     */
     public synchronized void stopTask() {
         for (ChildModelTask childModelTask : childTaskMap.values()) {
             try {
@@ -177,26 +243,34 @@ public abstract class ModelTask extends Model {
         MAIN_TASK_MAP.remove(this);
     }
 
+    /**
+     * 启动所有任务
+     */
     public static void startAllTask() {
         startAllTask(false);
     }
 
+    /**
+     * 启动所有任务
+     * @param force 是否强制启动
+     */
     public static void startAllTask(Boolean force) {
         for (Model model : getModelArray()) {
-            if (model != null) {
-                if (ModelType.TASK == model.getType()) {
-                    if (((ModelTask) model).startTask(force)) {
-                        try {
-                            Thread.sleep(750);
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
+            if (model != null && ModelType.TASK == model.getType()) {
+                if (((ModelTask) model).startTask(force)) {
+                    try {
+                        Thread.sleep(750);
+                    } catch (InterruptedException e) {
+                        Log.printStackTrace(e);
                     }
                 }
             }
         }
     }
 
+    /**
+     * 停止所有任务
+     */
     public static void stopAllTask() {
         for (Model model : getModelArray()) {
             if (model != null) {
@@ -211,6 +285,10 @@ public abstract class ModelTask extends Model {
         }
     }
 
+    /**
+     * 创建一个新的子任务执行器
+     * @return 子任务执行器
+     */
     private ChildTaskExecutor newTimedTaskExecutor() {
         ChildTaskExecutor childTaskExecutor;
         Integer timedTaskModel = BaseModel.getTimedTaskModel().getValue();
@@ -264,10 +342,6 @@ public abstract class ModelTask extends Model {
             this(id, null, null, execTime);
         }
 
-        /*protected ChildModelTask(String id, String group, Long time) {
-            this(id, group, null, time);
-        }*/
-
         public ChildModelTask(String id, Runnable runnable) {
             this(id, null, runnable, 0L);
         }
@@ -292,18 +366,32 @@ public abstract class ModelTask extends Model {
             this.execTime = execTime;
         }
 
+        /**
+         * 设置子任务的运行逻辑
+         * @return 子任务的运行逻辑
+         */
         public Runnable setRunnable() {
             return null;
         }
 
+        /**
+         * 执行子任务
+         */
         public final void run() {
             runnable.run();
         }
 
+        /**
+         * 设置取消任务的逻辑
+         * @param cancelTask 取消任务的逻辑
+         */
         protected void setCancelTask(CancelTask cancelTask) {
             this.cancelTask = cancelTask;
         }
 
+        /**
+         * 取消子任务
+         */
         public final void cancel() {
             if (cancelTask != null) {
                 try {
