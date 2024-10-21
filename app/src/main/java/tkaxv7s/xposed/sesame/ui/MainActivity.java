@@ -58,10 +58,6 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         tvStatistics = findViewById(R.id.tv_statistics);
         ViewAppInfo.checkRunType();
-        /*ActionBar supportActionBar = getSupportActionBar();
-        if (supportActionBar != null) {
-            supportActionBar.setIcon(R.drawable.title_logo);
-        }*/
         updateSubTitle(ViewAppInfo.getRunType());
         viewHandler = new Handler();
         titleRunner = () -> updateSubTitle(RunType.DISABLE);
@@ -108,7 +104,7 @@ public class MainActivity extends BaseActivity {
         alertDialog.show();
         Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (positiveButton != null) {
-            positiveButton.setTextColor(Color.parseColor("#216EEE")); // 设置按钮颜色为红色
+            positiveButton.setTextColor(getResources().getColor(R.color.colorPrimary));
         }
     }
 
@@ -352,7 +348,7 @@ public class MainActivity extends BaseActivity {
         // 在 AlertDialog 显示之后获取返回按钮并设置颜色
         Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (positiveButton != null) {
-            positiveButton.setTextColor(Color.parseColor("#216EEE")); // 设置按钮颜色为红色
+            positiveButton.setTextColor(getResources().getColor(R.color.colorPrimary));
         }
         int length = userNameArray.length;
         if (length > 0 && length < 3) {
@@ -379,10 +375,10 @@ public class MainActivity extends BaseActivity {
     }
 
     private void updateSubTitle(RunType runType) {
-        setBaseTitle(ViewAppInfo.getAppTitle() + "【" + runType.getName() + "】");
+        setBaseTitle(ViewAppInfo.getAppTitle() + "[" + runType.getName() + "]");
         switch (runType) {
             case DISABLE:
-                setBaseTitleTextColor(Color.parseColor("#333333"));
+                setBaseTitleTextColor(getResources().getColor(R.color.textColorRed));
                 break;
             case MODEL:
                 setBaseTitleTextColor(getResources().getColor(R.color.textColorPrimary));
