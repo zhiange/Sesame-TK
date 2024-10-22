@@ -176,11 +176,6 @@ public class NewSettingsActivity extends BaseActivity {
             return JsonUtil.toJsonString(tabList);
         }
 
-        /*@JavascriptInterface
-        public String getAllConfig() {
-            return JsonUtil.toJsonString(ModelTask.getModelConfigMap());
-        }*/
-
         @JavascriptInterface
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
