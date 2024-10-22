@@ -21,10 +21,11 @@ import tkaxv7s.xposed.sesame.util.LanguageUtil;
 import java.io.File;
 
 public class HtmlViewerActivity extends BaseActivity {
-    MyWebView mWebView;
-    ProgressBar pgb;
-    Uri uri;
-    Boolean canClear;
+
+    private MyWebView mWebView;
+    private ProgressBar progressBar;
+    private Uri uri;
+    private Boolean canClear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,40 +34,44 @@ public class HtmlViewerActivity extends BaseActivity {
         setContentView(R.layout.activity_html_viewer);
         setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
 
+        // 初始化 WebView 和进度条
         mWebView = findViewById(R.id.mwv_webview);
-        pgb = findViewById(R.id.pgb_webview);
+        progressBar = findViewById(R.id.pgb_webview);
 
-        mWebView.setWebChromeClient(
-                new WebChromeClient() {
-                    @SuppressLint("WrongConstant")
-                    @Override
-                    public void onProgressChanged(WebView view, int progress) {
-                        pgb.setProgress(progress);
-                        if (progress < 100) {
-                            setBaseSubtitle("Loading...");
-                            pgb.setVisibility(View.VISIBLE);
-                        } else {
-                            setBaseSubtitle(mWebView.getTitle());
-                            pgb.setVisibility(View.GONE);
-                        }
-                    }
+        // 设置 WebView 的客户端
+        setupWebView();
+    }
+
+    /**
+     * 设置 WebView 的 WebChromeClient 和进度变化监听
+     */
+    private void setupWebView() {
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            @SuppressLint("WrongConstant")
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                progressBar.setProgress(progress);
+                if (progress < 100) {
+                    setBaseSubtitle("Loading...");
+                    progressBar.setVisibility(View.VISIBLE);
+                } else {
+                    setBaseSubtitle(mWebView.getTitle());
+                    progressBar.setVisibility(View.GONE);
                 }
-        );
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // 获取传递过来的 Intent
         Intent intent = getIntent();
         WebSettings settings = mWebView.getSettings();
+
+        // 根据 intent 设置 WebView
         if (intent != null) {
-            if (intent.getBooleanExtra("nextLine", true)) {
-                settings.setTextZoom(85);
-                settings.setUseWideViewPort(false);
-            } else {
-                settings.setTextZoom(100);
-                settings.setUseWideViewPort(true);
-            }
+            configureWebViewSettings(intent, settings);
             uri = intent.getData();
             if (uri != null) {
                 mWebView.loadUrl(uri.toString());
@@ -74,12 +79,29 @@ public class HtmlViewerActivity extends BaseActivity {
             canClear = intent.getBooleanExtra("canClear", false);
             return;
         }
+        // 设置默认的 WebView 参数
         settings.setTextZoom(100);
         settings.setUseWideViewPort(true);
     }
 
+    /**
+     * 配置 WebView 的设置项
+     * @param intent 传递的 Intent
+     * @param settings WebView 的设置
+     */
+    private void configureWebViewSettings(Intent intent, WebSettings settings) {
+        if (intent.getBooleanExtra("nextLine", true)) {
+            settings.setTextZoom(85);
+            settings.setUseWideViewPort(false);
+        } else {
+            settings.setTextZoom(100);
+            settings.setUseWideViewPort(true);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // 创建菜单选项
         menu.add(0, 1, 1, getString(R.string.export_file));
         if (canClear) {
             menu.add(0, 2, 2, getString(R.string.clear_file));
@@ -95,58 +117,89 @@ public class HtmlViewerActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 1:
-                if (uri != null) {
-                    String path = uri.getPath();
-                    if (path != null) {
-                        File exportFile = FileUtil.exportFile(new File(path));
-                        if (exportFile != null) {
-                            Toast.makeText(this, "文件已导出到: " + exportFile.getPath(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
+                // 导出文件
+                exportFile();
                 break;
-
             case 2:
-                if (uri != null) {
-                    String path = uri.getPath();
-                    if (path != null) {
-                        File file = new File(path);
-                        if (FileUtil.clearFile(file)) {
-                            android.widget.Toast.makeText(this, "文件已清空", android.widget.Toast.LENGTH_SHORT).show();
-                            mWebView.reload();
-                        }
-                    }
-                }
+                // 清空文件
+                clearFile();
                 break;
-
             case 3:
-                if (uri != null) {
-                    String scheme = uri.getScheme();
-                    if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(intent);
-                    } else if ("file".equalsIgnoreCase(scheme)) {
-                        Toast.makeText(this, "该文件不支持用浏览器打开", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "不支持用浏览器打开", Toast.LENGTH_SHORT).show();
-                    }
-                }
+                // 使用其他浏览器打开
+                openWithBrowser();
                 break;
-
             case 4:
-                ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                cm.setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl()));
-                Toast.makeText(this, getString(R.string.copy_success), Toast.LENGTH_SHORT).show();
+                // 复制 URL 到剪贴板
+                copyUrlToClipboard();
                 break;
-
             case 5:
+                // 滚动到顶部
                 mWebView.scrollTo(0, 0);
                 break;
-
             case 6:
+                // 滚动到底部
                 mWebView.scrollToBottom();
                 break;
         }
         return true;
+    }
+
+    /**
+     * 导出当前文件
+     */
+    private void exportFile() {
+        if (uri != null) {
+            String path = uri.getPath();
+            if (path != null) {
+                File exportFile = FileUtil.exportFile(new File(path));
+                if (exportFile != null) {
+                    Toast.makeText(this, "文件已导出到: " + exportFile.getPath(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    /**
+     * 清空当前文件
+     */
+    private void clearFile() {
+        if (uri != null) {
+            String path = uri.getPath();
+            if (path != null) {
+                File file = new File(path);
+                if (FileUtil.clearFile(file)) {
+                    Toast.makeText(this, "文件已清空", Toast.LENGTH_SHORT).show();
+                    mWebView.reload();
+                }
+            }
+        }
+    }
+
+    /**
+     * 使用其他浏览器打开当前 URL
+     */
+    private void openWithBrowser() {
+        if (uri != null) {
+            String scheme = uri.getScheme();
+            if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            } else if ("file".equalsIgnoreCase(scheme)) {
+                Toast.makeText(this, "该文件不支持用浏览器打开", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "不支持用浏览器打开", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * 复制当前 WebView 的 URL 到剪贴板
+     */
+    private void copyUrlToClipboard() {
+        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        if (clipboardManager != null) {
+            clipboardManager.setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl()));
+            Toast.makeText(this, getString(R.string.copy_success), Toast.LENGTH_SHORT).show();
+        }
     }
 }
