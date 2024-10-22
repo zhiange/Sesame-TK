@@ -1743,27 +1743,37 @@ public class AntForestV2 extends ModelTask {
         }
     }
 
+    /**
+     * 使用隐身卡道具。
+     * 这个方法检查是否满足使用隐身卡的条件，如果满足，则在背包中查找并使用隐身卡。
+     * @param bagObject 背包的JSON对象。
+     */
     private void useStealthCard(JSONObject bagObject) {
         try {
-            // 背包查找 限时隐身卡
+            // 在背包中查找限时隐身卡
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_STEALTH_CARD");
-            // 没有限时隐身卡 且 开启了限时隐身永动机
+            // 如果没有限时隐身卡且开启了限时隐身永动机
             if (jo == null && stealthCardConstant.getValue()) {
-                // 商店兑换 限时隐身卡
+                // 在商店兑换限时隐身卡
                 if (exchangePropShop(findPropShop("SP20230521000082", "SK20230521000206"), 1)) {
+                    // 兑换成功后再次查找限时隐身卡
                     jo = findPropBag(bagObject, "LIMIT_TIME_STEALTH_CARD");
                 }
             }
+            // 如果没有找到限时隐身卡，则查找普通隐身卡
             if (jo == null) {
                 jo = findPropBag(bagObject, "STEALTH_CARD");
             }
-            // 使用 隐身卡
+            // 如果找到了隐身卡并成功使用
             if (jo != null && usePropBag(jo)) {
+                // 设置隐身卡结束时间
                 stealthEndTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
             } else {
+                // 如果没有找到或使用失败，则更新隐身卡时间
                 updateDoubleTime();
             }
         } catch (Throwable th) {
+            // 打印异常信息
             Log.i(TAG, "useStealthCard err:");
             Log.printStackTrace(TAG, th);
         }
