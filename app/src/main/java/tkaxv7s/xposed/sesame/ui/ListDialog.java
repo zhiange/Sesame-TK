@@ -91,6 +91,7 @@ public class ListDialog {
         listDialog.setOnShowListener(p1 -> {
             AlertDialog d = (AlertDialog) p1;
             layout_batch_process = d.findViewById(R.id.layout_batch_process);
+            assert layout_batch_process != null;
             layout_batch_process.setVisibility(listType == ListType.CHECK && !hasCount ? View.VISIBLE : View.GONE);
             ListAdapter.get(c).notifyDataSetChanged();
         });
