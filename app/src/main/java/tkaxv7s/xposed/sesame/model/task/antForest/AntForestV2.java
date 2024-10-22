@@ -2,9 +2,11 @@ package tkaxv7s.xposed.sesame.model.task.antForest;
 
 import de.robv.android.xposed.XposedHelpers;
 import lombok.Getter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import tkaxv7s.xposed.sesame.data.ConfigV2;
 import tkaxv7s.xposed.sesame.data.ModelFields;
 import tkaxv7s.xposed.sesame.data.ModelGroup;
@@ -244,6 +246,7 @@ public class AntForestV2 extends ModelTask {
     @Override
     public void run() {
         try {
+            //获取当前时间
             Log.record("执行开始-蚂蚁森林");
             NotificationUtil.setStatusTextExec();
 
@@ -589,44 +592,68 @@ public class AntForestV2 extends ModelTask {
         return userHomeObject;
     }
 
+    /**
+     * 收集用户自己的能量。
+     * 这个方法首先查询用户的主页信息，然后根据用户主页中的信息执行相应的操作，
+     * 如关闭“6秒拼手速”功能或执行“拼手速”游戏。最后，收集并返回用户的能量信息。
+     *
+     * @return 用户的能量信息，如果发生错误则返回null。
+     */
     private JSONObject collectSelfEnergy() {
         try {
+            // 查询用户的主页信息
             JSONObject selfHomeObject = querySelfHome();
             if (selfHomeObject != null) {
+                // 如果启用了关闭“6秒拼手速”功能
                 if (closeWhackMole.getValue()) {
+                    // 获取用户主页中的属性对象
                     JSONObject propertiesObject = selfHomeObject.optJSONObject("properties");
                     if (propertiesObject != null) {
+                        // 如果用户主页的属性中标记了“whackMole”
                         if (Objects.equals("Y", propertiesObject.optString("whackMole"))) {
-                            if (closeWhackMole()) {
-                                Log.record("6秒拼手速关闭成功");
-                            } else {
-                                Log.record("6秒拼手速关闭失败");
-                            }
+                            // 尝试关闭“6秒拼手速”功能
+                            boolean success = closeWhackMole();
+                            Log.record(success ? "6秒拼手速关闭成功" : "6秒拼手速关闭失败");
                         }
                     }
                 }
+                // 如果用户的下一个行动是“WhackMole”，则执行“拼手速”游戏
                 String nextAction = selfHomeObject.optString("nextAction");
                 if ("WhackMole".equalsIgnoreCase(nextAction)) {
                     Log.record("检测到6秒拼手速强制弹窗，先执行拼手速");
                     whackMole();
                 }
+                // 收集并返回用户的能量信息
                 return collectUserEnergy(UserIdMap.getCurrentUid(), selfHomeObject);
             }
         } catch (Throwable t) {
+            // 打印异常信息
             Log.printStackTrace(t);
         }
+        // 如果发生错误，返回null
         return null;
     }
 
+    /**
+     * 收集指定用户的能量。
+     * 这个方法查询指定用户的主页信息，然后收集并返回该好友的能量信息。
+     *
+     * @param userId 好友用户的ID。
+     * @return 好友的能量信息，如果发生错误则返回null。
+     */
     private JSONObject collectFriendEnergy(String userId) {
         try {
+            // 查询好友的主页信息
             JSONObject userHomeObject = queryFriendHome(userId);
             if (userHomeObject != null) {
+                // 如果查询成功，收集并返回好友的能量信息
                 return collectUserEnergy(userId, userHomeObject);
             }
         } catch (Throwable t) {
+            // 打印异常信息
             Log.printStackTrace(t);
         }
+        // 如果发生错误，返回null
         return null;
     }
 
@@ -1404,6 +1431,7 @@ public class AntForestV2 extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     // 兑换 能量保护罩
     private void exchangeEnergyShield() {
         if (exchangePropShop(findPropShop("CR20230517000497", "CR20230516000371"), 1)) {
@@ -1638,59 +1666,78 @@ public class AntForestV2 extends ModelTask {
         }
     }
 
+    /**
+     * 在收集能量之前使用道具。
+     * 这个方法检查是否需要使用双倍卡或隐身卡，并在需要时使用相应的道具。
+     * @param userId 用户的ID。
+     */
     private void usePropBeforeCollectEnergy(String userId) {
         try {
+            // 如果是自己的账号，直接返回，不需要使用道具
             if (Objects.equals(selfId, userId)) {
                 return;
             }
+            // 检查是否需要使用双倍卡或隐身卡
             boolean needDouble = doubleCard.getValue() && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = stealthCard.getValue() && stealthEndTime < System.currentTimeMillis();
+            // 如果需要使用双倍卡或隐身卡，进行同步操作
             if (needDouble || needStealth) {
                 synchronized (doubleCardLockObj) {
-                    JSONObject bagObject = null;
+                    // 获取背包对象
+                    JSONObject bagObject = getBag();
+                    // 如果需要使用双倍卡，使用双倍卡道具
                     if (needDouble) {
-                        bagObject = getBag();
                         useDoubleCard(bagObject);
                     }
+                    // 如果需要使用隐身卡，使用隐身卡道具
                     if (needStealth) {
-                        if (bagObject == null) {
-                            bagObject = getBag();
-                        }
                         useStealthCard(bagObject);
                     }
                 }
             }
         } catch (Exception e) {
+            // 打印异常信息
             Log.printStackTrace(e);
         }
     }
 
+    /**
+     * 使用双倍卡道具。
+     * 这个方法检查是否满足使用双倍卡的条件，如果满足，则在背包中查找并使用双倍卡。
+     * @param bagObject 背包的JSON对象。
+     */
     private void useDoubleCard(JSONObject bagObject) {
         try {
+            // 检查是否有双倍卡使用时间且今天可以使用双倍卡
             if (hasDoubleCardTime() && Status.canDoubleToday()) {
-                // 背包查找 限时能量双击卡
+                // 在背包中查找限时能量双击卡
                 JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
-                // 没有限时能量双击卡 且 开启了限时双击永动机
+                // 如果没有限时能量双击卡且开启了限时双击永动机
                 if (jo == null && doubleCardConstant.getValue()) {
-                    // 商店兑换 限时能量双击卡
+                    // 在商店兑换限时能量双击卡
                     if (exchangePropShop(findPropShop("CR20230516000362", "CR20230516000363"), Status.INSTANCE.getExchangeTimes() + 1)) {
                         Status.exchangeDoubleCardToday(true);
+                        // 兑换成功后再次查找限时能量双击卡
                         jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
                     }
                 }
+                // 如果没有找到限时能量双击卡，则查找普通能量双击卡
                 if (jo == null) {
-                    // 背包查找 能量双击卡
                     jo = findPropBag(bagObject, "ENERGY_DOUBLE_CLICK");
                 }
-                // 使用能量双击卡
+                // 如果找到了能量双击卡并成功使用
                 if (jo != null && usePropBag(jo)) {
+                    // 设置双倍卡结束时间
                     doubleEndTime = System.currentTimeMillis() + 1000 * 60 * 5;
+                    // 标记今天使用了双倍卡
                     Status.DoubleToday();
                 } else {
+                    // 如果没有找到或使用失败，则更新双倍卡时间
                     updateDoubleTime();
                 }
             }
         } catch (Throwable th) {
+            // 打印异常信息
             Log.i(TAG, "useDoubleCard err:");
             Log.printStackTrace(TAG, th);
         }
@@ -1721,6 +1768,7 @@ public class AntForestV2 extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
+
     private boolean hasDoubleCardTime() {
         long currentTimeMillis = System.currentTimeMillis();
         return TimeUtil.checkInTimeRange(currentTimeMillis, doubleCardTime.getValue());
@@ -1924,7 +1972,8 @@ public class AntForestV2 extends ModelTask {
 
     private void queryUserPatrol() {
         try {
-            th:do {
+            th:
+            do {
                 JSONObject jo = new JSONObject(AntForestRpcCall.queryUserPatrol());
                 TimeUtil.sleep(500);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
@@ -2267,9 +2316,7 @@ public class AntForestV2 extends ModelTask {
         }
         try {
             // 使用道具
-            JSONObject jo = new JSONObject(
-                    AntForestRpcCall.consumeProp(
-                            prop.getJSONArray("propIdList").getString(0), prop.getString("propType")));
+            JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(prop.getJSONArray("propIdList").getString(0), prop.getString("propType")));
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 Log.forest("使用道具🎭[" + prop.getJSONObject("propConfigVO").getString("propName") + "]");
                 return true;
