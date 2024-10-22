@@ -1,5 +1,6 @@
 package tkaxv7s.xposed.sesame.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
@@ -15,152 +16,187 @@ import tkaxv7s.xposed.sesame.util.Log;
 import java.util.*;
 
 public class ListAdapter extends BaseAdapter {
+
+    @SuppressLint("StaticFieldLeak")
     private static ListAdapter adapter;
-
     private static ListDialog.ListType listType;
+    private final Context context;  // 将 context 声明为 final
+    private List<? extends IdAndName> list;
+    private SelectModelFieldFunc selectModelFieldFunc;
+    private int findIndex = -1;
+    private String findWord = null;
+    public static List<ViewHolder> viewHolderList = new ArrayList<>();
 
+    /**
+     * 获取适配器的单例实例。
+     *
+     * @param c 上下文，建议传入 ApplicationContext 来避免内存泄漏
+     * @return 单例 ListAdapter 实例
+     */
     public static ListAdapter get(Context c) {
         if (adapter == null) {
-            adapter = new ListAdapter(c);
+            adapter = new ListAdapter(c.getApplicationContext());  // 使用 ApplicationContext
         }
         return adapter;
     }
 
+    /**
+     * 获取并重置适配器实例，清空查找相关的状态。
+     *
+     * @param c 上下文
+     * @return 重置后的适配器实例
+     */
     public static ListAdapter getClear(Context c) {
         ListAdapter adapter = get(c);
-        adapter.findIndex = -1;
-        adapter.findWord = null;
+        adapter.resetFindState();
         return adapter;
     }
 
+    /**
+     * 获取并重置适配器实例，设置列表类型并清空查找相关状态。
+     *
+     * @param c        上下文
+     * @param listType 列表类型
+     * @return 重置后的适配器实例
+     */
     public static ListAdapter getClear(Context c, ListDialog.ListType listType) {
-        if (adapter == null) {
-            adapter = new ListAdapter(c);
-            viewHolderList = new ArrayList<>();
-        }
+        ListAdapter adapter = get(c);
         ListAdapter.listType = listType;
-        adapter.findIndex = -1;
-        adapter.findWord = null;
+        adapter.resetFindState();
         return adapter;
     }
 
-    Context context;
-    List<? extends IdAndName> list;
-    SelectModelFieldFunc selectModelFieldFunc;
-    int findIndex = -1;
-    String findWord = null;
-
+    /**
+     * 构造函数，初始化上下文。
+     *
+     * @param c 上下文
+     */
     private ListAdapter(Context c) {
-        context = c;
+        this.context = c;  // 使用传入的上下文
     }
 
+    /**
+     * 设置基本列表数据。
+     *
+     * @param l 列表数据
+     */
     public void setBaseList(List<? extends IdAndName> l) {
-        if (l != list)
+        if (l != list) {
             exitFind();
-        list = l;
+        }
+        this.list = l;
     }
 
+    /**
+     * 设置选中的列表项，并按选中状态排序。
+     *
+     * @param selectModelFieldFunc 选择功能实现
+     */
     public void setSelectedList(SelectModelFieldFunc selectModelFieldFunc) {
         this.selectModelFieldFunc = selectModelFieldFunc;
         try {
             Collections.sort(list, (o1, o2) -> {
-                if (this.selectModelFieldFunc.contains(o1.id) == this.selectModelFieldFunc.contains(o2.id)) {
+                boolean contains1 = selectModelFieldFunc.contains(o1.id);
+                boolean contains2 = selectModelFieldFunc.contains(o2.id);
+                if (contains1 == contains2) {
                     return o1.compareTo(o2);
                 }
-                return this.selectModelFieldFunc.contains(o1.id) ? -1 : 1;
+                return contains1 ? -1 : 1;
             });
-        } catch (Throwable t) {
-            Log.i("ListAdapter err");
-            Log.printStackTrace(t);
+        } catch (Exception e) {
+            Log.i("ListAdapter error");
+            Log.printStackTrace(e);
         }
     }
 
+    /**
+     * 查找上一个匹配项。
+     *
+     * @param findThis 要查找的字符串
+     * @return 查找到的索引
+     */
     public int findLast(String findThis) {
-        if (list == null || list.isEmpty()) {
-            return -1;
-        }
-        findThis = findThis.toLowerCase();
-        if (!Objects.equals(findThis, findWord)) {
-            findIndex = -1;
-            findWord = findThis;
-        }
-        int start = findIndex;
-        int last = list.size() - 1;
-        if (start < 0) {
-            start = 0;
-        } else if (start > last) {
-            start = last;
-        }
-        int current = start;
-        for (; ; ) {
-            current--;
-            if (current < 0) {
-                current = last;
-            }
-            if (list.get(current).name.toLowerCase().contains(findThis)) {
-                findIndex = current;
-                break;
-            }
-            if (current == start) {
-                break;
-            }
-        }
-        notifyDataSetChanged();
-        return findIndex;
+        return findItem(findThis, false);
     }
 
+    /**
+     * 查找下一个匹配项。
+     *
+     * @param findThis 要查找的字符串
+     * @return 查找到的索引
+     */
     public int findNext(String findThis) {
+        return findItem(findThis, true);
+    }
+
+    /**
+     * 查找列表中的匹配项。
+     *
+     * @param findThis 查找的字符串
+     * @param forward  是否向前查找
+     * @return 匹配项的索引
+     */
+    private int findItem(String findThis, boolean forward) {
         if (list == null || list.isEmpty()) {
             return -1;
         }
         findThis = findThis.toLowerCase();
         if (!Objects.equals(findThis, findWord)) {
-            findIndex = -1;
+            resetFindState();
             findWord = findThis;
         }
-        int start = findIndex;
-        int last = list.size() - 1;
-        if (start < 0) {
-            start = 0;
-        } else if (start > last) {
-            start = last;
-        }
-        int current = start;
-        for (; ; ) {
-            current++;
-            if (current > last) {
-                current = 0;
-            }
+
+        int current = Math.max(findIndex, 0);
+        int size = list.size();
+        int start = current;
+
+        do {
+            current = (forward) ? (current + 1) % size : (current - 1 + size) % size;
             if (list.get(current).name.toLowerCase().contains(findThis)) {
                 findIndex = current;
-                break;
+                notifyDataSetChanged();
+                return findIndex;
             }
-            if (current == start) {
-                break;
-            }
-        }
-        notifyDataSetChanged();
-        return findIndex;
+        } while (current != start);
+
+        return -1;
     }
 
-    public void exitFind() {
+    /**
+     * 重置查找状态。
+     */
+    public void resetFindState() {
         findIndex = -1;
+        findWord = null;
     }
 
+    /**
+     * 退出查找模式。
+     */
+    public void exitFind() {
+        resetFindState();
+    }
+
+    /**
+     * 全选列表中的所有项。
+     */
     public void selectAll() {
         selectModelFieldFunc.clear();
-        for (IdAndName ai : list) {
-            selectModelFieldFunc.add(ai.id, 0);
+        for (IdAndName item : list) {
+            selectModelFieldFunc.add(item.id, 0);
         }
         notifyDataSetChanged();
     }
 
+    /**
+     * 反选列表中的所有项。
+     */
     public void SelectInvert() {
-        for (IdAndName ai : list) {
-            if (!selectModelFieldFunc.contains(ai.id)) {
-                selectModelFieldFunc.add(ai.id, 0);
+        for (IdAndName item : list) {
+            if (!selectModelFieldFunc.contains(item.id)) {
+                selectModelFieldFunc.add(item.id, 0);
             } else {
-                selectModelFieldFunc.remove(ai.id);
+                selectModelFieldFunc.remove(item.id);
             }
         }
         notifyDataSetChanged();
@@ -168,48 +204,50 @@ public class ListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return list == null ? 0 : list.size();
+        return list != null ? list.size() : 0;
     }
 
     @Override
-    public Object getItem(int p1) {
-        return list.get(p1);
+    public Object getItem(int position) {
+        return list.get(position);
     }
 
     @Override
-    public long getItemId(int p1) {
-        return p1;
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
-    public View getView(int p1, View p2, ViewGroup p3) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder vh;
-        if (p2 == null) {
+        if (convertView == null) {
             vh = new ViewHolder();
-            p2 = View.inflate(context, R.layout.list_item, null);
-            vh.tv = p2.findViewById(R.id.tv_idn);
-            vh.cb = p2.findViewById(R.id.cb_list);
+            convertView = View.inflate(context, R.layout.list_item, null);
+            vh.tv = convertView.findViewById(R.id.tv_idn);
+            vh.cb = convertView.findViewById(R.id.cb_list);
+
             if (listType == ListDialog.ListType.SHOW) {
                 vh.cb.setVisibility(View.GONE);
             }
-            p2.setTag(vh);
+            convertView.setTag(vh);
             viewHolderList.add(vh);
         } else {
-            vh = (ViewHolder) p2.getTag();
+            vh = (ViewHolder) convertView.getTag();
         }
 
-        IdAndName ai = list.get(p1);
-        vh.tv.setText(ai.name);
-        vh.tv.setTextColor(findIndex == p1 ? Color.RED : Color.BLACK);
-        vh.cb.setChecked(selectModelFieldFunc != null && selectModelFieldFunc.contains(ai.id));
-        return p2;
+        IdAndName item = list.get(position);
+        vh.tv.setText(item.name);
+        vh.tv.setTextColor(findIndex == position ? Color.RED : Color.BLACK);
+        vh.cb.setChecked(selectModelFieldFunc != null && selectModelFieldFunc.contains(item.id));
+
+        return convertView;
     }
 
-    public static List<ViewHolder> viewHolderList;
-
+    /**
+     * 内部 ViewHolder 类，用于缓存列表项视图。
+     */
     public static class ViewHolder {
         TextView tv;
         CheckBox cb;
     }
-
 }
