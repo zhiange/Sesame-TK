@@ -1669,6 +1669,7 @@ public class AntForestV2 extends ModelTask {
     /**
      * 在收集能量之前使用道具。
      * 这个方法检查是否需要使用双倍卡或隐身卡，并在需要时使用相应的道具。
+     *
      * @param userId 用户的ID。
      */
     private void usePropBeforeCollectEnergy(String userId) {
@@ -1704,6 +1705,7 @@ public class AntForestV2 extends ModelTask {
     /**
      * 使用双倍卡道具。
      * 这个方法检查是否满足使用双倍卡的条件，如果满足，则在背包中查找并使用双倍卡。
+     *
      * @param bagObject 背包的JSON对象。
      */
     private void useDoubleCard(JSONObject bagObject) {
@@ -1746,6 +1748,7 @@ public class AntForestV2 extends ModelTask {
     /**
      * 使用隐身卡道具。
      * 这个方法检查是否满足使用隐身卡的条件，如果满足，则在背包中查找并使用隐身卡。
+     *
      * @param bagObject 背包的JSON对象。
      */
     private void useStealthCard(JSONObject bagObject) {
@@ -1779,46 +1782,73 @@ public class AntForestV2 extends ModelTask {
         }
     }
 
+    /**
+     * 检查当前时间是否在双倍卡的有效使用时间内。
+     * 这个方法用来确定是否符合使用双倍卡的条件。
+     *
+     * @return 如果当前时间在双倍卡的有效时间范围内，返回true；否则返回false。
+     */
     private boolean hasDoubleCardTime() {
+        // 获取当前时间的毫秒数
         long currentTimeMillis = System.currentTimeMillis();
+
+        // 使用TimeUtil工具类检查当前时间是否在双倍卡设定的有效时间范围内
         return TimeUtil.checkInTimeRange(currentTimeMillis, doubleCardTime.getValue());
     }
 
-    /* 赠送道具 */
+
+    /**
+     * 向指定用户赠送道具。
+     * 这个方法首先查询可用的道具列表，然后选择一个道具赠送给目标用户。
+     * 如果有多个道具可用，会尝试继续赠送，直到所有道具都赠送完毕。
+     *
+     * @param targetUserId 目标用户的ID。
+     */
     private void giveProp(String targetUserId) {
         try {
+            // 循环赠送道具，直到没有更多道具可赠送
             do {
-                try {
-                    JSONObject jo = new JSONObject(AntForestRpcCall.queryPropList(true));
-                    if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                        JSONArray forestPropVOList = jo.optJSONArray("forestPropVOList");
-                        if (forestPropVOList != null && forestPropVOList.length() > 0) {
-                            jo = forestPropVOList.getJSONObject(0);
-                            String giveConfigId = jo.getJSONObject("giveConfigVO").getString("giveConfigId");
-                            int holdsNum = jo.optInt("holdsNum", 0);
-                            String propName = jo.getJSONObject("propConfigVO").getString("propName");
-                            String propId = jo.getJSONArray("propIdList").getString(0);
-                            jo = new JSONObject(AntForestRpcCall.giveProp(giveConfigId, propId, targetUserId));
-                            if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                                Log.forest("赠送道具🎭[" + UserIdMap.getMaskName(targetUserId) + "]#" + propName);
-                            } else {
-                                Log.record(jo.getString("resultDesc"));
-                                Log.i(jo.toString());
-                            }
-                            if (holdsNum > 1 || forestPropVOList.length() > 1) {
-                                continue;
-                            }
+                // 查询道具列表
+                JSONObject propListJo = new JSONObject(AntForestRpcCall.queryPropList(true));
+                // 检查查询结果是否成功
+                if ("SUCCESS".equals(propListJo.getString("resultCode"))) {
+                    // 获取道具列表
+                    JSONArray forestPropVOList = propListJo.optJSONArray("forestPropVOList");
+                    // 如果有可用的道具
+                    if (forestPropVOList != null && forestPropVOList.length() > 0) {
+                        // 选择第一个道具
+                        JSONObject propJo = forestPropVOList.getJSONObject(0);
+                        // 获取赠送配置ID、持有数量、道具名称和道具ID
+                        String giveConfigId = propJo.getJSONObject("giveConfigVO").getString("giveConfigId");
+                        int holdsNum = propJo.optInt("holdsNum", 0);
+                        String propName = propJo.getJSONObject("propConfigVO").getString("propName");
+                        String propId = propJo.getJSONArray("propIdList").getString(0);
+                        // 赠送道具
+                        JSONObject giveResultJo = new JSONObject(AntForestRpcCall.giveProp(giveConfigId, propId, targetUserId));
+                        // 如果赠送成功
+                        if ("SUCCESS".equals(giveResultJo.getString("resultCode"))) {
+                            // 记录赠送成功的日志
+                            Log.forest("赠送道具🎭[" + UserIdMap.getMaskName(targetUserId) + "]#" + propName);
+                        } else {
+                            // 记录赠送失败的日志
+                            Log.record(giveResultJo.getString("resultDesc"));
+                            Log.i(giveResultJo.toString());
                         }
-                    } else {
-                        Log.record(jo.getString("resultDesc"));
-                        Log.i(jo.toString());
+                        // 如果持有数量大于1或道具列表中有多于一个道具，则继续赠送
+                        if (holdsNum <= 1 && forestPropVOList.length() == 1) {
+                            break;
+                        }
                     }
-                } finally {
-                    TimeUtil.sleep(1500);
+                } else {
+                    // 如果查询道具列表失败，则记录失败的日志
+                    Log.record(propListJo.getString("resultDesc"));
+                    Log.i(propListJo.toString());
                 }
-                break;
+                // 等待1.5秒后再继续
+                TimeUtil.sleep(1500);
             } while (true);
         } catch (Throwable th) {
+            // 打印异常信息
             Log.i(TAG, "giveProp err:");
             Log.printStackTrace(TAG, th);
         }
