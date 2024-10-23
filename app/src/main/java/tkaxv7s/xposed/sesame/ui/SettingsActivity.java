@@ -159,7 +159,8 @@ public class SettingsActivity extends BaseActivity {
         menu.add(0, 2, 2, "导入配置");
         menu.add(0, 3, 3, "删除配置");
         menu.add(0, 4, 4, "单向好友");
-        if (!"TEST".equals(ViewAppInfo.getAppVersion())) {
+        //如果app版中包含字符串alpha则不展示
+        if (!(ViewAppInfo.getAppVersion().contains("alpha"))) {
             menu.add(0, 5, 5, "切换至新UI");
         }
         return super.onCreateOptionsMenu(menu);
