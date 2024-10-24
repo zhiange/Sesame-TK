@@ -1,6 +1,7 @@
 package tkaxv7s.xposed.sesame.util;
 
 import android.os.Environment;
+
 import tkaxv7s.xposed.sesame.hook.Toast;
 
 import java.io.*;
@@ -32,22 +33,6 @@ public class FileUtil {
             }
         } else {
             mainDir.mkdirs();
-            /*File oldDirectory = new File(Environment.getExternalStorageDirectory(), CONFIG_DIRECTORY_NAME);
-            if (oldDirectory.exists()) {
-                File deprecatedFile = new File(oldDirectory, "deprecated");
-                if (!deprecatedFile.exists()) {
-                    copyFile(oldDirectory, mainDirectory, "config.json");
-                    copyFile(oldDirectory, mainDirectory, "friendId.list");
-                    copyFile(oldDirectory, mainDirectory, "cooperationId.list");
-                    copyFile(oldDirectory, mainDirectory, "reserveId.list");
-                    copyFile(oldDirectory, mainDirectory, "statistics.json");
-                    copyFile(oldDirectory, mainDirectory, "cityCode.json");
-                    try {
-                        deprecatedFile.createNewFile();
-                    } catch (Throwable ignored) {
-                    }
-                }
-            }*/
         }
         return mainDir;
     }
@@ -497,8 +482,8 @@ public class FileUtil {
         try {
             byte[] b = new byte[1024];
             int length;
-            while((length= source.read(b)) > 0){
-                dest.write(b,0,length);
+            while ((length = source.read(b)) > 0) {
+                dest.write(b, 0, length);
                 dest.flush();
             }
             return true;
@@ -544,7 +529,7 @@ public class FileUtil {
                 if (parentFile != null) {
                     boolean ignore = parentFile.mkdirs();
                 }
-                if (!file.createNewFile()){
+                if (!file.createNewFile()) {
                     return null;
                 }
             } catch (Exception e) {
@@ -563,7 +548,7 @@ public class FileUtil {
         }
         if (!file.exists()) {
             try {
-                if (!file.mkdirs()){
+                if (!file.mkdirs()) {
                     return null;
                 }
             } catch (Exception e) {
@@ -574,43 +559,54 @@ public class FileUtil {
         return file;
     }
 
-    public static Boolean clearFile(File file) {
-        if (file.exists()) {
-            FileWriter fileWriter = null;
-            try {
-                fileWriter = new FileWriter(file);
+    /**
+     * 清空文件内容。
+     *
+     * @param file 要清空的文件
+     * @return 如果文件存在且内容被成功清空，则返回 true；如果文件不存在，则返回 false
+     */
+    public static boolean clearFile(File file) {
+        // 检查文件是否存在
+        if (file.exists() && file.isFile()) {
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                // 写入空字符串以清空文件内容
                 fileWriter.write("");
                 fileWriter.flush();
                 return true;
             } catch (IOException e) {
+                // 打印异常堆栈跟踪
                 Log.printStackTrace(e);
-            } finally {
-                try {
-                    if (fileWriter != null) {
-                        fileWriter.close();
-                    }
-                } catch (IOException e) {
-                    Log.printStackTrace(e);
-                }
             }
         }
         return false;
     }
 
-    public static Boolean deleteFile(File file) {
+    /**
+     * 删除文件或目录（包括空或非空目录）。
+     *
+     * @param file 要删除的文件或目录
+     * @return 如果文件或目录被成功删除，则返回 true；如果文件或目录不存在，则返回 false
+     */
+    public static boolean deleteFile(File file) {
+        // 检查文件或目录是否存在
         if (!file.exists()) {
             return false;
         }
+
+        // 如果是文件，则直接删除
         if (file.isFile()) {
             return file.delete();
         }
+
+        // 如果是目录，先删除目录中的所有文件和子目录
         File[] files = file.listFiles();
-        if (files == null) {
-            return file.delete();
+        if (files != null) {
+            for (File innerFile : files) {
+                // 递归删除子文件或子目录
+                deleteFile(innerFile);
+            }
         }
-        for (File innerFile : files) {
-            deleteFile(innerFile);
-        }
+
+        // 删除目录本身
         return file.delete();
-    }
-}
+    }}
