@@ -14,7 +14,7 @@ public class ThreadUtil {
                 try {
                     thread.join(unit.toMillis(timeout));
                 } catch (InterruptedException e) {
-                    Log.i(TAG, "thread shutdownAndWait err:");
+                    Log.runtime(TAG, "thread shutdownAndWait err:");
                     Log.printStackTrace(TAG, e);
                 }
             }
@@ -31,7 +31,7 @@ public class ThreadUtil {
         try {
             shutdownAndAwaitTermination(pool, 30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.i(TAG, "thread shutdownAndWait err:");
+            Log.runtime(TAG, "thread shutdownAndWait err:");
             Log.printStackTrace(TAG, e);
             return false;
         }
@@ -45,7 +45,7 @@ public class ThreadUtil {
                 if (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
                     pool.shutdownNow();
                     if (!pool.awaitTermination(timeout, unit)) {
-                        Log.i(TAG, "thread pool can't close");
+                        Log.runtime(TAG, "thread pool can't close");
                     }
                 }
             } catch (InterruptedException ie) {

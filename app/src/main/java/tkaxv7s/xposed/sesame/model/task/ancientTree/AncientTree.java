@@ -61,7 +61,7 @@ public class AncientTree extends ModelTask {
             Log.record("开始检测古树保护");
             ancientTree(ancientTreeCityCodeList.getValue());
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -75,7 +75,7 @@ public class AncientTree extends ModelTask {
                 Thread.sleep(1000L);
             }
         } catch (Throwable th) {
-            Log.i(TAG, "ancientTree err:");
+            Log.runtime(TAG, "ancientTree err:");
             Log.printStackTrace(TAG, th);
         }
     }
@@ -102,7 +102,7 @@ public class AncientTree extends ModelTask {
                 Status.ancientTreeToday(cityCode);
             }
         } catch (Throwable th) {
-            Log.i(TAG, "ancientTreeProtect err:");
+            Log.runtime(TAG, "ancientTreeProtect err:");
             Log.printStackTrace(TAG, th);
         }
     }
@@ -152,18 +152,18 @@ public class AncientTree extends ModelTask {
                                         + "]#" + age + "年" + name + ",消耗能量" + protectExpense + "g");
                             } else {
                                 Log.record(jo.getString("resultDesc"));
-                                Log.i(jo.toString());
+                                Log.runtime(jo.toString());
                             }
                         }
                     } else {
                         Log.record(jo.getString("resultDesc"));
-                        Log.i(ancientTreeDetail.toString());
+                        Log.runtime(ancientTreeDetail.toString());
                     }
                     Thread.sleep(500L);
                 }
             }
         } catch (Throwable th) {
-            Log.i(TAG, "districtDetail err:");
+            Log.runtime(TAG, "districtDetail err:");
             Log.printStackTrace(TAG, th);
         }
     }

@@ -92,7 +92,7 @@ public class RuntimeInfo {
             joCurrent.put(key, value);
             joAll.put(userId, joCurrent);
         } catch (JSONException e) {
-            Log.i(TAG, "put err:");
+            Log.runtime(TAG, "put err:");
             Log.printStackTrace(TAG, e);
         }
         save();

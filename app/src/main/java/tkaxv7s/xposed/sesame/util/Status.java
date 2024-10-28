@@ -557,7 +557,7 @@ public class Status {
         String currentUid = UserIdMap.getCurrentUid();
         try {
             if (StringUtil.isEmpty(currentUid)) {
-                Log.i(TAG, "用户为空，状态加载失败");
+                Log.runtime(TAG, "用户为空，状态加载失败");
                 throw new RuntimeException("用户为空，状态加载失败");
             }
             File statusFile = FileUtil.getStatusFile(currentUid);
@@ -566,19 +566,19 @@ public class Status {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
-                    Log.i(TAG, "重新格式化 status.json");
+                    Log.runtime(TAG, "重新格式化 status.json");
                     Log.system(TAG, "重新格式化 status.json");
                     FileUtil.write2File(formatted, FileUtil.getStatusFile(currentUid));
                 }
             } else {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new Status());
-                Log.i(TAG, "初始化 status.json");
+                Log.runtime(TAG, "初始化 status.json");
                 Log.system(TAG, "初始化 status.json");
                 FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), FileUtil.getStatusFile(currentUid));
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
-            Log.i(TAG, "状态文件格式有误，已重置");
+            Log.runtime(TAG, "状态文件格式有误，已重置");
             Log.system(TAG, "状态文件格式有误，已重置");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new Status());

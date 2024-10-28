@@ -1,5 +1,6 @@
 package tkaxv7s.xposed.sesame.util;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -14,162 +15,182 @@ import androidx.appcompat.app.AppCompatActivity;
 import tkaxv7s.xposed.sesame.hook.ApplicationHook;
 import tkaxv7s.xposed.sesame.model.task.antForest.AntForestRpcCall;
 
+/** 权限工具类，用于检查和请求所需权限。 */
 public class PermissionUtil {
-    private static final String TAG = AntForestRpcCall.class.getSimpleName();
+  private static final String TAG = AntForestRpcCall.class.getSimpleName();
+  private static final int REQUEST_EXTERNAL_STORAGE = 1;
+  private static final String[] PERMISSIONS_STORAGE = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-
-    private static final String[] PERMISSIONS_STORAGE = {
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-    };
-
-    public static Boolean checkOrRequestAllPermissions(AppCompatActivity activity) {
-        return checkOrRequestFilePermissions(activity) && checkOrRequestAlarmPermissions(activity);
+  /**
+   * 检查应用是否具有文件存储权限。
+   *
+   * @param context 应用上下文。
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static boolean checkFilePermissions(Context context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      // Android 11及以上版本，检查是否有管理所有文件的权限
+      return Environment.isExternalStorageManager();
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      // Android 6.0及以上版本，检查读写外部存储的权限
+      for (String permission : PERMISSIONS_STORAGE) {
+        if (context.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+          return false;
+        }
+      }
     }
+    return true;
+  }
 
-    public static boolean checkFilePermissions(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            //判断是否有管理外部存储的权限
-            return Environment.isExternalStorageManager();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (String permission : PERMISSIONS_STORAGE) {
-                if (context.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return true;
-        }
+  /**
+   * 检查或请求文件存储权限。
+   *
+   * @param activity 发起权限请求的Activity。
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static Boolean checkOrRequestFilePermissions(AppCompatActivity activity) {
+    if (checkFilePermissions(activity)) {
+      return true;
     }
-
-    public static Boolean checkOrRequestFilePermissions(AppCompatActivity activity) {
-        try {
-            if (checkFilePermissions(activity)) {
-                return true;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                //跳转到权限页，请求权限
-                Intent appIntent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                appIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                appIntent.setData(Uri.parse("package:" + activity.getPackageName()));
-                //appIntent.setData(Uri.fromParts("package", activity.getPackageName(), null));
-                try {
-                    activity.startActivity(appIntent);
-                } catch (ActivityNotFoundException ex) {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    activity.startActivity(intent);
-                }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                activity.requestPermissions(PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
-            }
-        } catch (Exception e) {
-            Log.printStackTrace(TAG, e);
-        }
-        return false;
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // 请求管理所有文件的权限
+        Intent appIntent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+        appIntent.setData(Uri.parse("package:" + activity.getPackageName()));
+        startActivitySafely(activity, appIntent, Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        // 请求外部存储读写权限
+        activity.requestPermissions(PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+      }
+    } catch (Exception e) {
+      Log.printStackTrace(TAG, e);
     }
+    return false;
+  }
 
-    public static boolean checkAlarmPermissions() {
-        Context context;
-        try {
-            if (!ApplicationHook.isHooked()) {
-                return false;
-            }
-            context = ApplicationHook.getContext();
-            if (context == null) {
-                return false;
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            //判断是否有使用闹钟的权限
-            AlarmManager systemService = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            if (systemService != null) {
-                return systemService.canScheduleExactAlarms();
-            }
-            return true;
-        }
+  /**
+   * 检查应用是否具有闹钟权限。
+   *
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static boolean checkAlarmPermissions() {
+    Context context = getContextSafely();
+    if (context == null) return false;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      // Android 12及以上版本，检查是否可以设置精确闹钟
+      AlarmManager systemService = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+      return systemService != null && systemService.canScheduleExactAlarms();
+    }
+    return true;
+  }
+
+  /**
+   * 检查或请求闹钟权限。
+   *
+   * @param context 发起权限请求的上下文。
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static Boolean checkOrRequestAlarmPermissions(Context context) {
+    if (checkAlarmPermissions()) {
+      return true;
+    }
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        // 请求设置精确闹钟的权限
+        Intent appIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+        appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
+        startActivitySafely(context, appIntent, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+      }
+    } catch (Exception e) {
+      Log.printStackTrace(TAG, e);
+    }
+    return false;
+  }
+
+  /**
+   * 检查应用是否具有电池优化豁免权限。
+   *
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static boolean checkBatteryPermissions() {
+    Context context = getContextSafely();
+    if (context == null) return false;
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      // 检查是否被豁免电池优化
+      PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+      return powerManager != null && powerManager.isIgnoringBatteryOptimizations(ClassUtil.PACKAGE_NAME);
+    }
+    return true;
+  }
+
+  /**
+   * 检查电池优化豁免权限，但不再直接请求该权限，以符合Google Play政策。
+   *
+   * @param context 发起检查请求的上下文。
+   * @return 如果权限被授予，返回true，否则返回false。
+   */
+  public static Boolean checkOrRequestBatteryPermissions(Context context) {
+    // 我们不再请求电池优化豁免权限，符合Google Play政策
+    try {
+      if (checkBatteryPermissions()) {
         return true;
-    }
-
-    public static Boolean checkOrRequestAlarmPermissions(Context context) {
+      }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        // 跳转到权限页，请求权限
+        @SuppressLint("BatteryLife")
+        Intent appIntent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
+        // appIntent.setData(Uri.fromParts("package", ClassUtil.PACKAGE_NAME, null));
         try {
-            if (checkAlarmPermissions()) {
-                return true;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                //跳转到权限页，请求权限
-                Intent appIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                appIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
-                //appIntent.setData(Uri.fromParts("package", ClassUtil.PACKAGE_NAME, null));
-                try {
-                    context.startActivity(appIntent);
-                } catch (ActivityNotFoundException ex) {
-                    Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                }
-            }
-        } catch (Exception e) {
-            Log.printStackTrace(TAG, e);
+          context.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+          @SuppressLint("BatteryLife")
+          Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+          intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          context.startActivity(intent);
         }
-        return false;
+      }
+    } catch (Exception e) {
+      Log.printStackTrace(TAG, e);
     }
+    return false;
+  }
 
-    public static boolean checkBatteryPermissions() {
-        Context context;
-        try {
-            if (!ApplicationHook.isHooked()) {
-                return false;
-            }
-            context = ApplicationHook.getContext();
-            if (context == null) {
-                return false;
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //判断是否有始终在后台运行的权限
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            if (powerManager != null) {
-                return powerManager.isIgnoringBatteryOptimizations(ClassUtil.PACKAGE_NAME);
-            }
-            return true;
-        }
-        return true;
+  /**
+   * 安全启动Activity的方法，处理启动失败的异常。
+   *
+   * @param context 用于启动Activity的上下文。
+   * @param intent 要启动的Intent。
+   * @param fallbackAction 如果第一个Intent失败，使用备用Action启动。
+   */
+  private static void startActivitySafely(Context context, Intent intent, String fallbackAction) {
+    try {
+      context.startActivity(intent);
+    } catch (ActivityNotFoundException ex) {
+      Intent fallbackIntent = new Intent(fallbackAction);
+      fallbackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      context.startActivity(fallbackIntent);
     }
+  }
 
-    public static Boolean checkOrRequestBatteryPermissions(Context context) {
-        try {
-            if (checkBatteryPermissions()) {
-                return true;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                //跳转到权限页，请求权限
-                Intent appIntent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                appIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
-                //appIntent.setData(Uri.fromParts("package", ClassUtil.PACKAGE_NAME, null));
-                try {
-                    context.startActivity(appIntent);
-                } catch (ActivityNotFoundException ex) {
-                    Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                }
-            }
-        } catch (Exception e) {
-            Log.printStackTrace(TAG, e);
-        }
-        return false;
+  /**
+   * 安全地获取应用上下文，如果未挂钩则返回null。
+   *
+   * @return 如果存在上下文则返回，否则返回null。
+   */
+  private static Context getContextSafely() {
+    try {
+      if (!ApplicationHook.isHooked()) {
+        return null;
+      }
+      return ApplicationHook.getContext();
+    } catch (Exception e) {
+      return null;
     }
+  }
 }

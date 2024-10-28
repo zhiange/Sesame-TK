@@ -1,4 +1,10 @@
+
 package tkaxv7s.xposed.sesame.ui;
+/*
+ * @Description: 好友统计，列表长按菜单
+ * @UpdateDate: 2024/10/23
+ * @UpdateTime: 16:39
+ */
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,22 +16,38 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+
+/**
+ * 选项适配器。
+ * 用于在列表视图中显示选项。
+ */
 public class OptionsAdapter extends BaseAdapter {
     @SuppressLint("StaticFieldLeak")
     private static OptionsAdapter adapter;
 
+    /**
+     * 获取单例适配器实例。
+     * @param c 上下文对象。
+     * @return 适配器实例。
+     */
     public static OptionsAdapter get(Context c) {
-        if (adapter == null)
+        if (adapter == null) {
             adapter = new OptionsAdapter(c);
+        }
         return adapter;
     }
 
-    Context context;
-    ArrayList<String> list;
+    private final Context context;
+    private final ArrayList<String> list;
 
+    /**
+     * 私有构造函数，防止外部直接实例化。
+     * @param c 上下文对象。
+     */
     private OptionsAdapter(Context c) {
         context = c;
         list = new ArrayList<>();
+        // 初始化列表项
         list.add("查看森林");
         list.add("查看庄园");
         list.add("查看资料");
@@ -34,28 +56,33 @@ public class OptionsAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        // 返回列表项的数量
         return list == null ? 0 : list.size();
     }
 
     @Override
-    public Object getItem(int p1) {
-        return list.get(p1);
+    public Object getItem(int position) {
+        // 返回指定位置的列表项
+        return list.get(position);
     }
 
     @Override
-    public long getItemId(int p1) {
-        return p1;
+    public long getItemId(int position) {
+        // 返回列表项的唯一ID，这里简单地使用位置作为ID
+        return position;
     }
 
     @SuppressLint("InflateParams")
     @Override
-    public View getView(int p1, View p2, ViewGroup p3) {
-        if (p2 == null) {
-            p2 = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null);
+    public View getView(int position, View convertView, ViewGroup parent) {
+        // 复用convertView以提高性能
+        if (convertView == null) {
+            // inflate布局
+            convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null);
         }
-        TextView txt = (TextView) p2;
-        txt.setText(getItem(p1).toString());
-        return p2;
+        // 获取TextView并设置文本
+        TextView txt = (TextView) convertView;
+        txt.setText(getItem(position).toString());
+        return convertView;
     }
-
 }

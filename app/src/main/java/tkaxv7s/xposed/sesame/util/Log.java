@@ -8,242 +8,277 @@ import com.elvishew.xlog.printer.file.FilePrinter;
 import com.elvishew.xlog.printer.file.backup.NeverBackupStrategy;
 import com.elvishew.xlog.printer.file.clean.NeverCleanStrategy;
 import com.elvishew.xlog.printer.file.naming.FileNameGenerator;
-import tkaxv7s.xposed.sesame.model.normal.base.BaseModel;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import tkaxv7s.xposed.sesame.model.normal.base.BaseModel;
 
+/** 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。 */
 public class Log {
 
-    static {
-        XLog.init(LogLevel.ALL);
-    }
+  // 日志初始化，设置日志等级
+  static {
+    XLog.init(LogLevel.ALL);
+  }
 
-    public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
+  // 使用 ThreadLocal 避免多线程环境下 SimpleDateFormat 的线程安全问题
+  public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd");
+  public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd HH:mm:ss");
+  public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy.MM.dd HH:mm:ss");
 
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        }
+  // 日志记录器
+  private static final Logger runtimeLogger = createLogger("runtime", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger recordLogger = createLogger("record", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger systemLogger = createLogger("system", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger debugLogger = createLogger("debug", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger forestLogger = createLogger("forest", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger farmLogger = createLogger("farm", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger otherLogger = createLogger("other", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger errorLogger = createLogger("error", "{d HH:mm:ss.SSS} {t}: {m}");
 
+  /**
+   * 创建一个 ThreadLocal<SimpleDateFormat> 实例，用于日期格式化。
+   *
+   * @param pattern 日期格式化模式
+   * @return 一个线程安全的 SimpleDateFormat 实例
+   */
+  private static ThreadLocal<SimpleDateFormat> createThreadLocal(final String pattern) {
+    return new ThreadLocal<SimpleDateFormat>() {
+      @Override
+      protected SimpleDateFormat initialValue() {
+        return new SimpleDateFormat(pattern, Locale.getDefault());
+      }
     };
+  }
 
-    public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        }
-
-    };
-
-    public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault());
-        }
-
-    };
-
-    private static final Logger runtimeLogger = XLog.tag("RUNTIME").printers(
+  /**
+   * 通用的日志记录器创建方法，减少重复代码。
+   *
+   * @param tag 日志标签
+   * @param pattern 日志输出的模式
+   * @return Logger 实例
+   */
+  private static Logger createLogger(String tag, String pattern) {
+    return XLog.tag(tag)
+        .printers(
             new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("runtime"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {t}: {m}"))
-                    .build()).build();
+                .fileNameGenerator(new CustomDateFileNameGenerator(tag))
+                .backupStrategy(new NeverBackupStrategy())
+                .cleanStrategy(new NeverCleanStrategy())
+                .flattener(new PatternFlattener(pattern))
+                .build())
+        .build();
+  }
 
-    private static final Logger recordLogger = XLog.tag("RECORD").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("record"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {m}"))
-                    .build()).build();
+  /**
+   * 输出信息级别的日志。
+   *
+   * @param s 日志内容
+   */
+  public static void runtime(String s) {
+    runtimeLogger.i(s);
+  }
 
-    private static final Logger systemLogger = XLog.tag("SYSTEM").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("system"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {t}: {m}"))
-                    .build()).build();
+  /**
+   * 输出带有标签的信息级别的日志。
+   *
+   * @param tag 标签
+   * @param s 日志内容
+   */
+  public static void runtime(String tag, String s) {
+    runtime(tag + ", " + s);
+  }
 
-    private static final Logger debugLogger = XLog.tag("DEBUG").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("debug"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {t}: {m}"))
-                    .build()).build();
-
-    private static final Logger forestLogger = XLog.tag("FOREST").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("forest"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {m}"))
-                    .build()).build();
-
-    private static final Logger farmLogger = XLog.tag("FARM").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("farm"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {m}"))
-                    .build()).build();
-
-    private static final Logger otherLogger = XLog.tag("OTHER").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("other"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {m}"))
-                    .build()).build();
-
-    private static final Logger errorLogger = XLog.tag("ERROR").printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                    .fileNameGenerator(new CustomDateFileNameGenerator("error"))
-                    .backupStrategy(new NeverBackupStrategy())
-                    .cleanStrategy(new NeverCleanStrategy())
-                    .flattener(new PatternFlattener("{d HH:mm:ss.SSS} {t}: {m}"))
-                    .build()).build();
-
-    public static void i(String s) {
-        runtimeLogger.i(s);
+  /**
+   * 记录日志并输出到 record 日志文件中。
+   *
+   * @param str 日志内容
+   */
+  public static void record(String str) {
+    runtimeLogger.i(str);
+    if (BaseModel.getRecordLog().getValue()) {
+      recordLogger.i(str);
     }
+  }
 
-    public static void i(String tag, String s) {
-        i(tag + ", " + s);
+  /**
+   * 输出系统级别的日志。
+   *
+   * @param tag 标签
+   * @param s 日志内容
+   */
+  public static void system(String tag, String s) {
+    systemLogger.i(tag + ", " + s);
+  }
+
+  /**
+   * 输出调试级别的日志。
+   *
+   * @param s 日志内容
+   */
+  public static void debug(String s) {
+    debugLogger.d(s);
+  }
+
+  /**
+   * 记录森林相关的日志。
+   *
+   * @param s 日志内容
+   */
+  public static void forest(String s) {
+    record(s);
+    forestLogger.i(s);
+  }
+
+  /**
+   * 记录农场相关的日志。
+   *
+   * @param s 日志内容
+   */
+  public static void farm(String s) {
+    record(s);
+    farmLogger.i(s);
+  }
+
+  /**
+   * 记录其他类型的日志。
+   *
+   * @param s 日志内容
+   */
+  public static void other(String s) {
+    record(s);
+    otherLogger.i(s);
+  }
+
+  /**
+   * 记录错误日志。
+   *
+   * @param s 日志内容
+   */
+  public static void error(String s) {
+    errorLogger.i(s);
+    runtime(s);
+  }
+
+  /**
+   * 打印异常堆栈跟踪信息。
+   *
+   * @param t 异常对象
+   */
+  public static void printStackTrace(Throwable t) {
+    String str = android.util.Log.getStackTraceString(t);
+    errorLogger.i(str);
+    runtime(str);
+  }
+
+  /**
+   * 打印带有标签的异常堆栈跟踪信息。
+   *
+   * @param tag 标签
+   * @param t 异常对象
+   */
+  public static void printStackTrace(String tag, Throwable t) {
+    String str = tag + ", " + android.util.Log.getStackTraceString(t);
+    errorLogger.i(str);
+    runtime(str);
+  }
+
+  /**
+   * 根据日志名称生成带有日期的日志文件名。
+   *
+   * @param logName 日志名称
+   * @return 带日期的日志文件名
+   */
+  public static String getLogFileName(String logName) {
+    SimpleDateFormat sdf = DATE_FORMAT_THREAD_LOCAL.get();
+    // 增加非空检查
+    if (sdf != null) {
+      return logName + "." + sdf.format(new Date()) + ".log";
+    } else {
+      throw new IllegalStateException("Date format not initialized properly");
     }
+  }
 
-    public static void record(String str) {
-        runtimeLogger.i(str);
-        if (!BaseModel.getRecordLog().getValue()) {
-            return;
+  /**
+   * 获取当前格式化的日期时间字符串。
+   *
+   * @return 格式化后的日期时间字符串
+   */
+  public static String getFormatDateTime() {
+    SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
+    // 增加非空检查
+    if (simpleDateFormat != null) {
+      return simpleDateFormat.format(new Date());
+    } else {
+      throw new IllegalStateException("Date format not initialized properly");
+    }
+  }
+
+  /**
+   * 获取当前格式化的日期字符串。
+   *
+   * @return 格式化后的日期字符串
+   */
+  public static String getFormatDate() {
+    return getFormatDateTime().split(" ")[0];
+  }
+
+  /**
+   * 获取当前格式化的时间字符串。
+   *
+   * @return 格式化后的时间字符串
+   */
+  public static String getFormatTime() {
+    return getFormatDateTime().split(" ")[1];
+  }
+
+  /**
+   * 将日期字符串转换为时间戳。
+   *
+   * @param timers 日期字符串
+   * @return 对应的时间戳
+   */
+  public static long timeToStamp(String timers) {
+    Date d = new Date();
+    try {
+      SimpleDateFormat simpleDateFormat = OTHER_DATE_TIME_FORMAT_THREAD_LOCAL.get();
+      if (simpleDateFormat != null) {
+        Date newD = simpleDateFormat.parse(timers);
+        if (newD != null) {
+          d = newD;
         }
-        recordLogger.i(str);
+      }
+    } catch (ParseException ignored) {
+    }
+    return d.getTime();
+  }
+
+  /** 自定义日志文件名生成器。 */
+  public static class CustomDateFileNameGenerator implements FileNameGenerator {
+
+    private final ThreadLocal<SimpleDateFormat> mLocalDateFormat = createThreadLocal("yyyy-MM-dd");
+    private final String name;
+
+    public CustomDateFileNameGenerator(String name) {
+      this.name = name;
     }
 
-    public static void system(String tag, String s) {
-        systemLogger.i(tag + ", " + s);
+    @Override
+    public boolean isFileNameChangeable() {
+      return true;
     }
 
-    public static void debug(String s) {
-        debugLogger.d(s);
+    /** 生成包含日期的文件名。 */
+    @Override
+    public String generateFileName(int logLevel, long timestamp) {
+      SimpleDateFormat sdf = mLocalDateFormat.get();
+      // 增加非空检查
+      if (sdf != null) {
+        return name + "." + sdf.format(new Date(timestamp)) + ".log";
+      } else {
+        throw new IllegalStateException("Date format not initialized properly");
+      }
     }
-
-    public static void forest(String s) {
-        record(s);
-        forestLogger.i(s);
-    }
-
-    public static void farm(String s) {
-        record(s);
-        farmLogger.i(s);
-    }
-
-    public static void other(String s) {
-        record(s);
-        otherLogger.i(s);
-    }
-
-    public static void error(String s) {
-        errorLogger.i(s);
-        i(s);
-    }
-
-    public static void printStackTrace(Throwable t) {
-        String str = android.util.Log.getStackTraceString(t);
-        errorLogger.i(str);
-        i(str);
-    }
-
-    public static void printStackTrace(String tag, Throwable t) {
-        String str = tag + ", " + android.util.Log.getStackTraceString(t);
-        errorLogger.i(str);
-        i(str);
-    }
-
-    public static String getLogFileName(String logName) {
-        SimpleDateFormat sdf = DATE_FORMAT_THREAD_LOCAL.get();
-        if (sdf == null) {
-            sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        }
-        return logName + "." + sdf.format(new Date()) + ".log";
-    }
-
-    public static String getFormatDateTime() {
-        SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
-        if (simpleDateFormat == null) {
-            simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        }
-        return simpleDateFormat.format(new Date());
-    }
-
-    public static String getFormatDate() {
-        return getFormatDateTime().split(" ")[0];
-    }
-
-    public static String getFormatTime() {
-        return getFormatDateTime().split(" ")[1];
-    }
-
-    /* //日期转换为时间戳 */
-    public static long timeToStamp(String timers) {
-        Date d = new Date();
-        long timeStemp;
-        try {
-            SimpleDateFormat simpleDateFormat = OTHER_DATE_TIME_FORMAT_THREAD_LOCAL.get();
-            if (simpleDateFormat == null) {
-                simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault());
-            }
-            Date newD = simpleDateFormat.parse(timers);
-            if (newD != null) {
-                d = newD;
-            }
-        } catch (ParseException ignored) {
-        }
-        timeStemp = d.getTime();
-        return timeStemp;
-    }
-
-    public static class CustomDateFileNameGenerator implements FileNameGenerator {
-
-        ThreadLocal<SimpleDateFormat> mLocalDateFormat = new ThreadLocal<SimpleDateFormat>() {
-
-            @Override
-            protected SimpleDateFormat initialValue() {
-                return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            }
-
-        };
-
-        private final String name;
-
-        public CustomDateFileNameGenerator(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public boolean isFileNameChangeable() {
-            return true;
-        }
-
-        /**
-         * Generate a file name which represent a specific date.
-         */
-        @Override
-        public String generateFileName(int logLevel, long timestamp) {
-            SimpleDateFormat sdf = mLocalDateFormat.get();
-            if (sdf == null) {
-                sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            }
-            return name + "." + sdf.format(new Date(timestamp)) + ".log";
-        }
-    }
-
+  }
 }

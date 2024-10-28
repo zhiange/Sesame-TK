@@ -47,7 +47,7 @@ public class Reserve extends ModelTask {
             Log.record("开始检测保护地");
             animalReserve();
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -87,10 +87,10 @@ public class Reserve extends ModelTask {
                     }
                 }
             } else {
-                Log.i(TAG, jo.getString("resultDesc"));
+                Log.runtime(TAG, jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
-            Log.i(TAG, "animalReserve err:");
+            Log.runtime(TAG, "animalReserve err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -116,10 +116,10 @@ public class Reserve extends ModelTask {
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "queryTreeForExchange err:");
+            Log.runtime(TAG, "queryTreeForExchange err:");
             Log.printStackTrace(TAG, t);
         }
         return false;
@@ -145,7 +145,7 @@ public class Reserve extends ModelTask {
                     Status.reserveToday(projectId, 1);
                 } else {
                     Log.record(jo.getString("resultDesc"));
-                    Log.i(jo.toString());
+                    Log.runtime(jo.toString());
                     Log.forest("领保护地🏕️[" + itemName + "]#发生未知错误，停止申请");
                     // Statistics.reserveToday(projectId, count);
                     break;
@@ -162,7 +162,7 @@ public class Reserve extends ModelTask {
                     break;
             }
         } catch (Throwable t) {
-            Log.i(TAG, "exchangeTree err:");
+            Log.runtime(TAG, "exchangeTree err:");
             Log.printStackTrace(TAG, t);
         }
     }

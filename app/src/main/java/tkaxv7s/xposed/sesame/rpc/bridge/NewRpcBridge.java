@@ -62,7 +62,7 @@ public class NewRpcBridge implements RpcBridge {
                     }
                 }
                 if (newRpcInstance == null) {
-                    Log.i(TAG, "get newRpcInstance null");
+                    Log.runtime(TAG, "get newRpcInstance null");
                     throw new RuntimeException("get newRpcInstance is null");
                 }
             }
@@ -87,9 +87,9 @@ public class NewRpcBridge implements RpcBridge {
                     , loader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext")
                     , bridgeCallbackClazz
             );
-            Log.i(TAG, "get newRpcCallMethod successfully");
+            Log.runtime(TAG, "get newRpcCallMethod successfully");
         } catch (Exception e) {
-            Log.i(TAG, "get newRpcCallMethod err:");
+            Log.runtime(TAG, "get newRpcCallMethod err:");
             throw e;
         }
     }
@@ -205,7 +205,7 @@ public class NewRpcBridge implements RpcBridge {
             } while (count < tryCount);
             return null;
         } finally {
-            Log.i("New RPC\n方法: " + method + "\n参数: " + data + "\n数据: " + rpcEntity.getResponseString() + "\n");
+            Log.runtime("New RPC\n方法: " + method + "\n参数: " + data + "\n数据: " + rpcEntity.getResponseString() + "\n");
         }
     }
 
@@ -316,7 +316,7 @@ public class NewRpcBridge implements RpcBridge {
             } while (count < tryCount);
             return null;
         } finally {
-            Log.i("New RPC\n方法: " + method + "\n参数: " + args + "\n数据: " + rpcEntity.getResponseString() + "\n");
+            Log.runtime("New RPC\n方法: " + method + "\n参数: " + args + "\n数据: " + rpcEntity.getResponseString() + "\n");
         }
     }
 

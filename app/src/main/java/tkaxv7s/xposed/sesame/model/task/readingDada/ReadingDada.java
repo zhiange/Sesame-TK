@@ -53,7 +53,7 @@ public class ReadingDada {
                 Log.record("获取问题失败");
             }
         } catch (Throwable e) {
-            Log.i(TAG, "answerQuestion err:");
+            Log.runtime(TAG, "answerQuestion err:");
             Log.printStackTrace(TAG, e);
         }
         return false;

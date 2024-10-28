@@ -1,9 +1,11 @@
 package tkaxv7s.xposed.sesame.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.InputType;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
@@ -118,6 +120,70 @@ public class StringDialog {
                 .setTitle("读取")
                 .setView(edt)
                 .create();
+    }
+
+    /**
+     * 显示警告对话框，使用默认的“确定”按钮文本。
+     *
+     * @param c     上下文对象。
+     * @param title 对话框标题。
+     * @param msg   对话框消息。
+     */
+    public static void showAlertDialog(Context c, String title, String msg) {
+        showAlertDialog(c, title, msg, "确定");
+    }
+
+    /**
+     * 显示警告对话框，允许自定义按钮文本。
+     *
+     * @param c              上下文对象。
+     * @param title          对话框标题。
+     * @param msg            对话框消息。
+     * @param positiveButton 自定义的确认按钮文本。
+     */
+    public static void showAlertDialog(Context c, String title, String msg, String positiveButton) {
+        AlertDialog alertDialog = new AlertDialog.Builder(c)
+                .setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton(positiveButton, (dialog, which) -> dialog.dismiss())
+                .create();
+
+        alertDialog.show();
+
+        // 获取按钮并设置颜色
+        Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (button != null) {
+            button.setTextColor(c.getResources().getColor(R.color.colorPrimary));
+        }
+    }
+
+    /**
+     * 显示选择对话框，允许选择一个项目。
+     *
+     * @param c               上下文对象。
+     * @param title           对话框标题。
+     * @param items           选项数组。
+     * @param onItemClick     选项点击事件。
+     * @param positiveButton  自定义的确认按钮文本。
+     * @param onDismiss       对话框消失事件。
+     */
+    public static void showSelectionDialog(Context c, String title, CharSequence[] items,
+                                           DialogInterface.OnClickListener onItemClick,
+                                           String positiveButton, DialogInterface.OnDismissListener onDismiss) {
+        AlertDialog alertDialog = new AlertDialog.Builder(c)
+                .setTitle(title)
+                .setItems(items, onItemClick)
+                .setOnDismissListener(onDismiss)
+                .setPositiveButton(positiveButton, (dialog, which) -> dialog.dismiss())
+                .create();
+
+        alertDialog.show();
+
+        // 获取并设置确认按钮的颜色
+        Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (button != null) {
+            button.setTextColor(c.getResources().getColor(R.color.colorPrimary));
+        }
     }
 
 }

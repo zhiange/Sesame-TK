@@ -18,7 +18,7 @@ public class RpcIntervalLimit {
 
     public static synchronized void addIntervalLimit(String method, IntervalLimit intervalLimit) {
         if (intervalLimitMap.containsKey(method)) {
-            Log.i("方法：" + method + " 间隔限制已存在");
+            Log.runtime("方法：" + method + " 间隔限制已存在");
             throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
         }
         intervalLimitMap.put(method, intervalLimit);

@@ -30,24 +30,24 @@ public class UIConfig {
         File uiConfigFile = FileUtil.getUIConfigFile();
         try {
             if (uiConfigFile.exists()) {
-                Log.i("加载UI配置");
+                Log.runtime("加载UI配置");
                 String json = FileUtil.readFromFile(uiConfigFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = toSaveStr();
                 if (formatted != null && !formatted.equals(json)) {
-                    Log.i(TAG, "格式化UI配置");
+                    Log.runtime(TAG, "格式化UI配置");
                     Log.system(TAG, "格式化UI配置");
                     FileUtil.write2File(formatted, uiConfigFile);
                 }
             } else {
                 unload();
-                Log.i(TAG, "初始UI配置");
+                Log.runtime(TAG, "初始UI配置");
                 Log.system(TAG, "初始UI配置");
                 FileUtil.write2File(toSaveStr(), uiConfigFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
-            Log.i(TAG, "重置UI配置");
+            Log.runtime(TAG, "重置UI配置");
             Log.system(TAG, "重置UI配置");
             try {
                 unload();

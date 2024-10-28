@@ -47,7 +47,7 @@ public class AntBookRead extends ModelTask {
             queryTask();
             queryTreasureBox();
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -97,10 +97,10 @@ public class AntBookRead extends ModelTask {
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "queryTaskCenterPage err:");
+            Log.runtime(TAG, "queryTaskCenterPage err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -158,10 +158,10 @@ public class AntBookRead extends ModelTask {
                     queryTask();
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "queryTask err:");
+            Log.runtime(TAG, "queryTask err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -175,7 +175,7 @@ public class AntBookRead extends ModelTask {
                 Log.other("阅读任务📖[" + name + "]#" + coinNum);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "collectTaskPrize err:");
+            Log.runtime(TAG, "collectTaskPrize err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -188,7 +188,7 @@ public class AntBookRead extends ModelTask {
 
             }
         } catch (Throwable t) {
-            Log.i(TAG, "taskFinish err:");
+            Log.runtime(TAG, "taskFinish err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -211,7 +211,7 @@ public class AntBookRead extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "queryTreasureBox err:");
+            Log.runtime(TAG, "queryTreasureBox err:");
             Log.printStackTrace(TAG, t);
         }
     }

@@ -129,9 +129,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             });
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.nebulaappproxy.api.rpc.H5AppRpcUpdate", classLoader, "matchVersion", classLoader.loadClass(ClassUtil.H5PAGE_NAME), Map.class, String.class, XC_MethodReplacement.returnConstant(false));
-                Log.i(TAG, "hook matchVersion successfully");
+                Log.runtime(TAG, "hook matchVersion successfully");
             } catch (Throwable t) {
-                Log.i(TAG, "hook matchVersion err:");
+                Log.runtime(TAG, "hook matchVersion err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
@@ -139,7 +139,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         "onResume", new XC_MethodHook() {
                             @Override
                             protected void afterHookedMethod(MethodHookParam param) {
-                                Log.i(TAG, "Activity onResume");
+                                Log.runtime(TAG, "Activity onResume");
                                 String targetUid = getUserId();
                                 if (targetUid == null) {
                                     Log.record("用户未登录");
@@ -166,13 +166,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     offline = false;
                                     execHandler();
                                     ((Activity) param.thisObject).finish();
-                                    Log.i(TAG, "Activity reLogin");
+                                    Log.runtime(TAG, "Activity reLogin");
                                 }
                             }
                         });
-                Log.i(TAG, "hook login successfully");
+                Log.runtime(TAG, "hook login successfully");
             } catch (Throwable t) {
-                Log.i(TAG, "hook login err:");
+                Log.runtime(TAG, "hook login err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
@@ -186,7 +186,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 if (!ClassUtil.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
                                     return;
                                 }
-                                Log.i(TAG, "Service onCreate");
+                                Log.runtime(TAG, "Service onCreate");
                                 context = appService.getApplicationContext();
                                 service = appService;
                                 mainHandler = new Handler();
@@ -268,7 +268,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                                     }
                                                 }
                                             } catch (Exception e) {
-                                                Log.i(TAG, "execAtTime err:");
+                                                Log.runtime(TAG, "execAtTime err:");
                                                 Log.printStackTrace(TAG, e);
                                             }
 
@@ -289,9 +289,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 }
                             }
                         });
-                Log.i(TAG, "hook service onCreate successfully");
+                Log.runtime(TAG, "hook service onCreate successfully");
             } catch (Throwable t) {
-                Log.i(TAG, "hook service onCreate err:");
+                Log.runtime(TAG, "hook service onCreate err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
@@ -311,36 +311,36 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     }
                 });
             } catch (Throwable t) {
-                Log.i(TAG, "hook service onDestroy err:");
+                Log.runtime(TAG, "hook service onDestroy err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackground", XC_MethodReplacement.returnConstant(false));
             } catch (Throwable t) {
-                Log.i(TAG, "hook FgBgMonitorImpl method 1 err:");
+                Log.runtime(TAG, "hook FgBgMonitorImpl method 1 err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackground", boolean.class, XC_MethodReplacement.returnConstant(false));
             } catch (Throwable t) {
-                Log.i(TAG, "hook FgBgMonitorImpl method 2 err:");
+                Log.runtime(TAG, "hook FgBgMonitorImpl method 2 err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackgroundV2", XC_MethodReplacement.returnConstant(false));
             } catch (Throwable t) {
-                Log.i(TAG, "hook FgBgMonitorImpl method 3 err:");
+                Log.runtime(TAG, "hook FgBgMonitorImpl method 3 err:");
                 Log.printStackTrace(TAG, t);
             }
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.common.transport.utils.MiscUtils", classLoader, "isAtFrontDesk", classLoader.loadClass("android.content.Context"), XC_MethodReplacement.returnConstant(true));
-                Log.i(TAG, "hook MiscUtils successfully");
+                Log.runtime(TAG, "hook MiscUtils successfully");
             } catch (Throwable t) {
-                Log.i(TAG, "hook MiscUtils err:");
+                Log.runtime(TAG, "hook MiscUtils err:");
                 Log.printStackTrace(TAG, t);
             }
             hooked = true;
-            Log.i(TAG, "load success: " + lpparam.packageName);
+            Log.runtime(TAG, "load success: " + lpparam.packageName);
         }
     }
 
@@ -360,7 +360,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     Log.record("设置定时唤醒:0|000000");
                 }
             } catch (Exception e) {
-                Log.i(TAG, "setWakenAt0 err:");
+                Log.runtime(TAG, "setWakenAt0 err:");
                 Log.printStackTrace(TAG, e);
             }
             List<String> wakenAtTimeList = BaseModel.getWakenAtTimeList().getValue();
@@ -381,13 +381,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             }
                         }
                     } catch (Exception e) {
-                        Log.i(TAG, "setWakenAtTime err:");
+                        Log.runtime(TAG, "setWakenAtTime err:");
                         Log.printStackTrace(TAG, e);
                     }
                 }
             }
         } catch (Exception e) {
-            Log.i(TAG, "setWakenAtTimeAlarm err:");
+            Log.runtime(TAG, "setWakenAtTimeAlarm err:");
             Log.printStackTrace(TAG, e);
         }
     }
@@ -403,7 +403,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Log.record("取消定时唤醒:" + wakenAtTimeKey);
                     }
                 } catch (Exception e) {
-                    Log.i(TAG, "unsetWakenAtTime err:");
+                    Log.runtime(TAG, "unsetWakenAtTime err:");
                     Log.printStackTrace(TAG, e);
                 }
             }
@@ -413,11 +413,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     Log.record("取消定时唤醒:0|000000");
                 }
             } catch (Exception e) {
-                Log.i(TAG, "unsetWakenAt0 err:");
+                Log.runtime(TAG, "unsetWakenAt0 err:");
                 Log.printStackTrace(TAG, e);
             }
         } catch (Exception e) {
-            Log.i(TAG, "unsetWakenAtTimeAlarm err:");
+            Log.runtime(TAG, "unsetWakenAtTimeAlarm err:");
             Log.printStackTrace(TAG, e);
         }
     }
@@ -513,9 +513,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     }
 
                                 });
-                        Log.i(TAG, "hook record request successfully");
+                        Log.runtime(TAG, "hook record request successfully");
                     } catch (Throwable t) {
-                        Log.i(TAG, "hook record request err:");
+                        Log.runtime(TAG, "hook record request err:");
                         Log.printStackTrace(TAG, t);
                     }
                     try {
@@ -536,9 +536,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     }
 
                                 });
-                        Log.i(TAG, "hook record response successfully");
+                        Log.runtime(TAG, "hook record response successfully");
                     } catch (Throwable t) {
-                        Log.i(TAG, "hook record response err:");
+                        Log.runtime(TAG, "hook record response err:");
                         Log.printStackTrace(TAG, t);
                     }
                 }
@@ -554,7 +554,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             execHandler();
             return true;
         } catch (Throwable th) {
-            Log.i(TAG, "startHandler err:");
+            Log.runtime(TAG, "startHandler err:");
             Log.printStackTrace(TAG, th);
             Toast.show("芝麻粒加载失败");
             return false;
@@ -601,7 +601,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 ModelTask.stopAllTask();
             }
         } catch (Throwable th) {
-            Log.i(TAG, "stopHandler err:");
+            Log.runtime(TAG, "stopHandler err:");
             Log.printStackTrace(TAG, th);
         }
     }
@@ -666,10 +666,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             } else {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
             }
-            Log.i("setAlarmTask triggerAtMillis:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis) + " operation:" + (operation == null ? "" : operation.toString()));
+            Log.runtime("setAlarmTask triggerAtMillis:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis) + " operation:" + (operation == null ? "" : operation.toString()));
             return true;
         } catch (Throwable th) {
-            Log.i(TAG, "setAlarmTask err:");
+            Log.runtime(TAG, "setAlarmTask err:");
             Log.printStackTrace(TAG, th);
         }
         return false;
@@ -683,7 +683,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             }
             return true;
         } catch (Throwable th) {
-            Log.i(TAG, "unsetAlarmTask err:");
+            Log.runtime(TAG, "unsetAlarmTask err:");
             Log.printStackTrace(TAG, th);
         }
         return false;
@@ -757,7 +757,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             context.sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.reLogin"));
         } catch (Throwable th) {
-            Log.i(TAG, "sesame sendBroadcast reLogin err:");
+            Log.runtime(TAG, "sesame sendBroadcast reLogin err:");
             Log.printStackTrace(TAG, th);
         }
     }
@@ -766,7 +766,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             context.sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.restart"));
         } catch (Throwable th) {
-            Log.i(TAG, "sesame sendBroadcast restart err:");
+            Log.runtime(TAG, "sesame sendBroadcast restart err:");
             Log.printStackTrace(TAG, th);
         }
     }
@@ -790,7 +790,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             return XposedHelpers.callMethod(getMicroApplicationContext(), "findServiceByInterface", service);
         } catch (Throwable th) {
-            Log.i(TAG, "getUserObject err");
+            Log.runtime(TAG, "getUserObject err");
             Log.printStackTrace(TAG, th);
         }
         return null;
@@ -800,7 +800,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             return XposedHelpers.callMethod(getServiceObject(XposedHelpers.findClass("com.alipay.mobile.personalbase.service.SocialSdkContactService", classLoader).getName()), "getMyAccountInfoModelByLocal");
         } catch (Throwable th) {
-            Log.i(TAG, "getUserObject err");
+            Log.runtime(TAG, "getUserObject err");
             Log.printStackTrace(TAG, th);
         }
         return null;
@@ -813,7 +813,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 return (String) XposedHelpers.getObjectField(userObject, "userId");
             }
         } catch (Throwable th) {
-            Log.i(TAG, "getUserId err");
+            Log.runtime(TAG, "getUserId err");
             Log.printStackTrace(TAG, th);
         }
         return null;
@@ -847,7 +847,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.i("sesame broadcast action:" + action + " intent:" + intent);
+            Log.runtime("sesame broadcast action:" + action + " intent:" + intent);
             if (action != null) {
                 switch (action) {
                     case "com.eg.android.AlipayGphone.sesame.restart":
@@ -866,7 +866,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         try {
                             context.sendBroadcast(new Intent("tkaxv7s.xposed.sesame.status"));
                         } catch (Throwable th) {
-                            Log.i(TAG, "sesame sendBroadcast status err:");
+                            Log.runtime(TAG, "sesame sendBroadcast status err:");
                             Log.printStackTrace(TAG, th);
                         }
                         break;
@@ -888,9 +888,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             } else {
                 context.registerReceiver(new AlipayBroadcastReceiver(), intentFilter);
             }
-            Log.i(TAG, "hook registerBroadcastReceiver successfully");
+            Log.runtime(TAG, "hook registerBroadcastReceiver successfully");
         } catch (Throwable th) {
-            Log.i(TAG, "hook registerBroadcastReceiver err:");
+            Log.runtime(TAG, "hook registerBroadcastReceiver err:");
             Log.printStackTrace(TAG, th);
         }
     }

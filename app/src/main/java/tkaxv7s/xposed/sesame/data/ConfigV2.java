@@ -149,7 +149,7 @@ public class ConfigV2 {
     }
 
     public static synchronized ConfigV2 load(String userId) {
-        Log.i(TAG, "开始加载配置");
+        Log.runtime(TAG, "开始加载配置");
         String userName = "";
         File configV2File = null;
         try {
@@ -171,7 +171,7 @@ public class ConfigV2 {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = toSaveStr();
                 if (formatted != null && !formatted.equals(json)) {
-                    Log.i(TAG, "格式化配置: " + userName);
+                    Log.runtime(TAG, "格式化配置: " + userName);
                     Log.system(TAG, "格式化配置: " + userName);
                     FileUtil.write2File(formatted, configV2File);
                 }
@@ -180,19 +180,19 @@ public class ConfigV2 {
                 if (defaultConfigV2File.exists()) {
                     String json = FileUtil.readFromFile(defaultConfigV2File);
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                    Log.i(TAG, "复制新配置: " + userName);
+                    Log.runtime(TAG, "复制新配置: " + userName);
                     Log.system(TAG, "复制新配置: " + userName);
                     FileUtil.write2File(json, configV2File);
                 } else {
                     unload();
-                    Log.i(TAG, "初始新配置: " + userName);
+                    Log.runtime(TAG, "初始新配置: " + userName);
                     Log.system(TAG, "初始新配置: " + userName);
                     FileUtil.write2File(toSaveStr(), configV2File);
                 }
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
-            Log.i(TAG, "重置配置: " + userName);
+            Log.runtime(TAG, "重置配置: " + userName);
             Log.system(TAG, "重置配置: " + userName);
             try {
                 unload();
@@ -204,7 +204,7 @@ public class ConfigV2 {
             }
         }
         INSTANCE.setInit(true);
-        Log.i(TAG, "加载配置结束");
+        Log.runtime(TAG, "加载配置结束");
         return INSTANCE;
     }
 

@@ -1,40 +1,72 @@
 package tkaxv7s.xposed.sesame.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 沙滩ID映射工具类。
+ * 提供了一个线程安全的ID映射，支持添加、删除、加载和保存ID映射。
+ */
 public class BeachIdMap {
 
+    /**
+     * 存储ID映射的并发HashMap。
+     */
     private static final Map<String, String> idMap = new ConcurrentHashMap<>();
 
+    /**
+     * 只读的ID映射。
+     */
     private static final Map<String, String> readOnlyIdMap = Collections.unmodifiableMap(idMap);
 
+    /**
+     * 获取只读的ID映射。
+     * @return 只读的ID映射。
+     */
     public static Map<String, String> getMap() {
         return readOnlyIdMap;
     }
 
+    /**
+     * 根据键获取值。
+     * @param key 键。
+     * @return 键对应的值，如果不存在则返回null。
+     */
     public static String get(String key) {
         return idMap.get(key);
     }
 
-    public synchronized static void add(String key, String value) {
+    /**
+     * 添加或更新ID映射。
+     * @param key 键。
+     * @param value 值。
+     */
+    public static synchronized void add(String key, String value) {
         idMap.put(key, value);
     }
 
-    public synchronized static void remove(String key) {
+    /**
+     * 从ID映射中删除键值对。
+     * @param key 键。
+     */
+    public static synchronized void remove(String key) {
         idMap.remove(key);
     }
 
-    public synchronized static void load() {
+    /**
+     * 从文件加载ID映射。
+     */
+    public static synchronized void load() {
         idMap.clear();
         try {
             String body = FileUtil.readFromFile(FileUtil.getBeachIdMapFile());
             if (!body.isEmpty()) {
-                Map<String, String> newMap = JsonUtil.parseObject(body, new TypeReference<Map<String, String>>() {
-                });
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
@@ -42,11 +74,25 @@ public class BeachIdMap {
         }
     }
 
-    public synchronized static boolean save() {
-        return FileUtil.write2File(JsonUtil.toJsonString(idMap), FileUtil.getBeachIdMapFile());
+    /**
+     * 将ID映射保存到文件。
+     * @return 如果保存成功返回true，否则返回false。
+     */
+    public static synchronized boolean save() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(idMap);
+            return FileUtil.write2File(json, FileUtil.getBeachIdMapFile());
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+            return false;
+        }
     }
 
-    public synchronized static void clear() {
+    /**
+     * 清除ID映射。
+     */
+    public static synchronized void clear() {
         idMap.clear();
     }
 

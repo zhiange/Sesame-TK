@@ -17,26 +17,28 @@ import tkaxv7s.xposed.sesame.data.modelFieldExt.SelectAndCountOneModelField;
 import tkaxv7s.xposed.sesame.data.modelFieldExt.SelectModelField;
 import tkaxv7s.xposed.sesame.data.modelFieldExt.SelectOneModelField;
 import tkaxv7s.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
-import tkaxv7s.xposed.sesame.entity.AlipayUser;
 import tkaxv7s.xposed.sesame.entity.AreaCode;
 import tkaxv7s.xposed.sesame.entity.CooperateUser;
 import tkaxv7s.xposed.sesame.entity.IdAndName;
 import tkaxv7s.xposed.sesame.util.CooperationIdMap;
-import tkaxv7s.xposed.sesame.util.UserIdMap;
 
 import java.util.List;
 
 public class ListDialog {
     static AlertDialog listDialog;
+    @SuppressLint("StaticFieldLeak")
     static Button btn_find_last, btn_find_next,
             btn_select_all, btn_select_invert;
+    @SuppressLint("StaticFieldLeak")
     static EditText searchText;
+    @SuppressLint("StaticFieldLeak")
     static ListView lv_list;
     private static SelectModelFieldFunc selectModelFieldFunc;
     static Boolean hasCount;
 
     static ListType listType;
 
+    @SuppressLint("StaticFieldLeak")
     static RelativeLayout layout_batch_process;
 
     public enum ListType {
@@ -103,7 +105,7 @@ public class ListDialog {
     }
 
     private static View getListView(Context c) {
-        View v = LayoutInflater.from(c).inflate(R.layout.dialog_list, null);
+        @SuppressLint("InflateParams") View v = LayoutInflater.from(c).inflate(R.layout.dialog_list, null);
 
         btn_find_last = v.findViewById(R.id.btn_find_last);
         btn_find_next = v.findViewById(R.id.btn_find_next);
@@ -141,7 +143,7 @@ public class ListDialog {
         btn_find_next.setOnClickListener(onBtnClickListener);
 
 
-        View.OnClickListener batchBtnOnClickListener = v1 -> {
+        @SuppressLint("NonConstantResourceId") View.OnClickListener batchBtnOnClickListener = v1 -> {
             ListAdapter la = ListAdapter.get(v1.getContext());
             switch (v1.getId()) {
                 case R.id.btn_select_all:
@@ -239,11 +241,7 @@ public class ListDialog {
                                     .setTitle("删除 " + curIdAndName.name)
                                     .setPositiveButton(c.getString(R.string.ok), (dialog, which) -> {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            if (curIdAndName instanceof AlipayUser) {
-                                                UserIdMap.remove(curIdAndName.id);
-                                            } else if (curIdAndName instanceof CooperateUser) {
-                                                CooperationIdMap.remove(curIdAndName.id);
-                                            }
+                                            CooperationIdMap.remove(curIdAndName.id);
                                             selectModelFieldFunc.remove(curIdAndName.id);
                                             ListAdapter.get(c).exitFind();
                                         }

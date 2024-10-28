@@ -19,326 +19,394 @@ import java.util.TimeZone;
 @SuppressLint("SimpleDateFormat")
 public class JsonUtil {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    public static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance();
-
-    public static final JsonFactory JSON_FACTORY = new JsonFactory();
+    private static final ObjectMapper MAPPER = new ObjectMapper(); // JSON对象映射器
+    public static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance(); // 类型工厂
+    public static final JsonFactory JSON_FACTORY = new JsonFactory(); // JSON工厂
 
     static {
-        //反序列化的时候如果多了其他属性,不抛出异常
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        //如果是空对象的时候,不抛异常
-        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        //属性为null不转换
-        MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        MAPPER.setTimeZone(TimeZone.getDefault());
-        MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        // 配置 ObjectMapper
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 忽略未知属性
+        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); // 忽略空对象
+        MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL); // 忽略空属性
+        MAPPER.setTimeZone(TimeZone.getDefault()); // 设置时区
+        MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")); // 设置日期格式
     }
 
     public static ObjectMapper copyMapper() {
-        return MAPPER.copy();
-    }
-
-    public static String toJsonString(Object object) {
-        try {
-            return MAPPER.writeValueAsString(object);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String toFormatJsonString(Object object) {
-        try {
-            return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static JsonParser getJsonParser(String body) {
-        try {
-            return JSON_FACTORY.createParser(body);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(String body, Type type) {
-        try {
-            return MAPPER.readValue(body, TYPE_FACTORY.constructType(type));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(String body, JavaType javaType) {
-        try {
-            return MAPPER.readValue(body, javaType);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(String body, TypeReference<T> valueTypeRef) {
-        try {
-            return MAPPER.readValue(body, valueTypeRef);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(String body, Class<T> clazz) {
-        try {
-            return MAPPER.readValue(body, clazz);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(JsonParser jsonParser, Type type) {
-        try {
-            return MAPPER.readValue(jsonParser, TYPE_FACTORY.constructType(type));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(JsonParser jsonParser, JavaType javaType) {
-        try {
-            return MAPPER.readValue(jsonParser, javaType);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(JsonParser jsonParser, TypeReference<T> valueTypeRef) {
-        try {
-            return MAPPER.readValue(jsonParser, valueTypeRef);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(JsonParser jsonParser, Class<T> clazz) {
-        try {
-            return MAPPER.readValue(jsonParser, clazz);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(Object bean, Type type) {
-        try {
-            return MAPPER.convertValue(bean, TYPE_FACTORY.constructType(type));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(Object bean, JavaType javaType) {
-        try {
-            return MAPPER.convertValue(bean, javaType);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(Object bean, TypeReference<T> valueTypeRef) {
-        try {
-            return MAPPER.convertValue(bean, valueTypeRef);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(Object bean, Class<T> clazz) {
-        try {
-            return MAPPER.convertValue(bean, clazz);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String parseString(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-            if (leaf != null) {
-                return leaf.asText();
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Integer parseInteger(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-            if (leaf != null) {
-                return leaf.asInt();
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static List<Integer> parseIntegerList(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-
-            if (leaf != null) {
-                return MAPPER.convertValue(leaf, new TypeReference<List<Integer>>() {
-                });
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    public static Boolean parseBoolean(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-            if (leaf != null) {
-                return leaf.asBoolean();
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Short parseShort(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-            if (leaf != null) {
-                Integer value = leaf.asInt();
-                return value.shortValue();
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Byte parseByte(String body, String field) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            JsonNode leaf = node.get(field);
-            if (leaf != null) {
-                Integer value = leaf.asInt();
-                return value.byteValue();
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T parseObject(String body, String field, Class<T> clazz) {
-        JsonNode node = null;
-        try {
-            node = MAPPER.readTree(body);
-            node = node.get(field);
-            return MAPPER.treeToValue(node, clazz);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> List<T> parseList(String body, Class<T> clazz) {
-        try {
-            return MAPPER.readValue(body, TYPE_FACTORY.constructCollectionType(ArrayList.class, clazz));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Object toNode(String json) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return MAPPER.readTree(json);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        return MAPPER.copy(); // 复制 ObjectMapper
     }
 
     /**
-     * 根据给定的点分隔符路径从JSONObject中获取值。
+     * 将对象转换为 JSON 字符串
      *
-     * @param jsonObject JSONObject对象
-     * @param path       点分隔符或包含嵌套属性的形式的路径，例如 "taskExtProps.TASK_MORPHO_DETAIL.[0].title"
-     * @return 找到值的话返回其String表现形式；如果任何层级键不存在或不是预期类型，则返回 null。
+     * @param object 要转换的对象
+     * @return JSON 字符串
+     */
+    public static String toJsonString(Object object) {
+        return execute(() -> MAPPER.writeValueAsString(object)); // 执行转换
+    }
+
+    /**
+     * 将对象转换为格式化的 JSON 字符串
+     *
+     * @param object 要转换的对象
+     * @return 格式化后的 JSON 字符串
+     */
+    public static String toFormatJsonString(Object object) {
+        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object)); // 执行转换
+    }
+
+    /**
+     * 创建 JSON 解析器
+     *
+     * @param body JSON 字符串
+     * @return JsonParser 解析器
+     */
+    public static JsonParser getJsonParser(String body) {
+        return execute(() -> JSON_FACTORY.createParser(body)); // 执行解析器创建
+    }
+
+    /**
+     * 解析 JSON 字符串为指定类型的对象
+     *
+     * @param body JSON 字符串
+     * @param type  目标类型
+     * @param <T>   目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(String body, Type type) {
+        return parseObjectInternal(() -> MAPPER.readValue(body, TYPE_FACTORY.constructType(type))); // 执行解析
+    }
+
+    /**
+     * 解析 JSON 字符串为指定类型的对象
+     *
+     * @param body     JSON 字符串
+     * @param javaType 目标 JavaType
+     * @param <T>     目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(String body, JavaType javaType) {
+        return parseObjectInternal(() -> MAPPER.readValue(body, javaType)); // 执行解析
+    }
+
+    /**
+     * 解析 JSON 字符串为指定类型的对象
+     *
+     * @param body         JSON 字符串
+     * @param valueTypeRef 目标类型引用
+     * @param <T>         目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(String body, TypeReference<T> valueTypeRef) {
+        return parseObjectInternal(() -> MAPPER.readValue(body, valueTypeRef)); // 执行解析
+    }
+
+    /**
+     * 解析 JSON 字符串为指定类型的对象
+     *
+     * @param body JSON 字符串
+     * @param clazz 目标类
+     * @param <T> 目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(String body, Class<T> clazz) {
+        return parseObjectInternal(() -> MAPPER.readValue(body, clazz)); // 执行解析
+    }
+
+    /**
+     * 从 JsonParser 解析为指定类型的对象
+     *
+     * @param jsonParser JsonParser 实例
+     * @param type       目标类型
+     * @param <T>       目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(JsonParser jsonParser, Type type) {
+        return parseObjectInternal(() -> MAPPER.readValue(jsonParser, TYPE_FACTORY.constructType(type))); // 执行解析
+    }
+
+    /**
+     * 从 JsonParser 解析为指定类型的对象
+     *
+     * @param jsonParser JsonParser 实例
+     * @param javaType   目标 JavaType
+     * @param <T>       目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(JsonParser jsonParser, JavaType javaType) {
+        return parseObjectInternal(() -> MAPPER.readValue(jsonParser, javaType)); // 执行解析
+    }
+
+    /**
+     * 从 JsonParser 解析为指定类型的对象
+     *
+     * @param jsonParser   JsonParser 实例
+     * @param valueTypeRef 目标类型引用
+     * @param <T>         目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(JsonParser jsonParser, TypeReference<T> valueTypeRef) {
+        return parseObjectInternal(() -> MAPPER.readValue(jsonParser, valueTypeRef)); // 执行解析
+    }
+
+    /**
+     * 从 JsonParser 解析为指定类型的对象
+     *
+     * @param jsonParser JsonParser 实例
+     * @param clazz      目标类
+     * @param <T>       目标类型泛型
+     * @return 解析后的对象
+     */
+    public static <T> T parseObject(JsonParser jsonParser, Class<T> clazz) {
+        return parseObjectInternal(() -> MAPPER.readValue(jsonParser, clazz)); // 执行解析
+    }
+
+    /**
+     * 将对象转换为指定类型的对象
+     *
+     * @param bean 源对象
+     * @param type 目标类型
+     * @param <T> 目标类型泛型
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(Object bean, Type type) {
+        return parseObjectInternal(() -> MAPPER.convertValue(bean, TYPE_FACTORY.constructType(type))); // 执行转换
+    }
+
+    /**
+     * 将对象转换为指定类型的对象
+     *
+     * @param bean    源对象
+     * @param javaType 目标 JavaType
+     * @param <T>    目标类型泛型
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(Object bean, JavaType javaType) {
+        return parseObjectInternal(() -> MAPPER.convertValue(bean, javaType)); // 执行转换
+    }
+
+    /**
+     * 将对象转换为指定类型的对象
+     *
+     * @param bean         源对象
+     * @param valueTypeRef 目标类型引用
+     * @param <T>         目标类型泛型
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(Object bean, TypeReference<T> valueTypeRef) {
+        return parseObjectInternal(() -> MAPPER.convertValue(bean, valueTypeRef)); // 执行转换
+    }
+
+    /**
+     * 将对象转换为指定类型的对象
+     *
+     * @param bean   源对象
+     * @param clazz  目标类
+     * @param <T>   目标类型泛型
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(Object bean, Class<T> clazz) {
+        return parseObjectInternal(() -> MAPPER.convertValue(bean, clazz)); // 执行转换
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为字符串
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值
+     */
+    public static String parseString(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? node.asText() : null; // 返回字段值
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为整数
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值
+     */
+    public static Integer parseInteger(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? node.asInt() : null; // 返回字段值
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为整数列表
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值列表
+     */
+    public static List<Integer> parseIntegerList(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? MAPPER.convertValue(node, new TypeReference<List<Integer>>() {}) : null; // 返回字段值列表
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为布尔值
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值
+     */
+    public static Boolean parseBoolean(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? node.asBoolean() : null; // 返回字段值
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为短整型
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值
+     */
+    public static Short parseShort(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? (short) node.asInt() : null; // 返回字段值
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串中的指定字段为字节型
+     *
+     * @param body  JSON 字符串
+     * @param field 指定字段名
+     * @return 字段值
+     */
+    public static Byte parseByte(String body, String field) {
+        return execute(() -> {
+            JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
+            return node != null ? (byte) node.asInt() : null; // 返回字段值
+        });
+    }
+
+    /**
+     * 解析 JSON 字符串为指定类型的对象列表
+     *
+     * @param body  JSON 字符串
+     * @param clazz 目标类
+     * @param <T>   目标类型泛型
+     * @return 解析后的对象列表
+     */
+    public static <T> List<T> parseList(String body, Class<T> clazz) {
+        return parseObjectInternal(() -> MAPPER.readValue(body, TYPE_FACTORY.constructCollectionType(ArrayList.class, clazz))); // 执行解析
+    }
+
+    /**
+     * 将 JSON 字符串转换为 JsonNode
+     *
+     * @param json JSON 字符串
+     * @return JsonNode 对象
+     */
+    public static JsonNode toNode(String json) {
+        return json == null ? null : execute(() -> MAPPER.readTree(json)); // 执行转换
+    }
+
+    /**
+     * 根据路径获取 JSON 对象中的值
+     *
+     * @param jsonObject JSON 对象
+     * @param path       字段路径（以 "." 分隔）
+     * @return 字段值
      */
     public static String getValueByPath(JSONObject jsonObject, String path) {
-        Object object = getValueByPathObject(jsonObject, path);
-        return object == null ? "" : String.valueOf(object);
+        Object value = getValueByPathObject(jsonObject, path); // 获取字段值
+        return value == null ? "" : value.toString(); // 返回字段值的字符串形式
     }
 
+    /**
+     * 根据路径获取 JSON 对象中的值
+     *
+     * @param jsonObject JSON 对象
+     * @param path       字段路径（以 "." 分隔）
+     * @return 字段值
+     */
     public static Object getValueByPathObject(JSONObject jsonObject, String path) {
-        // 使用正斜杠/作为Token分隔符号来直接跳过数组下标的解析逻辑部分并直接取嵌套属性
-        // 使用正则表达式分割，但保留[]内的内容
-        String[] parts = path.split("\\.");
+        String[] parts = path.split("\\."); // 分割路径
         try {
-            Object current = jsonObject;
+            Object current = jsonObject; // 当前对象
             for (String part : parts) {
                 if (current instanceof JSONObject) {
-                    //对象取属性
-                    current = ((JSONObject) current).get(part);
+                    current = ((JSONObject) current).get(part); // 从 JSONObject 获取值
                 } else if (current instanceof JSONArray) {
-                    //数组取索引
-                    JSONArray array = (JSONArray) current;
-                    String p = part.replaceAll("\\D", "");
-                    int index = Integer.parseInt(p);
-                    current = array.get(index);
-                } else if (part.contains("[")) {
-                    //不是对象、数组，当成字符串重新解析，如果字符串是数组
-                    JSONArray array = new JSONArray(current.toString());
-                    String p = part.replaceAll("\\D", "");
-                    int index = Integer.parseInt(p);
-                    current = array.get(index);
+                    int index = Integer.parseInt(part.replaceAll("\\D", "")); // 获取数组索引
+                    current = ((JSONArray) current).get(index); // 从 JSONArray 获取值
                 } else {
-                    //不是对象、数组，当成字符串重新解析，再取属性
-                    JSONObject object = new JSONObject(current.toString());
-                    current = object.get(part);
+                    current = new JSONObject(current.toString()).get(part); // 将当前对象转为 JSONObject 并获取值
                 }
             }
-            // 返回结果时检查是否确实找到了相应的值且非null，并转换成字符串形式返回
-            return current;
+            return current; // 返回最终的值
         } catch (Exception e) {
-            // JSONException、NumberFormatException等异常都被捕获，并默认行为是返回null.
-            return null;
+            return null; // 异常时返回 null
         }
     }
 
+    /**
+     * 将 JSONArray 转换为字符串列表
+     *
+     * @param jsonArray 源 JSONArray
+     * @return 字符串列表
+     */
     public static List<String> jsonArrayToList(JSONArray jsonArray) {
-        List<String> list = new ArrayList<>();
-        for (int i = 0, len = jsonArray.length(); i < len; i++) {
+        List<String> list = new ArrayList<>(); // 创建列表
+        for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                list.add(jsonArray.getString(i));
+                list.add(jsonArray.getString(i)); // 添加字符串到列表
             } catch (Exception e) {
-                Log.printStackTrace(e);
-                list.add("");
+                Log.printStackTrace(e); // 打印异常栈
+                list.add(""); // 异常时添加空字符串
             }
         }
-        return list;
+        return list; // 返回列表
     }
 
+    /**
+     * 内部方法，执行 JSON 操作并处理异常
+     *
+     * @param action JSON 操作
+     * @param <T>    操作返回类型
+     * @return 操作结果
+     */
+    private static <T> T parseObjectInternal(JsonAction<T> action) {
+        return execute(action); // 执行操作
+    }
+
+    /**
+     * 执行 JSON 操作并处理异常
+     *
+     * @param action JSON 操作
+     * @param <T>    操作返回类型
+     * @return 操作结果
+     */
+    private static <T> T execute(JsonAction<T> action) {
+        try {
+            return action.execute(); // 执行操作
+        } catch (Exception e) {
+            throw new RuntimeException(e); // 异常时抛出运行时异常
+        }
+    }
+
+    /**
+     * 函数式接口，用于执行 JSON 操作
+     *
+     * @param <T> 操作返回类型
+     */
+    @FunctionalInterface
+    private interface JsonAction<T> {
+        T execute() throws Exception; // 执行操作
+    }
 }

@@ -38,7 +38,7 @@ public class UserIdMap {
             try {
                 loader = ApplicationHook.getClassLoader();
             } catch (Exception e) {
-                Log.i("Error getting classloader");
+                Log.runtime("Error getting classloader");
                 return;
             }
             try {
@@ -71,7 +71,7 @@ public class UserIdMap {
                             }
                             UserIdMap.add(userEntity);
                         } catch (Throwable t) {
-                            Log.i("addUserObject err:");
+                            Log.runtime("addUserObject err:");
                             Log.printStackTrace(t);
                         }
                     }
@@ -79,7 +79,7 @@ public class UserIdMap {
                 }
                 UserIdMap.save(selfId);
             } catch (Throwable t) {
-                Log.i("checkUnknownId.run err:");
+                Log.runtime("checkUnknownId.run err:");
                 Log.printStackTrace(t);
             }
         });

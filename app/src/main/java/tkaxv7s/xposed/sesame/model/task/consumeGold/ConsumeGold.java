@@ -47,7 +47,7 @@ public class ConsumeGold extends ModelTask {
             taskV2Index("CG_BROWSER_AD_FEEDS");
             consumeGoldIndex();
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -81,10 +81,10 @@ public class ConsumeGold extends ModelTask {
                     taskV2Index(taskSceneCode);
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "taskV2Index err:");
+            Log.runtime(TAG, "taskV2Index err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -98,7 +98,7 @@ public class ConsumeGold extends ModelTask {
                 Log.other("赚消费金💰[" + name + "]#" + receiveAmount);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "taskV2TriggerReceive err:");
+            Log.runtime(TAG, "taskV2TriggerReceive err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -111,7 +111,7 @@ public class ConsumeGold extends ModelTask {
 
             }
         } catch (Throwable t) {
-            Log.i(TAG, "taskV2TriggerSignUp err:");
+            Log.runtime(TAG, "taskV2TriggerSignUp err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -124,7 +124,7 @@ public class ConsumeGold extends ModelTask {
 
             }
         } catch (Throwable t) {
-            Log.i(TAG, "taskV2TriggerSend err:");
+            Log.runtime(TAG, "taskV2TriggerSend err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -163,7 +163,7 @@ public class ConsumeGold extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "queryTreasureBox err:");
+            Log.runtime(TAG, "queryTreasureBox err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -183,7 +183,7 @@ public class ConsumeGold extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "signinCalendar err:");
+            Log.runtime(TAG, "signinCalendar err:");
             Log.printStackTrace(TAG, t);
         }
     }

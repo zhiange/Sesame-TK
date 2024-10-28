@@ -89,19 +89,19 @@ public class Statistics {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
-                    Log.i(TAG, "重新格式化 statistics.json");
+                    Log.runtime(TAG, "重新格式化 statistics.json");
                     Log.system(TAG, "重新格式化 statistics.json");
                     FileUtil.write2File(formatted, statisticsFile);
                 }
             } else {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
-                Log.i(TAG, "初始化 statistics.json");
+                Log.runtime(TAG, "初始化 statistics.json");
                 Log.system(TAG, "初始化 statistics.json");
                 FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), statisticsFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
-            Log.i(TAG, "统计文件格式有误，已重置统计文件");
+            Log.runtime(TAG, "统计文件格式有误，已重置统计文件");
             Log.system(TAG, "统计文件格式有误，已重置统计文件");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());

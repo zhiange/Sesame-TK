@@ -87,11 +87,11 @@ public class AntCooperate extends ModelTask {
                         }
                     }
                 } else {
-                    Log.i(TAG, jo.getString("resultDesc"));
+                    Log.runtime(TAG, jo.getString("resultDesc"));
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
         CooperationIdMap.save(UserIdMap.getCurrentUid());
@@ -105,10 +105,10 @@ public class AntCooperate extends ModelTask {
                 Log.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
                 Status.cooperateWaterToday(UserIdMap.getCurrentUid(), coopId);
             } else {
-                Log.i(TAG, jo.getString("resultDesc"));
+                Log.runtime(TAG, jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
-            Log.i(TAG, "cooperateWater err:");
+            Log.runtime(TAG, "cooperateWater err:");
             Log.printStackTrace(TAG, t);
         } finally {
             TimeUtil.sleep(500);
@@ -134,7 +134,7 @@ public class AntCooperate extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "calculatedWaterNum err:");
+            Log.runtime(TAG, "calculatedWaterNum err:");
             Log.printStackTrace(TAG, t);
         } finally {
             return num;

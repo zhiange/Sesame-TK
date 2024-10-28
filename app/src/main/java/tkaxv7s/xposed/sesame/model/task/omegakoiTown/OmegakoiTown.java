@@ -79,7 +79,7 @@ public class OmegakoiTown extends ModelTask {
             getSignInStatus();
             houseProduct();
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -110,16 +110,16 @@ public class OmegakoiTown extends ModelTask {
                                 Log.other("小镇任务🌇[" + name + "]#" + amount + "[" + rewardType.rewardName() + "]");
                             }
                         } catch (Throwable th) {
-                            Log.i(TAG, "spec RewardType:" + itemId + ";未知的类型");
+                            Log.runtime(TAG, "spec RewardType:" + itemId + ";未知的类型");
                         }
                     }
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "getUserTasks err:");
+            Log.runtime(TAG, "getUserTasks err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -140,7 +140,7 @@ public class OmegakoiTown extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "getSignInStatus err:");
+            Log.runtime(TAG, "getSignInStatus err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -177,10 +177,10 @@ public class OmegakoiTown extends ModelTask {
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "getUserTasks err:");
+            Log.runtime(TAG, "getUserTasks err:");
             Log.printStackTrace(TAG, t);
         }
     }

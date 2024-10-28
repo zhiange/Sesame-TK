@@ -35,13 +35,13 @@ public class OldRpcBridge implements RpcBridge {
         loader = ApplicationHook.getClassLoader();
         try {
             h5PageClazz = loader.loadClass(ClassUtil.H5PAGE_NAME);
-            Log.i(TAG, "rpc loadClass successfully");
+            Log.runtime(TAG, "rpc loadClass successfully");
         } catch (ClassNotFoundException t) {
-            Log.i(TAG, "rpc loadClass err:");
+            Log.runtime(TAG, "rpc loadClass err:");
             Log.printStackTrace(TAG, t);
             throw new RuntimeException(t);
         } catch (Throwable t) {
-            Log.i(TAG, "rpc loadClass err:");
+            Log.runtime(TAG, "rpc loadClass err:");
             Log.printStackTrace(TAG, t);
             throw t;
         }
@@ -52,9 +52,9 @@ public class OldRpcBridge implements RpcBridge {
                         boolean.class, loader.loadClass(ClassUtil.JSON_OBJECT_NAME), String.class, boolean.class, h5PageClazz,
                         int.class, String.class, boolean.class, int.class, String.class);
                 getResponseMethod = loader.loadClass("com.alipay.mobile.nebulaappproxy.api.rpc.H5Response").getMethod("getResponse");
-                Log.i(TAG, "get oldRpcCallMethod successfully");
+                Log.runtime(TAG, "get oldRpcCallMethod successfully");
             } catch (Exception e) {
-                Log.i(TAG, "get oldRpcCallMethod err:");
+                Log.runtime(TAG, "get oldRpcCallMethod err:");
                 throw e;
             }
         }
@@ -186,7 +186,7 @@ public class OldRpcBridge implements RpcBridge {
             } while (count < tryCount);
             return null;
         } finally {
-            Log.i("Old RPC\n方法: " + method + "\n参数: " + args + "\n数据: " + rpcEntity.getResponseString() + "\n");
+            Log.runtime("Old RPC\n方法: " + method + "\n参数: " + args + "\n数据: " + rpcEntity.getResponseString() + "\n");
         }
     }
 

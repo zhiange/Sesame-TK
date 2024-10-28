@@ -56,7 +56,7 @@ public class BaseTaskRpcCall {
             String s = taskQuery(appletId);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
-                Log.i(tag + ".doTask.taskQuery", jo.optString("resultDesc"));
+                Log.runtime(tag + ".doTask.taskQuery", jo.optString("resultDesc"));
                 return;
             }
             JSONObject result = jo.getJSONObject("result");
@@ -76,7 +76,7 @@ public class BaseTaskRpcCall {
                     s = taskTrigger(taskId, "receive", appletId);
                     jo = new JSONObject(s);
                     if (!jo.optBoolean("success")) {
-                        Log.i(tag + ".doTask.receive", jo.optString("resultDesc"));
+                        Log.runtime(tag + ".doTask.receive", jo.optString("resultDesc"));
                         continue;
                     }
                 } else if ("NONE_SIGNUP".equals(status)) {
@@ -84,7 +84,7 @@ public class BaseTaskRpcCall {
                     s = taskTrigger(taskId, "signup", appletId);
                     jo = new JSONObject(s);
                     if (!jo.optBoolean("success")) {
-                        Log.i(tag + ".doTask.signup", jo.optString("resultDesc"));
+                        Log.runtime(tag + ".doTask.signup", jo.optString("resultDesc"));
                         continue;
                     }
                 }
@@ -93,7 +93,7 @@ public class BaseTaskRpcCall {
                     s = taskTrigger(taskId, "send", appletId);
                     jo = new JSONObject(s);
                     if (!jo.optBoolean("success")) {
-                        Log.i(tag + ".doTask.send", jo.optString("resultDesc"));
+                        Log.runtime(tag + ".doTask.send", jo.optString("resultDesc"));
                         continue;
                     }
                 } else if (!"TO_RECEIVE".equals(status)) {
@@ -103,7 +103,7 @@ public class BaseTaskRpcCall {
                 Log.other(name + "[" + JsonUtil.getValueByPath(taskDetail, "taskExtProps.TASK_MORPHO_DETAIL.title") + "]任务完成");
             }
         } catch (Throwable th) {
-            Log.i(tag, "doTask err:");
+            Log.runtime(tag, "doTask err:");
             Log.printStackTrace(tag, th);
         }
     }

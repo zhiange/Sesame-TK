@@ -102,17 +102,17 @@ public class AntOrchard extends ModelTask {
                         orchardassistFriend();
                     } else {
                         Log.record(jo.getString("resultDesc"));
-                        Log.i(jo.toString());
+                        Log.runtime(jo.toString());
                     }
                 } else {
                     getEnableField().setValue(false);
                     Log.record("请先开启芭芭农场！");
                 }
             } else {
-                Log.i(TAG, jo.getString("resultDesc"));
+                Log.runtime(TAG, jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
-            Log.i(TAG, "start.run err:");
+            Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -146,7 +146,7 @@ public class AntOrchard extends ModelTask {
                 try {
                     JSONObject jo = new JSONObject(AntOrchardRpcCall.orchardIndex());
                     if (!"100".equals(jo.getString("resultCode"))) {
-                        Log.i(TAG, jo.getString("resultDesc"));
+                        Log.runtime(TAG, jo.getString("resultDesc"));
                         return;
                     }
                     if (jo.has("spreadManureActivity")) {
@@ -161,7 +161,7 @@ public class AntOrchard extends ModelTask {
                                 Log.farm("丰收礼包🎁[肥料*" + awardCount + "]");
                             } else {
                                 Log.record(joo.getString("desc"));
-                                Log.i(joo.toString());
+                                Log.runtime(joo.toString());
                             }
                         }
                     }
@@ -184,7 +184,7 @@ public class AntOrchard extends ModelTask {
                         jo = new JSONObject(AntOrchardRpcCall.orchardSpreadManure(getWua()));
                         if (!"100".equals(jo.getString("resultCode"))) {
                             Log.record(jo.getString("resultDesc"));
-                            Log.i(jo.toString());
+                            Log.runtime(jo.toString());
                             return;
                         }
                         taobaoData = jo.getString("taobaoData");
@@ -203,7 +203,7 @@ public class AntOrchard extends ModelTask {
                 break;
             } while (true);
         } catch (Throwable t) {
-            Log.i(TAG, "orchardSpreadManure err:");
+            Log.runtime(TAG, "orchardSpreadManure err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -222,13 +222,13 @@ public class AntOrchard extends ModelTask {
                 if ("100".equals(jo.getString("resultCode"))) {
                     Log.farm("每日肥料💩[" + todayFertilizerNum + "g]");
                 } else {
-                    Log.i(jo.getString("resultDesc"), jo.toString());
+                    Log.runtime(jo.getString("resultDesc"), jo.toString());
                 }
             } else {
-                Log.i(jo.getString("resultDesc"), jo.toString());
+                Log.runtime(jo.getString("resultDesc"), jo.toString());
             }
         } catch (Throwable t) {
-            Log.i(TAG, "extraInfoGet err:");
+            Log.runtime(TAG, "extraInfoGet err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -257,7 +257,7 @@ public class AntOrchard extends ModelTask {
                                 }
                             }
                         } else {
-                            Log.i(jo.getString("resultDesc"), jo.toString());
+                            Log.runtime(jo.getString("resultDesc"), jo.toString());
                         }
                     } else {
                         Log.record("七日礼包已领取");
@@ -266,7 +266,7 @@ public class AntOrchard extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "drawLotteryPlus err:");
+            Log.runtime(TAG, "drawLotteryPlus err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -295,16 +295,16 @@ public class AntOrchard extends ModelTask {
                             Log.farm("农场任务🧾[" + title + "]");
                         } else {
                             Log.record(jo.getString("desc"));
-                            Log.i(jo.toString());
+                            Log.runtime(jo.toString());
                         }
                     }
                 }
             } else {
                 Log.record(jo.getString("resultCode"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "doOrchardDailyTask err:");
+            Log.runtime(TAG, "doOrchardDailyTask err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -319,13 +319,13 @@ public class AntOrchard extends ModelTask {
                             .getInt("awardCount");
                     Log.farm("农场签到📅[获得肥料]#" + awardCount + "g");
                 } else {
-                    Log.i(joSign.getString("resultDesc"), joSign.toString());
+                    Log.runtime(joSign.getString("resultDesc"), joSign.toString());
                 }
             } else {
                 Log.record("农场今日已签到");
             }
         } catch (Throwable t) {
-            Log.i(TAG, "orchardSign err:");
+            Log.runtime(TAG, "orchardSign err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -349,15 +349,15 @@ public class AntOrchard extends ModelTask {
                         Log.farm("领取奖励🎖️[" + title + "]#" + awardCount + "g肥料");
                     } else {
                         Log.record(jo.getString("resultDesc"));
-                        Log.i(jo.toString());
+                        Log.runtime(jo.toString());
                     }
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "triggerTbTask err:");
+            Log.runtime(TAG, "triggerTbTask err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -392,7 +392,7 @@ public class AntOrchard extends ModelTask {
                                 Log.farm("农场许愿✨[每日施肥" + taskRequire + "次]");
                             } else {
                                 Log.record(jo.getString("resultDesc"));
-                                Log.i(jo.toString());
+                                Log.runtime(jo.toString());
                             }
                         }
                     } else if ("FINISHED".equals(jo.getString("status"))) {
@@ -403,16 +403,16 @@ public class AntOrchard extends ModelTask {
                             return;
                         } else {
                             Log.record(jo.getString("resultDesc"));
-                            Log.i(jo.toString());
+                            Log.runtime(jo.toString());
                         }
                     }
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(s);
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            Log.i(TAG, "triggerTbTask err:");
+            Log.runtime(TAG, "triggerTbTask err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -449,10 +449,10 @@ public class AntOrchard extends ModelTask {
                 }
             } else {
                 Log.record(jo.getString("resultDesc"));
-                Log.i(jo.toString());
+                Log.runtime(jo.toString());
             }
         } catch (Throwable t) {
-            Log.i(TAG, "batchHireAnimalRecommend err:");
+            Log.runtime(TAG, "batchHireAnimalRecommend err:");
             Log.printStackTrace(TAG, t);
         }
     }
@@ -484,7 +484,7 @@ public class AntOrchard extends ModelTask {
             }
             Status.antOrchardAssistFriendToday();
         } catch (Throwable t) {
-            Log.i(TAG, "orchardassistFriend err:");
+            Log.runtime(TAG, "orchardassistFriend err:");
             Log.printStackTrace(TAG, t);
         }
     }
