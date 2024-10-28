@@ -99,7 +99,7 @@
     <string name="start_check_energy">开始检测能量</string>
     <string name="collect_watering_bubble">收金球</string>
     <string name="use_double_card_time">使用双击卡时间</string>
-    <string name="use_double_card_time_desc">例如：(0000-0100,0700-0730)代表晚上0点到1点，早上7点到7点半，有能量并且没有使用双击卡就会自动使用</string>
+    <string name="use_double_card_time_desc">例如：(0000–0100,0700–0730)代表晚上0点到1点，早上7点到7点半，有能量并且没有使用双击卡就会自动使用</string>
     <string name="animal_sleep_time">小鸡睡眠时间(设置方式同双击卡)</string>
     <string name="visit_github">GitHub</string>
     <string name="exchange_energy_double_click">活力值兑换限时双击卡</string>
@@ -172,5 +172,10 @@
     <string name="omegakoi_town">支小镇</string>
     <string name="consume_gold">支付宝消费金</string>
     <string name="use_special_food">使用特殊食品</string>
+    <string name="file_exported">文件已导出到: </string>
+    <string name="file_cleared">文件已清空</string>
+    <string name="file_not_support_open_with_browser">该文件不支持用浏览器打开</string>
+    <string name="not_support_open_with_browser">不支持用浏览器打开</string>
+    <string name="text_diary_toast">测试弹窗字符串</string>
 
 </resources>

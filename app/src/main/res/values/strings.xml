@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Sesame</string>
     <string name="start_check_energy">Start check energy</string>
-    <string name="start_message">本APP是为了学习研究而开发，<b>免费且开源，禁止用于任何商业用途，并禁止二次修改后闭源发布</b>。请于24小时内卸载本APP。如果您是通过购买获得，请联系卖家退款或在平台举报卖家。</string>
+    <string name="start_message">This APP was developed for learning and research. <b>It is free and open source. It is forbidden to be used for any commercial purpose. </b>Please uninstall this APP within 24 hours. If you have obtained it by purchase, please contact the seller for a refund or report the seller on the platform.</string>
     <color name="color_alpha">#00000000</color>
     <color name="color_btn_down">#F0F0F0</color>
 
@@ -102,7 +102,7 @@
     <string name="collect_watering_bubble">Collect watering bubble</string>
     <string name="collect_prop">Collect prop</string>
     <string name="use_double_card_time">Use double card time</string>
-    <string name="use_double_card_time_desc">For example: (0000-0100, 0700-0730) represents 0 to 1 p.m. and 7 to 7:30 a.m., when there is energy and the card is automatically used without using double click</string>
+    <string name="use_double_card_time_desc">For example: (0000–0100, 0700–0730) represents 0 to 1 p.m. and 7 to 7:30 a.m., when there is energy and the card is automatically used without using double click</string>
     <string name="animal_sleep_time">Animal sleep time</string>
     <string name="visit_github">Visit GitHub</string>
     <string name="exchange_energy_double_click">Exchange energy double click</string>
@@ -176,5 +176,11 @@
     <string name="omegakoi_town">Omegakoi Town</string>
     <string name="consume_gold">Consume Gold</string>
     <string name="use_special_food">Use Special Food</string>
+    <string name="file_exported">The file has been exported to the: </string>
+    <string name="file_cleared">The file has been cleared</string>
+    <string name="file_not_support_open_with_browser">The file is not supported to open with browser</string>
+    <string name="not_support_open_with_browser">Not supported to open with browser</string>
+    <string name="text_diary_toast">Test Toast String</string>
+
 
 </resources>
