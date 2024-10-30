@@ -1455,94 +1455,112 @@ public class AntForestV2 extends ModelTask {
 
     private void receiveTaskAward() {
         try {
+            // 循环控制标志
             do {
-                boolean doubleCheck = false;
-                String s = AntForestRpcCall.queryTaskList();
-                JSONObject jo = new JSONObject(s);
-                if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    JSONArray forestSignVOList = jo.getJSONArray("forestSignVOList");
+                boolean doubleCheck = false; // 标记是否需要再次检查任务
+                String response = AntForestRpcCall.queryTaskList(); // 查询任务列表
+                JSONObject jsonResponse = new JSONObject(response); // 解析响应为 JSON 对象
+
+                // 检查响应结果码是否成功
+                if ("SUCCESS".equals(jsonResponse.getString("resultCode"))) {
+                    JSONArray forestSignVOList = jsonResponse.getJSONArray("forestSignVOList");
                     JSONObject forestSignVO = forestSignVOList.getJSONObject(0);
-                    String currentSignKey = forestSignVO.getString("currentSignKey");
-                    JSONArray signRecords = forestSignVO.getJSONArray("signRecords");
+                    String currentSignKey = forestSignVO.getString("currentSignKey"); // 当前签到的 key
+                    JSONArray signRecords = forestSignVO.getJSONArray("signRecords"); // 签到记录
+
+                    // 遍历签到记录，判断是否需要签到
                     for (int i = 0; i < signRecords.length(); i++) {
                         JSONObject signRecord = signRecords.getJSONObject(i);
                         String signKey = signRecord.getString("signKey");
                         if (signKey.equals(currentSignKey)) {
+                            // 如果未签到，执行签到
                             if (!signRecord.getBoolean("signed")) {
-                                JSONObject joSign = new JSONObject(AntForestRpcCall.vitalitySign());
-                                TimeUtil.sleep(300);
-                                if ("SUCCESS".equals(joSign.getString("resultCode")))
+                                JSONObject joSign = new JSONObject(AntForestRpcCall.vitalitySign()); // 执行签到请求
+                                TimeUtil.sleep(300); // 等待300毫秒
+                                if ("SUCCESS".equals(joSign.getString("resultCode"))) {
                                     Log.forest("森林签到📆");
+                                }
                             }
-                            break;
+                            break; // 签到完成，退出循环
                         }
                     }
-                    JSONArray forestTasksNew = jo.optJSONArray("forestTasksNew");
-                    if (forestTasksNew == null)
-                        return;
+
+                    JSONArray forestTasksNew = jsonResponse.optJSONArray("forestTasksNew");
+                    if (forestTasksNew == null) return; // 如果没有新任务，则返回
+
+                    // 遍历每个新任务
                     for (int i = 0; i < forestTasksNew.length(); i++) {
                         JSONObject forestTask = forestTasksNew.getJSONObject(i);
-                        JSONArray taskInfoList = forestTask.getJSONArray("taskInfoList");
+                        JSONArray taskInfoList = forestTask.getJSONArray("taskInfoList"); // 获取任务信息列表
+
+                        // 遍历每个任务信息
                         for (int j = 0; j < taskInfoList.length(); j++) {
                             JSONObject taskInfo = taskInfoList.getJSONObject(j);
-                            JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo");
-                            JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo"));
-                            String taskType = taskBaseInfo.getString("taskType");
-                            String taskTitle = bizInfo.optString("taskTitle", taskType);
-                            String awardCount = bizInfo.optString("awardCount", "1");
-                            String sceneCode = taskBaseInfo.getString("sceneCode");
-                            String taskStatus = taskBaseInfo.getString("taskStatus");
+                            JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo"); // 获取任务基本信息
+                            JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo")); // 获取业务信息
+                            String taskType = taskBaseInfo.getString("taskType"); // 获取任务类型
+                            String taskTitle = bizInfo.optString("taskTitle", taskType); // 获取任务标题
+                            String awardCount = bizInfo.optString("awardCount", "1"); // 获取奖励数量
+                            String sceneCode = taskBaseInfo.getString("sceneCode"); // 获取场景代码
+                            String taskStatus = taskBaseInfo.getString("taskStatus"); // 获取任务状态
+
+                            // 如果任务已完成，领取任务奖励
                             if (TaskStatus.FINISHED.name().equals(taskStatus)) {
-                                JSONObject joAward = new JSONObject(AntForestRpcCall.receiveTaskAward(sceneCode, taskType));
-                                TimeUtil.sleep(500);
+                                JSONObject joAward = new JSONObject(AntForestRpcCall.receiveTaskAward(sceneCode, taskType)); // 领取奖励请求
+                                TimeUtil.sleep(500); // 等待500毫秒
                                 if (joAward.optBoolean("success")) {
                                     Log.forest("任务奖励🎖️[" + taskTitle + "]#" + awardCount + "个");
-                                    doubleCheck = true;
+                                    doubleCheck = true; // 标记需要重新检查任务
                                 } else {
-                                    Log.record("领取失败，" + s);
-                                    Log.runtime(joAward.toString());
+                                    Log.record("领取失败，" + response); // 记录领取失败信息
+                                    Log.runtime(joAward.toString()); // 打印奖励响应
                                 }
-                            } else if (TaskStatus.TODO.name().equals(taskStatus)) {
+                            }
+                            // 如果任务待完成，执行完成逻辑
+                            else if (TaskStatus.TODO.name().equals(taskStatus)) {
                                 if (bizInfo.optBoolean("autoCompleteTask", false)
-                                        || AntForestTaskTypeSet.contains(taskType) || taskType.endsWith("_JIASUQI")
-                                        || taskType.endsWith("_BAOHUDI") || taskType.startsWith("GYG")) {
-                                    JSONObject joFinishTask = new JSONObject(
-                                            AntForestRpcCall.finishTask(sceneCode, taskType));
-                                    TimeUtil.sleep(500);
+                                        || AntForestTaskTypeSet.contains(taskType)
+                                        || taskType.endsWith("_JIASUQI")
+                                        || taskType.endsWith("_BAOHUDI")
+                                        || taskType.startsWith("GYG")) {
+                                    // 尝试完成任务
+                                    JSONObject joFinishTask = new JSONObject(AntForestRpcCall.finishTask(sceneCode, taskType)); // 完成任务请求
+                                    TimeUtil.sleep(500); // 等待500毫秒
                                     if (joFinishTask.optBoolean("success")) {
                                         Log.forest("森林任务🧾️[" + taskTitle + "]");
-                                        doubleCheck = true;
+                                        doubleCheck = true; // 标记需要重新检查任务
                                     } else {
-                                        Log.record("完成任务失败，" + taskTitle);
+                                        Log.record("完成任务失败，" + taskTitle); // 记录完成任务失败信息
                                     }
-                                } else if ("DAKA_GROUP".equals(taskType)) {
+                                }
+                                // 特殊任务处理
+                                else if ("DAKA_GROUP".equals(taskType) || "TEST_LEAF_TASK".equals(taskType)) {
                                     JSONArray childTaskTypeList = taskInfo.optJSONArray("childTaskTypeList");
                                     if (childTaskTypeList != null && childTaskTypeList.length() > 0) {
-                                        doChildTask(childTaskTypeList, taskTitle);
-                                    }
-                                } else if ("TEST_LEAF_TASK".equals(taskType)) {
-                                    JSONArray childTaskTypeList = taskInfo.optJSONArray("childTaskTypeList");
-                                    if (childTaskTypeList != null && childTaskTypeList.length() > 0) {
-                                        doChildTask(childTaskTypeList, taskTitle);
-                                        doubleCheck = true;
+                                        doChildTask(childTaskTypeList, taskTitle); // 处理子任务
+                                        if ("TEST_LEAF_TASK".equals(taskType)) {
+                                            doubleCheck = true; // 标记需要重新检查任务
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    if (doubleCheck)
-                        continue;
+
+                    // 如果需要重新检查任务，则继续循环
+                    if (doubleCheck) continue;
                 } else {
-                    Log.record(jo.getString("resultDesc"));
-                    Log.runtime(s);
+                    Log.record(jsonResponse.getString("resultDesc")); // 记录失败描述
+                    Log.runtime(response); // 打印响应内容
                 }
-                break;
+                break; // 退出循环
             } while (true);
         } catch (Throwable t) {
-            Log.runtime(TAG, "receiveTaskAward err:");
-            Log.printStackTrace(TAG, t);
+            Log.runtime(TAG, "receiveTaskAward 错误:");
+            Log.printStackTrace(TAG, t); // 打印异常栈
         }
     }
+
 
     private void doChildTask(JSONArray childTaskTypeList, String title) {
         try {

@@ -1,6 +1,10 @@
 package tkaxv7s.xposed.sesame.rpc.bridge;
 
 import de.robv.android.xposed.XposedHelpers;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Map;
 import tkaxv7s.xposed.sesame.entity.RpcEntity;
 import tkaxv7s.xposed.sesame.hook.ApplicationHook;
 import tkaxv7s.xposed.sesame.model.normal.base.BaseModel;
@@ -10,314 +14,239 @@ import tkaxv7s.xposed.sesame.util.Log;
 import tkaxv7s.xposed.sesame.util.NotificationUtil;
 import tkaxv7s.xposed.sesame.util.RandomUtil;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Map;
-
-/**
- * 新版rpc接口 支持最低支付宝版本v10.3.96.8100
- * 记录rpc抓包 支持最低支付宝版本v10.3.96.8100
- */
+/** 新版rpc接口，支持最低支付宝版本v10.3.96.8100 记录rpc抓包，支持最低支付宝版本v10.3.96.8100 */
 public class NewRpcBridge implements RpcBridge {
 
-    private static final String TAG = NewRpcBridge.class.getSimpleName();
+  private static final String TAG = NewRpcBridge.class.getSimpleName();
 
-    private ClassLoader loader;
+  private ClassLoader loader; // 类加载器
+  private Object newRpcInstance; // 新的 RPC 实例
+  private Method parseObjectMethod; // 解析对象的方法
+  private Class<?>[] bridgeCallbackClazzArray; // 回调类数组
+  private Method newRpcCallMethod; // RPC 调用方法
 
-    private Object newRpcInstance;
+  @Override
+  public RpcVersion getVersion() {
+    return RpcVersion.NEW; // 返回 RPC 版本
+  }
 
-    private Method parseObjectMethod;
+  @Override
+  public void load() throws Exception {
+    loader = ApplicationHook.getClassLoader(); // 获取类加载器
+    try {
+      // 获取 Alipay Nebula 服务
+      Object service = XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.alipay.mobile.nebulacore.Nebula", loader), "getService");
+      Object extensionManager = XposedHelpers.callMethod(service, "getExtensionManager");
+      Method getExtensionByName = extensionManager.getClass().getDeclaredMethod("createExtensionInstance", Class.class);
+      getExtensionByName.setAccessible(true);
 
-    private Class<?>[] bridgeCallbackClazzArray;
+      // 创建新的 RPC 实例
+      newRpcInstance = getExtensionByName.invoke(null, loader.loadClass("com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension"));
+      if (newRpcInstance == null) {
+        Object nodeExtensionMap = XposedHelpers.callMethod(extensionManager, "getNodeExtensionMap");
+        if (nodeExtensionMap != null) {
 
-    private Method newRpcCallMethod;
-
-    @Override
-    public RpcVersion getVersion() {
-        return RpcVersion.NEW;
-    }
-
-    @Override
-    public void load() throws Exception {
-        loader = ApplicationHook.getClassLoader();
-        try {
-            Object service = XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.alipay.mobile.nebulacore.Nebula", loader), "getService");
-            Object extensionManager = XposedHelpers.callMethod(service, "getExtensionManager");
-            Method getExtensionByName = extensionManager.getClass().getDeclaredMethod("createExtensionInstance", Class.class);
-            getExtensionByName.setAccessible(true);
-            newRpcInstance = getExtensionByName.invoke(null, loader.loadClass("com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension"));
-            if (newRpcInstance == null) {
-                Object nodeExtensionMap = XposedHelpers.callMethod(extensionManager, "getNodeExtensionMap");
-                if (nodeExtensionMap != null) {
-                    Map<Object, Map<String, Object>> map = (Map<Object, Map<String, Object>>) nodeExtensionMap;
-                    for (Map.Entry<Object, Map<String, Object>> entry : map.entrySet()) {
-                        Map<String, Object> map1 = entry.getValue();
-                        for (Map.Entry<String, Object> entry1 : map1.entrySet()) {
-                            if ("com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension".equals(entry1.getKey())) {
-                                newRpcInstance = entry1.getValue();
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (newRpcInstance == null) {
-                    Log.runtime(TAG, "get newRpcInstance null");
-                    throw new RuntimeException("get newRpcInstance is null");
-                }
+          Map<Object, Map<String, Object>> map = (Map<Object, Map<String, Object>>) nodeExtensionMap;
+          // 遍历节点扩展映射，寻找 RPC 扩展实例
+          for (Map.Entry<Object, Map<String, Object>> entry : map.entrySet()) {
+            Map<String, Object> map1 = entry.getValue();
+            for (Map.Entry<String, Object> entry1 : map1.entrySet()) {
+              if ("com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension".equals(entry1.getKey())) {
+                newRpcInstance = entry1.getValue();
+                break;
+              }
             }
-            parseObjectMethod = loader.loadClass("com.alibaba.fastjson.JSON").getMethod("parseObject", String.class);
-            Class<?> bridgeCallbackClazz = loader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback");
-            bridgeCallbackClazzArray = new Class[]{bridgeCallbackClazz};
-            newRpcCallMethod = newRpcInstance.getClass().getMethod("rpc"
-                    , String.class
-                    , boolean.class
-                    , boolean.class
-                    , String.class
-                    , loader.loadClass(ClassUtil.JSON_OBJECT_NAME)
-                    , String.class
-                    , loader.loadClass(ClassUtil.JSON_OBJECT_NAME)
-                    , boolean.class
-                    , boolean.class
-                    , int.class
-                    , boolean.class
-                    , String.class
-                    , loader.loadClass("com.alibaba.ariver.app.api.App")
-                    , loader.loadClass("com.alibaba.ariver.app.api.Page")
-                    , loader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext")
-                    , bridgeCallbackClazz
-            );
-            Log.runtime(TAG, "get newRpcCallMethod successfully");
-        } catch (Exception e) {
-            Log.runtime(TAG, "get newRpcCallMethod err:");
-            throw e;
+          }
         }
-    }
-
-    @Override
-    public void unload() {
-        newRpcCallMethod = null;
-        bridgeCallbackClazzArray = null;
-        parseObjectMethod = null;
-        newRpcInstance = null;
-        loader = null;
-    }
-
-    public String requestString(RpcEntity rpcEntity, int tryCount, int retryInterval) {
-        RpcEntity resRpcEntity = requestObject(rpcEntity, tryCount, retryInterval);
-        if (resRpcEntity != null) {
-            return resRpcEntity.getResponseString();
+        if (newRpcInstance == null) {
+          Log.runtime(TAG, "获取新的 RPC 实例为 null");
+          throw new RuntimeException("获取新的 RPC 实例为 null");
         }
-        return null;
-    }
+      }
+      // 获取解析对象的方法
+      parseObjectMethod = loader.loadClass("com.alibaba.fastjson.JSON").getMethod("parseObject", String.class);
+      Class<?> bridgeCallbackClazz = loader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback");
+      bridgeCallbackClazzArray = new Class[] {bridgeCallbackClazz}; // 初始化回调类数组
 
-    @Override
-    public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
-        if (ApplicationHook.isOffline()) {
-            return null;
-        }
-        int id = rpcEntity.hashCode();
-        String method = rpcEntity.getRequestMethod();
-        String data = rpcEntity.getRequestData();
-        String relation = rpcEntity.getRequestRelation();
+      // 获取 RPC 调用方法
+      newRpcCallMethod =
+          newRpcInstance
+              .getClass()
+              .getMethod(
+                  "rpc",
+                  String.class,
+                  boolean.class,
+                  boolean.class,
+                  String.class,
+                  loader.loadClass(ClassUtil.JSON_OBJECT_NAME),
+                  String.class,
+                  loader.loadClass(ClassUtil.JSON_OBJECT_NAME),
+                  boolean.class,
+                  boolean.class,
+                  int.class,
+                  boolean.class,
+                  String.class,
+                  loader.loadClass("com.alibaba.ariver.app.api.App"),
+                  loader.loadClass("com.alibaba.ariver.app.api.Page"),
+                  loader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"),
+                  bridgeCallbackClazz);
+      Log.runtime(TAG, "成功获取新的 RPC 调用方法");
+    } catch (Exception e) {
+      Log.runtime(TAG, "获取新的 RPC 调用方法出错:");
+      throw e;
+    }
+  }
+
+  @Override
+  public void unload() {
+    newRpcCallMethod = null;
+    bridgeCallbackClazzArray = null;
+    parseObjectMethod = null;
+    newRpcInstance = null;
+    loader = null; // 卸载时清空引用
+  }
+
+  public String requestString(RpcEntity rpcEntity, int tryCount, int retryInterval) {
+    RpcEntity resRpcEntity = requestObject(rpcEntity, tryCount, retryInterval);
+    if (resRpcEntity != null) {
+      return resRpcEntity.getResponseString(); // 返回响应字符串
+    }
+    return null;
+  }
+
+  @Override
+  public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
+    if (ApplicationHook.isOffline()) {
+      return null; // 如果处于离线状态，返回 null
+    }
+    int id = rpcEntity.hashCode();
+    String method = rpcEntity.getRequestMethod();
+    String data = rpcEntity.getRequestData();
+    String relation = rpcEntity.getRequestRelation();
+    try {
+      int count = 0;
+      do {
+        count++;
         try {
-            int count = 0;
-            do {
-                count++;
-                try {
-                    RpcIntervalLimit.enterIntervalLimit(method);
-                    newRpcCallMethod.invoke(
-                            newRpcInstance, method, false, false, "json", parseObjectMethod.invoke(null, "{\"__apiCallStartTime\":" + System.currentTimeMillis() + ",\"apiCallLink\":\"XRiverNotFound\",\"execEngine\":\"XRiver\",\"operationType\":\"" + method + "\",\"requestData\":" + data + (relation == null ? "" : ",\"relationLocal\":" + relation) + "}"), "", null, true, false, 0, false, "", null, null, null, Proxy.newProxyInstance(loader, bridgeCallbackClazzArray, new InvocationHandler() {
-                                @Override
-                                public Object invoke(Object proxy, Method innerMethod, Object[] args) {
-                                    if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
-                                        try {
-                                            Object obj = args[0];
-                                            rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
-                                            if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
-                                                rpcEntity.setError();
-                                                Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " args: " + rpcEntity.getRequestData() + " | data: " + rpcEntity.getResponseString());
-                                            }
-                                        } catch (Exception e) {
-                                            rpcEntity.setError();
-                                            Log.error("new rpc response | id: " + id + " | method: " + method + " err:");
-                                            Log.printStackTrace(e);
-                                        }
-                                    }
-                                    return null;
-                                }
-                            })
-                    );
-                    if (!rpcEntity.getHasResult()) {
-                        return null;
-                    }
-                    if (!rpcEntity.getHasError()) {
-                        return rpcEntity;
-                    }
-                    try {
-                        String errorCode = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "error");
-                        if ("2000".equals(errorCode)) {
-                            if (!ApplicationHook.isOffline()) {
-                                ApplicationHook.setOffline(true);
-                                NotificationUtil.updateStatusText("登录超时");
-                                if (BaseModel.getTimeoutRestart().getValue()) {
-                                    Log.record("尝试重新登录");
-                                    ApplicationHook.reLoginByBroadcast();
-                                }
+          RpcIntervalLimit.enterIntervalLimit(method); // 进入请求限流
+          newRpcCallMethod.invoke(
+              newRpcInstance,
+              method,
+              false,
+              false,
+              "json",
+              parseObjectMethod.invoke(
+                  null,
+                  "{\"__apiCallStartTime\":"
+                      + System.currentTimeMillis()
+                      + ",\"apiCallLink\":\"XRiverNotFound\",\"execEngine\":\"XRiver\","
+                      + "\"operationType\":\""
+                      + method
+                      + "\",\"requestData\":"
+                      + data
+                      + (relation == null ? "" : ",\"relationLocal\":" + relation)
+                      + "}"),
+              "",
+              null,
+              true,
+              false,
+              0,
+              false,
+              "",
+              null,
+              null,
+              null,
+              Proxy.newProxyInstance(
+                  loader,
+                  bridgeCallbackClazzArray,
+                      (proxy, innerMethod, args) -> {
+                        if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
+                          try {
+                            Object obj = args[0];
+                            rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
+                            if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
+                              rpcEntity.setError();
+                              Log.error(
+                                  "新 RPC 响应 | id: "
+                                      + rpcEntity.hashCode()
+                                      + " | 方法: "
+                                      + rpcEntity.getRequestMethod()
+                                      + " 参数: "
+                                      + rpcEntity.getRequestData()
+                                      + " | 数据: "
+                                      + rpcEntity.getResponseString());
                             }
-                            return null;
-                        }
-                        return rpcEntity;
-                    } catch (Exception e) {
-                        Log.error("new rpc response | id: " + id + " | method: " + method + " get err:");
-                        Log.printStackTrace(e);
-                    }
-                    if (retryInterval < 0) {
-                        try {
-                            Thread.sleep(600 + RandomUtil.delay());
-                        } catch (InterruptedException e) {
+                          } catch (Exception e) {
+                            rpcEntity.setError();
+                            Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
                             Log.printStackTrace(e);
+                          }
                         }
-                    } else if (retryInterval > 0) {
-                        try {
-                            Thread.sleep(retryInterval);
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    }
-                } catch (Throwable t) {
-                    Log.error("new rpc request | id: " + id + " | method: " + method + " err:");
-                    Log.printStackTrace(t);
-                    if (retryInterval < 0) {
-                        try {
-                            Thread.sleep(600 + RandomUtil.delay());
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    } else if (retryInterval > 0) {
-                        try {
-                            Thread.sleep(retryInterval);
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    }
-                }
-            } while (count < tryCount);
-            return null;
-        } finally {
-            Log.runtime("New RPC\n方法: " + method + "\n参数: " + data + "\n数据: " + rpcEntity.getResponseString() + "\n");
-        }
-    }
-
-    public RpcEntity newAsyncRequest(RpcEntity rpcEntity, int tryCount, int retryInterval) {
-        if (ApplicationHook.isOffline()) {
-            return null;
-        }
-        int id = rpcEntity.hashCode();
-        String method = rpcEntity.getRequestMethod();
-        String args = rpcEntity.getRequestData();
-        try {
-            int count = 0;
-            do {
-                count++;
-                try {
-                    synchronized (rpcEntity) {
-                        newRpcCallMethod.invoke(
-                                newRpcInstance, method, false, false, "json", parseObjectMethod.invoke(null, "{\"__apiCallStartTime\":" + System.currentTimeMillis() + ",\"apiCallLink\":\"XRiverNotFound\",\"execEngine\":\"XRiver\",\"operationType\":\"" + method + "\",\"requestData\":" + args + "}"), "", null, true, false, 0, false, "", null, null, null, Proxy.newProxyInstance(loader, bridgeCallbackClazzArray, new InvocationHandler() {
-                                    @Override
-                                    public Object invoke(Object proxy, Method innerMethod, Object[] innerArgs) {
-                                        if (innerArgs.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
-                                            try {
-                                                synchronized (rpcEntity) {
-                                                    Object obj = innerArgs[0];
-                                                    String result = (String) XposedHelpers.callMethod(obj, "toJSONString");
-                                                    rpcEntity.setResponseObject(obj, result);
-                                                    if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
-                                                        rpcEntity.setError();
-                                                        Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " args: " + rpcEntity.getRequestData() + " | data: " + rpcEntity.getResponseString());
-                                                    }
-                                                    Thread thread = rpcEntity.getRequestThread();
-                                                    if (thread != null) {
-                                                        rpcEntity.notifyAll();
-                                                    }
-                                                }
-                                            } catch (Exception e) {
-                                                rpcEntity.setError();
-                                                Log.error("new rpc response | id: " + id + " | method: " + method + " err:");
-                                                Log.printStackTrace(e);
-                                                synchronized (rpcEntity) {
-                                                    Thread thread = rpcEntity.getRequestThread();
-                                                    if (thread != null) {
-                                                        rpcEntity.notifyAll();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        return null;
-                                    }
-                                })
-                        );
-                        rpcEntity.wait(30_000);
-                    }
-                    if (!rpcEntity.getHasResult()) {
                         return null;
-                    }
-                    if (!rpcEntity.getHasError()) {
-                        return rpcEntity;
-                    }
-                    try {
-                        String errorCode = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "error");
-                        if ("2000".equals(errorCode)) {
-                            if (!ApplicationHook.isOffline()) {
-                                ApplicationHook.setOffline(true);
-                                NotificationUtil.updateStatusText("登录超时");
-                                if (BaseModel.getTimeoutRestart().getValue()) {
-                                    Log.record("尝试重新登录");
-                                    ApplicationHook.reLoginByBroadcast();
-                                }
-                            }
-                            return null;
-                        }
-                        return rpcEntity;
-                    } catch (Exception e) {
-                        Log.error("new rpc response | id: " + id + " | method: " + method + " get err:");
-                        Log.printStackTrace(e);
-                    }
-                    if (retryInterval < 0) {
-                        try {
-                            Thread.sleep(600 + RandomUtil.delay());
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    } else if (retryInterval > 0) {
-                        try {
-                            Thread.sleep(retryInterval);
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    }
-                } catch (Throwable t) {
-                    Log.error("new rpc request | id: " + id + " | method: " + method + " err:");
-                    Log.printStackTrace(t);
-                    if (retryInterval < 0) {
-                        try {
-                            Thread.sleep(600 + RandomUtil.delay());
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    } else if (retryInterval > 0) {
-                        try {
-                            Thread.sleep(retryInterval);
-                        } catch (InterruptedException e) {
-                            Log.printStackTrace(e);
-                        }
-                    }
-                }
-            } while (count < tryCount);
+                      }));
+          // 检查响应是否存在
+          if (!rpcEntity.getHasResult()) {
             return null;
-        } finally {
-            Log.runtime("New RPC\n方法: " + method + "\n参数: " + args + "\n数据: " + rpcEntity.getResponseString() + "\n");
+          }
+          if (!rpcEntity.getHasError()) {
+            return rpcEntity; // 如果没有错误，返回 RPC 实体
+          }
+          try {
+            String errorCode = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "error");
+            // 处理登录超时
+            if ("2000".equals(errorCode)) {
+              if (!ApplicationHook.isOffline()) {
+                ApplicationHook.setOffline(true);
+                NotificationUtil.updateStatusText("登录超时");
+                if (BaseModel.getTimeoutRestart().getValue()) {
+                  Log.record("尝试重新登录");
+                  ApplicationHook.reLoginByBroadcast();
+                }
+              }
+              return null;
+            }
+            return rpcEntity; // 返回 RPC 实体
+          } catch (Exception e) {
+            Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 获取错误:");
+            Log.printStackTrace(e);
+          }
+          // 处理重试逻辑
+          if (retryInterval < 0) {
+            try {
+              Thread.sleep(600 + RandomUtil.delay()); // 随机延迟
+            } catch (InterruptedException e) {
+              Log.printStackTrace(e);
+            }
+          } else if (retryInterval > 0) {
+            try {
+              Thread.sleep(retryInterval); // 固定延迟
+            } catch (InterruptedException e) {
+              Log.printStackTrace(e);
+            }
+          }
+        } catch (Throwable t) {
+          Log.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
+          Log.printStackTrace(t);
+          // 处理重试逻辑
+          if (retryInterval < 0) {
+            try {
+              Thread.sleep(600 + RandomUtil.delay()); // 随机延迟
+            } catch (InterruptedException e) {
+              Log.printStackTrace(e);
+            }
+          } else if (retryInterval > 0) {
+            try {
+              Thread.sleep(retryInterval); // 固定延迟
+            } catch (InterruptedException e) {
+              Log.printStackTrace(e);
+            }
+          }
         }
+      } while (count < tryCount); // 根据尝试次数循环请求
+    } catch (Exception e) {
+      Log.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
+      Log.printStackTrace(e);
     }
-
+    return null; // 返回 null 表示请求失败
+  }
 }

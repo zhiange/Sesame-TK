@@ -172,60 +172,77 @@ public class AntDodo extends ModelTask {
         }
     }
 
+    /**
+     * 获得任务奖励
+     */
     private void receiveTaskAward() {
         try {
-            th:do {
-                String s = AntDodoRpcCall.taskList();
-                JSONObject jo = new JSONObject(s);
-                if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    JSONArray taskGroupInfoList = jo.getJSONObject("data").optJSONArray("taskGroupInfoList");
-                    if (taskGroupInfoList == null)
-                        return;
+            // 标签用于循环控制，确保在任务完成后可以继续处理
+            th: do {
+                String response = AntDodoRpcCall.taskList(); // 调用任务列表接口
+                JSONObject jsonResponse = new JSONObject(response); // 解析响应为 JSON 对象
+
+                // 检查响应结果码是否成功
+                if ("SUCCESS".equals(jsonResponse.getString("resultCode"))) {
+                    // 获取任务组信息列表
+                    JSONArray taskGroupInfoList = jsonResponse.getJSONObject("data").optJSONArray("taskGroupInfoList");
+                    if (taskGroupInfoList == null) return; // 如果任务组为空则返回
+
+                    // 遍历每个任务组
                     for (int i = 0; i < taskGroupInfoList.length(); i++) {
                         JSONObject antDodoTask = taskGroupInfoList.getJSONObject(i);
-                        JSONArray taskInfoList = antDodoTask.getJSONArray("taskInfoList");
+                        JSONArray taskInfoList = antDodoTask.getJSONArray("taskInfoList"); // 获取任务信息列表
+
+                        // 遍历每个任务
                         for (int j = 0; j < taskInfoList.length(); j++) {
                             JSONObject taskInfo = taskInfoList.getJSONObject(j);
-                            JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo");
-                            JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo"));
-                            String taskType = taskBaseInfo.getString("taskType");
-                            String taskTitle = bizInfo.optString("taskTitle", taskType);
-                            String awardCount = bizInfo.optString("awardCount", "1");
-                            String sceneCode = taskBaseInfo.getString("sceneCode");
-                            String taskStatus = taskBaseInfo.getString("taskStatus");
+                            JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo"); // 获取任务基本信息
+                            JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo")); // 获取业务信息
+                            String taskType = taskBaseInfo.getString("taskType"); // 获取任务类型
+                            String taskTitle = bizInfo.optString("taskTitle", taskType); // 获取任务标题
+                            String awardCount = bizInfo.optString("awardCount", "1"); // 获取奖励数量
+                            String sceneCode = taskBaseInfo.getString("sceneCode"); // 获取场景代码
+                            String taskStatus = taskBaseInfo.getString("taskStatus"); // 获取任务状态
+
+                            // 如果任务已完成，领取任务奖励
                             if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                                 JSONObject joAward = new JSONObject(
-                                        AntDodoRpcCall.receiveTaskAward(sceneCode, taskType));
-                                if (joAward.optBoolean("success"))
+                                        AntDodoRpcCall.receiveTaskAward(sceneCode, taskType)); // 领取奖励请求
+                                if (joAward.optBoolean("success")) {
                                     Log.forest("任务奖励🎖️[" + taskTitle + "]#" + awardCount + "个");
-                                else
-                                    Log.record("领取失败，" + s);
-                                Log.runtime(joAward.toString());
-                            } else if (TaskStatus.TODO.name().equals(taskStatus)) {
+                                } else {
+                                    Log.record("领取失败，" + response); // 记录领取失败信息
+                                }
+                                Log.runtime(joAward.toString()); // 打印奖励响应
+                            }
+                            // 如果任务待完成，处理特定类型的任务
+                            else if (TaskStatus.TODO.name().equals(taskStatus)) {
                                 if ("SEND_FRIEND_CARD".equals(taskType)) {
+                                    // 尝试完成任务
                                     JSONObject joFinishTask = new JSONObject(
-                                            AntDodoRpcCall.finishTask(sceneCode, taskType));
+                                            AntDodoRpcCall.finishTask(sceneCode, taskType)); // 完成任务请求
                                     if (joFinishTask.optBoolean("success")) {
                                         Log.forest("物种任务🧾️[" + taskTitle + "]");
-                                        continue th;
+                                        continue th; // 成功完成任务，返回外层循环
                                     } else {
-                                        Log.record("完成任务失败，" + taskTitle);
+                                        Log.record("完成任务失败，" + taskTitle); // 记录完成任务失败信息
                                     }
                                 }
                             }
                         }
                     }
                 } else {
-                    Log.record(jo.getString("resultDesc"));
-                    Log.runtime(s);
+                    Log.record(jsonResponse.getString("resultDesc")); // 记录失败描述
+                    Log.runtime(response); // 打印响应内容
                 }
-                break;
+                break; // 退出循环
             } while (true);
         } catch (Throwable t) {
-            Log.runtime(TAG, "AntDodo ReceiveTaskAward err:");
-            Log.printStackTrace(TAG, t);
+            Log.runtime(TAG, "AntDodo ReceiveTaskAward 错误:");
+            Log.printStackTrace(TAG, t); // 打印异常栈
         }
     }
+
 
     private void propList() {
         try {
@@ -240,7 +257,7 @@ public class AntDodo extends ModelTask {
                     for (int i = 0; i < propList.length(); i++) {
                         JSONObject prop = propList.getJSONObject(i);
                         String propType = prop.getString("propType");
-                        
+
                         boolean usePropType = useProp.getValue();
                         if ("COLLECT_TIMES_7_DAYS".equals(propType)) {
                             usePropType = usePropType || usePropCollectTimes7Days.getValue();

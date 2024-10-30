@@ -98,6 +98,9 @@ public class AntForestRpcCall {
         return ApplicationHook.requestString("alipay.antmember.forest.h5.forFriendCollectEnergy", args1);
     }
 
+    /**
+     * 森林签到
+     */
     public static String vitalitySign() {
         return ApplicationHook.requestString("alipay.antforest.forest.h5.vitalitySign",
                 "[{\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
@@ -137,6 +140,8 @@ public class AntForestRpcCall {
                 "[{\"ignoreLimit\":false,\"requestType\":\"H5\",\"sceneCode\":\"" + sceneCode +
                         "\",\"source\":\"ANTFOREST\",\"taskType\":\"" + taskType + "\"}]");
     }
+
+
 
     public static String finishTask(String sceneCode, String taskType) {
         String outBizNo = taskType + "_" + RandomUtil.nextDouble();
