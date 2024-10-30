@@ -22,6 +22,8 @@
                 android:layout_marginTop="15dp"
                 android:lineSpacingMultiplier="1.5"
                 android:gravity="center"
+                android:textSize="18sp"
+                android:text="@string/normal_text"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="#FF000000" />
 
@@ -29,13 +31,43 @@
                 android:id="@+id/btn_test"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_margin="50dp"
+                android:layout_margin="60dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/the_image_of_main"
                 android:gravity="center"
                 android:onClick="onClick"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/main" />
+        <TextView
+            android:id="@+id/one_word"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_marginBottom="25sp"
+            android:text="@string/bulid_target"
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+        <TextView
+            android:id="@+id/bulid_target"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_marginBottom="5sp"
+            android:text="@string/bulid_target"
+
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+        <TextView
+                android:id="@+id/bulid_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="22sp"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:text="@string/build_version_1_0_0"
+            android:textColor="#fd8728"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
 
         <LinearLayout
                 android:id="@+id/lyt_bottom1"

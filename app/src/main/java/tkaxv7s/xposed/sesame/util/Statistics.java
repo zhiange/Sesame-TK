@@ -10,13 +10,17 @@ import java.util.Calendar;
 public class Statistics {
 
     private static final String TAG = Statistics.class.getSimpleName();
-
     public static final Statistics INSTANCE = new Statistics();
 
     private TimeStatistics year = new TimeStatistics();
     private TimeStatistics month = new TimeStatistics();
     private TimeStatistics day = new TimeStatistics();
 
+    /**
+     * 增加指定数据类型的统计量
+     * @param dt 数据类型（收集、帮助、浇水）
+     * @param i 增加的数量
+     */
     public static void addData(DataType dt, int i) {
         Statistics stat = INSTANCE;
         switch (dt) {
@@ -38,6 +42,12 @@ public class Statistics {
         }
     }
 
+    /**
+     * 获取指定时间和数据类型的统计值
+     * @param tt 时间类型（年、月、日）
+     * @param dt 数据类型（时间、收集、帮助、浇水）
+     * @return 统计值
+     */
     public static int getData(TimeType tt, DataType dt) {
         Statistics stat = INSTANCE;
         int data = 0;
@@ -53,7 +63,7 @@ public class Statistics {
                 ts = stat.day;
                 break;
         }
-        if (ts != null)
+        if (ts != null) {
             switch (dt) {
                 case TIME:
                     data = ts.time;
@@ -68,22 +78,34 @@ public class Statistics {
                     data = ts.watered;
                     break;
             }
+        }
         return data;
     }
 
+    /**
+     * 获取统计文本信息
+     * @return 包含年、月、日统计信息的字符串
+     */
     public static String getText() {
-
-        StringBuilder table = new StringBuilder();
         // 添加表头
-        table.append("今年  收: ").append(getData(TimeType.YEAR, DataType.COLLECTED)).append(" 帮: ").append(getData(TimeType.YEAR, DataType.HELPED)).append(" 浇: ").append(getData(TimeType.YEAR, DataType.WATERED));
-        table.append("\n今月  收: ").append(getData(TimeType.MONTH, DataType.COLLECTED)).append(" 帮: ").append(getData(TimeType.MONTH, DataType.HELPED)).append(" 浇: ").append(getData(TimeType.MONTH, DataType.WATERED));
-        table.append("\n今日  收: ").append(getData(TimeType.DAY, DataType.COLLECTED)).append(" 帮: ").append(getData(TimeType.DAY, DataType.HELPED)).append(" 浇: ").append(getData(TimeType.DAY, DataType.WATERED));
-        return table.toString();
+        return "今年  收: " + getData(TimeType.YEAR, DataType.COLLECTED) +
+                " 帮: " + getData(TimeType.YEAR, DataType.HELPED) +
+                " 浇: " + getData(TimeType.YEAR, DataType.WATERED) +
+                "\n今月  收: " + getData(TimeType.MONTH, DataType.COLLECTED) +
+                " 帮: " + getData(TimeType.MONTH, DataType.HELPED) +
+                " 浇: " + getData(TimeType.MONTH, DataType.WATERED) +
+                "\n今日  收: " + getData(TimeType.DAY, DataType.COLLECTED) +
+                " 帮: " + getData(TimeType.DAY, DataType.HELPED) +
+                " 浇: " + getData(TimeType.DAY, DataType.WATERED);
     }
 
+    /**
+     * 加载统计数据
+     * @return 统计实例
+     */
     public static synchronized Statistics load() {
+        File statisticsFile = FileUtil.getStatisticsFile();
         try {
-            File statisticsFile = FileUtil.getStatisticsFile();
             if (statisticsFile.exists()) {
                 String json = FileUtil.readFromFile(statisticsFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
@@ -113,6 +135,9 @@ public class Statistics {
         return INSTANCE;
     }
 
+    /**
+     * 卸载当前统计数据
+     */
     public static synchronized void unload() {
         try {
             JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
@@ -121,10 +146,17 @@ public class Statistics {
         }
     }
 
+    /**
+     * 保存统计数据
+     */
     public static synchronized void save() {
         save(Calendar.getInstance());
     }
 
+    /**
+     * 保存统计数据并更新日期
+     * @param nowCalendar 当前日期
+     */
     public static synchronized void save(Calendar nowCalendar) {
         if (updateDay(nowCalendar)) {
             Log.system(TAG, "重置 statistics.json");
@@ -134,6 +166,11 @@ public class Statistics {
         FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), FileUtil.getStatisticsFile());
     }
 
+    /**
+     * 更新日期并重置统计数据
+     * @param nowCalendar 当前日期
+     * @return 如果日期已更改，返回 true；否则返回 false
+     */
     public static Boolean updateDay(Calendar nowCalendar) {
         int ye = nowCalendar.get(Calendar.YEAR);
         int mo = nowCalendar.get(Calendar.MONTH) + 1;
@@ -151,14 +188,6 @@ public class Statistics {
             return false;
         }
         return true;
-    }
-
-    public enum TimeType {
-        YEAR, MONTH, DAY
-    }
-
-    public enum DataType {
-        TIME, COLLECTED, HELPED, WATERED
     }
 
     @Data
@@ -181,4 +210,11 @@ public class Statistics {
         }
     }
 
+    public enum TimeType {
+        YEAR, MONTH, DAY
+    }
+
+    public enum DataType {
+        TIME, COLLECTED, HELPED, WATERED
+    }
 }

@@ -10,9 +10,14 @@
         <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="windowNoTitle">true</item>
+        <!-- 设置actionOverflowMenuStyle以自定义菜单的背景 -->
+        <item name="actionOverflowMenuStyle">@style/MenuTheme</item>
     </style>
+
 
     <style name="MenuTheme">
         <item name="android:textColorSecondary">@color/textColorPrimary</item>
+        <item name="android:popupBackground">@drawable/menu_background</item>
     </style>
+
 </resources>

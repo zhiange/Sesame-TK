@@ -25,7 +25,6 @@ import tkaxv7s.xposed.sesame.data.ViewAppInfo;
 import tkaxv7s.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
 import tkaxv7s.xposed.sesame.entity.FriendWatch;
 import tkaxv7s.xposed.sesame.entity.UserEntity;
-import tkaxv7s.xposed.sesame.model.normal.base.BaseModel;
 import tkaxv7s.xposed.sesame.util.*;
 
 public class MainActivity extends BaseActivity {
@@ -48,12 +47,17 @@ public class MainActivity extends BaseActivity {
 
   private UserEntity[] userEntityArray = {null};
 
-  @SuppressLint("UnspecifiedRegisterReceiverFlag")
+  @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     tvStatistics = findViewById(R.id.tv_statistics);
+    TextView buildVersion = findViewById(R.id.bulid_version);
+    TextView buildTarget = findViewById(R.id.bulid_target);
+    TextView oneWord = findViewById(R.id.one_word);
+    // 获取并设置一言句子
+
     ViewAppInfo.checkRunType();
     updateSubTitle(ViewAppInfo.getRunType());
     viewHandler = new Handler();
@@ -73,7 +77,6 @@ public class MainActivity extends BaseActivity {
                   viewHandler.removeCallbacks(titleRunner);
                   if (isClick) {
                     Toast toast = OtherDialog.makeText(context, "芝麻粒加载状态正常👌", Toast.LENGTH_SHORT);
-                    toast.setGravity(toast.getGravity(), toast.getXOffset(), BaseModel.getToastOffsetY().getValue());
                     toast.show();
                     isClick = false;
                   }
@@ -94,6 +97,24 @@ public class MainActivity extends BaseActivity {
     } else {
       registerReceiver(broadcastReceiver, intentFilter);
     }
+    Statistics.load();
+    tvStatistics.setText(Statistics.getText());
+    // 调用 OneWord 获取句子
+    OneWord.getOneWord(
+        new OneWord.OneWordCallback() {
+          @Override
+          public void onSuccess(String result) {
+            runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
+          }
+
+          @Override
+          public void onFailure(String error) {
+            runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
+          }
+        });
+
+    buildTarget.setText("Build Date: " + ViewAppInfo.getAppBuildTarget());
+    buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
   }
 
@@ -232,16 +253,27 @@ public class MainActivity extends BaseActivity {
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    int state = getPackageManager().getComponentEnabledSetting(new ComponentName(this, getClass().getCanonicalName() + "Alias"));
-    menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true).setChecked(state > PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
-    menu.add(0, 2, 2, R.string.view_error_log_file);
-    menu.add(0, 3, 3, R.string.export_error_log_file);
-    menu.add(0, 4, 4, R.string.view_all_log_file);
-    menu.add(0, 5, 5, R.string.export_runtime_log_file);
-    menu.add(0, 6, 6, R.string.export_the_statistic_file);
-    menu.add(0, 7, 7, R.string.import_the_statistic_file);
-    menu.add(0, 8, 8, R.string.view_debug);
-    menu.add(0, 9, 9, R.string.settings);
+    PackageManager packageManager = getPackageManager();
+    String aliasName = getClass().getCanonicalName() + "Alias";
+
+    try {
+      int componentEnabledSetting = packageManager.getComponentEnabledSetting(new ComponentName(this, aliasName));
+      MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
+      checkable.setChecked(componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+
+      menu.add(0, 2, 2, R.string.view_error_log_file);
+      menu.add(0, 3, 3, R.string.export_error_log_file);
+      menu.add(0, 4, 4, R.string.view_all_log_file);
+      menu.add(0, 5, 5, R.string.export_runtime_log_file);
+      menu.add(0, 6, 6, R.string.export_the_statistic_file);
+      menu.add(0, 7, 7, R.string.import_the_statistic_file);
+      menu.add(0, 8, 8, R.string.view_debug);
+      menu.add(0, 9, 9, R.string.settings);
+    } catch (Exception e) {
+      Log.printStackTrace(e);
+      Toast.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
+    }
+
     return super.onCreateOptionsMenu(menu);
   }
 
@@ -249,11 +281,13 @@ public class MainActivity extends BaseActivity {
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case 1:
-        int state = item.isChecked() ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        getPackageManager().setComponentEnabledSetting(new ComponentName(this, getClass().getCanonicalName() + "Alias"), state, PackageManager.DONT_KILL_APP);
-        item.setChecked(!item.isChecked());
+        boolean shouldHideIcon = !item.isChecked(); // 是否应隐藏图标
+        item.setChecked(shouldHideIcon);
+        PackageManager packageManager = getPackageManager();
+        String aliasName = getClass().getCanonicalName() + "Alias";
+        int newState = shouldHideIcon ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED : PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        packageManager.setComponentEnabledSetting(new ComponentName(this, aliasName), newState, PackageManager.DONT_KILL_APP);
         break;
-
       case 2:
         String errorData = "file://";
         errorData += FileUtil.getErrorLogFile().getAbsolutePath();
@@ -323,7 +357,8 @@ public class MainActivity extends BaseActivity {
 
     // 调用 StringDialog 中的 showSelectionDialog 方法
     StringDialog.showSelectionDialog(
-        this,"请选择配置",
+        this,
+        "请选择配置",
         userNameArray,
         (dialog, which) -> {
           selected.set(true);

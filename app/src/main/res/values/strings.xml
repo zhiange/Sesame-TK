@@ -181,6 +181,9 @@
     <string name="file_not_support_open_with_browser">The file is not supported to open with browser</string>
     <string name="not_support_open_with_browser">Not supported to open with browser</string>
     <string name="text_diary_toast">Test Toast String</string>
+    <string name="normal_text">Data loading…</string>
+    <string name="build_version_1_0_0">Build Version: </string>
+    <string name="bulid_target">Build Target: </string>
 
 
 </resources>
