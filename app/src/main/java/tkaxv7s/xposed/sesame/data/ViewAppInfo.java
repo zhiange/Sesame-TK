@@ -5,14 +5,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import lombok.Getter;
 import lombok.Setter;
+import tkaxv7s.xposed.sesame.BuildConfig;
 import tkaxv7s.xposed.sesame.R;
 import tkaxv7s.xposed.sesame.util.Log;
-import tkaxv7s.xposed.sesame.BuildConfig;
+
 public final class ViewAppInfo {
 
   @SuppressLint("StaticFieldLeak")
@@ -25,20 +25,22 @@ public final class ViewAppInfo {
 
   @Getter private static String appBuildTarget = "";
 
+  @Getter private static String appBuildNumber = "";
 
   @Setter @Getter private static RunType runType = RunType.DISABLE;
 
   public static void init(Context context) {
     if (ViewAppInfo.context == null) {
       ViewAppInfo.context = context;
-      appTitle = context.getString(R.string.app_name) + "-TK·alpha";
+      appBuildNumber = BuildConfig.BUILD_NUMBER;
+      appTitle = context.getString(R.string.app_name) + "-TK·alpha." + appBuildNumber;
+      appBuildTarget = "Build Date To: " + BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
       try {
-        PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-        appVersion = packageInfo.versionName;
+        appVersion = BuildConfig.BUILD_TAG + "." + BuildConfig.BUILD_NUMBER;
       } catch (Exception e) {
         Log.printStackTrace(e);
       }
-      appBuildTarget =BuildConfig.BUILD_DATE + " " +BuildConfig.BUILD_TIME;
+
     }
   }
 

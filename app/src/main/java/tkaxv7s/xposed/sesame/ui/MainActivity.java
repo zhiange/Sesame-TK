@@ -67,7 +67,7 @@ public class MainActivity extends BaseActivity {
           @Override
           public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.runtime("view broadcast action:" + action + " intent:" + intent);
+            Log.runtime(getString(R.string.look_broadcast_action) + action + " intent:" + intent);
             if (action != null) {
               switch (action) {
                 case "tkaxv7s.xposed.sesame.status":
@@ -113,8 +113,9 @@ public class MainActivity extends BaseActivity {
           }
         });
 
-    buildTarget.setText("Build Date: " + ViewAppInfo.getAppBuildTarget());
+
     buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());
+    buildTarget.setText(ViewAppInfo.getAppBuildTarget());
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
   }
 

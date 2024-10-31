@@ -8,24 +8,25 @@ apply plugin: 'com.android.application'
 android {
     def buildDate
     def buildTime
+    def buildTime2
     def buildNumber
     // alpha|beta|release|debug
     def buildTag = "alpha" // 指定构建标签
 
     try {
+        // 获取当前日期并格式化
+        def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+        buildDate = dateFormat.format(new Date())
         // 获取当前时间并格式化为编译时间字符串
-        def dateFormat = new SimpleDateFormat("HH:mm:ss")
-        buildTime = dateFormat.format(new Date())
-
+        def dateFormat2 = new SimpleDateFormat("HH:mm:ss")
+        buildTime = dateFormat2.format(new Date())
+        // 获取当前时间并格式化为编译时间字符串
+        def dateFormat3 = new SimpleDateFormat("HH.mm.ss")
+        buildTime2 = dateFormat3.format(new Date())
         // 使用 Java MessageDigest 计算 buildTime 的 MD5 值，并取前8位作为版本号
         MessageDigest md = MessageDigest.getInstance("MD5")
         md.update(buildTime.bytes)
         buildNumber = md.digest().encodeHex().toString().substring(0, 8)
-
-        // 获取当前日期并格式化
-        def dateFormat2 = new SimpleDateFormat("yyyy-MM-dd")
-        buildDate = dateFormat2.format(new Date())
-
     } catch (Exception e) {
         // 错误处理机制
         println("时间或日期格式化错误: ${e.message}")
@@ -34,7 +35,7 @@ android {
         buildNumber = "00000000"
     }
 
-    def version = "${buildTag}.${buildNumber}"
+    def version = "${buildTag}.${buildDate} ${buildTime2}"
 
     // 编译SDK版本
     compileSdk 34
@@ -50,6 +51,7 @@ android {
         // 使用 buildConfigField 添加自定义字段
         buildConfigField "String", "BUILD_DATE", "\"${buildDate}\"" // 创建常量
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\"" // 创建常量
+        buildConfigField "String", "BUILD_TIME2", "\"${buildTime2}\"" // 创建常量
         buildConfigField "String", "BUILD_NUMBER", "\"${buildNumber}\"" // 创建常量
         buildConfigField "String", "BUILD_TAG", "\"${buildTag}\"" // 创建常量
     }
@@ -77,7 +79,8 @@ android {
             // ProGuard配置文件
         }
     }
-    buildToolsVersion '30.0.2' // 构建工具版本
+    buildToolsVersion '30.0.2'
+    // 构建工具版本
     applicationVariants.configureEach { variant -> // 配置每个应用变体
         variant.outputs.configureEach { output -> // 配置每个输出
             def outputFile = output.outputFile
