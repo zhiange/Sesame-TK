@@ -16,6 +16,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import lombok.Getter;
 import tkaxv7s.xposed.sesame.BuildConfig;
+import tkaxv7s.xposed.sesame.R;
 import tkaxv7s.xposed.sesame.data.ConfigV2;
 import tkaxv7s.xposed.sesame.data.Model;
 import tkaxv7s.xposed.sesame.data.RunType;
@@ -834,20 +835,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         });
     }
 
-    /*public static Boolean reLogin() {
-        Object authService = getExtServiceByInterface("com.alipay.mobile.framework.service.ext.security.AuthService");
-        if ((Boolean) XposedHelpers.callMethod(authService, "rpcAuth")) {
-            return true;
-        }
-        Log.record("重新登录失败");
-        return false;
-    }*/
-
     private class AlipayBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.runtime("sesame broadcast action:" + action + " intent:" + intent);
+            Log.runtime("sesame"+context.getString(R.string.look_broadcast_action) + action + " intent:" + intent);
             if (action != null) {
                 switch (action) {
                     case "com.eg.android.AlipayGphone.sesame.restart":

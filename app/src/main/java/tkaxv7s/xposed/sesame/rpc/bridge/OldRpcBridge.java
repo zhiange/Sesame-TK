@@ -245,7 +245,14 @@ public class OldRpcBridge implements RpcBridge {
      */
     private void handleMmtpException(RpcEntity rpcEntity) {
         try {
-            String jsonString = "{\"resultCode\":\"FAIL\",\"memo\":\"MMTPException\",\"resultDesc\":\"MMTPException\"}";
+            String jsonString;
+
+            JSONObject jo = new JSONObject();
+            jo.put("resultCode", "FAIL");
+            jo.put("memo", "MMTPException");
+            jo.put("resultDesc", "MMTPException");
+            jsonString = jo.toString();
+
             rpcEntity.setResponseObject(new JSONObject(jsonString), jsonString); // 设置 MMTP 异常响应
         } catch (JSONException e) {
             Log.printStackTrace(e); // 打印异常信息

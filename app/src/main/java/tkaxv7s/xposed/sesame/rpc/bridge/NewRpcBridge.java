@@ -1,7 +1,6 @@
 package tkaxv7s.xposed.sesame.rpc.bridge;
 
 import de.robv.android.xposed.XposedHelpers;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -159,31 +158,33 @@ public class NewRpcBridge implements RpcBridge {
               Proxy.newProxyInstance(
                   loader,
                   bridgeCallbackClazzArray,
-                      (proxy, innerMethod, args) -> {
-                        if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
-                          try {
-                            Object obj = args[0];
-                            rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
-                            if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
-                              rpcEntity.setError();
-                              Log.error(
-                                  "新 RPC 响应 | id: "
-                                      + rpcEntity.hashCode()
-                                      + " | 方法: "
-                                      + rpcEntity.getRequestMethod()
-                                      + " 参数: "
-                                      + rpcEntity.getRequestData()
-                                      + " | 数据: "
-                                      + rpcEntity.getResponseString());
-                            }
-                          } catch (Exception e) {
-                            rpcEntity.setError();
-                            Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
-                            Log.printStackTrace(e);
-                          }
+                  (proxy, innerMethod, args) -> {
+                    if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
+                      try {
+                        Object obj = args[0];
+                        rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
+                        if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
+                          rpcEntity.setError();
+                          Log.error(
+                              "\n=======================================================>\n"
+                                  + "新 RPC 响应 | id: "
+                                  + rpcEntity.hashCode()
+                                  + " | 方法: "
+                                  + rpcEntity.getRequestMethod()
+                                  + " \n参数: "
+                                  + rpcEntity.getRequestData()
+                                  + " \n数据: "
+                                  + rpcEntity.getResponseString()
+                                  + "\n=======================================================<");
                         }
-                        return null;
-                      }));
+                      } catch (Exception e) {
+                        rpcEntity.setError();
+                        Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
+                        Log.printStackTrace(e);
+                      }
+                    }
+                    return null;
+                  }));
           // 检查响应是否存在
           if (!rpcEntity.getHasResult()) {
             return null;

@@ -770,48 +770,55 @@ public class AntStall extends ModelTask {
     private void donate() {
         try {
             // 调用远程接口获取项目列表信息
-            String s = AntStallRpcCall.projectList();
+            String response = AntStallRpcCall.projectList();
             // 将返回的 JSON 字符串转换为 JSONObject 对象
-            JSONObject jo = new JSONObject(s);
+            JSONObject jsonResponse = new JSONObject(response);
+
             // 检查返回结果是否成功
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if ("SUCCESS".equals(jsonResponse.optString("resultCode", ""))) {
                 // 获取 astUserInfoVO 对象
-                JSONObject astUserInfoVO = jo.getJSONObject("astUserInfoVO");
-                // 获取当前余额的金额
-                double currentCoinAmount = astUserInfoVO.getJSONObject("currentCoin").getDouble("amount");
-                // 检查当前余额是否大于15000
-                if (currentCoinAmount < 15000) {
-                    // 当 currentCoinAmount 小于 15000 时，直接返回，不执行后续操作
-                    return;
+                JSONObject userInfo = jsonResponse.optJSONObject("astUserInfoVO");
+                if (userInfo != null) {
+                    // 获取当前余额的金额
+                    double currentCoinAmount = Objects.requireNonNull(userInfo.optJSONObject("currentCoin")).optDouble("amount", 0.0);
+                    // 检查当前余额是否大于15000
+                    if (currentCoinAmount < 15000) {
+                        // 当 currentCoinAmount 小于 15000 时，直接返回，不执行后续操作
+                        return;
+                    }
                 }
+
                 // 获取项目列表中的 astProjectVOS 数组
-                JSONArray astProjectVOS = jo.getJSONArray("astProjectVOS");
+                JSONArray projects = jsonResponse.optJSONArray("astProjectVOS");
                 // 遍历项目列表
-                for (int i = 0; i < astProjectVOS.length(); i++) {
-                    // 获取每个项目的 JSONObject
-                    JSONObject project = astProjectVOS.getJSONObject(i);
-                    // 检查项目状态是否为 "ONLINE"
-                    if ("ONLINE".equals(project.getString("status"))) {
-                        // 获取项目的 projectId
-                        String projectId = project.getString("projectId");
-                        // 调用远程接口获取项目详情
-                        s = AntStallRpcCall.projectDetail(projectId);
-                        // 将返回的 JSON 字符串转换为 JSONObject 对象
-                        JSONObject joProjectDetail = new JSONObject(s);
-                        // 检查返回结果是否成功
-                        if ("SUCCESS".equals(joProjectDetail.getString("resultCode"))) {
-                            // 调用远程接口进行捐赠操作
-                            s = AntStallRpcCall.projectDonate(projectId);
+                if (projects != null) {
+                    for (int i = 0; i < projects.length(); i++) {
+                        // 获取每个项目的 JSONObject
+                        JSONObject project = projects.optJSONObject(i);
+                        if (project != null && "ONLINE".equals(project.optString("status", ""))) {
+                            // 获取项目的 projectId
+                            String projectId = project.optString("projectId", "");
+                            // 调用远程接口获取项目详情
+                            response = AntStallRpcCall.projectDetail(projectId);
                             // 将返回的 JSON 字符串转换为 JSONObject 对象
-                            JSONObject joProjectDonate = new JSONObject(s);
-                            // 获取捐赠操作返回的 astProjectVO 对象
-                            JSONObject astProjectVO = joProjectDonate.getJSONObject("astProjectVO");
-                            // 获取 astProjectVO 对象中的 title 字段值
-                            String title = astProjectVO.getString("title");
-                            // 检查捐赠操作返回结果是否成功
-                            if ("SUCCESS".equals(joProjectDonate.getString("resultCode"))) {
-                                Log.farm("蚂蚁新村⛪[捐赠:" + title + "]");
-                                Status.setStallDonateToday();
+                            JSONObject projectDetail = new JSONObject(response);
+                            // 检查返回结果是否成功
+                            if ("SUCCESS".equals(projectDetail.optString("resultCode", ""))) {
+                                // 调用远程接口进行捐赠操作
+                                response = AntStallRpcCall.projectDonate(projectId);
+                                // 将返回的 JSON 字符串转换为 JSONObject 对象
+                                JSONObject donateResponse = new JSONObject(response);
+                                // 获取捐赠操作返回的 astProjectVO 对象
+                                JSONObject astProjectVO = donateResponse.optJSONObject("astProjectVO");
+                                if (astProjectVO != null) {
+                                    // 获取 astProjectVO 对象中的 title 字段值
+                                    String title = astProjectVO.optString("title", "未知项目");
+                                    // 检查捐赠操作返回结果是否成功
+                                    if ("SUCCESS".equals(donateResponse.optString("resultCode", ""))) {
+                                        Log.farm("蚂蚁新村⛪[捐赠:" + title + "]");
+                                        Status.setStallDonateToday();
+                                    }
+                                }
                             }
                         }
                     }
@@ -822,6 +829,7 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
 
 
     // 进入下一村
