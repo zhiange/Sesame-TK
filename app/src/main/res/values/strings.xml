@@ -184,6 +184,7 @@
     <string name="normal_text">Data loading…</string>
     <string name="build_version_1_0_0">Build Version: </string>
     <string name="bulid_target">Build Target: </string>
+    <string name="look_broadcast_action">view broadcast action</string>
 
 
 </resources>

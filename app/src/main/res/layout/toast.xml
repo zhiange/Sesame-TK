@@ -5,7 +5,7 @@
     android:background="@drawable/shape_diary_toast"
     android:orientation="horizontal"
     android:layout_gravity="bottom"
-    android:layout_marginBottom="45sp"
+    android:layout_marginBottom="120sp"
     >
 
     <ImageView
