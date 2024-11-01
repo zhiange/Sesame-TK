@@ -550,19 +550,42 @@ public class AntForestV2 extends ModelTask {
   /** 青春特权森林道具领取 */
   private void youthPrivilege() {
     try {
-      // 定义映射列表，将代码项映射到对应的中文名称
-      Map<String, String> taskMap = new HashMap<>();
-      taskMap.put("DAXUESHENG_SJK", "双击卡");
-      taskMap.put("NENGLIANGZHAO_20230807", "保护罩");
-      taskMap.put("JIASUQI_20230808", "加速器");
+      // 定义任务列表，每个任务包含接口调用参数和标记信息
+      List<List<String>> taskList =
+          Arrays.asList(
+              Arrays.asList("DNHZ_SL_college", "DAXUESHENG_SJK", "双击卡"),
+              Arrays.asList("DXS_BHZ", "NENGLIANGZHAO_20230807", "保护罩"),
+              Arrays.asList("DXS_JSQ", "JIASUQI_20230808", "加速器"));
 
-      // 遍历任务列表，获取任务并记录结果
-      for (Map.Entry<String, String> entry : taskMap.entrySet()) {
-        String taskCode = entry.getKey();
-        String taskName = entry.getValue();
-
-        String result = AntForestRpcCall.receiveTaskAwardV2(taskCode);
-        Log.runtime(taskName + "领取结果：" + result);
+      // 遍历任务列表
+      for (List<String> task : taskList) {
+        String queryParam = task.get(0); // 用于 queryTaskListV2 方法的第一个参数
+        String receiveParam = task.get(1); // 用于 receiveTaskAwardV2 方法的第二个参数
+        String taskName = task.get(2); // 标记名称
+        // 调用 queryTaskListV2 方法并解析返回结果
+        String queryResult = AntForestRpcCall.queryTaskListV2(queryParam);
+        Log.runtime(taskName + "任务·查询状态：" + queryResult);
+        JSONObject getTaskStatusObject = new JSONObject(queryResult);
+        // 获取任务信息列表
+        JSONArray taskInfoList = getTaskStatusObject.getJSONArray("forestTasksNew").getJSONObject(0).getJSONArray("taskInfoList");
+        // 遍历任务信息列表
+        for (int i = 0; i < taskInfoList.length(); i++) {
+          JSONObject taskInfo = taskInfoList.getJSONObject(i);
+          JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo");
+          // 检查任务类型和状态
+          if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
+            String taskStatus = taskBaseInfo.getString("taskStatus");
+            if ("RECEIVED".equals(taskStatus)) {
+              Log.other(taskName + "任务·已完成" + taskName + "领取-无需再次进行");
+            } else if ("FINISHED".equals(taskStatus)) {
+              Log.other(taskName + "开始尝试" + taskName + "领取");
+              String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
+              JSONObject resultOfReceive = new JSONObject(receiveResult);
+              String resultDesc = resultOfReceive.getString("desc");
+              Log.other(taskName + "领取结果：" + resultDesc);
+            }
+          }
+        }
       }
     } catch (Exception e) {
       Log.runtime(TAG, "youthPrivilege err:");
