@@ -582,7 +582,7 @@ public class AntForestV2 extends ModelTask {
           if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
             String taskStatus = taskBaseInfo.getString("taskStatus");
             if ("RECEIVED".equals(taskStatus)) {
-              Log.forest("【青春特权】森林道具[" + taskName + "]已领取 ✅");
+              Log.other("【青春特权】森林道具[" + taskName + "]已领取 ✅");
             } else if ("FINISHED".equals(taskStatus)) {
               Log.forest("【青春特权】森林道具[" + taskName + "]开始领取...");
               String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
@@ -605,7 +605,11 @@ public class AntForestV2 extends ModelTask {
       String result = AntForestRpcCall.studentCheckin();
       JSONObject Result = new JSONObject(result);
       String resultDesc = Result.getString("resultDesc");
-      Log.forest("【青春特权-学生签到】：" + resultDesc);
+      if (resultDesc.contains("不匹配")) {
+        Log.other("【青春特权-学生签到】：" + resultDesc);
+      } else {
+        Log.forest("【青春特权-学生签到】：" + resultDesc);
+      }
     } catch (Exception e) {
       Log.runtime(TAG, "studentCheckin err:");
       Log.printStackTrace(TAG, e);
