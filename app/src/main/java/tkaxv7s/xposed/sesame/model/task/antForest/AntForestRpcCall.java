@@ -156,6 +156,7 @@ public class AntForestRpcCall {
     return ApplicationHook.requestString("alipay.antforest.forest.h5.queryTaskList", new JSONArray().put(jo).toString());
   }
 
+  /*青春特权道具任务状态查询🔍*/
   public static String queryTaskListV2(String firstTaskType) throws JSONException {
     JSONObject jo = new JSONObject();
     JSONObject extend = new JSONObject();
@@ -184,6 +185,7 @@ public class AntForestRpcCall {
 
   /**
    * 领取青春特权道具
+   *
    * @param taskType DAXUESHENG_SJK,NENGLIANGZHAO_20230807,JIASUQI_20230808
    * @return 领取结果
    * @throws JSONException JSON 解析异常
@@ -463,13 +465,12 @@ public class AntForestRpcCall {
         "[{\"activityCode\":\"medical_health_feeds_query\",\"activityId\":\"2023072600001207\",\"body\":{\"apiVersion\":\"3.1.0\",\"bizId\":\"B213\",\"businessCode\":\"JKhealth\",\"businessId\":\"O2023071900061804\",\"cityCode\":\"330100\",\"cityName\":\"杭州\",\"exclContentIds\":[],\"filterItems\":[],\"latitude\":\"\",\"longitude\":\"\",\"moduleParam\":{\"COMMON_FEEDS_BLOCK_2024041200243259\":{}},\"pageCode\":\"YM2024041200137150\",\"pageNo\":1,\"pageSize\":10,\"pid\":\"BC_PD_20230713000008526\",\"queryQuizActivityFeed\":1,\"scenceCode\":\"HEALTH_CHANNEL\",\"schemeParams\":{},\"scope\":\"PARTIAL\",\"selectedTabCode\":\"\",\"sourceType\":\"miniApp\",\"specialItemId\":\"\",\"specialItemType\":\"\",\"tenantCode\":\"2021003141652419\",\"underTakeContentId\":\"\"},\"version\":\"2.0\"}]");
   }
 
-  /*
-   * public static String medical_health_feeds_query() {
-   * return ApplicationHook.requestString("alipay.iblib.channel.build.query",
-   * "[{\"activityCode\":\"medical_health_feeds_query\",\"activityId\":\"2023072600001207\",\"body\":{\"apiVersion\":\"3.1.0\",\"bizId\":\"B213\",\"businessCode\":\"JKhealth\",\"businessId\":\"O2023071900061804\",\"cityCode\":\"330100\",\"cityName\":\"杭州\",\"exclContentIds\":[\"20240611OB020010036515121805\",\"20240618OB020010036519694606\",\"20240531OB020010039908594289\",\"20240618OB020010031219943466\",\"20240130OB020010034821821452\",\"20240531OB020010039908610960\",\"20240520OB020010035100844933\",\"20230926OB020010033829802408\",\"20240612OB020010039916083635\",\"20240510OB020010031294655966\",\"20240520OB020010030300850750\",\"20230928OB020010030332233578\",\"20220519OB020010035308350001\",\"20240104OB020010032288343993\",\"20220517OB020010038708340106\",\"20240606OB020010039912316758\",\"20240529OB020010033806968404\",\"20240614OB020010039917386188\",\"20230830OB020010039920939091\",\"20231124OB020010036561478030\"],\"filterItems\":[],\"latitude\":\"\",\"longitude\":\"\",\"moduleParam\":{\"COMMON_FEEDS_BLOCK_2024041200243259\":{}},\"pageCode\":\"YM2024041200137150\",\"pageNo\":1,\"pageSize\":10,\"pid\":\"BC_PD_20230713000008526\",\"queryQuizActivityFeed\":1,\"scenceCode\":\"HEALTH_CHANNEL\",\"schemeParams\":{},\"scope\":\"PARTIAL\",\"selectedTabCode\":\"MD2024042300000013\",\"sourceType\":\"miniApp\",\"specialItemId\":\"\",\"specialItemType\":\"\",\"tenantCode\":\"2021003141652419\",\"underTakeContentId\":\"\"},\"version\":\"2.0\"}]"
-   * );
-   * }
-   */
+  /*青春特权领红包*/
+  public static String studentCheckin() throws JSONException {
+    JSONObject jo = new JSONObject();
+    jo.put("source", "chInfo_ch_appcenter__chsub_9patch");
+    return ApplicationHook.requestString("alipay.membertangram.biz.rpc.student.checkIn", new JSONArray().put(jo).toString());
+  }
 
   public static String query_forest_energy() {
     return ApplicationHook.requestString(

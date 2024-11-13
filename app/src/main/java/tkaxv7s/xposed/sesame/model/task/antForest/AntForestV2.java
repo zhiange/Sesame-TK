@@ -556,7 +556,6 @@ public class AntForestV2 extends ModelTask {
               Arrays.asList("DNHZ_SL_college", "DAXUESHENG_SJK", "双击卡"),
               Arrays.asList("DXS_BHZ", "NENGLIANGZHAO_20230807", "保护罩"),
               Arrays.asList("DXS_JSQ", "JIASUQI_20230808", "加速器"));
-
       // 遍历任务列表
       for (List<String> task : taskList) {
         String queryParam = task.get(0); // 用于 queryTaskListV2 方法的第一个参数
@@ -564,7 +563,7 @@ public class AntForestV2 extends ModelTask {
         String taskName = task.get(2); // 标记名称
         // 调用 queryTaskListV2 方法并解析返回结果
         String queryResult = AntForestRpcCall.queryTaskListV2(queryParam);
-        Log.runtime(taskName + "任务·查询状态：" + queryResult);
+        Log.runtime("【青春特权】森林道具：" + taskName + "查询结果：" + queryResult);
         JSONObject getTaskStatusObject = new JSONObject(queryResult);
         // 获取任务信息列表
         JSONArray taskInfoList = getTaskStatusObject.getJSONArray("forestTasksNew").getJSONObject(0).getJSONArray("taskInfoList");
@@ -576,19 +575,46 @@ public class AntForestV2 extends ModelTask {
           if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
             String taskStatus = taskBaseInfo.getString("taskStatus");
             if ("RECEIVED".equals(taskStatus)) {
-              Log.other(taskName + "任务·已完成" + taskName + "领取-无需再次进行");
+              Log.forest("【青春特权】 森林道具 [" + taskName + "] 已领取 ✅");
             } else if ("FINISHED".equals(taskStatus)) {
-              Log.other(taskName + "开始尝试" + taskName + "领取");
+              Log.forest("【青春特权】 森林道具 [" + taskName + "] 开始领取...");
               String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
               JSONObject resultOfReceive = new JSONObject(receiveResult);
               String resultDesc = resultOfReceive.getString("desc");
-              Log.other(taskName + "领取结果：" + resultDesc);
+              Log.forest("【青春特权】 森林道具 [" + taskName + "]  领取结果：" + resultDesc);
             }
           }
         }
       }
     } catch (Exception e) {
       Log.runtime(TAG, "youthPrivilege err:");
+      Log.printStackTrace(TAG, e);
+    }
+  }
+
+  /*青春特权-学生签到得红包*/
+  private void studentCheckin() {
+    try {
+      String result = AntForestRpcCall.studentCheckin();
+      JSONObject Result = new JSONObject(result);
+
+      // 获取 resultDesc 字段
+      String resultDesc = Result.getString("resultDesc");
+      Log.runtime("【青春特权-学生签到】：" + resultDesc);
+      // 获取 basicAmountVO 对象并解析其中的 amount 和 doubled 字段
+      JSONObject basicAmountVO = Result.getJSONObject("basicAmountVO");
+      String amount = basicAmountVO.getString("amount");
+      boolean doubled = basicAmountVO.getBoolean("doubled");
+      Log.runtime("签到基础能量：" + amount + ", 是否翻倍：" + doubled);
+
+      // 获取 studentCheckInAmountInfo 对象并解析其中的 todayAmount 和 totalAmount 字段
+      JSONObject studentCheckInAmountInfo = Result.getJSONObject("studentCheckInAmountInfo");
+      String todayAmount = studentCheckInAmountInfo.getString("todayAmount");
+      String totalAmount = studentCheckInAmountInfo.getString("totalAmount");
+      Log.runtime("今日签到能量：" + todayAmount + ", 总签到能量：" + totalAmount);
+
+    } catch (Exception e) {
+      Log.runtime(TAG, "studentCheckin err:");
       Log.printStackTrace(TAG, e);
     }
   }

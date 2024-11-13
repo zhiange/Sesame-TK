@@ -268,7 +268,6 @@ public class AntFarmRpcCall {
                 }
                 buffer.append(str);
             }
-
             // 标准的md5加密后的结果
             return buffer.toString();
         } catch (NoSuchAlgorithmException e) {
@@ -278,7 +277,6 @@ public class AntFarmRpcCall {
     }
 
     /* 小鸡厨房 */
-
     public static String enterKitchen(String userId) {
         return ApplicationHook.requestString("com.alipay.antfarm.enterKitchen",
                 "[{\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"userId\":\""
