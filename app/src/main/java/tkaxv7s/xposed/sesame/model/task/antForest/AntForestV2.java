@@ -128,6 +128,7 @@ public class AntForestV2 extends ModelTask {
   private TextModelField photoGuangPanBefore;
   private TextModelField photoGuangPanAfter;
   private BooleanModelField youthPrivilege;
+  private BooleanModelField studentCheckIn;
 
   private int totalCollected = 0;
   private int totalHelpCollected = 0;
@@ -205,6 +206,7 @@ public class AntForestV2 extends ModelTask {
               photoGuangPanAfter.reset();
             }));
     modelFields.addField(youthPrivilege = new BooleanModelField("youthPrivilege", "青春特权森林道具领取", false));
+    modelFields.addField(studentCheckIn = new BooleanModelField("studentCheckIn", "青春特权每日签到红包", false));
 
     return modelFields;
   }
@@ -515,8 +517,13 @@ public class AntForestV2 extends ModelTask {
         if (medicalHealthFeeds.getValue()) {
           medicalHealthFeeds();
         }
+        // 青春特权森林道具领取
         if (youthPrivilege.getValue()) {
           youthPrivilege();
+        }
+        // 青春特权每日签到红包
+        if (collectGiftBox.getValue()) {
+          studentCheckin();
         }
       }
     } catch (Throwable t) {
@@ -575,13 +582,13 @@ public class AntForestV2 extends ModelTask {
           if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
             String taskStatus = taskBaseInfo.getString("taskStatus");
             if ("RECEIVED".equals(taskStatus)) {
-              Log.forest("【青春特权】 森林道具 [" + taskName + "] 已领取 ✅");
+              Log.forest("【青春特权】森林道具[" + taskName + "]已领取 ✅");
             } else if ("FINISHED".equals(taskStatus)) {
-              Log.forest("【青春特权】 森林道具 [" + taskName + "] 开始领取...");
+              Log.forest("【青春特权】森林道具[" + taskName + "]开始领取...");
               String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
               JSONObject resultOfReceive = new JSONObject(receiveResult);
               String resultDesc = resultOfReceive.getString("desc");
-              Log.forest("【青春特权】 森林道具 [" + taskName + "]  领取结果：" + resultDesc);
+              Log.forest("【青春特权】森林道具[" + taskName + "]领取结果：" + resultDesc);
             }
           }
         }
@@ -597,22 +604,8 @@ public class AntForestV2 extends ModelTask {
     try {
       String result = AntForestRpcCall.studentCheckin();
       JSONObject Result = new JSONObject(result);
-
-      // 获取 resultDesc 字段
       String resultDesc = Result.getString("resultDesc");
-      Log.runtime("【青春特权-学生签到】：" + resultDesc);
-      // 获取 basicAmountVO 对象并解析其中的 amount 和 doubled 字段
-      JSONObject basicAmountVO = Result.getJSONObject("basicAmountVO");
-      String amount = basicAmountVO.getString("amount");
-      boolean doubled = basicAmountVO.getBoolean("doubled");
-      Log.runtime("签到基础能量：" + amount + ", 是否翻倍：" + doubled);
-
-      // 获取 studentCheckInAmountInfo 对象并解析其中的 todayAmount 和 totalAmount 字段
-      JSONObject studentCheckInAmountInfo = Result.getJSONObject("studentCheckInAmountInfo");
-      String todayAmount = studentCheckInAmountInfo.getString("todayAmount");
-      String totalAmount = studentCheckInAmountInfo.getString("totalAmount");
-      Log.runtime("今日签到能量：" + todayAmount + ", 总签到能量：" + totalAmount);
-
+      Log.forest("【青春特权-学生签到】：" + resultDesc);
     } catch (Exception e) {
       Log.runtime(TAG, "studentCheckin err:");
       Log.printStackTrace(TAG, e);
