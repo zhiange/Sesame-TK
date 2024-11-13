@@ -128,6 +128,7 @@ public class AntForestV2 extends ModelTask {
   private TextModelField photoGuangPanBefore;
   private TextModelField photoGuangPanAfter;
   private BooleanModelField youthPrivilege;
+  private BooleanModelField studentCheckIn;
 
   private int totalCollected = 0;
   private int totalHelpCollected = 0;
@@ -205,6 +206,7 @@ public class AntForestV2 extends ModelTask {
               photoGuangPanAfter.reset();
             }));
     modelFields.addField(youthPrivilege = new BooleanModelField("youthPrivilege", "青春特权森林道具领取", false));
+    modelFields.addField(studentCheckIn = new BooleanModelField("studentCheckIn", "青春特权每日签到红包", false));
 
     return modelFields;
   }
@@ -515,8 +517,13 @@ public class AntForestV2 extends ModelTask {
         if (medicalHealthFeeds.getValue()) {
           medicalHealthFeeds();
         }
+        // 青春特权森林道具领取
         if (youthPrivilege.getValue()) {
           youthPrivilege();
+        }
+        // 青春特权每日签到红包
+        if (collectGiftBox.getValue()) {
+          studentCheckin();
         }
       }
     } catch (Throwable t) {
