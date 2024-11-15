@@ -359,7 +359,7 @@ public class AntForestV2 extends ModelTask {
                     Log.runtime(str);
                   }
                 }
-                Thread.sleep(1000L);
+                TimeUtil.sleep(1000L);
               }
               if (wateringBubbles.length() >= 20) {
                 hasMore = true;
@@ -381,7 +381,7 @@ public class AntForestV2 extends ModelTask {
                   Log.record("领取道具失败:" + jo.getString("resultDesc"));
                   Log.runtime(jo.toString());
                 }
-                Thread.sleep(1000L);
+                TimeUtil.sleep(1000L);
               }
               if (givenProps.length() >= 20) {
                 hasMore = true;
@@ -413,7 +413,7 @@ public class AntForestV2 extends ModelTask {
                 Log.runtime(jo.toString());
               }
               try {
-                Thread.sleep(500);
+                TimeUtil.sleep(500);
               } catch (Exception e) {
                 Log.printStackTrace(e);
               }
@@ -599,20 +599,32 @@ public class AntForestV2 extends ModelTask {
     }
   }
 
-  /*青春特权-学生签到得红包*/
+  /*青春特权每日签到红包*/
   private void studentCheckin() {
-    try {
-      String result = AntForestRpcCall.studentCheckin();
-      JSONObject Result = new JSONObject(result);
-      String resultDesc = Result.getString("resultDesc");
-      if (resultDesc.contains("不匹配")) {
-        Log.other("【青春特权-学生签到】：" + resultDesc);
-      } else {
-        Log.forest("【青春特权-学生签到】：" + resultDesc);
+    // 获取当前时间的小时和分钟
+    Calendar calendar = Calendar.getInstance();
+    int hour = calendar.get(Calendar.HOUR_OF_DAY); // 获取小时（24小时制）
+    int minute = calendar.get(Calendar.MINUTE);   // 获取分钟
+
+    // 检查时间是否在5点到10点之间
+    if ((hour > 5 || hour == 5) && hour < 10) {
+      try {
+        String result = AntForestRpcCall.studentCheckin();
+        JSONObject Result = new JSONObject(result);
+        String resultDesc = Result.getString("resultDesc");
+
+        if (resultDesc.contains("不匹配")) {
+          Log.other("【青春特权-学生签到】：" + resultDesc);
+        } else {
+          Log.forest("【青春特权-学生签到】：" + resultDesc);
+        }
+      } catch (Exception e) {
+        Log.runtime(TAG, "studentCheckin err:");
+        Log.printStackTrace(TAG, e);
       }
-    } catch (Exception e) {
-      Log.runtime(TAG, "studentCheckin err:");
-      Log.printStackTrace(TAG, e);
+    } else {
+      // 当前时间不在规定范围内，不进行签到
+      Log.other("【青春特权-学生签到】：" + "当前时间不在签到时间范围内");
     }
   }
 
@@ -1462,7 +1474,7 @@ public class AntForestV2 extends ModelTask {
       while (Status.canExchangeDoubleCardToday() && exchangePropShop(jo, Status.INSTANCE.getExchangeTimes() + 1)) {
         Status.exchangeDoubleCardToday(true);
         TimeUtil.sleep(1000);
-        //        Thread.sleep(1000);
+        //        TimeUtil.sleep(1000);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "exchangeEnergyDoubleClick err:");
@@ -1507,7 +1519,7 @@ public class AntForestV2 extends ModelTask {
                 int totalVitalityAmount = jo.getJSONObject("userVitalityInfoVO").getInt("totalVitalityAmount");
                 if (totalVitalityAmount > price) {
                   jo = new JSONObject(AntForestRpcCall.exchangeBenefit(spuId, skuId));
-                  Thread.sleep(1000);
+                  TimeUtil.sleep(1000);
                   if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     Status.exchangeDoubleCardTodayLongTime(true);
                     exchangedTimes = Status.INSTANCE.getExchangeTimesLongTime();
@@ -1709,7 +1721,7 @@ public class AntForestV2 extends ModelTask {
         for (int i = 0; i < bubbleEnergyList.length(); i++) {
           sum += bubbleEnergyList.getInt(i);
         }
-        Thread.sleep(5000L);
+        TimeUtil.sleep(5000L);
         if ("SUCCESS".equals(new JSONObject(AntForestRpcCall.energyRainSettlement(sum, token)).getString("resultCode"))) {
           Toast.show("获得了[" + sum + "g]能量[能量雨]");
           Log.forest("收能量雨🌧️[" + sum + "g]");
@@ -2031,7 +2043,7 @@ public class AntForestV2 extends ModelTask {
             Log.record(jo.getString("resultDesc"));
             Log.runtime(jo.toString());
           }
-          Thread.sleep(500);
+          TimeUtil.sleep(500);
         }
       }
     } catch (Throwable th) {
