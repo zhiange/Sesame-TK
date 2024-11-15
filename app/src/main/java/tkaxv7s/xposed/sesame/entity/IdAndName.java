@@ -14,10 +14,10 @@ import java.util.List;
 public abstract class IdAndName implements Comparable<IdAndName> {
 
     @Getter
-    private String name; // 实体名称
+    String name; // 实体名称
 
     @Getter
-    private String id; // 实体 ID
+    String id; // 实体 ID
 
     // 拼音缓存，用于提升多次比较时的性能
     private ArrayList<String> pinyin;
