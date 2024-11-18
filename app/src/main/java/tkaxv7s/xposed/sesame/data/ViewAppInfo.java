@@ -49,7 +49,7 @@ public final class ViewAppInfo {
       // 设置构建编号
       appBuildNumber = BuildConfig.BUILD_NUMBER;
       // 设置应用名称
-      appTitle = context.getString(R.string.app_name) + "-TK·alpha." + appBuildNumber;
+      appTitle = context.getString(R.string.app_name) + "-TK·alpha";
       // 设置构建目标信息
       appBuildTarget = "Build Date To: " + BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
       // 设置版本号

@@ -1,5 +1,7 @@
 package tkaxv7s.xposed.sesame.util;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Environment;
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -17,7 +19,7 @@ public class FileUtil {
   public static final File LOG_DIRECTORY_FILE = getLogDirectoryFile();
   private static File cityCodeFile;
   private static File wuaFile;
-
+  private  Context context;
 
 
   private static File getMainDirectoryFile() {
@@ -404,7 +406,8 @@ public class FileUtil {
     }
     // 检查文件是否可读
     if (!f.canRead()) {
-      Toast.show(f.getName() + "没有读取权限！", true);
+//      Toast.show(f.getName() + "没有读取权限！", true);
+      ToastUtil.showToast(f.getName()+"没有读取权限！");
       return "";
     }
     StringBuilder result = new StringBuilder();
@@ -439,7 +442,8 @@ public class FileUtil {
     // 文件已存在，检查是否有写入权限
     if (f.exists()) {
       if (!f.canWrite()) {
-        Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
+//        Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
+        ToastUtil.showToast(f.getAbsoluteFile()+"没有写入权限！");
         return false;
       }
       // 如果是目录，则删除并重新创建文件
@@ -479,7 +483,8 @@ public class FileUtil {
   public static boolean append2File(String s, File f) {
     // 文件已存在，检查是否有写入权限
     if (f.exists() && !f.canWrite()) {
-      Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
+//      Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
+      ToastUtil.showToast(f.getAbsoluteFile()+"没有写入权限！");
       return false;
     }
     boolean success = false;

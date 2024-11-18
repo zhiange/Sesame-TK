@@ -19,6 +19,7 @@ import tkaxv7s.xposed.sesame.R;
 import tkaxv7s.xposed.sesame.util.FileUtil;
 import tkaxv7s.xposed.sesame.util.LanguageUtil;
 import tkaxv7s.xposed.sesame.util.Log;
+import tkaxv7s.xposed.sesame.util.ToastUtil;
 
 public class HtmlViewerActivity extends BaseActivity {
   private static final String TAG = HtmlViewerActivity.class.getSimpleName();
@@ -155,7 +156,7 @@ public class HtmlViewerActivity extends BaseActivity {
           File exportFile = FileUtil.exportFile(new File(path));
           if (exportFile != null && exportFile.exists()) {
             //            OtherDialog.showToast(this, "文件已导出到: " + exportFile.getPath(), Toast.LENGTH_SHORT).show();
-            OtherDialog.showToast(this, getString(R.string.file_exported) + exportFile.getPath());
+            ToastUtil.showToast(this, getString(R.string.file_exported) + exportFile.getPath());
           } else {
             Log.runtime(TAG, "导出失败，exportFile 对象为 null 或不存在！");
           }
@@ -178,7 +179,7 @@ public class HtmlViewerActivity extends BaseActivity {
         if (path != null) {
           File file = new File(path);
           if (FileUtil.clearFile(file)) {
-            OtherDialog.makeText(this, "文件已清空", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, "文件已清空", Toast.LENGTH_SHORT).show();
             mWebView.reload();
           }
         }
@@ -196,9 +197,9 @@ public class HtmlViewerActivity extends BaseActivity {
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(intent);
       } else if ("file".equalsIgnoreCase(scheme)) {
-        OtherDialog.makeText(this, "该文件不支持用浏览器打开", Toast.LENGTH_SHORT).show();
+        ToastUtil.makeText(this, "该文件不支持用浏览器打开", Toast.LENGTH_SHORT).show();
       } else {
-        OtherDialog.makeText(this, "不支持用浏览器打开", Toast.LENGTH_SHORT).show();
+        ToastUtil.makeText(this, "不支持用浏览器打开", Toast.LENGTH_SHORT).show();
       }
     }
   }
@@ -208,7 +209,7 @@ public class HtmlViewerActivity extends BaseActivity {
     ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
     if (clipboardManager != null) {
       clipboardManager.setPrimaryClip(ClipData.newPlainText(null, mWebView.getUrl()));
-      OtherDialog.makeText(this, getString(R.string.copy_success), Toast.LENGTH_SHORT).show();
+      ToastUtil.makeText(this, getString(R.string.copy_success), Toast.LENGTH_SHORT).show();
     }
   }
 }

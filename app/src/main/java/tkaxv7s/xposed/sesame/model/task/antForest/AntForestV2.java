@@ -359,7 +359,7 @@ public class AntForestV2 extends ModelTask {
                     Log.runtime(str);
                   }
                 }
-                TimeUtil.sleep(1000L);
+                Thread.sleep(1000L);
               }
               if (wateringBubbles.length() >= 20) {
                 hasMore = true;
@@ -381,7 +381,7 @@ public class AntForestV2 extends ModelTask {
                   Log.record("领取道具失败:" + jo.getString("resultDesc"));
                   Log.runtime(jo.toString());
                 }
-                TimeUtil.sleep(1000L);
+                Thread.sleep(1000L);
               }
               if (givenProps.length() >= 20) {
                 hasMore = true;
@@ -413,7 +413,7 @@ public class AntForestV2 extends ModelTask {
                 Log.runtime(jo.toString());
               }
               try {
-                TimeUtil.sleep(500);
+                Thread.sleep(500);
               } catch (Exception e) {
                 Log.printStackTrace(e);
               }
@@ -458,7 +458,7 @@ public class AntForestV2 extends ModelTask {
           if (Status.canWaterFriendToday(uid, waterCount)) {
             try {
               String s = AntForestRpcCall.queryFriendHomePage(uid);
-              TimeUtil.sleep(100);
+              Thread.sleep(100);
               JSONObject jo = new JSONObject(s);
               if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 String bizNo = jo.getString("bizNo");
@@ -522,7 +522,7 @@ public class AntForestV2 extends ModelTask {
           youthPrivilege();
         }
         // 青春特权每日签到红包
-        if (collectGiftBox.getValue()) {
+        if (studentCheckIn.getValue()) {
           studentCheckin();
         }
       }
@@ -599,34 +599,78 @@ public class AntForestV2 extends ModelTask {
     }
   }
 
-  /*青春特权每日签到红包*/
+  /* 青春特权每日签到红包 */
   private void studentCheckin() {
-    // 获取当前时间的小时和分钟
-    Calendar calendar = Calendar.getInstance();
-    int hour = calendar.get(Calendar.HOUR_OF_DAY); // 获取小时（24小时制）
-    int minute = calendar.get(Calendar.MINUTE);   // 获取分钟
+    try {
+      // 获取当前时间
+      Calendar calendar = Calendar.getInstance();
+      int hour = calendar.get(Calendar.HOUR_OF_DAY); // 小时（24小时制）
 
-    // 检查时间是否在5点到10点之间
-    if ((hour > 5 || hour == 5) && hour < 10) {
-      try {
-        String result = AntForestRpcCall.studentCheckin();
-        JSONObject Result = new JSONObject(result);
-        String resultDesc = Result.getString("resultDesc");
+      // 定义签到时间范围
+      final int START_HOUR = 5;
+      final int END_HOUR = 10;
 
-        if (resultDesc.contains("不匹配")) {
-          Log.other("【青春特权-学生签到】：" + resultDesc);
-        } else {
-          Log.forest("【青春特权-学生签到】：" + resultDesc);
-        }
-      } catch (Exception e) {
-        Log.runtime(TAG, "studentCheckin err:");
-        Log.printStackTrace(TAG, e);
+      if (hour >= START_HOUR && hour < END_HOUR) {
+        // 当前时间在双倍积分时间内
+        studentPerformCheckin("双倍积分时间内");
+      } else {
+        // 当前时间不在双倍积分时间范围内
+        studentHandleOutOfTimeCheckin();
       }
-    } else {
-      // 当前时间不在规定范围内，不进行签到
-      Log.other("【青春特权-学生签到】：" + "当前时间不在签到时间范围内");
+    } catch (Exception e) {
+      Log.runtime(TAG, "studentCheckin err:");
+      Log.printStackTrace(TAG, e);
     }
   }
+
+  /**
+   * 执行签到逻辑
+   *
+   * @param context 上下文说明（例如时间段）
+   */
+  private void studentPerformCheckin(String context) {
+    try {
+      String result = AntForestRpcCall.studentCheckin();
+      JSONObject resultJson = new JSONObject(result);
+      String resultDesc = resultJson.getString("resultDesc");
+
+      if (resultDesc.contains("不匹配")) {
+        Log.other("【青春特权-学生签到】" + context + "：" + resultDesc);
+      } else {
+        Log.forest("【青春特权-学生签到】" + context + "：" + resultDesc);
+      }
+    } catch (Exception e) {
+      Log.runtime(TAG, "performCheckin err:");
+      Log.printStackTrace(TAG, e);
+    }
+  }
+
+  /**
+   * 处理不在签到时间范围内的逻辑
+   */
+  private void studentHandleOutOfTimeCheckin() {
+    try {
+      String result = AntForestRpcCall.studentQqueryCheckInModel();
+      JSONObject resultJson = new JSONObject(result);
+
+      // 检查是否已经签到
+      String action = resultJson.getJSONObject("studentCheckInInfo").getString("action");
+      if ("DO_TASK".equals(action)) {
+        Log.forest("【青春特权-学生签到】：今日已签到");
+      } else {
+        Log.forest("【青春特权-学生签到-未在双倍积分时间内】");
+        // 在非双倍积分时间段内进行签到
+        studentPerformCheckin("非双倍积分时间内");
+      }
+    } catch (JSONException e) {
+      Log.runtime(TAG, "handleOutOfTimeCheckin JSON err:");
+      Log.printStackTrace(TAG, e);
+    } catch (Exception e) {
+      Log.runtime(TAG, "handleOutOfTimeCheckin err:");
+      Log.printStackTrace(TAG, e);
+    }
+  }
+
 
   private void notifyMain() {
     if (taskCount.decrementAndGet() < 1) {
@@ -959,7 +1003,7 @@ public class AntForestV2 extends ModelTask {
               Log.printStackTrace(t);
               break;
             } finally {
-              TimeUtil.sleep(500);
+              Thread.sleep(500);
             }
           }
         }
@@ -1004,7 +1048,7 @@ public class AntForestV2 extends ModelTask {
             Log.printStackTrace(t);
             break;
           } finally {
-            TimeUtil.sleep(500);
+            Thread.sleep(500);
           }
         }
       }
@@ -1041,7 +1085,7 @@ public class AntForestV2 extends ModelTask {
                 sleep = collectIntervalEntity.getInterval() - System.currentTimeMillis() + collectEnergyLockLimit.get();
               }
               if (sleep > 0) {
-                TimeUtil.sleep(sleep);
+                Thread.sleep(sleep);
               }
               startTime = System.currentTimeMillis();
               collectEnergyLockLimit.setForce(startTime);
@@ -1061,7 +1105,7 @@ public class AntForestV2 extends ModelTask {
                   Log.record("触发异常,等待至" + TimeUtil.getCommonDate(waitTime));
                   return;
                 }
-                TimeUtil.sleep(600 + RandomUtil.delay());
+                Thread.sleep(600 + RandomUtil.delay());
               }
               if (tryCount < tryCountInt) {
                 collectEnergyEntity.setNeedRetry();
@@ -1237,7 +1281,7 @@ public class AntForestV2 extends ModelTask {
         int remainBubble = response.optInt("remainBubble", 0);
         if (remainBubble > 0) {
           jo = new JSONObject(AntForestRpcCall.medical_health_feeds_query());
-          TimeUtil.sleep(300);
+          Thread.sleep(300);
           if ("SUCCESS".equals(jo.getString("resultCode"))) {
             response = jo.getJSONObject("data").getJSONObject("response").optJSONObject("COMMON_FEEDS_BLOCK_2024041200243259").getJSONObject("data").getJSONObject("response");
             JSONArray feeds = response.optJSONArray("feeds");
@@ -1250,7 +1294,7 @@ public class AntForestV2 extends ModelTask {
                 String feedId = jo.optString("feedId", "null");
                 if (!"null".equals(feedId)) {
                   jo = new JSONObject(AntForestRpcCall.produce_forest_energy(feedId));
-                  TimeUtil.sleep(300);
+                  Thread.sleep(300);
                   if (jo.optBoolean("success")) {
                     response = jo.getJSONObject("data").getJSONObject("response");
                     int cumulativeEnergy = response.optInt("cumulativeEnergy");
@@ -1287,7 +1331,7 @@ public class AntForestV2 extends ModelTask {
         int energy = jo.optInt("energy");
         String id = jo.getString("id");
         jo = new JSONObject(AntForestRpcCall.harvest_forest_energy(energy, id));
-        TimeUtil.sleep(300);
+        Thread.sleep(300);
         if (jo.optBoolean("success")) {
           Log.forest("健康医疗🚑[收取能量]#" + energy + "g");
         }
@@ -1319,7 +1363,7 @@ public class AntForestV2 extends ModelTask {
           if (!moleIdList.isEmpty()) {
             String token = response.getString("token"); // 获取令牌
             long elapsedTime = System.currentTimeMillis() - startTime; // 计算已耗时间
-            TimeUtil.sleep(Math.max(0, 6000 - elapsedTime)); // 睡眠至6秒
+            Thread.sleep(Math.max(0, 6000 - elapsedTime)); // 睡眠至6秒
 
             // 调用接口进行结算
             response = new JSONObject(AntForestRpcCall.settlementWhackMole(token, moleIdList));
@@ -1429,7 +1473,7 @@ public class AntForestV2 extends ModelTask {
       label:
       for (int waterCount = 1; waterCount <= count; waterCount++) {
         s = AntForestRpcCall.transferEnergy(userId, bizNo, energyId);
-        TimeUtil.sleep(1500);
+        Thread.sleep(1500);
         jo = new JSONObject(s);
         String resultCode = jo.getString("resultCode");
         switch (resultCode) {
@@ -1473,8 +1517,8 @@ public class AntForestV2 extends ModelTask {
       JSONObject jo = findPropShop("CR20230516000362", "CR20230516000363");
       while (Status.canExchangeDoubleCardToday() && exchangePropShop(jo, Status.INSTANCE.getExchangeTimes() + 1)) {
         Status.exchangeDoubleCardToday(true);
-        TimeUtil.sleep(1000);
-        //        TimeUtil.sleep(1000);
+        Thread.sleep(1000);
+        //        Thread.sleep(1000);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "exchangeEnergyDoubleClick err:");
@@ -1519,7 +1563,7 @@ public class AntForestV2 extends ModelTask {
                 int totalVitalityAmount = jo.getJSONObject("userVitalityInfoVO").getInt("totalVitalityAmount");
                 if (totalVitalityAmount > price) {
                   jo = new JSONObject(AntForestRpcCall.exchangeBenefit(spuId, skuId));
-                  TimeUtil.sleep(1000);
+                  Thread.sleep(1000);
                   if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     Status.exchangeDoubleCardTodayLongTime(true);
                     exchangedTimes = Status.INSTANCE.getExchangeTimesLongTime();
@@ -1596,7 +1640,7 @@ public class AntForestV2 extends ModelTask {
               // 如果未签到，执行签到
               if (!signRecord.getBoolean("signed")) {
                 JSONObject joSign = new JSONObject(AntForestRpcCall.vitalitySign()); // 执行签到请求
-                TimeUtil.sleep(300); // 等待300毫秒
+                Thread.sleep(300); // 等待300毫秒
                 if ("SUCCESS".equals(joSign.getString("resultCode"))) {
                   Log.forest("森林签到📆");
                 }
@@ -1627,7 +1671,7 @@ public class AntForestV2 extends ModelTask {
               // 如果任务已完成，领取任务奖励
               if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                 JSONObject joAward = new JSONObject(AntForestRpcCall.receiveTaskAward(sceneCode, taskType)); // 领取奖励请求
-                TimeUtil.sleep(500); // 等待500毫秒
+                Thread.sleep(500); // 等待500毫秒
                 if (joAward.optBoolean("success")) {
                   Log.forest("任务奖励🎖️[" + taskTitle + "]#" + awardCount + "个");
                   doubleCheck = true; // 标记需要重新检查任务
@@ -1645,7 +1689,7 @@ public class AntForestV2 extends ModelTask {
                     || taskType.startsWith("GYG")) {
                   // 尝试完成任务
                   JSONObject joFinishTask = new JSONObject(AntForestRpcCall.finishTask(sceneCode, taskType)); // 完成任务请求
-                  TimeUtil.sleep(500); // 等待500毫秒
+                  Thread.sleep(500); // 等待500毫秒
                   if (joFinishTask.optBoolean("success")) {
                     Log.forest("森林任务🧾️[" + taskTitle + "]");
                     doubleCheck = true; // 标记需要重新检查任务
@@ -1694,7 +1738,7 @@ public class AntForestV2 extends ModelTask {
         if (TaskStatus.TODO.name().equals(taskStatus)) {
           if (bizInfo.optBoolean("autoCompleteTask")) {
             JSONObject joFinishTask = new JSONObject(AntForestRpcCall.finishTask(sceneCode, taskType));
-            TimeUtil.sleep(500);
+            Thread.sleep(500);
             if (joFinishTask.optBoolean("success")) {
               Log.forest("完成任务🧾️[" + taskTitle + "]");
             } else {
@@ -1713,7 +1757,7 @@ public class AntForestV2 extends ModelTask {
   private void startEnergyRain() {
     try {
       JSONObject jo = new JSONObject(AntForestRpcCall.startEnergyRain());
-      TimeUtil.sleep(500);
+      Thread.sleep(500);
       if ("SUCCESS".equals(jo.getString("resultCode"))) {
         String token = jo.getString("token");
         JSONArray bubbleEnergyList = jo.getJSONObject("difficultyInfo").getJSONArray("bubbleEnergyList");
@@ -1721,12 +1765,12 @@ public class AntForestV2 extends ModelTask {
         for (int i = 0; i < bubbleEnergyList.length(); i++) {
           sum += bubbleEnergyList.getInt(i);
         }
-        TimeUtil.sleep(5000L);
+        Thread.sleep(5000L);
         if ("SUCCESS".equals(new JSONObject(AntForestRpcCall.energyRainSettlement(sum, token)).getString("resultCode"))) {
           Toast.show("获得了[" + sum + "g]能量[能量雨]");
           Log.forest("收能量雨🌧️[" + sum + "g]");
         }
-        TimeUtil.sleep(500);
+        Thread.sleep(500);
       }
     } catch (Throwable th) {
       Log.runtime(TAG, "startEnergyRain err:");
@@ -1737,7 +1781,7 @@ public class AntForestV2 extends ModelTask {
   private void energyRain() {
     try {
       JSONObject joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
-      TimeUtil.sleep(500);
+      Thread.sleep(500);
       if ("SUCCESS".equals(joEnergyRainHome.getString("resultCode"))) {
         if (joEnergyRainHome.getBoolean("canPlayToday")) {
           startEnergyRain();
@@ -1745,7 +1789,7 @@ public class AntForestV2 extends ModelTask {
         if (joEnergyRainHome.getBoolean("canGrantStatus")) {
           Log.record("有送能量雨的机会");
           JSONObject joEnergyRainCanGrantList = new JSONObject(AntForestRpcCall.queryEnergyRainCanGrantList());
-          TimeUtil.sleep(500);
+          Thread.sleep(500);
           JSONArray grantInfos = joEnergyRainCanGrantList.getJSONArray("grantInfos");
           Set<String> set = giveEnergyRainList.getValue();
           String userId;
@@ -1756,7 +1800,7 @@ public class AntForestV2 extends ModelTask {
               userId = grantInfo.getString("userId");
               if (set.contains(userId)) {
                 JSONObject joEnergyRainChance = new JSONObject(AntForestRpcCall.grantEnergyRainChance(userId));
-                TimeUtil.sleep(500);
+                Thread.sleep(500);
                 Log.record("尝试送能量雨给【" + UserIdMap.getMaskName(userId) + "】");
                 granted = true;
                 // 20230724能量雨调整为列表中没有可赠送的好友则不赠送
@@ -1786,7 +1830,7 @@ public class AntForestV2 extends ModelTask {
         }
       }
       joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
-      TimeUtil.sleep(500);
+      Thread.sleep(500);
       if ("SUCCESS".equals(joEnergyRainHome.getString("resultCode")) && joEnergyRainHome.getBoolean("canPlayToday")) {
         startEnergyRain();
       }
@@ -1918,7 +1962,7 @@ public class AntForestV2 extends ModelTask {
     // 获取当前时间的毫秒数
     long currentTimeMillis = System.currentTimeMillis();
 
-    // 使用TimeUtil工具类检查当前时间是否在双倍卡设定的有效时间范围内
+    // 使用Thread工具类检查当前时间是否在双倍卡设定的有效时间范围内
     return TimeUtil.checkInTimeRange(currentTimeMillis, doubleCardTime.getValue());
   }
 
@@ -1968,7 +2012,7 @@ public class AntForestV2 extends ModelTask {
           Log.runtime(propListJo.toString());
         }
         // 等待1.5秒后再继续
-        TimeUtil.sleep(1500);
+        Thread.sleep(1500);
       } while (true);
     } catch (Throwable th) {
       // 打印异常信息
@@ -2043,7 +2087,7 @@ public class AntForestV2 extends ModelTask {
             Log.record(jo.getString("resultDesc"));
             Log.runtime(jo.toString());
           }
-          TimeUtil.sleep(500);
+          Thread.sleep(500);
         }
       }
     } catch (Throwable th) {
@@ -2131,10 +2175,10 @@ public class AntForestV2 extends ModelTask {
       th:
       do {
         JSONObject jo = new JSONObject(AntForestRpcCall.queryUserPatrol());
-        TimeUtil.sleep(500);
+        Thread.sleep(500);
         if ("SUCCESS".equals(jo.getString("resultCode"))) {
           JSONObject resData = new JSONObject(AntForestRpcCall.queryMyPatrolRecord());
-          TimeUtil.sleep(500);
+          Thread.sleep(500);
           if (resData.optBoolean("canSwitch")) {
             JSONArray records = resData.getJSONArray("records");
             for (int i = 0; i < records.length(); i++) {
@@ -2145,7 +2189,7 @@ public class AntForestV2 extends ModelTask {
                   JSONObject patrolConfig = record.getJSONObject("patrolConfig");
                   String patrolId = patrolConfig.getString("patrolId");
                   resData = new JSONObject(AntForestRpcCall.switchUserPatrol(patrolId));
-                  TimeUtil.sleep(500);
+                  Thread.sleep(500);
                   if ("SUCCESS".equals(resData.getString("resultCode"))) {
                     Log.forest("巡护⚖️-切换地图至" + patrolId);
                   }
@@ -2167,12 +2211,12 @@ public class AntForestV2 extends ModelTask {
           if ("STANDING".equals(currentStatus)) {
             if (leftChance > 0) {
               jo = new JSONObject(AntForestRpcCall.patrolGo(currentNode, patrolId));
-              TimeUtil.sleep(500);
+              Thread.sleep(500);
               patrolKeepGoing(jo.toString(), currentNode, patrolId);
               continue;
             } else if (leftStep >= 2000 && usedStep < 10000) {
               jo = new JSONObject(AntForestRpcCall.exchangePatrolChance(leftStep));
-              TimeUtil.sleep(300);
+              Thread.sleep(300);
               if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 int addedChance = jo.optInt("addedChance", 0);
                 Log.forest("步数兑换⚖️[巡护次数*" + addedChance + "]");
@@ -2226,7 +2270,7 @@ public class AntForestV2 extends ModelTask {
           JSONObject materialInfo = events.getJSONObject("materialInfo");
           String materialType = materialInfo.optString("materialType", "image");
           s = AntForestRpcCall.patrolKeepGoing(currentNode, patrolId, materialType);
-          TimeUtil.sleep(100);
+          Thread.sleep(100);
           continue;
 
         } else {
@@ -2370,7 +2414,7 @@ public class AntForestV2 extends ModelTask {
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
               Log.forest("合成动物💡[" + name + "]");
               animalId = id;
-              TimeUtil.sleep(100);
+              Thread.sleep(100);
               continue;
             } else {
               Log.runtime(TAG, jo.getString("resultDesc"));

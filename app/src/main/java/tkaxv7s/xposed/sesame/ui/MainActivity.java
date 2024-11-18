@@ -51,6 +51,7 @@ public class MainActivity extends BaseActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    ToastUtil.init(this); // 初始化全局 Context
     setContentView(R.layout.activity_main);
     tvStatistics = findViewById(R.id.tv_statistics);
     TextView buildVersion = findViewById(R.id.bulid_version);
@@ -76,8 +77,7 @@ public class MainActivity extends BaseActivity {
                   }
                   viewHandler.removeCallbacks(titleRunner);
                   if (isClick) {
-                    Toast toast = OtherDialog.makeText(context, "芝麻粒加载状态正常👌", Toast.LENGTH_SHORT);
-                    toast.show();
+                    ToastUtil.showToast("芝麻粒加载状态正常👌");
                     isClick = false;
                   }
                   break;
@@ -112,8 +112,6 @@ public class MainActivity extends BaseActivity {
             runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
           }
         });
-
-
     buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());
     buildTarget.setText(ViewAppInfo.getAppBuildTarget());
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
@@ -139,7 +137,7 @@ public class MainActivity extends BaseActivity {
                 onResume();
                 return;
               }
-              Toast.makeText(MainActivity.this, "未获取文件读写权限", Toast.LENGTH_SHORT).show();
+              ToastUtil.makeText(MainActivity.this, "未获取文件读写权限", Toast.LENGTH_SHORT).show();
               handler.postDelayed(this, 2000);
             }
           });
@@ -259,9 +257,8 @@ public class MainActivity extends BaseActivity {
 
     try {
       int componentEnabledSetting = packageManager.getComponentEnabledSetting(new ComponentName(this, aliasName));
-      MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
+      MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(false);
       checkable.setChecked(componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
-
       menu.add(0, 2, 2, R.string.view_error_log_file);
       menu.add(0, 3, 3, R.string.export_error_log_file);
       menu.add(0, 4, 4, R.string.view_all_log_file);
@@ -272,9 +269,8 @@ public class MainActivity extends BaseActivity {
       menu.add(0, 9, 9, R.string.settings);
     } catch (Exception e) {
       Log.printStackTrace(e);
-      Toast.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
+      ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
     }
-
     return super.onCreateOptionsMenu(menu);
   }
 
@@ -302,7 +298,7 @@ public class MainActivity extends BaseActivity {
       case 3:
         File errorLogFile = FileUtil.exportFile(FileUtil.getErrorLogFile());
         if (errorLogFile != null) {
-          Toast.makeText(this, "文件已导出到: " + errorLogFile.getPath(), Toast.LENGTH_SHORT).show();
+          ToastUtil.makeText(this, "文件已导出到: " + errorLogFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
 
@@ -319,21 +315,21 @@ public class MainActivity extends BaseActivity {
       case 5:
         File allLogFile = FileUtil.exportFile(FileUtil.getRuntimeLogFile());
         if (allLogFile != null) {
-          Toast.makeText(this, "文件已导出到: " + allLogFile.getPath(), Toast.LENGTH_SHORT).show();
+          ToastUtil.makeText(this, "文件已导出到: " + allLogFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
 
       case 6:
         File statisticsFile = FileUtil.exportFile(FileUtil.getStatisticsFile());
         if (statisticsFile != null) {
-          Toast.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
+          ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
 
       case 7:
         if (FileUtil.copyTo(FileUtil.getExportedStatisticsFile(), FileUtil.getStatisticsFile())) {
           tvStatistics.setText(Statistics.getText());
-          Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
+          ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
 

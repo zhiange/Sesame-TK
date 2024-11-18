@@ -68,7 +68,7 @@ public class BaseModel extends Model {
   @Getter private static final BooleanModelField showToast = new BooleanModelField("showToast", "气泡提示", true);
 
   /** 气泡提示的纵向偏移量 */
-  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 0);
+  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 80);
 
   /** 只显示中文并设置时区 */
   @Getter private static final BooleanModelField languageSimplifiedChinese = new BooleanModelField("languageSimplifiedChinese", "只显示中文并设置时区", true);
