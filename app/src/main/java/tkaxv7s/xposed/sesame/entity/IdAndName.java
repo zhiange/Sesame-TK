@@ -16,7 +16,6 @@ public abstract class IdAndName implements Comparable<IdAndName> {
 
     public String name; // 实体名称
 
-
     public String id; // 实体 ID
 
     // 拼音缓存，用于提升多次比较时的性能
