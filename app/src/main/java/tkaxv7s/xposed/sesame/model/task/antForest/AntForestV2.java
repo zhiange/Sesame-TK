@@ -523,7 +523,7 @@ public class AntForestV2 extends ModelTask {
         }
         // 青春特权每日签到红包
         if (studentCheckIn.getValue()) {
-          studentCheckin();
+          studentSignInRedEnvelope();
         }
       }
     } catch (Throwable t) {
@@ -600,7 +600,7 @@ public class AntForestV2 extends ModelTask {
   }
 
   /* 青春特权每日签到红包 */
-  private void studentCheckin() {
+  private void studentSignInRedEnvelope() {
     try {
       // 获取当前时间
       Calendar calendar = Calendar.getInstance();
@@ -609,13 +609,15 @@ public class AntForestV2 extends ModelTask {
       // 定义签到时间范围
       final int START_HOUR = 5;
       final int END_HOUR = 10;
-
-      if (hour >= START_HOUR && hour < END_HOUR) {
+      if (hour <START_HOUR){
+        Log.other("【青春特权-学生签到】：5点前不执行签到 ❤️");
+        return;}
+      if (hour < END_HOUR) {
         // 当前时间在双倍积分时间内
-        studentPerformCheckin("双倍积分时间内");
+        studentTaskHandle("双倍 🐯");
       } else {
         // 当前时间不在双倍积分时间范围内
-        studentHandleOutOfTimeCheckin();
+        studentTaskHandle("非双倍 🐱");
       }
     } catch (Exception e) {
       Log.runtime(TAG, "studentCheckin err:");
@@ -626,18 +628,17 @@ public class AntForestV2 extends ModelTask {
   /**
    * 执行签到逻辑
    *
-   * @param context 上下文说明（例如时间段）
+   * @param tag 上下文说明（例如时间段）
    */
-  private void studentPerformCheckin(String context) {
+  private void studentTask(String tag) {
     try {
       String result = AntForestRpcCall.studentCheckin();
       JSONObject resultJson = new JSONObject(result);
       String resultDesc = resultJson.getString("resultDesc");
-
       if (resultDesc.contains("不匹配")) {
-        Log.other("【青春特权-学生签到】" + context + "：" + resultDesc);
+        Log.other("【青春特权-学生签到】" + tag + "：" + resultDesc+"可能已经签到过啦，去【青春特权】看看就着知道了");
       } else {
-        Log.forest("【青春特权-学生签到】" + context + "：" + resultDesc);
+        Log.forest("【青春特权-学生签到】" + tag + "：" + resultDesc);
       }
     } catch (Exception e) {
       Log.runtime(TAG, "performCheckin err:");
@@ -648,19 +649,16 @@ public class AntForestV2 extends ModelTask {
   /**
    * 处理不在签到时间范围内的逻辑
    */
-  private void studentHandleOutOfTimeCheckin() {
+  private void studentTaskHandle(String tag) {
     try {
-      String result = AntForestRpcCall.studentQqueryCheckInModel();
-      JSONObject resultJson = new JSONObject(result);
-
+      String isTasked = AntForestRpcCall.studentQqueryCheckInModel();
+      JSONObject isTaskedJson = new JSONObject(isTasked);
       // 检查是否已经签到
-      String action = resultJson.getJSONObject("studentCheckInInfo").getString("action");
+      String action = isTaskedJson.getJSONObject("studentCheckInInfo").getString("action");
       if ("DO_TASK".equals(action)) {
-        Log.forest("【青春特权-学生签到】：今日已签到");
+        Log.other("【青春特权-学生签到】：今日已签到");
       } else {
-        Log.forest("【青春特权-学生签到-未在双倍积分时间内】");
-        // 在非双倍积分时间段内进行签到
-        studentPerformCheckin("非双倍积分时间内");
+        studentTask(tag);
       }
     } catch (JSONException e) {
       Log.runtime(TAG, "handleOutOfTimeCheckin JSON err:");
