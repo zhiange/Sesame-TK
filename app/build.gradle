@@ -40,7 +40,7 @@ android {
     // 编译SDK版本
     compileSdk 34
     defaultConfig {
-        applicationId "tkaxv7s.xposed.sesame" // 应用程序ID
+        applicationId "fansirsqi.xposed.sesame" // 应用程序ID
         minSdk 21 // 最低SDK版本
 
         //noinspection ExpiredTargetSdkVersion

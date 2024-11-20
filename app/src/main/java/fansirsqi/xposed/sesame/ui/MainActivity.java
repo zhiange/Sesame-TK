@@ -71,7 +71,7 @@ public class MainActivity extends BaseActivity {
             Log.runtime(getString(R.string.look_broadcast_action) + action + " intent:" + intent);
             if (action != null) {
               switch (action) {
-                case "tkaxv7s.xposed.sesame.status":
+                case "fansirsqi.xposed.sesame.status":
                   if (RunType.DISABLE == ViewAppInfo.getRunType()) {
                     updateSubTitle(RunType.PACKAGE);
                   }
@@ -81,7 +81,7 @@ public class MainActivity extends BaseActivity {
                     isClick = false;
                   }
                   break;
-                case "tkaxv7s.xposed.sesame.update":
+                case "fansirsqi.xposed.sesame.update":
                   Statistics.load();
                   tvStatistics.setText(Statistics.getText());
                   break;
@@ -90,8 +90,8 @@ public class MainActivity extends BaseActivity {
           }
         };
     IntentFilter intentFilter = new IntentFilter();
-    intentFilter.addAction("tkaxv7s.xposed.sesame.status");
-    intentFilter.addAction("tkaxv7s.xposed.sesame.update");
+    intentFilter.addAction("fansirsqi.xposed.sesame.status");
+    intentFilter.addAction("fansirsqi.xposed.sesame.update");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED);
     } else {
