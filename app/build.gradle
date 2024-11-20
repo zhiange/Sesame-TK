@@ -35,7 +35,7 @@ android {
         buildNumber = "00000000"
     }
 
-    def version = "${buildTag}.${buildDate} ${buildTime2}"
+    def version = "${buildNumber}-${buildTag}"
 
     // 编译SDK版本
     compileSdk 34
@@ -116,7 +116,7 @@ dependencies {
     normalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.17.1'
     // 普通产品风味的Jackson注解库
 
-    compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.5'
+    compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.17.1'
     // 兼容产品风味的Jackson核心库
     compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.5'
     // 兼容产品风味的Jackson数据绑定库

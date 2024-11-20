@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.provider.Settings;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
@@ -463,7 +465,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           mainHandler.postDelayed(
               () -> {
                 if (!PermissionUtil.checkOrRequestAlarmPermissions(context)) {
-                  android.widget.Toast.makeText(context, "请授予支付宝使用闹钟权限", android.widget.Toast.LENGTH_SHORT).show();
+                  ToastUtil.makeText(context, "请授予支付宝使用闹钟权限", android.widget.Toast.LENGTH_SHORT).show();
+//                  //打开闹钟权限授权页面
+//                  Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+//                  context.startActivity(intent);
                 }
               },
               2000);
@@ -484,7 +489,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           mainHandler.postDelayed(
               () -> {
                 if (!PermissionUtil.checkOrRequestBatteryPermissions(context)) {
-                  android.widget.Toast.makeText(context, "请授予支付宝终在后台运行权限", android.widget.Toast.LENGTH_SHORT).show();
+                  ToastUtil.makeText(context, "请授予支付宝终在后台运行权限", android.widget.Toast.LENGTH_SHORT).show();
                 }
               },
               2000);

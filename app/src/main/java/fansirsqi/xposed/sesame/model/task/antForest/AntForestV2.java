@@ -640,7 +640,7 @@ public class AntForestV2 extends ModelTask {
       JSONObject resultJson = new JSONObject(result);
       String resultDesc = resultJson.getString("resultDesc");
       if (resultDesc.contains("不匹配")) {
-        Log.other("【青春特权-学生签到】" + tag + "：" + resultDesc+"可能已经签到过啦，去【青春特权】看看就着知道了");
+        Log.record("【青春特权-学生签到】" + tag + "：" + resultDesc+"可能已经签到过啦，去【青春特权】看看就着知道了");
       } else {
         Log.forest("【青春特权-学生签到】" + tag + "：" + resultDesc);
       }
@@ -660,7 +660,7 @@ public class AntForestV2 extends ModelTask {
       // 检查是否已经签到
       String action = isTaskedJson.getJSONObject("studentCheckInInfo").getString("action");
       if ("DO_TASK".equals(action)) {
-        Log.other("【青春特权-学生签到】：今日已签到");
+        Log.record("【青春特权-学生签到】：今日已签到");
       } else {
         studentTask(tag);
       }

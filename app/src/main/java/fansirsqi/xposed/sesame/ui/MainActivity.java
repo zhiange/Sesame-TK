@@ -259,7 +259,7 @@ public class MainActivity extends BaseActivity {
 
     try {
       int componentEnabledSetting = packageManager.getComponentEnabledSetting(new ComponentName(this, aliasName));
-      MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(false);
+      MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
       checkable.setChecked(componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
       menu.add(0, 2, 2, R.string.view_error_log_file);
       menu.add(0, 3, 3, R.string.view_other_log_file);

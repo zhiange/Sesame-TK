@@ -74,6 +74,7 @@
     <string name="view_error_log_file">View error log file</string>
     <string name="export_error_log_file">Export error log file</string>
     <string name="export_runtime_log_file">Export all log file</string>
+    <string name="view_other_log_file">View Other log file</string>
     <string name="export_the_statistic_file">Export the statistic file</string>
     <string name="import_the_statistic_file">Import the statistic file</string>
     <string name="view_all_log_file">View runtime log file</string>

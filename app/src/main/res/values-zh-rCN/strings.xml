@@ -71,6 +71,7 @@
     <string name="view_error_log_file">查看异常日志</string>
     <string name="export_error_log_file">导出异常日志</string>
     <string name="export_runtime_log_file">导出运行日志</string>
+    <string name="view_other_log_file">查看其他日志</string>
     <string name="export_the_statistic_file">导出统计</string>
     <string name="import_the_statistic_file">导入统计</string>
     <string name="view_all_log_file">查看运行日志</string>
