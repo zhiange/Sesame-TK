@@ -5,13 +5,13 @@
     android:width="29.514458dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <path
-        android:fillColor="#1677ff"
+        android:fillColor="#62E995"
         android:pathData="M57,4.23H2.11A2.11,2.11 0,0 0,0 6.34V76.05a2.11,2.11 0,0 0,2.11 2.11H57a2.11,2.11 0,0 0,2.11 -2.11V6.37A2.38,2.38 0,0 0,57 4.23Z" />
     <path
-        android:fillColor="#02b5fb"
+        android:fillColor="#2389FD"
         android:pathData="M50.7,12.67H8.45a2.11,2.11 0,0 0,-2.11 2.12V69.71a2.1,2.1 0,0 0,2.11 2.11H50.7a2.1,2.1 0,0 0,2.11 -2.11V14.82a2.4,2.4 0,0 0,-2.11 -2.15ZM38,0H21.12a4.23,4.23 0,0 0,0 8.45H38A4.23,4.23 0,0 0,38 0Z" />
     <path
-        android:fillColor="#3176bc"
+        android:fillColor="#ffddFD"
         android:pathData="M37,3.17H23.24c-1.36,0 -1.09,2.11 0,2.11H37c1.06,0 1.52,-2.11 0,-2.11Z" />
     <path
         android:fillColor="#fff"

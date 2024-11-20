@@ -130,7 +130,7 @@
                 android:layout_margin="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/button_main"
-                android:drawableTop="@drawable/other"
+                android:drawableTop="@drawable/all_log"
                 android:drawablePadding="5dp"
                 android:gravity="center"
                 android:onClick="onClick"
