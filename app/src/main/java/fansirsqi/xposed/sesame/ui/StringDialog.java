@@ -160,16 +160,16 @@ public class StringDialog {
     /**
      * 显示选择对话框，允许选择一个项目。
      *
-     * @param c               上下文对象。
-     * @param title           对话框标题。
-     * @param items           选项数组。
-     * @param onItemClick     选项点击事件。
-     * @param positiveButton  自定义的确认按钮文本。
-     * @param onDismiss       对话框消失事件。
+     * @param c              上下文对象。
+     * @param title          对话框标题。
+     * @param items          选项数组。
+     * @param onItemClick    选项点击事件。
+     * @param positiveButton 自定义的确认按钮文本。
+     * @param onDismiss      对话框消失事件。
      */
-    public static void showSelectionDialog(Context c, String title, CharSequence[] items,
-                                           DialogInterface.OnClickListener onItemClick,
-                                           String positiveButton, DialogInterface.OnDismissListener onDismiss) {
+    public static AlertDialog showSelectionDialog(Context c, String title, CharSequence[] items,
+                                                  DialogInterface.OnClickListener onItemClick,
+                                                  String positiveButton, DialogInterface.OnDismissListener onDismiss) {
         AlertDialog alertDialog = new AlertDialog.Builder(c)
                 .setTitle(title)
                 .setItems(items, onItemClick)
@@ -184,6 +184,7 @@ public class StringDialog {
         if (button != null) {
             button.setTextColor(c.getResources().getColor(R.color.colorPrimary));
         }
+        return alertDialog;
     }
 
 }

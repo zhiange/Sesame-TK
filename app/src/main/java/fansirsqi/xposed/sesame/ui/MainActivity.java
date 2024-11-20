@@ -13,11 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 // import androidx.appcompat.app.AlertDialog;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import androidx.appcompat.app.AlertDialog;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -26,6 +23,11 @@ import fansirsqi.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends BaseActivity {
 
@@ -260,13 +262,13 @@ public class MainActivity extends BaseActivity {
       MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(false);
       checkable.setChecked(componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
       menu.add(0, 2, 2, R.string.view_error_log_file);
-      menu.add(0, 3, 3, R.string.export_error_log_file);
+      menu.add(0, 3, 3, R.string.view_other_log_file);
       menu.add(0, 4, 4, R.string.view_all_log_file);
-      menu.add(0, 5, 5, R.string.export_runtime_log_file);
-      menu.add(0, 6, 6, R.string.export_the_statistic_file);
-      menu.add(0, 7, 7, R.string.import_the_statistic_file);
-      menu.add(0, 8, 8, R.string.view_debug);
-      menu.add(0, 9, 9, R.string.settings);
+      // menu.add(0, 5, 5, R.string.export_runtime_log_file);
+      menu.add(0, 5, 5, R.string.export_the_statistic_file);
+      menu.add(0, 6, 6, R.string.import_the_statistic_file);
+      menu.add(0, 7, 7, R.string.view_debug);
+      menu.add(0, 8, 8, R.string.settings);
     } catch (Exception e) {
       Log.printStackTrace(e);
       ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -296,10 +298,13 @@ public class MainActivity extends BaseActivity {
         break;
 
       case 3:
-        File errorLogFile = FileUtil.exportFile(FileUtil.getErrorLogFile());
-        if (errorLogFile != null) {
-          ToastUtil.makeText(this, "文件已导出到: " + errorLogFile.getPath(), Toast.LENGTH_SHORT).show();
-        }
+        String otherData = "file://";
+        otherData += FileUtil.getOtherLogFile().getAbsolutePath();
+        Intent otherIt = new Intent(this, HtmlViewerActivity.class);
+        otherIt.putExtra("nextLine", false);
+        otherIt.putExtra("canClear", true);
+        otherIt.setData(Uri.parse(otherData));
+        startActivity(otherIt);
         break;
 
       case 4:
@@ -313,27 +318,20 @@ public class MainActivity extends BaseActivity {
         break;
 
       case 5:
-        File allLogFile = FileUtil.exportFile(FileUtil.getRuntimeLogFile());
-        if (allLogFile != null) {
-          ToastUtil.makeText(this, "文件已导出到: " + allLogFile.getPath(), Toast.LENGTH_SHORT).show();
-        }
-        break;
-
-      case 6:
         File statisticsFile = FileUtil.exportFile(FileUtil.getStatisticsFile());
         if (statisticsFile != null) {
           ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
 
-      case 7:
+      case 6:
         if (FileUtil.copyTo(FileUtil.getExportedStatisticsFile(), FileUtil.getStatisticsFile())) {
           tvStatistics.setText(Statistics.getText());
           ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
 
-      case 8:
+      case 7:
         String debugData = "file://";
         debugData += FileUtil.getDebugLogFile().getAbsolutePath();
         Intent debugIt = new Intent(this, HtmlViewerActivity.class);
@@ -342,7 +340,7 @@ public class MainActivity extends BaseActivity {
         startActivity(debugIt);
         break;
 
-      case 9:
+      case 8:
         selectSettingUid();
         break;
     }
@@ -352,31 +350,39 @@ public class MainActivity extends BaseActivity {
   private void selectSettingUid() {
     AtomicBoolean selected = new AtomicBoolean(false);
 
-    // 调用 StringDialog 中的 showSelectionDialog 方法
-    StringDialog.showSelectionDialog(
-        this,
-        "请选择配置",
-        userNameArray,
-        (dialog, which) -> {
-          selected.set(true);
-          dialog.dismiss();
-          goSettingActivity(which);
-        },
-        "返回",
-        dialog -> selected.set(true));
+    AlertDialog dialog = StringDialog.showSelectionDialog(
+            this,
+            "请选择配置",
+            userNameArray,
+            (dialog1, which) -> {
+              selected.set(true);
+              dialog1.dismiss();
+              goSettingActivity(which);
+            },
+            "返回",
+            dialog1 -> {
+              selected.set(true);
+              dialog1.dismiss();
+            });
 
     int length = userNameArray.length;
     if (length > 0 && length < 3) {
-      new Thread(
-              () -> {
-                TimeUtil.sleep(800);
-                if (!selected.get()) {
-                  goSettingActivity(length - 1);
-                }
-              })
-          .start();
+      new Thread(() -> {
+        TimeUtil.sleep(800);
+        if (!selected.get()) {
+          goSettingActivity(length - 1);
+
+          // 在主线程中关闭对话框
+          runOnUiThread(() -> {
+            if (dialog.isShowing()) {
+              dialog.dismiss();
+            }
+          });
+        }
+      }).start();
     }
   }
+
 
   /**
    * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
