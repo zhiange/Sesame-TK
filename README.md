@@ -1,8 +1,20 @@
 # Sesame-TK
 
-[![License](https://img.shields.io/github/license/TKaxv-7S/Sesame-TK.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/release/TKaxv-7S/Sesame-TK.svg)](../../releases)
-[![All Releases Download](https://img.shields.io/github/downloads/TKaxv-7S/Sesame-TK/total.svg)](../../releases)
+[![License](https://img.shields.io/github/license/Fansirsqi/Sesame-TK.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/release/Fansirsqi/Sesame-TK.svg)](../../releases)
+[![All Releases Download](https://img.shields.io/github/downloads/Fansirsqi/Sesame-TK/total.svg)](../../releases)
+
+## 本人不是专业的开发者，仅仅是一名热爱开源的爱好者，欢迎大家提出宝贵意见，共同完善此项目。
+
+大部分代码内容由GPT4-o模型完辅助成
+
+bug请提交issues，功能建议请提交PR
+
+有相关问题，我也可能不会修复轻喷，因为我不是专业的开发者。
+
+访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
+
+---
 
 # 本仓库已存档，新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
 
@@ -59,8 +71,8 @@
 
 ## 贡献者
 
-<a href="https://github.com/TKaxv-7S/Sesame-TK/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=TKaxv-7S/Sesame-TK" />
+<a href="https://github.com/Fansirsqi/Sesame-TK/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Fansirsqi/Sesame-TK" />
 </a>
 
 贡献名单使用 [contrib.rocks](https://contrib.rocks) 生成
