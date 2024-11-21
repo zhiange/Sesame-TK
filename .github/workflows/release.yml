@@ -76,8 +76,8 @@ jobs:
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 31.0.0
 
-      # 上传 Normal APK 到 Release
-      - name: Upload Normal APK to Release
+      # 上传 Normal APK 到源仓库 Release
+      - name: Upload Normal APK to Source Release
         uses: termux/upload-release-action@v4.2.0
         with:
           asset_name: Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.apk
@@ -88,8 +88,8 @@ jobs:
           checksums: sha256
           checksums_file_name: CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.%algo%
 
-      # 上传 Compatible APK 到 Release
-      - name: Upload Compatible APK to Release
+      # 上传 Compatible APK 到源仓库 Release
+      - name: Upload Compatible APK to Source Release
         uses: termux/upload-release-action@v4.2.0
         with:
           asset_name: Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.apk
@@ -99,3 +99,15 @@ jobs:
           overwrite: true
           checksums: sha256
           checksums_file_name: CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.%algo%
+
+      # 上传 APKs 到目标仓库的 Release
+      - name: Push APKs to Target Repository Release
+        run: |
+          git clone https://github.com/Xposed-Modules-Repo/fansirsqi.xposed.sesame target_repo
+          cd target_repo
+          git tag ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }}
+          gh release create ${{ github.ref_name }} \
+            ../app/build/outputs/apk/normal/release/*.apk \
+            ../app/build/outputs/apk/compatible/release/*.apk \
+            -t ${{ github.ref_name }} -R fansirsqi.xposed.sesame -n "Release ${{ github.ref_name }}"
