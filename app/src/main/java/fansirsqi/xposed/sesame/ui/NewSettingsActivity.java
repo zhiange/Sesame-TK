@@ -80,16 +80,13 @@ public class NewSettingsActivity extends BaseActivity {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
         setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
-
         context = this;
-
         webView = findViewById(R.id.webView);
         WebSettings settings = webView.getSettings();
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         settings.setJavaScriptEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setDomStorageEnabled(true);
-        //settings.setPluginsEnabled(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setSupportZoom(true);
@@ -129,18 +126,15 @@ public class NewSettingsActivity extends BaseActivity {
         webView.loadUrl("file:///android_asset/web/index.html");
         // webView.loadUrl("http://192.168.31.32:5500/app/src/main/assets/web/index.html");
         webView.requestFocus();
-
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
         for (Map.Entry<String, ModelConfig> configEntry : modelConfigMap.entrySet()) {
             ModelConfig modelConfig = configEntry.getValue();
             tabList.add(new ModelDto(configEntry.getKey(), modelConfig.getName(), modelConfig.getIcon(), null));
         }
-
         for (ModelGroup modelGroup : ModelGroup.values()) {
             groupList.add(new ModelGroupDto(modelGroup.getCode(), modelGroup.getName(), modelGroup.getIcon()));
         }
     }
-
     @Override
     public void onBackPressed() {
         if (webView.canGoBack()) {
@@ -150,7 +144,6 @@ public class NewSettingsActivity extends BaseActivity {
             save();
         }
     }
-
     public class WebAppInterface {
         @JavascriptInterface
         public void onBackPressed() {
@@ -162,30 +155,24 @@ public class NewSettingsActivity extends BaseActivity {
                 }
             });
         }
-
         @JavascriptInterface
         public void onExit() {
             runOnUiThread(NewSettingsActivity.this::finish);
         }
     }
-
     private class WebViewCallback {
-
         @JavascriptInterface
         public String getTabs() {
             return JsonUtil.toJsonString(tabList);
         }
-
         @JavascriptInterface
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
         }
-
         @JavascriptInterface
         public String getGroup() {
             return JsonUtil.toJsonString(groupList);
         }
-
         @JavascriptInterface
         public String getModelByGroup(String groupCode) {
             Collection<ModelConfig> modelConfigCollection = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode)).values();
@@ -199,11 +186,9 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return JsonUtil.toJsonString(modelDtoList);
         }
-
         @JavascriptInterface
         public String setModelByGroup(String groupCode, String modelsValue) {
-            List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {
-            });
+            List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {});
             Map<String, ModelConfig> modelConfigSet = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode));
             for (ModelDto modelDto : modelDtoList) {
                 ModelConfig modelConfig = modelConfigSet.get(modelDto.getModelCode());
@@ -223,7 +208,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "SUCCESS";
         }
-
         @JavascriptInterface
         public String getModel(String modelCode) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -237,7 +221,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
-
         @JavascriptInterface
         public String setModel(String modelCode, String fieldsValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -274,7 +257,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
-
         @JavascriptInterface
         public String setField(String modelCode, String fieldCode, String fieldValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -291,12 +273,10 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
-
         @JavascriptInterface
         public void Log(String log) {
             Log.record("设置："+ log);
         }
-
     }
 
     @Override
@@ -308,7 +288,6 @@ public class NewSettingsActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至旧UI");
         return super.onCreateOptionsMenu(menu);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

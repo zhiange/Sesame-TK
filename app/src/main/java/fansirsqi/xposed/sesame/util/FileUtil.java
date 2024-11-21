@@ -19,58 +19,48 @@ public class FileUtil {
   private static File wuaFile;
   private  Context context;
 
+  /**
+   * 确保指定的目录存在且不是一个文件。
+   * 如果目录是一个文件，则将其删除并创建新的目录。
+   * 如果目录不存在，则创建该目录。
+   *
+   * @param directory 要确保的目录对应的File对象。
+   */
+  public static void ensureDirectory(File directory) {
+    if (directory.exists()) {
+      if (directory.isFile()) {
+        directory.delete();
+      }
+      directory.mkdirs();
+    } else {
+      directory.mkdirs();
+    }
+  }
+
 
   private static File getMainDirectoryFile() {
     String storageDirStr = Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + ClassUtil.PACKAGE_NAME;
     File storageDir = new File(storageDirStr);
     File mainDir = new File(storageDir, CONFIG_DIRECTORY_NAME);
-    if (mainDir.exists()) {
-      if (mainDir.isFile()) {
-        mainDir.delete();
-        mainDir.mkdirs();
-      }
-    } else {
-      mainDir.mkdirs();
-    }
+    ensureDirectory(mainDir);
     return mainDir;
   }
 
   private static File getLogDirectoryFile() {
     File logDir = new File(MAIN_DIRECTORY_FILE, "log");
-    if (logDir.exists()) {
-      if (logDir.isFile()) {
-        logDir.delete();
-        logDir.mkdirs();
-      }
-    } else {
-      logDir.mkdirs();
-    }
+    ensureDirectory(logDir);
     return logDir;
   }
 
   private static File getConfigDirectoryFile() {
     File configDir = new File(MAIN_DIRECTORY_FILE, "config");
-    if (configDir.exists()) {
-      if (configDir.isFile()) {
-        configDir.delete();
-        configDir.mkdirs();
-      }
-    } else {
-      configDir.mkdirs();
-    }
+    ensureDirectory(configDir);
     return configDir;
   }
 
   public static File getUserConfigDirectoryFile(String userId) {
     File configDir = new File(CONFIG_DIRECTORY_FILE, userId);
-    if (configDir.exists()) {
-      if (configDir.isFile()) {
-        configDir.delete();
-        configDir.mkdirs();
-      }
-    } else {
-      configDir.mkdirs();
-    }
+    ensureDirectory(configDir);
     return configDir;
   }
 
@@ -239,139 +229,95 @@ public class FileUtil {
     return cityCodeFile;
   }
 
-  public static File getRuntimeLogFile() {
-    File runtimeLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("runtime"));
-    if (runtimeLogFile.exists() && runtimeLogFile.isDirectory()) {
-      runtimeLogFile.delete();
+
+  /**
+   * 确保日志文件存在，如果文件是一个目录则删除并创建新文件。
+   * 如果文件不存在，则创建新文件。
+   *
+   * @param logDirectory 日志文件所在的目录
+   * @param logFileName  日志文件的名称
+   * @return 日志文件的File对象
+   */
+  private static File ensureLogFile(File logDirectory, String logFileName) {
+    File logFile = new File(logDirectory, logFileName);
+    if (logFile.exists() && logFile.isDirectory()) {
+      logFile.delete();
     }
-    if (!runtimeLogFile.exists()) {
+    if (!logFile.exists()) {
       try {
-        runtimeLogFile.createNewFile();
-      } catch (Throwable ignored) {
+        logFile.createNewFile();
+      } catch (IOException ignored) {
+        // 忽略创建文件时可能出现的异常
       }
     }
-    return runtimeLogFile;
+    return logFile;
+  }
+
+  public static File getRuntimeLogFile() {
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("runtime"));
   }
 
   public static File getRecordLogFile() {
-    File recordLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("record"));
-    if (recordLogFile.exists() && recordLogFile.isDirectory()) {
-      recordLogFile.delete();
-    }
-    if (!recordLogFile.exists()) {
-      try {
-        recordLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return recordLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("record"));
   }
 
   public static File getSystemLogFile() {
-    File systemLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("system"));
-    if (systemLogFile.exists() && systemLogFile.isDirectory()) {
-      systemLogFile.delete();
-    }
-    if (!systemLogFile.exists()) {
-      try {
-        systemLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return systemLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("system"));
   }
 
+
   public static File getDebugLogFile() {
-    File debugLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("debug"));
-    if (debugLogFile.exists() && debugLogFile.isDirectory()) {
-      debugLogFile.delete();
-    }
-    if (!debugLogFile.exists()) {
-      try {
-        debugLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return debugLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("debug"));
   }
 
   public static File getForestLogFile() {
-    File forestLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("forest"));
-    if (forestLogFile.exists() && forestLogFile.isDirectory()) {
-      forestLogFile.delete();
-    }
-    if (!forestLogFile.exists()) {
-      try {
-        forestLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return forestLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("forest"));
   }
 
   public static File getFarmLogFile() {
-    File farmLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("farm"));
-    if (farmLogFile.exists() && farmLogFile.isDirectory()) {
-      farmLogFile.delete();
-    }
-    if (!farmLogFile.exists()) {
-      try {
-        farmLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return farmLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("farm"));
   }
 
   public static File getOtherLogFile() {
-    File otherLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("other"));
-    if (otherLogFile.exists() && otherLogFile.isDirectory()) {
-      otherLogFile.delete();
-    }
-    if (!otherLogFile.exists()) {
-      try {
-        otherLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return otherLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("other"));
   }
 
   public static File getErrorLogFile() {
-    File errorLogFile = new File(LOG_DIRECTORY_FILE, Log.getLogFileName("error"));
-    if (errorLogFile.exists() && errorLogFile.isDirectory()) {
-      errorLogFile.delete();
-    }
-    if (!errorLogFile.exists()) {
-      try {
-        errorLogFile.createNewFile();
-      } catch (Throwable ignored) {
-      }
-    }
-    return errorLogFile;
+    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("error"));
   }
 
   public static void clearLog() {
-    File[] files = LOG_DIRECTORY_FILE.listFiles();
-    if (files == null) {
+    // 检查日志目录是否存在，如果不存在或者不是一个目录，则直接返回
+    if (!LOG_DIRECTORY_FILE.isDirectory()) {
       return;
     }
+    // 获取当前日期的格式化字符串
     SimpleDateFormat sdf = Log.DATE_FORMAT_THREAD_LOCAL.get();
     if (sdf == null) {
       sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     }
     String today = sdf.format(new Date());
+    // 获取日志目录下的所有文件
+    File[] files = LOG_DIRECTORY_FILE.listFiles();
+    if (files == null) {
+      return;
+    }
+    // 遍历文件，根据条件进行清理
     for (File file : files) {
       String name = file.getName();
-      if (name.endsWith(today + ".log")) {
-        if (file.length() < 104_857_600) {
-          continue;
-        }
+      // 如果文件名以今天的日期结尾，并且文件大小小于100MB，则跳过
+      if (name.endsWith(today + ".log") && file.length() < 104_857_600) {
+        continue;
       }
+      // 尝试删除文件，忽略可能出现的SecurityException
       try {
-        file.delete();
-      } catch (Exception e) {
-        Log.printStackTrace(e);
+        if (!file.delete()) {
+          // 如果删除失败，可以在这里记录日志或者进行其他处理
+          ToastUtil.showToast("Failed to delete log file: " + file.getName());
+        }
+      } catch (SecurityException se) {
+        // 记录安全异常，不应该抛出
+        Log.printStackTrace(se);
       }
     }
   }

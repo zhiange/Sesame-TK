@@ -68,8 +68,9 @@ public class SettingsActivity extends BaseActivity {
 
         context = this;
         tabHost = findViewById(R.id.tab_settings);
-        svTabs = findViewById(R.id.sv_tabs);
         tabHost.setup();
+        svTabs = findViewById(R.id.sv_tabs);
+
 
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
         for (Map.Entry<String, ModelConfig> configEntry : modelConfigMap.entrySet()) {
@@ -100,28 +101,6 @@ public class SettingsActivity extends BaseActivity {
         }
         tabHost.setCurrentTab(0);
 
-        /*int size = modelConfigMap.size() - 1;
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                if (Math.abs(e1.getX() - e2.getX()) > 250) {
-                    return false;
-                    }
-                int currentView = tabHost.getCurrentTab();
-                if (e1.getY() - e2.getY() > 120 && Math.abs(velocityY) > 200) {
-                    if (currentView < size) {
-                        currentView++;
-                    }
-                    tabHost.setCurrentTab(currentView);
-                } else if (e2.getY() - e1.getY() > 120 && Math.abs(velocityY) > 200) {
-                    if (currentView > 0) {
-                        currentView--;
-                    }
-                    tabHost.setCurrentTab(currentView);
-                }
-                return true;
-            }
-        });*/
     }
 
     @Override
@@ -129,14 +108,6 @@ public class SettingsActivity extends BaseActivity {
         super.onBackPressed();
         save();
     }
-
-    /*@Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (gestureDetector.onTouchEvent(event)) {
-            event.setAction(MotionEvent.ACTION_CANCEL);
-        }
-        return super.dispatchTouchEvent(event);
-    }*/
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {

@@ -43,7 +43,6 @@ public class OneWord {
             JSONObject jsonObject = new JSONObject(response.toString());
             String hitokoto = jsonObject.optString("hitokoto", "忘形雨笠烟蓑，知心牧唱樵歌。\n明月清风共我，闲人三个，从他今古消磨。");
             String from = jsonObject.optString("from", "天净沙·渔父");
-
             // 格式化输出句子
             String formattedSentence = String.format("%s\n\n                    -----Re: %s", hitokoto, from);
             callback.onSuccess(formattedSentence); // 调用回调返回成功结果
@@ -60,7 +59,6 @@ public class OneWord {
   // 定义回调接口
   public interface OneWordCallback {
     void onSuccess(String result); // 成功回调
-
     void onFailure(String error); // 失败回调
   }
 }
