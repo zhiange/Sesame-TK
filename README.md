@@ -18,6 +18,23 @@
 对了，我自己用的支付宝版本是`10.5.88.8000`
 
 
+如果你想自己编译，请fork本项目
+
+然后在仓库设置相关签名文件信息，使用GitHub Actions编译，下载编译好的APK文件，安装到手机上即可
+签名的生成以及转码请自行🔍解决 很简单滴~，你绝B可以
+
+
+|仓库变量名| 变量值                  |
+|----|----------------------|
+|`ANDROID_SIGNING_KEY`| `keystore.jks`文件的base64编码字符串 |
+|`ANDROID_KEY_ALIAS`| `keystore.jks`文件别名 |
+|`ANDROID_SIGNING_PASSWORD`| `keystore.jks`文件密码 |
+|`ANDROID_KEY_PASSWORD`| `keystore.jks`文件密码 |
+
+设置好这些后，去仓库新建一个release，随便新建一个tag，然后点击`Publish release`，GitHub Actions会自动编译并发布APK文件到release中，下载安装即可
+
+
+
 <details>
 <summary>Preview Images</summary>
 
@@ -40,12 +57,12 @@
 
 新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
 
-<div style="color: red; "> 
-<h1>为了大家的资金安全与个人信息安全,墙裂建议</h1>
-<span>不要使用任何未开放源代码的修改版！</span><br/>
-<span>不要使用任何未开放源代码的修改版！</span><br/>
-<span>不要使用任何未开放源代码的修改版！</span><br/>
-</div>
+<h1>🚨 为了大家的资金安全与个人信息安全，墙裂建议</h1>
+<p>
+  <strong style="color: red;">不要使用任何未开放源代码的修改版！</strong><br/>
+  <strong style="color: red;">不要使用任何未开放源代码的修改版！</strong><br/>
+  <strong style="color: red;">不要使用任何未开放源代码的修改版！</strong>
+</p>
 
 ## 自北京时间2024年7月15日开始，开源协议已变更，该项目禁止用于任何商业用途，并禁止二次修改后闭源发布
 
