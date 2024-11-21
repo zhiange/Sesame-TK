@@ -6,19 +6,27 @@
 
 ## 本人不是专业的开发者，仅仅是一名热爱开源的爱好者，欢迎大家提出宝贵意见，共同完善此项目。
 
-大部分代码内容由GPT4-o模型完辅助成
+大部分代码内容由`GPT4-o`模型完辅助成
 
-bug请提交issues，功能建议请提交PR
+`bug`请[提交issues](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
+功能建议请提交PR
 
-有相关问题，我也可能不会修复轻喷，因为我不是专业的开发者。
+有相关问题，我也可能不会修复,大家轻喷，因为我不是专业的开发者，我可能真的不会修复。
 
 访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
+
+对了，我自己用的支付宝版本是`10.5.88.8000`
+
+
 <details>
 <summary>Preview Images</summary>
 
 <div style="display: flex; align-items: flex-start; justify-content: center;">
+
   <img src="https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit_66964347f6135.jpg" alt="Screenshot 1" style="max-width: 35%; height: auto; margin-right: 10px;">
+
   <img src="https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame_a545f9fee2510.jpg" alt="Screenshot 2" style="max-width: 35%; height: auto;">
+
 </div>
 
 </details>
