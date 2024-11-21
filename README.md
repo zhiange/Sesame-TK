@@ -102,3 +102,15 @@ bug请提交issues，功能建议请提交PR
 </a>
 
 贡献名单使用 [contrib.rocks](https://contrib.rocks) 生成
+
+
+## Star History
+
+<a href="https://star-history.com/#Fansirsqi/Sesame-TK&Timeline">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Fansirsqi/Sesame-TK&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Fansirsqi/Sesame-TK&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Fansirsqi/Sesame-TK&type=Timeline" />
+ </picture>
+</a>
+
