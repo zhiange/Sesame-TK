@@ -181,6 +181,5 @@
     <string name="normal_text">数据加载中…</string>
     <string name="build_version_1_0_0">Build Version: </string>
     <string name="bulid_target">Build Target: </string>
-    <string name="look_broadcast_action">查看广播动作</string>
 
 </resources>

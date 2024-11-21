@@ -70,7 +70,7 @@ public class MainActivity extends BaseActivity {
           @Override
           public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.runtime(getString(R.string.look_broadcast_action) + action + " intent:" + intent);
+            Log.runtime("receive broadcast:" + action + " intent:" + intent);
             if (action != null) {
               switch (action) {
                 case "fansirsqi.xposed.sesame.status":
@@ -79,7 +79,20 @@ public class MainActivity extends BaseActivity {
                   }
                   viewHandler.removeCallbacks(titleRunner);
                   if (isClick) {
-                    Toast.makeText(context, "芝麻粒加载状态正常👌", Toast.LENGTH_SHORT).show();
+                    // 调用 OneWord 获取句子
+                    OneWord.getOneWord(
+                            new OneWord.OneWordCallback() {
+                              @Override
+                              public void onSuccess(String result) {
+                                runOnUiThread(() -> updateOneWord(result,oneWord)); // 在主线程中更新UI
+                              }
+                              @Override
+                              public void onFailure(String error) {
+                                runOnUiThread(() -> updateOneWord(error,oneWord)); // 在主线程中更新UI
+                              }
+                            });
+                    Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
+                    TimeUtil.sleep(5000);//别急，等一会儿再说
                     isClick = false;
                   }
                   break;
@@ -108,7 +121,6 @@ public class MainActivity extends BaseActivity {
           public void onSuccess(String result) {
             runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
           }
-
           @Override
           public void onFailure(String error) {
             runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
@@ -118,7 +130,10 @@ public class MainActivity extends BaseActivity {
     buildTarget.setText(ViewAppInfo.getAppBuildTarget());
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
   }
-
+  private void updateOneWord(String str, TextView oneWord) {
+//    ToastUtil.showToast(str);
+    oneWord.setText(str);
+  }
   @Override
   public void onWindowFocusChanged(boolean hasFocus) {
     if (!hasPermissions) {
@@ -145,7 +160,6 @@ public class MainActivity extends BaseActivity {
           });
     }
   }
-
   @Override
   protected void onResume() {
     super.onResume();
@@ -203,7 +217,6 @@ public class MainActivity extends BaseActivity {
       }
     }
   }
-
   @SuppressLint("NonConstantResourceId")
   public void onClick(View v) {
     if (v.getId() == R.id.btn_test) {
@@ -216,7 +229,6 @@ public class MainActivity extends BaseActivity {
       }
       return;
     }
-
     String data = "file://";
     switch (v.getId()) {
       case R.id.btn_forest_log:
@@ -230,7 +242,6 @@ public class MainActivity extends BaseActivity {
       case R.id.btn_all_log:
         data += FileUtil.getRecordLogFile().getAbsolutePath();
         break;
-
       case R.id.btn_github:
         //   欢迎自己打包 欢迎大佬pr
         //   项目开源且公益  维护都是自愿
@@ -238,11 +249,9 @@ public class MainActivity extends BaseActivity {
         //   那我只能说你妈死了 就当开源项目给你妈烧纸钱了
         data = "https://github.com/Fansirsqi/Sesame-TK";
         break;
-
       case R.id.btn_settings:
         selectSettingUid();
         return;
-
       case R.id.btn_friend_watch:
         ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
         return;
@@ -251,12 +260,10 @@ public class MainActivity extends BaseActivity {
     it.setData(Uri.parse(data));
     startActivity(it);
   }
-
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     PackageManager packageManager = getPackageManager();
     String aliasName = getClass().getCanonicalName() + "Alias";
-
     try {
       int componentEnabledSetting = packageManager.getComponentEnabledSetting(new ComponentName(this, aliasName));
       MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
@@ -296,7 +303,6 @@ public class MainActivity extends BaseActivity {
         errorIt.setData(Uri.parse(errorData));
         startActivity(errorIt);
         break;
-
       case 3:
         String otherData = "file://";
         otherData += FileUtil.getOtherLogFile().getAbsolutePath();

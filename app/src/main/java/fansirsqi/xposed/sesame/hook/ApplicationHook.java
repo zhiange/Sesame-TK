@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.provider.Settings;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -538,7 +537,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                       @SuppressLint("WakelockTimeout")
                       @Override
-                      protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                      protected void beforeHookedMethod(MethodHookParam param) {
                         Object[] args = param.args;
                         Object object = args[15];
                         Object[] recordArray = new Object[4];
@@ -550,7 +549,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                       @SuppressLint("WakelockTimeout")
                       @Override
-                      protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                      protected void afterHookedMethod(MethodHookParam param) {
                         Object object = param.args[15];
                         Object[] recordArray = rpcHookMap.remove(object);
                         if (recordArray != null) {
@@ -576,7 +575,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                       @SuppressLint("WakelockTimeout")
                       @Override
-                      protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                      protected void beforeHookedMethod(MethodHookParam param) {
                         Object object = param.thisObject;
                         Object[] recordArray = rpcHookMap.get(object);
                         if (recordArray != null) {
@@ -706,6 +705,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
+  @SuppressLint("ScheduleExactAlarm")
   private static Boolean setAlarmTask(long triggerAtMillis, PendingIntent operation) {
     try {
       AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -715,10 +715,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
       }
       Log.runtime(
-          "setAlarmTask triggerAtMillis:"
-              + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis)
-              + " operation:"
-              + (operation == null ? "" : operation.toString()));
+              "setAlarmTask triggerAtMillis:"
+                  + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis)
+                  + " operation:"
+                  + operation);
       return true;
     } catch (Throwable th) {
       Log.runtime(TAG, "setAlarmTask err:");
@@ -757,9 +757,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     return rpcBridge.requestString(method, data, relation);
   }
 
-  /*public static String requestString(String method, String data, String relation, Long time) {
-      return rpcBridge.requestString(method, data, relation, time);
-  }*/
 
   public static String requestString(String method, String data, int tryCount, int retryInterval) {
     return rpcBridge.requestString(method, data, tryCount, retryInterval);
@@ -769,9 +766,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     return rpcBridge.requestString(method, data, relation, tryCount, retryInterval);
   }
 
-  /*public static String requestString(String method, String data, String relation, Long time, int tryCount, int retryInterval) {
-      return rpcBridge.requestString(method, data, relation, time, tryCount, retryInterval);
-  }*/
 
   public static RpcEntity requestObject(RpcEntity rpcEntity) {
     return rpcBridge.requestObject(rpcEntity, 3, -1);
@@ -888,7 +882,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     @Override
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
-      Log.runtime("sesame" + context.getString(R.string.look_broadcast_action) + action + " intent:" + intent);
+      Log.runtime("sesame 查看广播:" + action + " intent:" + intent);
       if (action != null) {
         switch (action) {
           case "com.eg.android.AlipayGphone.sesame.restart":
