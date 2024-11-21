@@ -32,14 +32,12 @@ bug请提交issues，功能建议请提交PR
 
 新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
 
-<span style="color: red; "> 
-
-# 为了大家的资金安全与个人信息安全,墙裂建议
-## 不要使用任何未开放源代码的修改版！
-## 不要使用任何未开放源代码的修改版！
-## 不要使用任何未开放源代码的修改版！
-
-</span>
+<div style="color: red; "> 
+<h1>为了大家的资金安全与个人信息安全,墙裂建议</h1>
+<span>不要使用任何未开放源代码的修改版！</span><br/>
+<span>不要使用任何未开放源代码的修改版！</span><br/>
+<span>不要使用任何未开放源代码的修改版！</span><br/>
+</div>
 
 ## 自北京时间2024年7月15日开始，开源协议已变更，该项目禁止用于任何商业用途，并禁止二次修改后闭源发布
 
