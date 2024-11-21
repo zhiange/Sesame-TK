@@ -13,15 +13,31 @@ bug请提交issues，功能建议请提交PR
 有相关问题，我也可能不会修复轻喷，因为我不是专业的开发者。
 
 访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
+<details>
+<summary>Preview Images</summary>
+
+![Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit.jpg](https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit_66964347f6135.jpg)
+
+![Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame.jpg](https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame_a545f9fee2510.jpg)
+</details>
+
+<details> <summary>Archived content</summary> 
+
 
 ---
 
-# 本仓库已存档，新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
+## [本仓库](https://github.com/TKaxv-7S/Sesame-TK) 已存档
 
-# 为了大家的资金安全与个人信息安全，强烈建议
+新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
+
+<font color='red'> 
+
+# 为了大家的资金安全与个人信息安全,墙裂建议
 ## 不要使用任何未开放源代码的修改版！
 ## 不要使用任何未开放源代码的修改版！
 ## 不要使用任何未开放源代码的修改版！
+
+</font>
 
 ## 自北京时间2024年7月15日开始，开源协议已变更，该项目禁止用于任何商业用途，并禁止二次修改后闭源发布
 
@@ -39,10 +55,13 @@ bug请提交issues，功能建议请提交PR
 
 ### 旧版本在 [XQuickEnergy](https://github.com/TKaxv-7S/XQuickEnergy)
 
+
+</details>
+
 ## 主要功能
 感谢蚂蚁森林对绿化事业的贡献。快速收取蚂蚁森林能量，也为祖国的绿化事业出一份微薄之力~
 
-### 版本特点
+### 版本特点 By [TKaxv-7S](https://github.com/TKaxv-7S)
 1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/TKaxv-7S/Sesame-TK/wiki)或如下图所示，非常欢迎大家提[PR](https://github.com/TKaxv-7S/Sesame-TK/pulls)
 ![Sesame-TK开发指南](https://github.com/TKaxv-7S/Sesame-TK/assets/22593101/4d8451fe-2b7f-4f19-9439-b0afbf683510)
 2. 重构 **森林收能量代码**，大幅提升能量多的账号收取效率
@@ -61,15 +80,22 @@ bug请提交issues，功能建议请提交PR
 6. 本APP如无意中侵犯了某个媒体或个人的知识产权，请来信或来电告之，作者将立即删除。
 
 ## 授权说明
-本项目基于 [constanline版XQuickEnergy](https://github.com/constanline/XQuickEnergy) 与 [pansong291版XQuickEnergy](https://github.com/pansong291/XQuickEnergy) 开发
+本项目fork自
+基于 [constanline版XQuickEnergy](https://github.com/constanline/XQuickEnergy) 
+与 [pansong291版XQuickEnergy](https://github.com/pansong291/XQuickEnergy) 
+开发的项目[Sesame-TK](https://github.com/TKaxv-7S/Sesame-TK)
+并且在其基础上进行了少量的功能改进与优化。得益于GPT4-o模型的强大能力使得本项目能有这么多提交
+但是不确定是否是有效修改，请自行斟酌考虑使用。
+
+所有图片由 ༒激༙྇流༙྇泉༙྇༒ 授权使用
+
+## 协议说明
 
 在 **北京时间2024年7月15日之前** 提交的所有代码 ，遵循 Apache-2.0 协议
 
 自 **北京时间2024年7月15日开始** 提交的所有代码 ，遵循 GPLv3 协议，并禁止用于任何商业用途、禁止二次修改后闭源发布
 
-所有图片由 ༒激༙྇流༙྇泉༙྇༒ 授权使用
-
-## 贡献者
+## 鸣谢
 
 <a href="https://github.com/Fansirsqi/Sesame-TK/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Fansirsqi/Sesame-TK" />
