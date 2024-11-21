@@ -16,9 +16,11 @@ bug请提交issues，功能建议请提交PR
 <details>
 <summary>Preview Images</summary>
 
-![Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit.jpg](https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit_66964347f6135.jpg)
+<div style="display: flex; align-items: flex-start; justify-content: center;">
+  <img src="https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-19-594_fansirsqi.xposed.sesame-edit_66964347f6135.jpg" alt="Screenshot 1" style="max-width: 35%; height: auto; margin-right: 10px;">
+  <img src="https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame_a545f9fee2510.jpg" alt="Screenshot 2" style="max-width: 35%; height: auto;">
+</div>
 
-![Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame.jpg](https://pic2.ziyuan.wang/user/fansir/2024/11/Screenshot_2024-11-20-19-40-36-528_fansirsqi.xposed.sesame_a545f9fee2510.jpg)
 </details>
 
 <details> <summary>Archived content</summary> 
