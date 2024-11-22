@@ -26,7 +26,7 @@ public class UIConfig {
     private boolean init;
 
     // 是否使用新 UI
-    private Boolean newUI = true;
+    private Boolean newUI = false;
 
     /**
      * 保存当前 UI 配置到文件中
