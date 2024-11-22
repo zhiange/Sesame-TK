@@ -41,13 +41,21 @@ public class AntForestRpcCall {
     return ApplicationHook.requestString("alipay.antforest.forest.h5.fillUserRobFlag", "[{\"userIdList\":" + userIdList + "}]", "{\"pathList\":[\"friendRanking\"]}");
   }
 
-  public static String queryHomePage() {
+  public static String queryHomePage() throws JSONException {
+    JSONObject requestObject = new JSONObject()
+            .put("activityParam",new JSONObject())
+            .put("configVersionMap", new JSONObject().put("wateringBubbleConfig", "0"))
+            .put("skipWhackMole", false)
+            .put("source", "chInfo_ch_appcenter__chsub_9patch")
+            .put("version", VERSION);
     return ApplicationHook.requestString(
-        "alipay.antforest.forest.h5.queryHomePage",
-        "[{\"configVersionMap\":{\"wateringBubbleConfig\":\"10\"},\"skipWhackMole\":true,\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION + "\"}]",
-        3,
-        1000);
+            "alipay.antforest.forest.h5.queryHomePage",
+            new JSONArray().put(requestObject).toString(),
+            3,
+            1000
+    );
   }
+
 
   public static String queryFriendHomePage(String userId) {
     return ApplicationHook.requestString(
