@@ -20,10 +20,4 @@
         <item name="android:popupBackground">@drawable/menu_background</item>
     </style>
 
-
-    <style name="CustomMenuStyle">
-        <item name="android:checkboxStyle">@color/textColorRed</item> <!-- 自定义的复选框样式 -->
-    </style>
-
-
 </resources>
