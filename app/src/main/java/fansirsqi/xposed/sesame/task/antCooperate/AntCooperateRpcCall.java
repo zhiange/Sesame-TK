@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antCooperate;
+package fansirsqi.xposed.sesame.task.antCooperate;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 
