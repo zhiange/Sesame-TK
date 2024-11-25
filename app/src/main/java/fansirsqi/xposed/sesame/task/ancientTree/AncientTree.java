@@ -1,16 +1,17 @@
-package fansirsqi.xposed.sesame.model.task.ancientTree;
+package fansirsqi.xposed.sesame.task.ancientTree;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.modelFieldExt.BooleanModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectModelField;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
+import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AreaCode;
-import fansirsqi.xposed.sesame.model.base.TaskCommon;
-import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Status;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -58,25 +59,25 @@ public class AncientTree extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("开始检测古树保护");
+            LogUtil.record("开始检测古树保护");
             ancientTree(ancientTreeCityCodeList.getValue());
         } catch (Throwable t) {
-            Log.runtime(TAG, "start.run err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "start.run err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
     private static void ancientTree(Collection<String> ancientTreeCityCodeList) {
         try {
             for (String cityCode : ancientTreeCityCodeList) {
-                if (!Status.canAncientTreeToday(cityCode))
+                if (!StatusUtil.canAncientTreeToday(cityCode))
                     continue;
                 ancientTreeProtect(cityCode);
                 Thread.sleep(1000L);
             }
         } catch (Throwable th) {
-            Log.runtime(TAG, "ancientTree err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "ancientTree err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 
@@ -97,13 +98,13 @@ public class AncientTree extends ModelTask {
                     JSONObject districtInfo = districtBriefInfo.getJSONObject("districtInfo");
                     String districtCode = districtInfo.getString("districtCode");
                     districtDetail(districtCode);
-                    Thread.sleep(1000L);
+                    TimeUtil.sleep(1000L);
                 }
-                Status.ancientTreeToday(cityCode);
+                StatusUtil.ancientTreeToday(cityCode);
             }
         } catch (Throwable th) {
-            Log.runtime(TAG, "ancientTreeProtect err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "ancientTreeProtect err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 
@@ -145,26 +146,26 @@ public class AncientTree extends ModelTask {
                             cityCode = ancientTreeInfo.getString("cityCode");
                             if (currentEnergy < protectExpense)
                                 break;
-                            Thread.sleep(200);
+                            TimeUtil.sleep(200);
                             jo = new JSONObject(AncientTreeRpcCall.protect(activityId, projectId, cityCode));
                             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                                Log.forest("保护古树🎐[" + cityName + "-" + districtName
+                                LogUtil.forest("保护古树🎐[" + cityName + "-" + districtName
                                         + "]#" + age + "年" + name + ",消耗能量" + protectExpense + "g");
                             } else {
-                                Log.record(jo.getString("resultDesc"));
-                                Log.runtime(jo.toString());
+                                LogUtil.record(jo.getString("resultDesc"));
+                                LogUtil.runtime(jo.toString());
                             }
                         }
                     } else {
-                        Log.record(jo.getString("resultDesc"));
-                        Log.runtime(ancientTreeDetail.toString());
+                        LogUtil.record(jo.getString("resultDesc"));
+                        LogUtil.runtime(ancientTreeDetail.toString());
                     }
-                    Thread.sleep(500L);
+                    TimeUtil.sleep(500L);
                 }
             }
         } catch (Throwable th) {
-            Log.runtime(TAG, "districtDetail err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "districtDetail err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 }
