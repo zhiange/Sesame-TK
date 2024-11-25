@@ -1,18 +1,16 @@
-package fansirsqi.xposed.sesame.model.normal.base;
+package fansirsqi.xposed.sesame.model;
 
 import lombok.Getter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.Model;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.modelFieldExt.BooleanModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.ChoiceModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.IntegerModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.ListModelField;
-import fansirsqi.xposed.sesame.model.task.antOcean.AntOceanRpcCall;
-import fansirsqi.xposed.sesame.model.task.reserve.ReserveRpcCall;
+
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
+import fansirsqi.xposed.sesame.task.antOcean.AntOceanRpcCall;
+import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.*;
 
 /** 基础配置模块 */
@@ -24,7 +22,7 @@ public class BaseModel extends Model {
   /** 执行间隔时间（分钟） */
   @Getter
   private static final IntegerModelField.MultiplyIntegerModelField checkInterval =
-      new IntegerModelField.MultiplyIntegerModelField("checkInterval", "执行间隔(分钟)", 50, 1, 12 * 60, 60_000);
+      new IntegerModelField.MultiplyIntegerModelField("checkInterval", "执行间隔(分钟)", 30, 1, 12 * 60, 60_000);//此处调整至30分钟执行一次，可能会比平常耗电一点。。
 
   /** 定时执行的时间点列表 */
   @Getter
@@ -34,7 +32,7 @@ public class BaseModel extends Model {
   /** 定时唤醒的时间点列表 */
   @Getter
   private static final ListModelField.ListJoinCommaToStringModelField wakenAtTimeList =
-      new ListModelField.ListJoinCommaToStringModelField("wakenAtTimeList", "定时唤醒(关闭:-1)", ListUtil.newArrayList("0650", "2350"));
+      new ListModelField.ListJoinCommaToStringModelField("wakenAtTimeList", "定时唤醒(关闭:-1)", ListUtil.newArrayList("0650","1250", "2350"));
 
   /** 能量收集的时间范围 */
   @Getter
@@ -68,7 +66,7 @@ public class BaseModel extends Model {
   @Getter private static final BooleanModelField showToast = new BooleanModelField("showToast", "气泡提示", true);
 
   /** 气泡提示的纵向偏移量 */
-  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 80);
+  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 85);
 
   /** 只显示中文并设置时区 */
   @Getter private static final BooleanModelField languageSimplifiedChinese = new BooleanModelField("languageSimplifiedChinese", "只显示中文并设置时区", true);
@@ -121,7 +119,7 @@ public class BaseModel extends Model {
                 initReserve();
                 initBeach();
               } catch (Exception e) {
-                Log.printStackTrace(e);
+                LogUtil.printStackTrace(e);
               }
             })
         .start();
@@ -130,14 +128,14 @@ public class BaseModel extends Model {
   /** 清理数据，在模块销毁时调用，清空 Reserve 和 Beach 数据。 */
   public static void destroyData() {
     try {
-      ReserveIdMap.clear();
-      BeachIdMap.clear();
+      ReserveIdMapUtil.clear();
+      BeachIdMapUtil.clear();
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
   }
 
-  /** 初始化保护地任务。通过 ReserveRpc 接口查询可兑换的树项目，将符合条件的保护地任务存入 ReserveIdMap。 条件：项目类型为 "RESERVE" 且状态为 "AVAILABLE"。若调用失败则加载备份的 ReserveIdMap。 */
+  /** 初始化保护地任务。通过 ReserveRpc 接口查询可兑换的树项目，将符合条件的保护地任务存入 ReserveIdMapUtil。 条件：项目类型为 "RESERVE" 且状态为 "AVAILABLE"。若调用失败则加载备份的 ReserveIdMapUtil。 */
   private static void initReserve() {
     try {
       // 调用 ReserveRpc 接口，查询可兑换的树项目列表
@@ -168,35 +166,35 @@ public class BaseModel extends Model {
             // 过滤出 projectType 为 "RESERVE" 且 applyAction 为 "AVAILABLE" 的项目
             if ("RESERVE".equals(item.getString("projectType")) && "AVAILABLE".equals(item.getString("applyAction"))) {
 
-              // 将符合条件的项目添加到 ReserveIdMap
+              // 将符合条件的项目添加到 ReserveIdMapUtil
               String itemId = item.getString("itemId");
               String itemName = item.getString("itemName");
               int energy = item.getInt("energy");
-              ReserveIdMap.add(itemId, itemName + "(" + energy + "g)");
+              ReserveIdMapUtil.add(itemId, itemName + "(" + energy + "g)");
             }
           }
         }
 
-        // 将筛选结果保存到 ReserveIdMap
-        ReserveIdMap.save();
+        // 将筛选结果保存到 ReserveIdMapUtil
+        ReserveIdMapUtil.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
-        Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
+        LogUtil.runtime(jsonResponse.optString("resultDesc", "未知错误"));
       }
     } catch (JSONException e) {
       // 捕获 JSON 解析错误并记录日志
-      Log.runtime("JSON 解析错误：" + e.getMessage());
-      Log.printStackTrace(e);
-      ReserveIdMap.load(); // 若出现异常则加载保存的 ReserveIdMap 备份
+      LogUtil.runtime("JSON 解析错误：" + e.getMessage());
+      LogUtil.printStackTrace(e);
+      ReserveIdMapUtil.load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
-      Log.runtime("初始化保护地任务时出错：" + e.getMessage());
-      Log.printStackTrace(e);
-      ReserveIdMap.load(); // 加载备份的 ReserveIdMap
+      LogUtil.runtime("初始化保护地任务时出错：" + e.getMessage());
+      LogUtil.printStackTrace(e);
+      ReserveIdMapUtil.load(); // 加载备份的 ReserveIdMapUtil
     }
   }
 
-  /** 初始化沙滩任务。通过调用 AntOceanRpc 接口查询养成列表，并将符合条件的任务加入 BeachIdMap。 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL， 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachIdMap 中。 */
+  /** 初始化沙滩任务。通过调用 AntOceanRpc 接口查询养成列表，并将符合条件的任务加入 BeachIdMapUtil。 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL， 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachIdMapUtil 中。 */
   private static void initBeach() {
     try {
       // 调用 AntOceanRpc 接口，查询养成列表信息
@@ -229,30 +227,30 @@ public class BaseModel extends Model {
               continue;
             }
 
-            // 将符合条件的项目添加到 BeachIdMap
+            // 将符合条件的项目添加到 BeachIdMapUtil
             String templateCode = item.getString("templateCode");
             String cultivationName = item.getString("cultivationName");
             int energy = item.getInt("energy");
-            BeachIdMap.add(templateCode, cultivationName + "(" + energy + "g)");
+            BeachIdMapUtil.add(templateCode, cultivationName + "(" + energy + "g)");
           }
         }
 
-        // 将所有筛选结果保存到 BeachIdMap
-        BeachIdMap.save();
+        // 将所有筛选结果保存到 BeachIdMapUtil
+        BeachIdMapUtil.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
-        Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
+        LogUtil.runtime(jsonResponse.optString("resultDesc", "未知错误"));
       }
     } catch (JSONException e) {
       // 记录 JSON 解析过程中的异常
-      Log.runtime("JSON 解析错误：" + e.getMessage());
-      Log.printStackTrace(e);
-      BeachIdMap.load(); // 若出现异常则加载保存的 BeachIdMap 备份
+      LogUtil.runtime("JSON 解析错误：" + e.getMessage());
+      LogUtil.printStackTrace(e);
+      BeachIdMapUtil.load(); // 若出现异常则加载保存的 BeachIdMapUtil 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
-      Log.runtime("初始化沙滩任务时出错：" + e.getMessage());
-      Log.printStackTrace(e);
-      BeachIdMap.load(); // 加载保存的 BeachIdMap 备份
+      LogUtil.runtime("初始化沙滩任务时出错：" + e.getMessage());
+      LogUtil.printStackTrace(e);
+      BeachIdMapUtil.load(); // 加载保存的 BeachIdMapUtil 备份
     }
   }
 
