@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antBookRead;
+package fansirsqi.xposed.sesame.task.antBookRead;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.util.RandomUtil;
