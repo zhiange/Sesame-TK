@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.normal.answerAI;
+package fansirsqi.xposed.sesame.task.AnswerAI;
 
 import java.util.List;
 
