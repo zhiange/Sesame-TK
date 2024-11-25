@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antStall;
+package fansirsqi.xposed.sesame.task.antStall;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
