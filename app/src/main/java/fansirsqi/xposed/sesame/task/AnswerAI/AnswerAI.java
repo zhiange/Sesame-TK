@@ -1,11 +1,11 @@
-package fansirsqi.xposed.sesame.model.normal.answerAI;
+package fansirsqi.xposed.sesame.task.AnswerAI;
 
-import fansirsqi.xposed.sesame.data.Model;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.modelFieldExt.BooleanModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.StringModelField;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
+import fansirsqi.xposed.sesame.util.LogUtil;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class AnswerAI extends Model {
         try {
             return answerAIInterface.getAnswer(text);
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
         return "";
     }
@@ -70,7 +70,7 @@ public class AnswerAI extends Model {
         try {
             return answerAIInterface.getAnswer(text, answerList);
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
         return "";
     }
