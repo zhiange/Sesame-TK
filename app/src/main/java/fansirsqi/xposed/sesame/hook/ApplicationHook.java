@@ -19,21 +19,21 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import fansirsqi.xposed.sesame.data.Config;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.BuildConfig;
-import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.ConfigV2;
-import fansirsqi.xposed.sesame.data.Model;
+import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
-import fansirsqi.xposed.sesame.data.task.BaseTask;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
+import fansirsqi.xposed.sesame.task.BaseTask;
+import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AlipayVersion;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
-import fansirsqi.xposed.sesame.model.base.TaskCommon;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
-import fansirsqi.xposed.sesame.model.task.antMember.AntMemberRpcCall;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.model.BaseModel;
+import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.rpc.bridge.NewRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.OldRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.RpcBridge;
@@ -100,7 +100,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       try {
         XposedHelpers.callStaticMethod(lpparam.classLoader.loadClass(ViewAppInfo.class.getName()), "setRunTypeByCode", RunType.MODEL.getCode());
       } catch (ClassNotFoundException e) {
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
     } else if (ClassUtil.PACKAGE_NAME.equals(lpparam.packageName) && ClassUtil.PACKAGE_NAME.equals(lpparam.processName)) {
       if (hooked) {
@@ -118,7 +118,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               try {
                 alipayVersion = new AlipayVersion(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
               } catch (Exception e) {
-                Log.printStackTrace(e);
+                LogUtil.printStackTrace(e);
               }
               super.afterHookedMethod(param);
             }
@@ -132,10 +132,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             Map.class,
             String.class,
             XC_MethodReplacement.returnConstant(false));
-        Log.runtime(TAG, "hook matchVersion successfully");
+        LogUtil.runtime(TAG, "hook matchVersion successfully");
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook matchVersion err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook matchVersion err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod(
@@ -145,10 +145,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             new XC_MethodHook() {
               @Override
               protected void afterHookedMethod(MethodHookParam param) {
-                Log.runtime(TAG, "Activity onResume");
+                LogUtil.runtime(TAG, "Activity onResume");
                 String targetUid = getUserId();
                 if (targetUid == null) {
-                  Log.record("用户未登录");
+                  LogUtil.record("用户未登录");
                   Toast.show("用户未登录");
                   return;
                 }
@@ -158,28 +158,28 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                   }
                   return;
                 }
-                String currentUid = UserIdMap.getCurrentUid();
+                String currentUid = UserIdMapUtil.getCurrentUid();
                 if (!targetUid.equals(currentUid)) {
                   if (currentUid != null) {
                     initHandler(true);
-                    Log.record("用户已切换");
+                    LogUtil.record("用户已切换");
                     Toast.show("用户已切换");
                     return;
                   }
-                  UserIdMap.initUser(targetUid);
+                  UserIdMapUtil.initUser(targetUid);
                 }
                 if (offline) {
                   offline = false;
                   execHandler();
                   ((Activity) param.thisObject).finish();
-                  Log.runtime(TAG, "Activity reLogin");
+                  LogUtil.runtime(TAG, "Activity reLogin");
                 }
               }
             });
-        Log.runtime(TAG, "hook login successfully");
+        LogUtil.runtime(TAG, "hook login successfully");
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook login err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook login err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod(
@@ -195,7 +195,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (!ClassUtil.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
                   return;
                 }
-                Log.runtime(TAG, "Service onCreate");
+                LogUtil.runtime(TAG, "Service onCreate");
                 context = appService.getApplicationContext();
                 service = appService;
                 mainHandler = new Handler();
@@ -211,26 +211,26 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             if (!init) {
                               return;
                             }
-                            Log.record("应用版本：" + alipayVersion.getVersionString());
-                            Log.record("模块版本：" + modelVersion);
-                            Log.record("开始执行");
+                            LogUtil.record("应用版本：" + alipayVersion.getVersionString());
+                            LogUtil.record("模块版本：" + modelVersion);
+                            LogUtil.record("开始执行");
                             try {
                               int checkInterval = BaseModel.getCheckInterval().getValue();
                               if (lastExecTime + 2000 > System.currentTimeMillis()) {
-                                Log.record("执行间隔较短，跳过执行");
+                                LogUtil.record("执行间隔较短，跳过执行");
                                 execDelayedHandler(checkInterval);
                                 return;
                               }
                               updateDay();
                               String targetUid = getUserId();
-                              String currentUid = UserIdMap.getCurrentUid();
+                              String currentUid = UserIdMapUtil.getCurrentUid();
                               if (targetUid == null || currentUid == null) {
-                                Log.record("用户为空，放弃执行");
+                                LogUtil.record("用户为空，放弃执行");
                                 reLogin();
                                 return;
                               }
                               if (!targetUid.equals(currentUid)) {
-                                Log.record("开始切换用户");
+                                LogUtil.record("开始切换用户");
                                 Toast.show("开始切换用户");
                                 reLogin();
                                 return;
@@ -245,19 +245,19 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                   if (waitTime > 0) {
                                     Thread.sleep(waitTime);
                                   }
-                                  Log.record("执行失败：检查超时");
+                                  LogUtil.record("执行失败：检查超时");
                                   reLogin();
                                   return;
                                 }
                                 reLoginCount.set(0);
                               } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                                Log.record("执行失败：检查中断");
+                                LogUtil.record("执行失败：检查中断");
                                 reLogin();
                                 return;
                               } catch (Exception e) {
-                                Log.record("执行失败：检查异常");
+                                LogUtil.record("执行失败：检查异常");
                                 reLogin();
-                                Log.printStackTrace(TAG, e);
+                                LogUtil.printStackTrace(TAG, e);
                                 return;
                               }
                               TaskCommon.update();
@@ -265,6 +265,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               lastExecTime = System.currentTimeMillis();
 
                               try {
+                                //定时执行的时间列表
                                 List<String> execAtTimeList = BaseModel.getExecAtTimeList().getValue();
                                 if (execAtTimeList != null) {
                                   Calendar lastExecTimeCalendar = TimeUtil.getCalendarByTimeMillis(lastExecTime);
@@ -274,7 +275,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     if (execAtTimeCalendar != null
                                         && lastExecTimeCalendar.compareTo(execAtTimeCalendar) < 0
                                         && nextExecTimeCalendar.compareTo(execAtTimeCalendar) > 0) {
-                                      Log.record("设置定时执行:" + execAtTime);
+                                      LogUtil.record("设置定时执行:" + execAtTime);
                                       execDelayedHandler(execAtTimeCalendar.getTimeInMillis() - lastExecTime);
                                       FileUtil.clearLog();
                                       return;
@@ -282,31 +283,31 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                   }
                                 }
                               } catch (Exception e) {
-                                Log.runtime(TAG, "execAtTime err:");
-                                Log.printStackTrace(TAG, e);
+                                LogUtil.runtime(TAG, "execAtTime err:");
+                                LogUtil.printStackTrace(TAG, e);
                               }
 
                               execDelayedHandler(checkInterval);
                               FileUtil.clearLog();
                             } catch (Exception e) {
-                              Log.record("执行异常:");
-                              Log.printStackTrace(e);
+                              LogUtil.record("执行异常:");
+                              LogUtil.printStackTrace(e);
                             }
                           }
                         });
                 registerBroadcastReceiver(appService);
                 dayCalendar = Calendar.getInstance();
-                Statistics.load();
+                StatisticsUtil.load();
                 FriendWatch.load();
                 if (initHandler(true)) {
                   init = true;
                 }
               }
             });
-        Log.runtime(TAG, "hook service onCreate successfully");
+        LogUtil.runtime(TAG, "hook service onCreate successfully");
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook service onCreate err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook service onCreate err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod(
@@ -320,35 +321,35 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (!ClassUtil.CURRENT_USING_SERVICE.equals(service.getClass().getCanonicalName())) {
                   return;
                 }
-                Log.record("支付宝前台服务被销毁");
+                LogUtil.record("支付宝前台服务被销毁");
                 NotificationUtil.updateStatusText("支付宝前台服务被销毁");
                 destroyHandler(true);
                 FriendWatch.unload();
-                Statistics.unload();
+                StatisticsUtil.unload();
                 restartByBroadcast();
               }
             });
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook service onDestroy err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook service onDestroy err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackground", XC_MethodReplacement.returnConstant(false));
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook FgBgMonitorImpl method 1 err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook FgBgMonitorImpl method 1 err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackground", boolean.class, XC_MethodReplacement.returnConstant(false));
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook FgBgMonitorImpl method 2 err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook FgBgMonitorImpl method 2 err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod("com.alipay.mobile.common.fgbg.FgBgMonitorImpl", classLoader, "isInBackgroundV2", XC_MethodReplacement.returnConstant(false));
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook FgBgMonitorImpl method 3 err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook FgBgMonitorImpl method 3 err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       try {
         XposedHelpers.findAndHookMethod(
@@ -357,13 +358,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             "isAtFrontDesk",
             classLoader.loadClass("android.content.Context"),
             XC_MethodReplacement.returnConstant(true));
-        Log.runtime(TAG, "hook MiscUtils successfully");
+        LogUtil.runtime(TAG, "hook MiscUtils successfully");
       } catch (Throwable t) {
-        Log.runtime(TAG, "hook MiscUtils err:");
-        Log.printStackTrace(TAG, t);
+        LogUtil.runtime(TAG, "hook MiscUtils err:");
+        LogUtil.printStackTrace(TAG, t);
       }
       hooked = true;
-      Log.runtime(TAG, "load success: " + lpparam.packageName);
+      LogUtil.runtime(TAG, "load success: " + lpparam.packageName);
     }
   }
 
@@ -380,11 +381,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         calendar.set(Calendar.MILLISECOND, 0);
         if (setAlarmTask(calendar.getTimeInMillis(), pendingIntent)) {
           alarm0Pi = pendingIntent;
-          Log.record("设置定时唤醒:0|000000");
+          LogUtil.record("设置定时唤醒:0|000000");
         }
       } catch (Exception e) {
-        Log.runtime(TAG, "setWakenAt0 err:");
-        Log.printStackTrace(TAG, e);
+        LogUtil.runtime(TAG, "setWakenAt0 err:");
+        LogUtil.printStackTrace(TAG, e);
       }
       List<String> wakenAtTimeList = BaseModel.getWakenAtTimeList().getValue();
       if (wakenAtTimeList != null && !wakenAtTimeList.isEmpty()) {
@@ -399,19 +400,19 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (setAlarmTask(wakenAtTimeCalendar.getTimeInMillis(), wakenAtTimePendingIntent)) {
                   String wakenAtTimeKey = i + "|" + wakenAtTime;
                   wakenAtTimeAlarmMap.put(wakenAtTimeKey, wakenAtTimePendingIntent);
-                  Log.record("设置定时唤醒:" + wakenAtTimeKey);
+                  LogUtil.record("设置定时唤醒:" + wakenAtTimeKey);
                 }
               }
             }
           } catch (Exception e) {
-            Log.runtime(TAG, "setWakenAtTime err:");
-            Log.printStackTrace(TAG, e);
+            LogUtil.runtime(TAG, "setWakenAtTime err:");
+            LogUtil.printStackTrace(TAG, e);
           }
         }
       }
     } catch (Exception e) {
-      Log.runtime(TAG, "setWakenAtTimeAlarm err:");
-      Log.printStackTrace(TAG, e);
+      LogUtil.runtime(TAG, "setWakenAtTimeAlarm err:");
+      LogUtil.printStackTrace(TAG, e);
     }
   }
 
@@ -423,25 +424,25 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           PendingIntent wakenAtTimePendingIntent = entry.getValue();
           if (unsetAlarmTask(wakenAtTimePendingIntent)) {
             wakenAtTimeAlarmMap.remove(wakenAtTimeKey);
-            Log.record("取消定时唤醒:" + wakenAtTimeKey);
+            LogUtil.record("取消定时唤醒:" + wakenAtTimeKey);
           }
         } catch (Exception e) {
-          Log.runtime(TAG, "unsetWakenAtTime err:");
-          Log.printStackTrace(TAG, e);
+          LogUtil.runtime(TAG, "unsetWakenAtTime err:");
+          LogUtil.printStackTrace(TAG, e);
         }
       }
       try {
         if (unsetAlarmTask(alarm0Pi)) {
           alarm0Pi = null;
-          Log.record("取消定时唤醒:0|000000");
+          LogUtil.record("取消定时唤醒:0|000000");
         }
       } catch (Exception e) {
-        Log.runtime(TAG, "unsetWakenAt0 err:");
-        Log.printStackTrace(TAG, e);
+        LogUtil.runtime(TAG, "unsetWakenAt0 err:");
+        LogUtil.printStackTrace(TAG, e);
       }
     } catch (Exception e) {
-      Log.runtime(TAG, "unsetWakenAtTimeAlarm err:");
-      Log.printStackTrace(TAG, e);
+      LogUtil.runtime(TAG, "unsetWakenAtTimeAlarm err:");
+      LogUtil.printStackTrace(TAG, e);
     }
   }
 
@@ -455,12 +456,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       if (force) {
         String userId = getUserId();
         if (userId == null) {
-          Log.record("用户未登录");
+          LogUtil.record("用户未登录");
           Toast.show("用户未登录");
           return false;
         }
         if (!PermissionUtil.checkAlarmPermissions()) {
-          Log.record("支付宝无闹钟权限");
+          LogUtil.record("支付宝无闹钟权限");
           mainHandler.postDelayed(
               () -> {
                 if (!PermissionUtil.checkOrRequestAlarmPermissions(context)) {
@@ -473,18 +474,18 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               2000);
           return false;
         }
-        UserIdMap.initUser(userId);
+        UserIdMapUtil.initUser(userId);
         Model.initAllModel();
-        Log.record("模块版本：" + modelVersion);
-        Log.record("开始加载");
-        ConfigV2.load(userId);
+        LogUtil.record("模块版本：" + modelVersion);
+        LogUtil.record("开始加载");
+        Config.load(userId);
         if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
-          Log.record("芝麻粒已禁用");
+          LogUtil.record("芝麻粒已禁用");
           Toast.show("芝麻粒已禁用");
           return false;
         }
         if (BaseModel.getBatteryPerm().getValue() && !init && !PermissionUtil.checkBatteryPermissions()) {
-          Log.record("支付宝无始终在后台运行权限");
+          LogUtil.record("支付宝无始终在后台运行权限");
           mainHandler.postDelayed(
               () -> {
                 if (!PermissionUtil.checkOrRequestBatteryPermissions(context)) {
@@ -506,7 +507,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, service.getClass().getName());
             wakeLock.acquire();
           } catch (Throwable t) {
-            Log.printStackTrace(t);
+            LogUtil.printStackTrace(t);
           }
         }
         setWakenAtTimeAlarm();
@@ -553,16 +554,16 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Object object = param.args[15];
                         Object[] recordArray = rpcHookMap.remove(object);
                         if (recordArray != null) {
-                          Log.debug("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
+                          LogUtil.debug("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
                         } else {
-                          Log.debug("删除记录ID: " + object.hashCode());
+                          LogUtil.debug("删除记录ID: " + object.hashCode());
                         }
                       }
                     });
-            Log.runtime(TAG, "hook record request successfully");
+            LogUtil.runtime(TAG, "hook record request successfully");
           } catch (Throwable t) {
-            Log.runtime(TAG, "hook record request err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "hook record request err:");
+            LogUtil.printStackTrace(TAG, t);
           }
           try {
             rpcResponseUnhook =
@@ -583,26 +584,26 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         }
                       }
                     });
-            Log.runtime(TAG, "hook record response successfully");
+            LogUtil.runtime(TAG, "hook record response successfully");
           } catch (Throwable t) {
-            Log.runtime(TAG, "hook record response err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "hook record response err:");
+            LogUtil.printStackTrace(TAG, t);
           }
         }
         NotificationUtil.start(service);
         Model.bootAllModel(classLoader);
-        Status.load();
+        StatusUtil.load();
         updateDay();
         BaseModel.initData();
-        Log.record("加载完成");
+        LogUtil.record("加载完成");
         Toast.show("芝麻粒加载成功");
       }
       offline = false;
       execHandler();
       return true;
     } catch (Throwable th) {
-      Log.runtime(TAG, "startHandler err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "startHandler err:");
+      LogUtil.printStackTrace(TAG, th);
       Toast.show("芝麻粒加载失败");
       return false;
     }
@@ -614,25 +615,25 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         if (service != null) {
           stopHandler();
           BaseModel.destroyData();
-          Status.unload();
+          StatusUtil.unload();
           NotificationUtil.stop();
           RpcIntervalLimit.clearIntervalLimit();
-          ConfigV2.unload();
+          Config.unload();
           Model.destroyAllModel();
-          UserIdMap.unload();
+          UserIdMapUtil.unload();
         }
         if (rpcResponseUnhook != null) {
           try {
             rpcResponseUnhook.unhook();
           } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
           }
         }
         if (rpcRequestUnhook != null) {
           try {
             rpcRequestUnhook.unhook();
           } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
           }
         }
         if (wakeLock != null) {
@@ -648,8 +649,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         ModelTask.stopAllTask();
       }
     } catch (Throwable th) {
-      Log.runtime(TAG, "stopHandler err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "stopHandler err:");
+      LogUtil.printStackTrace(TAG, th);
     }
   }
 
@@ -662,7 +663,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     try {
       NotificationUtil.updateNextExecText(System.currentTimeMillis() + delayMillis);
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
   }
 
@@ -682,26 +683,26 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         dayCalendar.set(Calendar.HOUR_OF_DAY, 0);
         dayCalendar.set(Calendar.MINUTE, 0);
         dayCalendar.set(Calendar.SECOND, 0);
-        Log.record("日期更新为：" + nowYear + "-" + (nowMonth + 1) + "-" + nowDay);
+        LogUtil.record("日期更新为：" + nowYear + "-" + (nowMonth + 1) + "-" + nowDay);
         setWakenAtTimeAlarm();
       }
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
     try {
-      Statistics.save(nowCalendar);
+      StatisticsUtil.save(nowCalendar);
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
     try {
-      Status.save(nowCalendar);
+      StatusUtil.save(nowCalendar);
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
     try {
       FriendWatch.updateDay();
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
   }
 
@@ -714,15 +715,15 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       } else {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
       }
-      Log.runtime(
+      LogUtil.runtime(
               "setAlarmTask triggerAtMillis:"
                   + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis)
                   + " operation:"
                   + operation);
       return true;
     } catch (Throwable th) {
-      Log.runtime(TAG, "setAlarmTask err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "setAlarmTask err:");
+      LogUtil.printStackTrace(TAG, th);
     }
     return false;
   }
@@ -735,8 +736,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       }
       return true;
     } catch (Throwable th) {
-      Log.runtime(TAG, "unsetAlarmTask err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "unsetAlarmTask err:");
+      LogUtil.printStackTrace(TAG, th);
     }
     return false;
   }
@@ -797,8 +798,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     try {
       context.sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.reLogin"));
     } catch (Throwable th) {
-      Log.runtime(TAG, "sesame sendBroadcast reLogin err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "sesame sendBroadcast reLogin err:");
+      LogUtil.printStackTrace(TAG, th);
     }
   }
 
@@ -806,8 +807,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     try {
       context.sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.restart"));
     } catch (Throwable th) {
-      Log.runtime(TAG, "sesame sendBroadcast restart err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "sesame sendBroadcast restart err:");
+      LogUtil.printStackTrace(TAG, th);
     }
   }
 
@@ -832,8 +833,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     try {
       return XposedHelpers.callMethod(getMicroApplicationContext(), "findServiceByInterface", service);
     } catch (Throwable th) {
-      Log.runtime(TAG, "getUserObject err");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "getUserObject err");
+      LogUtil.printStackTrace(TAG, th);
     }
     return null;
   }
@@ -843,8 +844,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       return XposedHelpers.callMethod(
           getServiceObject(XposedHelpers.findClass("com.alipay.mobile.personalbase.service.SocialSdkContactService", classLoader).getName()), "getMyAccountInfoModelByLocal");
     } catch (Throwable th) {
-      Log.runtime(TAG, "getUserObject err");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "getUserObject err");
+      LogUtil.printStackTrace(TAG, th);
     }
     return null;
   }
@@ -856,8 +857,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         return (String) XposedHelpers.getObjectField(userObject, "userId");
       }
     } catch (Throwable th) {
-      Log.runtime(TAG, "getUserId err");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "getUserId err");
+      LogUtil.printStackTrace(TAG, th);
     }
     return null;
   }
@@ -882,12 +883,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     @Override
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
-      Log.runtime("sesame 查看广播:" + action + " intent:" + intent);
+      LogUtil.runtime("sesame 查看广播:" + action + " intent:" + intent);
       if (action != null) {
         switch (action) {
           case "com.eg.android.AlipayGphone.sesame.restart":
             String userId = intent.getStringExtra("userId");
-            if (StringUtil.isEmpty(userId) || Objects.equals(UserIdMap.getCurrentUid(), userId)) {
+            if (StringUtil.isEmpty(userId) || Objects.equals(UserIdMapUtil.getCurrentUid(), userId)) {
               initHandler(true);
             }
             break;
@@ -901,8 +902,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             try {
               context.sendBroadcast(new Intent("fansirsqi.xposed.sesame.status"));
             } catch (Throwable th) {
-              Log.runtime(TAG, "sesame sendBroadcast status err:");
-              Log.printStackTrace(TAG, th);
+              LogUtil.runtime(TAG, "sesame sendBroadcast status err:");
+              LogUtil.printStackTrace(TAG, th);
             }
             break;
         }
@@ -923,10 +924,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       } else {
         context.registerReceiver(new AlipayBroadcastReceiver(), intentFilter);
       }
-      Log.runtime(TAG, "hook registerBroadcastReceiver successfully");
+      LogUtil.runtime(TAG, "hook registerBroadcastReceiver successfully");
     } catch (Throwable th) {
-      Log.runtime(TAG, "hook registerBroadcastReceiver err:");
-      Log.printStackTrace(TAG, th);
+      LogUtil.runtime(TAG, "hook registerBroadcastReceiver err:");
+      LogUtil.printStackTrace(TAG, th);
     }
   }
 }
