@@ -1,13 +1,13 @@
-package fansirsqi.xposed.sesame.model.task.antMember;
+package fansirsqi.xposed.sesame.task.antMember;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.modelFieldExt.BooleanModelField;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
-import fansirsqi.xposed.sesame.model.base.TaskCommon;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.*;
 
 import java.util.Iterator;
@@ -93,7 +93,7 @@ public class AntMember extends ModelTask {
                 }
                 JSONObject data = jo.getJSONObject("data");
                 if (!data.optBoolean("isOpened")) {
-                    Log.record("商家服务👪未开通");
+                    LogUtil.record("商家服务👪未开通");
                     return;
                 }
                 if (zcjSignIn.getValue()) {
@@ -108,23 +108,23 @@ public class AntMember extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
     private void memberSign() {
         try {
-            if (Status.canMemberSignInToday(UserIdMap.getCurrentUid())) {
+            if (StatusUtil.canMemberSignInToday(UserIdMapUtil.getCurrentUid())) {
                 String s = AntMemberRpcCall.queryMemberSigninCalendar();
                 TimeUtil.sleep(500);
                 JSONObject jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    Log.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay")
+                    LogUtil.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay")
                             + "天");
-                    Status.memberSignInToday(UserIdMap.getCurrentUid());
+                    StatusUtil.memberSignInToday(UserIdMapUtil.getCurrentUid());
                 } else {
-                    Log.record(jo.getString("resultDesc"));
-                    Log.runtime(s);
+                    LogUtil.record(jo.getString("resultDesc"));
+                    LogUtil.runtime(s);
                 }
             }
 
@@ -134,7 +134,7 @@ public class AntMember extends ModelTask {
 
             queryAllStatusTaskList();
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -154,22 +154,22 @@ public class AntMember extends ModelTask {
                     s = AntMemberRpcCall.receivePointByUser(id);
                     jo = new JSONObject(s);
                     if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                        Log.other("领取奖励🎖️[" + bizTitle + "]#" + pointAmount + "积分");
+                        LogUtil.other("领取奖励🎖️[" + bizTitle + "]#" + pointAmount + "积分");
                     } else {
-                        Log.record(jo.getString("resultDesc"));
-                        Log.runtime(s);
+                        LogUtil.record(jo.getString("resultDesc"));
+                        LogUtil.runtime(s);
                     }
                 }
                 if (hasNextPage) {
                     queryPointCert(page + 1, pageSize);
                 }
             } else {
-                Log.record(jo.getString("resultDesc"));
-                Log.runtime(s);
+                LogUtil.record(jo.getString("resultDesc"));
+                LogUtil.runtime(s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "queryPointCert err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "queryPointCert err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -182,18 +182,18 @@ public class AntMember extends ModelTask {
                     String activityNo = jo.getString("activityNo");
                     JSONObject joSignIn = new JSONObject(AntMemberRpcCall.signIn(activityNo));
                     if (joSignIn.optBoolean("success")) {
-                        Log.other("商家服务🕴🏻[开门打卡签到成功]");
+                        LogUtil.other("商家服务🕴🏻[开门打卡签到成功]");
                     } else {
-                        Log.record(joSignIn.getString("errorMsg"));
-                        Log.runtime(joSignIn.toString());
+                        LogUtil.record(joSignIn.getString("errorMsg"));
+                        LogUtil.runtime(joSignIn.toString());
                     }
                 }
             } else {
-                Log.record("queryActivity" + " " + s);
+                LogUtil.record("queryActivity" + " " + s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "kmdkSignIn err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "kmdkSignIn err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -203,33 +203,33 @@ public class AntMember extends ModelTask {
                 JSONObject jo = new JSONObject(AntMemberRpcCall.queryActivity());
                 if (jo.optBoolean("success")) {
                     String activityNo = jo.getString("activityNo");
-                    if (!Log.getFormatDate().replace("-", "").equals(activityNo.split("_")[2])) {
+                    if (!LogUtil.getFormatDate().replace("-", "").equals(activityNo.split("_")[2])) {
                         break;
                     }
                     if ("SIGN_UP".equals(jo.getString("signUpStatus"))) {
-                        Log.record("开门打卡今日已报名！");
+                        LogUtil.record("开门打卡今日已报名！");
                         break;
                     }
                     if ("UN_SIGN_UP".equals(jo.getString("signUpStatus"))) {
                         String activityPeriodName = jo.getString("activityPeriodName");
                         JSONObject joSignUp = new JSONObject(AntMemberRpcCall.signUp(activityNo));
                         if (joSignUp.optBoolean("success")) {
-                            Log.other("商家服务🕴🏻[" + activityPeriodName + "开门打卡报名]");
+                            LogUtil.other("商家服务🕴🏻[" + activityPeriodName + "开门打卡报名]");
                             return;
                         } else {
-                            Log.record(joSignUp.getString("errorMsg"));
-                            Log.runtime(joSignUp.toString());
+                            LogUtil.record(joSignUp.getString("errorMsg"));
+                            LogUtil.runtime(joSignUp.toString());
                         }
                     }
                 } else {
-                    Log.record("queryActivity");
-                    Log.runtime(jo.toString());
+                    LogUtil.record("queryActivity");
+                    LogUtil.runtime(jo.toString());
                 }
                 Thread.sleep(500);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "kmdkSignUp err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "kmdkSignUp err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -245,15 +245,15 @@ public class AntMember extends ModelTask {
                         JSONObject data = jo.getJSONObject("data");
                         int todayReward = data.getInt("todayReward");
                         String widgetName = data.getString("widgetName");
-                        Log.other("商家服务🕴🏻[" + widgetName + "]#" + todayReward + "积分");
+                        LogUtil.other("商家服务🕴🏻[" + widgetName + "]#" + todayReward + "积分");
                     }
                 }
             } else {
-                Log.record("zcjSignInQuery" + " " + s);
+                LogUtil.record("zcjSignInQuery" + " " + s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "zcjSignIn err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "zcjSignIn err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -277,7 +277,7 @@ public class AntMember extends ModelTask {
                         if (task.has("pointBallId")) {
                             jo = new JSONObject(AntMemberRpcCall.ballReceive(task.getString("pointBallId")));
                             if (jo.optBoolean("success")) {
-                                Log.other("商家服务🕴🏻[" + title + "]#" + reward);
+                                LogUtil.other("商家服务🕴🏻[" + title + "]#" + reward);
                             }
                         }
                     } else if ("PROCESSING".equals(taskStatus) || "UNRECEIVED".equals(taskStatus)) {
@@ -285,7 +285,7 @@ public class AntMember extends ModelTask {
                             JSONObject bizExtMap = task.getJSONObject("extendLog").getJSONObject("bizExtMap");
                             jo = new JSONObject(AntMemberRpcCall.taskFinish(bizExtMap.getString("bizId")));
                             if (jo.optBoolean("success")) {
-                                Log.other("商家服务🕴🏻[" + title + "]#" + reward);
+                                LogUtil.other("商家服务🕴🏻[" + title + "]#" + reward);
                             }
                             doubleCheck = true;
                         } else {
@@ -330,16 +330,16 @@ public class AntMember extends ModelTask {
                     taskListQuery();
                 }
             } else {
-                Log.runtime("taskListQuery err:" + " " + s);
+                LogUtil.runtime("taskListQuery err:" + " " + s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskListQuery err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskListQuery err:");
+            LogUtil.printStackTrace(TAG, t);
         } finally {
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
-                Log.printStackTrace(e);
+                LogUtil.printStackTrace(e);
             }
         }
     }
@@ -353,15 +353,15 @@ public class AntMember extends ModelTask {
                 if (jo.optBoolean("success")) {
                     jo = new JSONObject(AntMemberRpcCall.produce(actionCode));
                     if (jo.optBoolean("success")) {
-                        Log.other("完成任务🕴🏻[" + title + "]");
+                        LogUtil.other("完成任务🕴🏻[" + title + "]");
                     }
                 }
             } else {
-                Log.record("taskReceive" + " " + s);
+                LogUtil.record("taskReceive" + " " + s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskReceive err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskReceive err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -376,7 +376,7 @@ public class AntMember extends ModelTask {
                 JSONObject jo = new JSONObject(s);
                 boolean doubleCheck = false;
                 if (!"SUCCESS".equals(jo.getString("resultCode"))) {
-                    Log.runtime(TAG, "queryAllStatusTaskList err:" + jo.getString("resultDesc"));
+                    LogUtil.runtime(TAG, "queryAllStatusTaskList err:" + jo.getString("resultDesc"));
                     return;
                 }
                 if (!jo.has("categoryTaskList")) {
@@ -397,8 +397,8 @@ public class AntMember extends ModelTask {
                 break;
             } while (true);
         } catch (Throwable t) {
-            Log.runtime(TAG, "signPageTaskList err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "signPageTaskList err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -411,7 +411,7 @@ public class AntMember extends ModelTask {
             TimeUtil.sleep(500);
             JSONObject jsonObject = new JSONObject(str);
             if (!"SUCCESS".equals(jsonObject.getString("resultCode"))) {
-                Log.runtime(TAG, "queryAllStatusTaskList err:" + jsonObject.getString("resultDesc"));
+                LogUtil.runtime(TAG, "queryAllStatusTaskList err:" + jsonObject.getString("resultDesc"));
                 return;
             }
             if (!jsonObject.has("availableTaskList")) {
@@ -421,8 +421,8 @@ public class AntMember extends ModelTask {
                 queryAllStatusTaskList();
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "queryAllStatusTaskList err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "queryAllStatusTaskList err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -432,7 +432,7 @@ public class AntMember extends ModelTask {
             String str = AntMemberRpcCall.promiseQueryHome();
             JSONObject jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".doPromise.promiseQueryHome", jsonObject.optString("errorMsg"));
+                LogUtil.runtime(TAG + ".doPromise.promiseQueryHome", jsonObject.optString("errorMsg"));
                 return;
             }
             JSONArray jsonArray = (JSONArray) JsonUtil.getValueByPathObject(jsonObject, "data.processingPromises");
@@ -461,8 +461,8 @@ public class AntMember extends ModelTask {
                 promiseSportsRoute();
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "doPromise err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "doPromise err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -474,13 +474,13 @@ public class AntMember extends ModelTask {
                     "\"templateId\":\"go_alipay_sports_route\"}");
             JSONObject jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".doPromise.promiseJoin", jsonObject.optString("errorMsg"));
+                LogUtil.runtime(TAG + ".doPromise.promiseJoin", jsonObject.optString("errorMsg"));
                 return;
             }
-            Log.other("生活记录👟已加入[" + JsonUtil.getValueByPath(jsonObject, "data.promiseName") + "]" + JsonUtil.getValueByPath(jsonObject, "data.dynamicContent.subTitle"));
+            LogUtil.other("生活记录👟已加入[" + JsonUtil.getValueByPath(jsonObject, "data.promiseName") + "]" + JsonUtil.getValueByPath(jsonObject, "data.dynamicContent.subTitle"));
         } catch (Throwable t) {
-            Log.runtime(TAG, "promiseSportsRoute err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "promiseSportsRoute err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -495,7 +495,7 @@ public class AntMember extends ModelTask {
             String str = AntMemberRpcCall.queryMultiSceneWaitToGainList();
             JSONObject jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".securityFund.queryMultiSceneWaitToGainList", jsonObject.optString("errorMsg"));
+                LogUtil.runtime(TAG + ".securityFund.queryMultiSceneWaitToGainList", jsonObject.optString("errorMsg"));
                 return;
             }
             jsonObject = jsonObject.getJSONObject("data");
@@ -522,8 +522,8 @@ public class AntMember extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "securityFund err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "securityFund err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -539,10 +539,10 @@ public class AntMember extends ModelTask {
     private boolean gainMyAndFamilySumInsured(JSONObject jsonObject, boolean isRepeat, String recordId) throws JSONException {
         JSONObject jo = new JSONObject(AntMemberRpcCall.gainMyAndFamilySumInsured(jsonObject));
         if (!jo.optBoolean("success")) {
-            Log.runtime(TAG + ".gainMyAndFamilySumInsured", jo.optString("errorMsg"));
+            LogUtil.runtime(TAG + ".gainMyAndFamilySumInsured", jo.optString("errorMsg"));
             return true;
         }
-        Log.other("生活记录💰领取保障金[" + JsonUtil.getValueByPath(jo, "data.gainSumInsuredDTO.gainSumInsuredYuan") + "]" + "元");
+        LogUtil.other("生活记录💰领取保障金[" + JsonUtil.getValueByPath(jo, "data.gainSumInsuredDTO.gainSumInsuredYuan") + "]" + "元");
         if (isRepeat) {
             promiseQueryDetail(recordId);
             promiseQueryDetail(recordId);
@@ -560,7 +560,7 @@ public class AntMember extends ModelTask {
     private JSONObject promiseQueryDetail(String recordId) throws JSONException {
         JSONObject jo = new JSONObject(AntMemberRpcCall.promiseQueryDetail(recordId));
         if (!jo.optBoolean("success")) {
-            Log.runtime(TAG + ".promiseQueryDetail", jo.optString("errorMsg"));
+            LogUtil.runtime(TAG + ".promiseQueryDetail", jo.optString("errorMsg"));
             return null;
         }
         return jo;
@@ -599,7 +599,7 @@ public class AntMember extends ModelTask {
                     JSONObject jo = new JSONObject(AntMemberRpcCall.applyTask(name, id));
                     TimeUtil.sleep(300);
                     if (!"SUCCESS".equals(jo.getString("resultCode"))) {
-                        Log.runtime(TAG, "signPageTaskList.applyTask err:" + jo.optString("resultDesc"));
+                        LogUtil.runtime(TAG, "signPageTaskList.applyTask err:" + jo.optString("resultDesc"));
                         continue;
                     }
                     String[] targetBusinessArray = targetBusiness.split("#");
@@ -615,43 +615,43 @@ public class AntMember extends ModelTask {
                     jo = new JSONObject(AntMemberRpcCall.executeTask(bizParam, bizSubType));
                     TimeUtil.sleep(300);
                     if (!"SUCCESS".equals(jo.getString("resultCode"))) {
-                        Log.runtime(TAG, "signPageTaskList.executeTask err:" + jo.optString("resultDesc"));
+                        LogUtil.runtime(TAG, "signPageTaskList.executeTask err:" + jo.optString("resultDesc"));
                         continue;
                     }
                     String ex = "";
                     if (hybrid) {
                         ex = "(" + (periodCurrentCount + k + 1) + "/" + periodTargetCount + ")";
                     }
-                    Log.other("会员任务🎖️[" + name + ex + "]#" + awardParamPoint + "积分");
+                    LogUtil.other("会员任务🎖️[" + name + ex + "]#" + awardParamPoint + "积分");
                     doubleCheck = true;
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "signPageTaskList err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "signPageTaskList err:");
+            LogUtil.printStackTrace(TAG, t);
         }
         return doubleCheck;
     }
 
     public void kbMember() {
         try {
-            if (!Status.canKbSignInToday()) {
+            if (!StatusUtil.canKbSignInToday()) {
                 return;
             }
             String s = AntMemberRpcCall.rpcCall_signIn();
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success", false)) {
                 jo = jo.getJSONObject("data");
-                Log.other("口碑签到📅[第" + jo.getString("dayNo") + "天]#获得" + jo.getString("value") + "积分");
-                Status.KbSignInToday();
+                LogUtil.other("口碑签到📅[第" + jo.getString("dayNo") + "天]#获得" + jo.getString("value") + "积分");
+                StatusUtil.KbSignInToday();
             } else if (s.contains("\"HAS_SIGN_IN\"")) {
-                Status.KbSignInToday();
+                StatusUtil.KbSignInToday();
             } else {
-                Log.runtime(TAG, jo.getString("errorMessage"));
+                LogUtil.runtime(TAG, jo.getString("errorMessage"));
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "signIn err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "signIn err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -662,7 +662,7 @@ public class AntMember extends ModelTask {
             // 收取其他
             goldBillCollect("");
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -674,7 +674,7 @@ public class AntMember extends ModelTask {
             String str = AntMemberRpcCall.goldBillCollect(signInfo);
             JSONObject jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".goldBillCollect.goldBillCollect", jsonObject.optString("resultDesc"));
+                LogUtil.runtime(TAG + ".goldBillCollect.goldBillCollect", jsonObject.optString("resultDesc"));
                 return;
             }
             JSONObject object = jsonObject.getJSONObject("result");
@@ -684,12 +684,12 @@ public class AntMember extends ModelTask {
                 return;
             }
             for (int i = 0; i < length; i++) {
-                Log.other("黄金票🙈[" + jsonArray.getString(i) + "]");
+                LogUtil.other("黄金票🙈[" + jsonArray.getString(i) + "]");
             }
-            Log.other("黄金票🏦本次总共获得[" + JsonUtil.getValueByPath(object, "collectedCamp.amount") + "]");
+            LogUtil.other("黄金票🏦本次总共获得[" + JsonUtil.getValueByPath(object, "collectedCamp.amount") + "]");
         } catch (Throwable th) {
-            Log.runtime(TAG, "signIn err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "signIn err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 
@@ -699,7 +699,7 @@ public class AntMember extends ModelTask {
                 String str = AntMemberRpcCall.querySignInBall();
                 JSONObject jsonObject = new JSONObject(str);
                 if (!jsonObject.optBoolean("success")) {
-                    Log.runtime(TAG + ".signIn.querySignInBall", jsonObject.optString("resultDesc"));
+                    LogUtil.runtime(TAG + ".signIn.querySignInBall", jsonObject.optString("resultDesc"));
                     return;
                 }
                 str = JsonUtil.getValueByPath(jsonObject, "data.signInBallModule.signInStatus");
@@ -710,19 +710,19 @@ public class AntMember extends ModelTask {
                 TimeUtil.sleep(300);
                 jsonObject = new JSONObject(str);
                 if (!jsonObject.optBoolean("success")) {
-                    Log.runtime(TAG + ".signIn.continueSignIn", jsonObject.optString("resultDesc"));
+                    LogUtil.runtime(TAG + ".signIn.continueSignIn", jsonObject.optString("resultDesc"));
                     return;
                 }
-                Log.other("游戏中心🎮签到成功");
+                LogUtil.other("游戏中心🎮签到成功");
             } catch (Throwable th) {
-                Log.runtime(TAG, "signIn err:");
-                Log.printStackTrace(TAG, th);
+                LogUtil.runtime(TAG, "signIn err:");
+                LogUtil.printStackTrace(TAG, th);
             }
             try {
                 String str = AntMemberRpcCall.queryPointBallList();
                 JSONObject jsonObject = new JSONObject(str);
                 if (!jsonObject.optBoolean("success")) {
-                    Log.runtime(TAG + ".batchReceive.queryPointBallList", jsonObject.optString("resultDesc"));
+                    LogUtil.runtime(TAG + ".batchReceive.queryPointBallList", jsonObject.optString("resultDesc"));
                     return;
                 }
                 JSONArray jsonArray = (JSONArray) JsonUtil.getValueByPathObject(jsonObject, "data.pointBallList");
@@ -733,16 +733,16 @@ public class AntMember extends ModelTask {
                 TimeUtil.sleep(300);
                 jsonObject = new JSONObject(str);
                 if (jsonObject.optBoolean("success")) {
-                    Log.other("游戏中心🎮全部领取成功[" + JsonUtil.getValueByPath(jsonObject, "data.totalAmount") + "]乐豆");
+                    LogUtil.other("游戏中心🎮全部领取成功[" + JsonUtil.getValueByPath(jsonObject, "data.totalAmount") + "]乐豆");
                 } else {
-                    Log.runtime(TAG + ".batchReceive.batchReceivePointBall", jsonObject.optString("resultDesc"));
+                    LogUtil.runtime(TAG + ".batchReceive.batchReceivePointBall", jsonObject.optString("resultDesc"));
                 }
             } catch (Throwable th) {
-                Log.runtime(TAG, "batchReceive err:");
-                Log.printStackTrace(TAG, th);
+                LogUtil.runtime(TAG, "batchReceive err:");
+                LogUtil.printStackTrace(TAG, th);
             }
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -751,18 +751,18 @@ public class AntMember extends ModelTask {
             String s = AntMemberRpcCall.queryHome();
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
-                Log.runtime(TAG + ".run.queryHome", jo.optString("errorMsg"));
+                LogUtil.runtime(TAG + ".run.queryHome", jo.optString("errorMsg"));
                 return;
             }
             JSONObject entrance = jo.getJSONObject("entrance");
             if (!entrance.optBoolean("openApp")) {
-                Log.other("芝麻信用💌未开通");
+                LogUtil.other("芝麻信用💌未开通");
                 return;
             }
             JSONObject jo2 = new JSONObject(AntMemberRpcCall.queryCreditFeedback());
             TimeUtil.sleep(300);
             if (!jo2.optBoolean("success")) {
-                Log.runtime(TAG + ".collectSesame.queryCreditFeedback", jo2.optString("resultView"));
+                LogUtil.runtime(TAG + ".collectSesame.queryCreditFeedback", jo2.optString("resultView"));
                 return;
             }
             JSONArray ojbect = jo2.getJSONArray("creditFeedbackVOS");
@@ -777,13 +777,13 @@ public class AntMember extends ModelTask {
                 jo2 = new JSONObject(AntMemberRpcCall.collectCreditFeedback(creditFeedbackId));
                 TimeUtil.sleep(300);
                 if (!jo2.optBoolean("success")) {
-                    Log.runtime(TAG + ".collectSesame.collectCreditFeedback", jo2.optString("resultView"));
+                    LogUtil.runtime(TAG + ".collectSesame.collectCreditFeedback", jo2.optString("resultView"));
                     continue;
                 }
-                Log.other("收芝麻粒🙇🏻‍♂️[" + title + "]#" + potentialSize + "粒");
+                LogUtil.other("收芝麻粒🙇🏻‍♂️[" + title + "]#" + potentialSize + "粒");
             }
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -791,7 +791,7 @@ public class AntMember extends ModelTask {
         try {
             JSONObject jo = new JSONObject(AntMemberRpcCall.querySignInProcess("AP16242232", "INS_BLUE_BEAN_SIGN"));
             if (!jo.optBoolean("success")) {
-                Log.runtime(jo.toString());
+                LogUtil.runtime(jo.toString());
                 return;
             }
             if (jo.getJSONObject("result").getBoolean("canPush")) {
@@ -799,15 +799,15 @@ public class AntMember extends ModelTask {
                 if (jo.optBoolean("success")) {
                     String prizeName = jo.getJSONObject("result").getJSONArray("prizeSendOrderDTOList").getJSONObject(0)
                             .getString("prizeName");
-                    Log.record("安心豆🫘[" + prizeName + "]");
+                    LogUtil.record("安心豆🫘[" + prizeName + "]");
                 } else {
-                    Log.runtime(jo.toString());
+                    LogUtil.runtime(jo.toString());
                 }
             }
 
         } catch (Throwable t) {
-            Log.runtime(TAG, "beanSignIn err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "beanSignIn err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -815,13 +815,13 @@ public class AntMember extends ModelTask {
         try {
             JSONObject jo = new JSONObject(AntMemberRpcCall.queryUserAccountInfo("INS_BLUE_BEAN"));
             if (!jo.optBoolean("success")) {
-                Log.runtime(jo.toString());
+                LogUtil.runtime(jo.toString());
                 return;
             }
             int userCurrentPoint = jo.getJSONObject("result").getInt("userCurrentPoint");
             jo = new JSONObject(AntMemberRpcCall.beanExchangeDetail("IT20230214000700069722"));
             if (!jo.optBoolean("success")) {
-                Log.runtime(jo.toString());
+                LogUtil.runtime(jo.toString());
                 return;
             }
             jo = jo.getJSONObject("result").getJSONObject("rspContext").getJSONObject("params").getJSONObject("exchangeDetail");
@@ -834,13 +834,13 @@ public class AntMember extends ModelTask {
             }
             jo = new JSONObject(AntMemberRpcCall.beanExchange(itemId, realConsumePointAmount));
             if (jo.optBoolean("success")) {
-                Log.record("安心豆🫘[兑换:" + itemName + "]");
+                LogUtil.record("安心豆🫘[兑换:" + itemName + "]");
             } else {
-                Log.runtime(jo.toString());
+                LogUtil.runtime(jo.toString());
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "beanExchangeBubbleBoost err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "beanExchangeBubbleBoost err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 }
