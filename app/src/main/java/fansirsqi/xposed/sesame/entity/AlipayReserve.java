@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.ReserveIdMap;
+import fansirsqi.xposed.sesame.util.ReserveIdMapUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ public class AlipayReserve extends IdAndName {
     }
 
     /**
-     * 获取包含所有保留项的列表，首次调用时从 ReserveIdMap 初始化。
+     * 获取包含所有保留项的列表，首次调用时从 ReserveIdMapUtil 初始化。
      * 使用双重检查锁定机制实现懒加载以提高性能。
      * @return 包含所有 AlipayReserve 对象的不可变列表
      */
@@ -35,7 +35,7 @@ public class AlipayReserve extends IdAndName {
             synchronized (AlipayReserve.class) {
                 if (list == null) {
                     List<AlipayReserve> tempList = new ArrayList<>();
-                    Set<Map.Entry<String, String>> idSet = ReserveIdMap.getMap().entrySet();
+                    Set<Map.Entry<String, String>> idSet = ReserveIdMapUtil.getMap().entrySet();
                     for (Map.Entry<String, String> entry : idSet) {
                         tempList.add(new AlipayReserve(entry.getKey(), entry.getValue()));
                     }
