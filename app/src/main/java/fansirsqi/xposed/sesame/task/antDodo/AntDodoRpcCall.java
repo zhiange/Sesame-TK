@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antDodo;
+package fansirsqi.xposed.sesame.task.antDodo;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.util.RandomUtil;
