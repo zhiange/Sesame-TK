@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antForest;
+package fansirsqi.xposed.sesame.task.antForest;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +11,9 @@ import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
+/**
+ * 森林 RPC 调用类
+ */
 public class AntForestRpcCall {
 
   private static String VERSION = "";
@@ -249,7 +252,6 @@ public class AntForestRpcCall {
     jo.put("onlyGive", onlyGive ? "Y" : "");
     jo.put("source", "chInfo_ch_appcenter__chsub_9patch");
     jo.put("version", VERSION);
-
     return ApplicationHook.requestString("alipay.antforest.forest.h5.queryPropList", new JSONArray().put(jo).toString());
   }
 
@@ -333,7 +335,7 @@ public class AntForestRpcCall {
     return ApplicationHook.requestString(operationTpye, requestDate);
   }
 
-  /* 巡护保护地 */
+  /** 巡护保护地 */
   public static String queryUserPatrol() throws JSONException {
     JSONObject jo = new JSONObject();
     jo.put("source", "ant_forest");
@@ -414,20 +416,20 @@ public class AntForestRpcCall {
         "[{\"propId\":\"" + propId + "\",\"propType\":\"" + propType + "\",\"shortDay\":\"" + shortDay + "\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
   }
 
-  /* 复活能量 */
+  /** 复活能量 */
   public static String protectBubble(String targetUserId) {
     return ApplicationHook.requestString(
         "alipay.antforest.forest.h5.protectBubble", "[{\"source\":\"ANT_FOREST_H5\",\"targetUserId\":\"" + targetUserId + "\",\"version\":\"" + VERSION + "\"}]");
   }
 
-  /* 森林礼盒 */
+  /** 森林礼盒 */
   public static String collectFriendGiftBox(String targetId, String targetUserId) {
     return ApplicationHook.requestString(
         "alipay.antforest.forest.h5.collectFriendGiftBox",
         "[{\"source\":\"chInfo_ch_appcenter__chsub_9patch\",\"targetId\":\"" + targetId + "\",\"targetUserId\":\"" + targetUserId + "\"}]");
   }
 
-  /* 6秒拼手速 打地鼠 */
+  /** 6秒拼手速 打地鼠 */
   public static String startWhackMole() {
     return ApplicationHook.requestString("alipay.antforest.forest.h5.startWhackMole", "[{\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
   }
@@ -448,7 +450,7 @@ public class AntForestRpcCall {
     return ApplicationHook.requestString("alipay.antforest.forest.h5.updateUserConfig", "[{\"configMap\":{\"whackMole\":\"N\"},\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
   }
 
-  /* 森林集市 */
+  /** 森林集市 */
   public static String consultForSendEnergyByAction(String sourceType) {
     return ApplicationHook.requestString("alipay.bizfmcg.greenlife.consultForSendEnergyByAction", "[{\"sourceType\":\"" + sourceType + "\"}]");
   }
@@ -459,14 +461,14 @@ public class AntForestRpcCall {
         "[{\"actionType\":\"GOODS_BROWSE\",\"requestId\":\"" + RandomUtil.getRandomString(8) + "\",\"sourceType\":\"" + sourceType + "\"}]");
   }
 
-  /* 翻倍额外能量收取 */
+  /** 翻倍额外能量收取 */
   public static String collectRobExpandEnergy(String propId, String propType) {
     return ApplicationHook.requestString(
         "alipay.antforest.forest.h5.collectRobExpandEnergy",
         "[{\"propId\":\"" + propId + "\",\"propType\":\"" + propType + "\",\"source\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
   }
 
-  /* 医疗健康 */
+  /** 医疗健康 */
   public static String medical_health_feeds_query() {
     return ApplicationHook.requestString(
         "alipay.iblib.channel.build.query",
@@ -511,4 +513,74 @@ public class AntForestRpcCall {
             + id
             + "\"}],\"scene\":\"FEEDS\"},\"version\":\"2.0\"}]");
   }
+  /**
+   * 查询绿色行动
+   *
+   * @return 结果
+   */
+  public static String ecolifeQueryHomePage() {
+    return ApplicationHook.requestString("alipay.ecolife.rpc.h5.queryHomePage",
+            "[{\"channel\":\"ALIPAY\",\"source\":\"search_brandbox\"}]");
+  }
+
+  /**
+   * 开通绿色行动
+   *
+   * @return 结果
+   */
+  public static String ecolifeOpenEcolife() {
+    return ApplicationHook.requestString("alipay.ecolife.rpc.h5.openEcolife",
+            "[{\"channel\":\"ALIPAY\",\"source\":\"renwuGD\"}]");
+  }
+
+  /**
+   * 执行任务
+   *
+   * @param actionId actionId
+   * @param dayPoint 当前日期
+   * @param source   来源renwuGD,photo-comparison,search_brandbox
+   * @return 结果
+   */
+  public static String ecolifeTick(String actionId, String dayPoint, String source) {
+    String args1 = "[{\"actionId\":\"" + actionId + "\",\"channel\":\"ALIPAY\",\"dayPoint\":\""
+            + dayPoint + "\",\"generateEnergy\":false,\"source\":\"" + source + "\"}]";
+    return ApplicationHook.requestString("alipay.ecolife.rpc.h5.tick", args1);
+  }
+
+  /**
+   * 查询任务信息
+   *
+   * @param source   来源renwuGD,photo-comparison,search_brandbox
+   * @param dayPoint 当前日期
+   * @return 结果
+   */
+  public static String ecolifeQueryDish(String source, String dayPoint) {
+    return ApplicationHook.requestString("alipay.ecolife.rpc.h5.queryDish",
+            "[{\"channel\":\"ALIPAY\",\"dayPoint\":\"" + dayPoint
+                    + "\",\"source\":\"" + source + "\"}]");
+  }
+
+  /**
+   * 上传照片
+   *
+   * @param operateType 类型：餐前、餐后
+   * @param imageId     图片id
+   * @param conf1       位移值？
+   * @param conf2       conf2
+   * @param conf3       conf3
+   * @return 结果
+   */
+  public static String ecolifeUploadDishImage(String operateType, String imageId,
+                                              double conf1, double conf2, double conf3, String dayPoint) {
+    return ApplicationHook.requestString("alipay.ecolife.rpc.h5.uploadDishImage",
+            "[{\"channel\":\"ALIPAY\",\"dayPoint\":\"" + dayPoint +
+                    "\",\"source\":\"photo-comparison\",\"uploadParamMap\":{\"AIResult\":[{\"conf\":" + conf1 + ",\"kvPair\":false," +
+                    "\"label\":\"other\",\"pos\":[1.0002995,0.22104378,0.0011976048,0.77727276],\"value\":\"\"}," +
+                    "{\"conf\":" + conf2 + ",\"kvPair\":false,\"label\":\"guangpan\",\"pos\":[1.0002995,0.22104378,0.0011976048,0.77727276]," +
+                    "\"value\":\"\"},{\"conf\":" + conf3 + ",\"kvPair\":false,\"label\":\"feiguangpan\"," +
+                    "\"pos\":[1.0002995,0.22104378,0.0011976048,0.77727276],\"value\":\"\"}],\"existAIResult\":true,\"imageId\":\"" +
+                    imageId + "\",\"imageUrl\":\"https://mdn.alipayobjects.com/afts/img/" + imageId +
+                    "/original?bz=APM_20000067\",\"operateType\":\"" + operateType + "\"}}]");
+  }
+
 }
