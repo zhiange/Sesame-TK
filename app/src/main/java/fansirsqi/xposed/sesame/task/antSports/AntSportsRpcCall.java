@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antSports;
+package fansirsqi.xposed.sesame.task.antSports;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 
