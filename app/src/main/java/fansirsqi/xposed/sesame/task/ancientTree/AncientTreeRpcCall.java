@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.ancientTree;
+package fansirsqi.xposed.sesame.task.ancientTree;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 
