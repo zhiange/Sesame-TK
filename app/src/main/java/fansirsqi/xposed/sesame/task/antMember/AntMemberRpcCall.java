@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.antMember;
+package fansirsqi.xposed.sesame.task.antMember;
 
 import org.json.JSONException;
 import org.json.JSONObject;
