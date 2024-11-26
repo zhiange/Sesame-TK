@@ -1,11 +1,11 @@
-name: Build and Upload APKs
+name: Build, Upload, and Sync
 
 on:
   release:
-    types: [published]
+    types: [published] # 自动触发同步
 
 jobs:
-  build:
+  build-and-sync:
     runs-on: ubuntu-latest
 
     steps:
@@ -95,3 +95,21 @@ jobs:
           overwrite: true
           checksums: sha256
           checksums_file_name: CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.%algo%
+
+      # 同步 Release 到目标仓库
+      - name: Sync Release to Target Repository
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
+            ${{ steps.sign_compatible_apk.outputs.signedFile }}
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          repo: Xposed-Modules-Repo/fansirsqi.xposed.sesame # 目标仓库
+          allow_override: true # 允许覆盖已有的 Release
+          body: |
+            本 Release 同步自源仓库 [Sesame-TK](https://github.com/${{ github.repository }})
+            **更新内容**:
+            ${{ github.event.release.body || '无更新说明' }}
