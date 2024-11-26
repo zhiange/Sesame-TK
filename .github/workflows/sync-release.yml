@@ -38,15 +38,16 @@ jobs:
       - name: Get Source Release Assets
         id: get_assets
         run: |
-          SOURCE_REPO="your-username/your-repo-name"  # 替换为源仓库
+          SOURCE_REPO="${{ github.repository }}"  # 自动获取当前仓库名称
           API_URL="https://api.github.com/repos/$SOURCE_REPO/releases/tags/$TAG_NAME"
-          
+
           # 获取源仓库该标签下所有的 Release 资产
           ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $API_URL | jq -r '.assets[] | {name: .name, browser_download_url: .browser_download_url}')
 
           # 输出所有资产的 URL
           echo "Assets for release $TAG_NAME: $ASSETS"
           echo "$ASSETS" > assets.json
+      
 
       - name: Download Assets from Source Repository
         id: download_assets
