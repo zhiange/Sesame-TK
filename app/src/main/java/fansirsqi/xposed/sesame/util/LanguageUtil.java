@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import java.util.Locale;
 
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
+import fansirsqi.xposed.sesame.model.BaseModel;
 
 /**
  * 语言工具类，用于设置应用程序的语言环境。
