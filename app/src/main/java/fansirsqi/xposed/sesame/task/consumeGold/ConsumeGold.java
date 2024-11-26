@@ -1,13 +1,13 @@
-package fansirsqi.xposed.sesame.model.task.consumeGold;
+package fansirsqi.xposed.sesame.task.consumeGold;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
-import fansirsqi.xposed.sesame.model.base.TaskCommon;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.LogUtil;
 
 public class ConsumeGold extends ModelTask {
     private static final String TAG = ConsumeGold.class.getSimpleName();
@@ -47,8 +47,8 @@ public class ConsumeGold extends ModelTask {
             taskV2Index("CG_BROWSER_AD_FEEDS");
             consumeGoldIndex();
         } catch (Throwable t) {
-            Log.runtime(TAG, "start.run err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "start.run err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -80,12 +80,12 @@ public class ConsumeGold extends ModelTask {
                 if (doubleCheck)
                     taskV2Index(taskSceneCode);
             } else {
-                Log.record(jo.getString("resultDesc"));
-                Log.runtime(s);
+                LogUtil.record(jo.getString("resultDesc"));
+                LogUtil.runtime(s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskV2Index err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskV2Index err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -95,11 +95,11 @@ public class ConsumeGold extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success")) {
                 int receiveAmount = jo.getInt("receiveAmount");
-                Log.other("赚消费金💰[" + name + "]#" + receiveAmount);
+                LogUtil.other("赚消费金💰[" + name + "]#" + receiveAmount);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskV2TriggerReceive err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskV2TriggerReceive err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -111,8 +111,8 @@ public class ConsumeGold extends ModelTask {
 
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskV2TriggerSignUp err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskV2TriggerSignUp err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -124,8 +124,8 @@ public class ConsumeGold extends ModelTask {
 
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "taskV2TriggerSend err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "taskV2TriggerSend err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -151,7 +151,7 @@ public class ConsumeGold extends ModelTask {
                         if (jo.optBoolean("success")) {
                             JSONObject homePromoPrizeInfoDTO = jo.getJSONObject("homePromoPrizeInfoDTO");
                             int quantity = homePromoPrizeInfoDTO.getInt("quantity");
-                            Log.other("赚消费金💰[投5币抽]#" + quantity);
+                            LogUtil.other("赚消费金💰[投5币抽]#" + quantity);
                             if (homePromoPrizeInfoDTO.has("promoAdvertisementInfo")) {
                                 JSONObject promoAdvertisementInfo = homePromoPrizeInfoDTO
                                         .getJSONObject("promoAdvertisementInfo");
@@ -163,8 +163,8 @@ public class ConsumeGold extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "queryTreasureBox err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "queryTreasureBox err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -178,13 +178,13 @@ public class ConsumeGold extends ModelTask {
                     jo = new JSONObject(ConsumeGoldRpcCall.openBoxAward());
                     if (jo.optBoolean("success")) {
                         int amount = jo.getInt("amount");
-                        Log.other("消费金签到💰[" + amount + "金币]");
+                        LogUtil.other("消费金签到💰[" + amount + "金币]");
                     }
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "signinCalendar err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "signinCalendar err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 }
