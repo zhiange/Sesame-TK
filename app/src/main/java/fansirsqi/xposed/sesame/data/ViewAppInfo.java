@@ -48,14 +48,14 @@ public final class ViewAppInfo {
     if (ViewAppInfo.context == null) {
       ViewAppInfo.context = context;
       // 设置构建编号
-      appBuildNumber = BuildConfig.BUILD_NUMBER;
+      appBuildNumber = BuildConfig.VERSION_CODE;
       // 设置应用名称
       appTitle = context.getString(R.string.app_name) + "-TK·alpha";
       // 设置构建目标信息
       appBuildTarget = "Build Date: " + BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
       // 设置版本号
       try {
-        appVersion = BuildConfig.BUILD_TAG + "." + BuildConfig.BUILD_NUMBER;
+        appVersion = BuildConfig.VERSION_NAME;
       } catch (Exception e) {
         LogUtil.printStackTrace(e);
       }
