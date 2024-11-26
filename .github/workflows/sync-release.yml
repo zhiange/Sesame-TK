@@ -6,23 +6,38 @@ on:
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "The tag name of the release to sync"
+        required: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Determine Source Tag
+        id: determine_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "tag_name=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+          else
+            echo "tag_name=${{ inputs.tag_name }}" >> $GITHUB_ENV
+          fi
+          echo "Determined tag: ${{ env.tag_name }}"
+
       - name: Sync Release to Target Repository
+        env:
+          TAG_NAME: ${{ env.tag_name }}
         run: |
           TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"
-          SOURCE_TAG="${{ github.event.workflow_run.head_branch }}"
           API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
 
           # 创建目标仓库的 Release
           RELEASE_RESPONSE=$(curl -s -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -d '{
-                     "tag_name": "'"$SOURCE_TAG"'",
-                     "name": "'"$SOURCE_TAG"'",
+                     "tag_name": "'"$TAG_NAME"'",
+                     "name": "'"$TAG_NAME"'",
                      "body": "Release synced from source repository",
                      "draft": false,
                      "prerelease": false
@@ -41,10 +56,10 @@ jobs:
           # 上传 APK 到目标仓库的 Release
           curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -H "Content-Type: application/octet-stream" \
-               --data-binary @${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${SOURCE_TAG}.apk \
-               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${SOURCE_TAG}.apk"
+               --data-binary @${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${TAG_NAME}.apk \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${TAG_NAME}.apk"
 
           curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -H "Content-Type: application/octet-stream" \
-               --data-binary @${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${SOURCE_TAG}.apk \
-               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${SOURCE_TAG}.apk"
+               --data-binary @${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${TAG_NAME}.apk \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${TAG_NAME}.apk"
