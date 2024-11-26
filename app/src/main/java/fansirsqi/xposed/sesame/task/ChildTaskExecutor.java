@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.data.task;
+package fansirsqi.xposed.sesame.task;
 
 /**
  * ChildTaskExecutor 接口用于定义管理子任务的方法。
