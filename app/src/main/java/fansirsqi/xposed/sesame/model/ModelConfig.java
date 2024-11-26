@@ -1,7 +1,7 @@
-package fansirsqi.xposed.sesame.data;
+package fansirsqi.xposed.sesame.model;
 
 import lombok.Data;
-import fansirsqi.xposed.sesame.data.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 
 import java.io.Serializable;
 import java.util.Map;
