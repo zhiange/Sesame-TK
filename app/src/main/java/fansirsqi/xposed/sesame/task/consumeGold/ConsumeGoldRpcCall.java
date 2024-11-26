@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.consumeGold;
+package fansirsqi.xposed.sesame.task.consumeGold;
 
 import java.util.UUID;
 
