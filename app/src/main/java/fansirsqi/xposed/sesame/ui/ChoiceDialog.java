@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.ui;
 import android.content.Context;
 import androidx.appcompat.app.AlertDialog;
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.modelFieldExt.ChoiceModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 
 public class ChoiceDialog {
 
