@@ -12,10 +12,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
+import fansirsqi.xposed.sesame.model.BaseModel;
 
 /** 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。 */
-public class Log {
+public class LogUtil {
 
   // 日志初始化，设置日志等级
   static {
