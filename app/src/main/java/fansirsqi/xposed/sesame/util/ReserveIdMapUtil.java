@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ReserveIdMap {
+public class ReserveIdMapUtil {
 
     private static final Map<String, String> idMap = new ConcurrentHashMap<>();
 
@@ -38,7 +38,7 @@ public class ReserveIdMap {
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
     }
 
