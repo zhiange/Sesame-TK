@@ -56,7 +56,7 @@ public class TimeUtil {
                 return isAfterOrCompareTimeStr(timeMillis, min) && isBeforeOrCompareTimeStr(timeMillis, max);
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
         return false;
     }
@@ -177,7 +177,7 @@ public class TimeUtil {
                 return timeCalendar.compareTo(compareCalendar);
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class TimeUtil {
             Calendar timeCalendar = getCalendarByTimeMillis(timeMillis);
             return getCalendarByTimeStr(timeCalendar, timeStr);
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
         return null;
     }
@@ -241,7 +241,7 @@ public class TimeUtil {
             timeCalendar.set(Calendar.MILLISECOND, 0);
             return timeCalendar;
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
         return null;
     }
@@ -271,26 +271,28 @@ public class TimeUtil {
     }
 
     /**
-     * 获取当前日期的字符串表示。
+     * 获取当前日期的字符串表示，使用固定格式 "yyyy-MM-dd"。
      *
      * @return 日期字符串，格式为 "yyyy-MM-dd"。
      */
     public static String getDateStr() {
-        return getDateStr(0);
+        return getDateStr(0, "yyyy-MM-dd");
     }
 
     /**
-     * 获取给定天数偏移后的日期字符串表示。
+     * 获取给定天数偏移后的日期字符串表示，使用固定格式。
      *
      * @param plusDay 天数偏移量。
-     * @return 日期字符串，格式为 "yyyy-MM-dd"。
+     * @param pattern 日期格式模板，例如 "yyyy-MM-dd"。
+     * @return 格式化后的日期字符串。
      */
-    public static String getDateStr(int plusDay) {
+    public static String getDateStr(int plusDay, String pattern) {
         Calendar c = Calendar.getInstance();
         if (plusDay != 0) {
             c.add(Calendar.DATE, plusDay);
         }
-        return DateFormat.getDateInstance().format(c.getTime());
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+        return sdf.format(c.getTime());
     }
 
     /**
