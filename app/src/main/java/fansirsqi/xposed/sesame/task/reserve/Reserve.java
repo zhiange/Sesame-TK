@@ -1,16 +1,16 @@
-package fansirsqi.xposed.sesame.model.task.reserve;
+package fansirsqi.xposed.sesame.task.reserve;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectAndCountModelField;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
+import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AlipayReserve;
-import fansirsqi.xposed.sesame.model.base.TaskCommon;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.RandomUtil;
-import fansirsqi.xposed.sesame.util.Status;
+import fansirsqi.xposed.sesame.util.StatusUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -44,11 +44,11 @@ public class Reserve extends ModelTask {
 
     public void run() {
         try {
-            Log.record("开始检测保护地");
+            LogUtil.record("开始检测保护地");
             animalReserve();
         } catch (Throwable t) {
-            Log.runtime(TAG, "start.run err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "start.run err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -79,7 +79,7 @@ public class Reserve extends ModelTask {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         if (Objects.equals(entry.getKey(), projectId)) {
                             Integer count = entry.getValue();
-                            if (count != null && count > 0 && Status.canReserveToday(projectId, count)) {
+                            if (count != null && count > 0 && StatusUtil.canReserveToday(projectId, count)) {
                                 exchangeTree(projectId, itemName, count);
                             }
                             break;
@@ -87,11 +87,11 @@ public class Reserve extends ModelTask {
                     }
                 }
             } else {
-                Log.runtime(TAG, jo.getString("resultDesc"));
+                LogUtil.runtime(TAG, jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "animalReserve err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "animalReserve err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -107,20 +107,20 @@ public class Reserve extends ModelTask {
                     if (currentEnergy >= jo.getInt("energy")) {
                         return true;
                     } else {
-                        Log.forest("领保护地🏕️[" + jo.getString("projectName") + "]#能量不足停止申请");
+                        LogUtil.forest("领保护地🏕️[" + jo.getString("projectName") + "]#能量不足停止申请");
                         return false;
                     }
                 } else {
-                    Log.forest("领保护地🏕️[" + jo.getString("projectName") + "]#似乎没有了");
+                    LogUtil.forest("领保护地🏕️[" + jo.getString("projectName") + "]#似乎没有了");
                     return false;
                 }
             } else {
-                Log.record(jo.getString("resultDesc"));
-                Log.runtime(s);
+                LogUtil.record(jo.getString("resultDesc"));
+                LogUtil.runtime(s);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "queryTreeForExchange err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "queryTreeForExchange err:");
+            LogUtil.printStackTrace(TAG, t);
         }
         return false;
     }
@@ -138,32 +138,32 @@ public class Reserve extends ModelTask {
                 jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     int vitalityAmount = jo.optInt("vitalityAmount", 0);
-                    appliedTimes = Status.getReserveTimes(projectId) + 1;
+                    appliedTimes = StatusUtil.getReserveTimes(projectId) + 1;
                     String str = "领保护地🏕️[" + itemName + "]#第" + appliedTimes + "次"
                             + (vitalityAmount > 0 ? "-活力值+" + vitalityAmount : "");
-                    Log.forest(str);
-                    Status.reserveToday(projectId, 1);
+                    LogUtil.forest(str);
+                    StatusUtil.reserveToday(projectId, 1);
                 } else {
-                    Log.record(jo.getString("resultDesc"));
-                    Log.runtime(jo.toString());
-                    Log.forest("领保护地🏕️[" + itemName + "]#发生未知错误，停止申请");
-                    // Statistics.reserveToday(projectId, count);
+                    LogUtil.record(jo.getString("resultDesc"));
+                    LogUtil.runtime(jo.toString());
+                    LogUtil.forest("领保护地🏕️[" + itemName + "]#发生未知错误，停止申请");
+                    // StatisticsUtil.reserveToday(projectId, count);
                     break;
                 }
                 Thread.sleep(300);
                 canApply = queryTreeForExchange(projectId);
                 if (!canApply) {
-                    // Statistics.reserveToday(projectId, count);
+                    // StatisticsUtil.reserveToday(projectId, count);
                     break;
                 } else {
                     Thread.sleep(300);
                 }
-                if (!Status.canReserveToday(projectId, count))
+                if (!StatusUtil.canReserveToday(projectId, count))
                     break;
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "exchangeTree err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "exchangeTree err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
