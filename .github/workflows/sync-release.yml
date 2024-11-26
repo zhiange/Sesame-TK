@@ -1,0 +1,50 @@
+name: Sync Release to Target Repository
+
+on:
+  workflow_run:
+    workflows: ["Build and Upload APKs"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync Release to Target Repository
+        run: |
+          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"
+          SOURCE_TAG="${{ github.event.workflow_run.head_branch }}"
+          API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
+
+          # 创建目标仓库的 Release
+          RELEASE_RESPONSE=$(curl -s -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+               -d '{
+                     "tag_name": "'"$SOURCE_TAG"'",
+                     "name": "'"$SOURCE_TAG"'",
+                     "body": "Release synced from source repository",
+                     "draft": false,
+                     "prerelease": false
+                   }' \
+               $API_URL)
+
+          # 提取 Release ID
+          TARGET_RELEASE=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
+
+          if [ "$TARGET_RELEASE" == "null" ] || [ -z "$TARGET_RELEASE" ]; then
+            echo "Failed to create Release in target repository."
+            echo "Response: $RELEASE_RESPONSE"
+            exit 1
+          fi
+
+          # 上传 APK 到目标仓库的 Release
+          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+               -H "Content-Type: application/octet-stream" \
+               --data-binary @${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${SOURCE_TAG}.apk \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${SOURCE_TAG}.apk"
+
+          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+               -H "Content-Type: application/octet-stream" \
+               --data-binary @${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${SOURCE_TAG}.apk \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${SOURCE_TAG}.apk"
