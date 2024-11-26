@@ -67,15 +67,15 @@ public class FriendWatch extends IdAndName {
             JSONObject joSingle = joFriendWatch.optJSONObject(id);
             if (joSingle == null) {
                 joSingle = new JSONObject();
-                joSingle.put("name", UserIdMap.getMaskName(id));
+                joSingle.put("name", UserIdMapUtil.getMaskName(id));
                 joSingle.put("allGet", 0);
                 joSingle.put("startTime", TimeUtil.getDateStr());
                 joFriendWatch.put(id, joSingle);
             }
             joSingle.put("weekGet", joSingle.optInt("weekGet", 0) + collectedEnergy);
         } catch (Throwable th) {
-            Log.runtime(TAG, "friendWatch err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "friendWatch err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 
@@ -86,8 +86,8 @@ public class FriendWatch extends IdAndName {
         try {
             FileUtil.write2File(joFriendWatch.toString(), FileUtil.getFriendWatchFile());
         } catch (Exception e) {
-            Log.runtime(TAG, "friendWatch save err:");
-            Log.printStackTrace(TAG, e);
+            LogUtil.runtime(TAG, "friendWatch save err:");
+            LogUtil.printStackTrace(TAG, e);
         }
     }
 
@@ -112,8 +112,8 @@ public class FriendWatch extends IdAndName {
             }
             save();
         } catch (Throwable th) {
-            Log.runtime(TAG, "friendWatch updateDay err:");
-            Log.printStackTrace(TAG, th);
+            LogUtil.runtime(TAG, "friendWatch updateDay err:");
+            LogUtil.printStackTrace(TAG, th);
         }
     }
 
@@ -128,7 +128,7 @@ public class FriendWatch extends IdAndName {
             joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
             return true;
         } catch (JSONException e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
             joFriendWatch = new JSONObject();
         }
         return false;
@@ -186,8 +186,8 @@ public class FriendWatch extends IdAndName {
                 list.add(friendWatch);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "FriendWatch getList err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "FriendWatch getList err:");
+            LogUtil.printStackTrace(TAG, t);
         }
         return list;
     }
