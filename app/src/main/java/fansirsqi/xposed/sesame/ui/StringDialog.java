@@ -11,7 +11,7 @@ import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
 
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.ModelField;
+import fansirsqi.xposed.sesame.model.ModelField;
 
 /**
  * 字符串对话框工具类。
