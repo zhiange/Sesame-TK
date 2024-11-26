@@ -13,7 +13,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
-import fansirsqi.xposed.sesame.model.task.antForest.AntForestRpcCall;
+import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
 
 /** 权限工具类，用于检查和请求所需权限。 */
 public class PermissionUtil {
@@ -63,7 +63,7 @@ public class PermissionUtil {
         activity.requestPermissions(PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
       }
     } catch (Exception e) {
-      Log.printStackTrace(TAG, e);
+      LogUtil.printStackTrace(TAG, e);
     }
     return false;
   }
@@ -103,7 +103,7 @@ public class PermissionUtil {
         startActivitySafely(context, appIntent, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
       }
     } catch (Exception e) {
-      Log.printStackTrace(TAG, e);
+      LogUtil.printStackTrace(TAG, e);
     }
     return false;
   }
@@ -156,7 +156,7 @@ public class PermissionUtil {
         }
       }
     } catch (Exception e) {
-      Log.printStackTrace(TAG, e);
+      LogUtil.printStackTrace(TAG, e);
     }
     return false;
   }
