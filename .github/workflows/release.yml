@@ -103,12 +103,12 @@ jobs:
       # 同步源仓库的 Release 到目标仓库
       - name: Sync Release to Target Repository
         run: |
-          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"  # 目标仓库名称
-          SOURCE_TAG="${{ github.ref_name }}"  # 源仓库的标签
+          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"
+          SOURCE_TAG="${{ github.ref_name }}"
           API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
-          
+
           # 创建目标仓库的 Release
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -d '{
                      "tag_name": "'"$SOURCE_TAG"'",
                      "name": "'"$SOURCE_TAG"'",
@@ -117,18 +117,18 @@ jobs:
                      "prerelease": false
                    }' \
                $API_URL
-          
+
           # 获取目标仓库的 Release ID
-          TARGET_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                            $API_URL | jq -r "select(.tag_name==\"$SOURCE_TAG\") | .id")
+          TARGET_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+                            $API_URL | jq -r ".[] | select(.tag_name==\"$SOURCE_TAG\") | .id")
 
           # 上传 APK 到目标仓库的 Release
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -H "Content-Type: application/octet-stream" \
                --data-binary @${{ steps.sign_normal_apk.outputs.signedFile }} \
                "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${SOURCE_TAG}.apk"
 
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -H "Content-Type: application/octet-stream" \
                --data-binary @${{ steps.sign_compatible_apk.outputs.signedFile }} \
                "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${SOURCE_TAG}.apk"
