@@ -6,10 +6,10 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.util.ClassUtil;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.NotificationUtil;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 
@@ -58,7 +58,7 @@ public class NewRpcBridge implements RpcBridge {
           }
         }
         if (newRpcInstance == null) {
-          Log.runtime(TAG, "获取新的 RPC 实例为 null");
+          LogUtil.runtime(TAG, "获取新的 RPC 实例为 null");
           throw new RuntimeException("获取新的 RPC 实例为 null");
         }
       }
@@ -89,9 +89,9 @@ public class NewRpcBridge implements RpcBridge {
                   loader.loadClass("com.alibaba.ariver.app.api.Page"),
                   loader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"),
                   bridgeCallbackClazz);
-      Log.runtime(TAG, "成功获取新的 RPC 调用方法");
+      LogUtil.runtime(TAG, "成功获取新的 RPC 调用方法");
     } catch (Exception e) {
-      Log.runtime(TAG, "获取新的 RPC 调用方法出错:");
+      LogUtil.runtime(TAG, "获取新的 RPC 调用方法出错:");
       throw e;
     }
   }
@@ -165,7 +165,7 @@ public class NewRpcBridge implements RpcBridge {
                         rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
                         if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
                           rpcEntity.setError();
-                          Log.error(
+                          LogUtil.error(
                               "\n=======================================================>\n"
                                   + "新 RPC 响应 | id: "
                                   + rpcEntity.hashCode()
@@ -179,8 +179,8 @@ public class NewRpcBridge implements RpcBridge {
                         }
                       } catch (Exception e) {
                         rpcEntity.setError();
-                        Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
-                        Log.printStackTrace(e);
+                        LogUtil.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
+                        LogUtil.printStackTrace(e);
                       }
                     }
                     return null;
@@ -200,7 +200,7 @@ public class NewRpcBridge implements RpcBridge {
                 ApplicationHook.setOffline(true);
                 NotificationUtil.updateStatusText("登录超时");
                 if (BaseModel.getTimeoutRestart().getValue()) {
-                  Log.record("尝试重新登录");
+                  LogUtil.record("尝试重新登录");
                   ApplicationHook.reLoginByBroadcast();
                 }
               }
@@ -208,45 +208,45 @@ public class NewRpcBridge implements RpcBridge {
             }
             return rpcEntity; // 返回 RPC 实体
           } catch (Exception e) {
-            Log.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 获取错误:");
-            Log.printStackTrace(e);
+            LogUtil.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 获取错误:");
+            LogUtil.printStackTrace(e);
           }
           // 处理重试逻辑
           if (retryInterval < 0) {
             try {
               Thread.sleep(600 + RandomUtil.delay()); // 随机延迟
             } catch (InterruptedException e) {
-              Log.printStackTrace(e);
+              LogUtil.printStackTrace(e);
             }
           } else if (retryInterval > 0) {
             try {
               Thread.sleep(retryInterval); // 固定延迟
             } catch (InterruptedException e) {
-              Log.printStackTrace(e);
+              LogUtil.printStackTrace(e);
             }
           }
         } catch (Throwable t) {
-          Log.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
-          Log.printStackTrace(t);
+          LogUtil.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
+          LogUtil.printStackTrace(t);
           // 处理重试逻辑
           if (retryInterval < 0) {
             try {
               Thread.sleep(600 + RandomUtil.delay()); // 随机延迟
             } catch (InterruptedException e) {
-              Log.printStackTrace(e);
+              LogUtil.printStackTrace(e);
             }
           } else if (retryInterval > 0) {
             try {
               Thread.sleep(retryInterval); // 固定延迟
             } catch (InterruptedException e) {
-              Log.printStackTrace(e);
+              LogUtil.printStackTrace(e);
             }
           }
         }
       } while (count < tryCount); // 根据尝试次数循环请求
     } catch (Exception e) {
-      Log.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
-      Log.printStackTrace(e);
+      LogUtil.error("新 RPC 请求 | id: " + id + " | 方法: " + method + " 错误:");
+      LogUtil.printStackTrace(e);
     }
     return null; // 返回 null 表示请求失败
   }
