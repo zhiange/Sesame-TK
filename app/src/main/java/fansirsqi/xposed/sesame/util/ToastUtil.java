@@ -8,7 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
+import fansirsqi.xposed.sesame.model.BaseModel;
 
 public class ToastUtil {
   private static Context appContext;
