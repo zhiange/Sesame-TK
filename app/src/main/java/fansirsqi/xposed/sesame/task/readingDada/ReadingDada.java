@@ -1,11 +1,11 @@
-package fansirsqi.xposed.sesame.model.task.readingDada;
+package fansirsqi.xposed.sesame.task.readingDada;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.data.ModelGroup;
-import fansirsqi.xposed.sesame.model.normal.answerAI.AnswerAI;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.util.JsonUtil;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
 /**
@@ -44,17 +44,17 @@ public class ReadingDada {
                 s = ReadingDadaRpcCall.submitAnswer(activityId, outBizId, jo.getString("questionId"), answer);
                 jo = new JSONObject(s);
                 if ("200".equals(jo.getString("resultCode"))) {
-                    Log.record("答题完成");
+                    LogUtil.record("答题完成");
                     return true;
                 } else {
-                    Log.record("答题失败");
+                    LogUtil.record("答题失败");
                 }
             } else {
-                Log.record("获取问题失败");
+                LogUtil.record("获取问题失败");
             }
         } catch (Throwable e) {
-            Log.runtime(TAG, "answerQuestion err:");
-            Log.printStackTrace(TAG, e);
+            LogUtil.runtime(TAG, "answerQuestion err:");
+            LogUtil.printStackTrace(TAG, e);
         }
         return false;
     }
