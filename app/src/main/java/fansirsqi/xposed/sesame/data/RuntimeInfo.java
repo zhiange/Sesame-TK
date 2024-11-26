@@ -3,8 +3,8 @@ package fansirsqi.xposed.sesame.data;
 import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.util.FileUtil;
-import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.UserIdMap;
+import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.UserIdMapUtil;
 
 import java.util.Objects;
 
@@ -41,7 +41,7 @@ public class RuntimeInfo {
      * @return 返回 RuntimeInfo 的单例实例
      */
     public static RuntimeInfo getInstance() {
-        if (instance == null || !Objects.equals(instance.userId, UserIdMap.getCurrentUid())) {
+        if (instance == null || !Objects.equals(instance.userId, UserIdMapUtil.getCurrentUid())) {
             instance = new RuntimeInfo();
         }
         return instance;
@@ -52,7 +52,7 @@ public class RuntimeInfo {
      * 从文件中读取运行时数据，并初始化相关的 JSON 对象。
      */
     private RuntimeInfo() {
-        userId = UserIdMap.getCurrentUid();
+        userId = UserIdMapUtil.getCurrentUid();
         String content = FileUtil.readFromFile(FileUtil.runtimeInfoFile(userId));
 
         // 如果文件读取成功，则解析 JSON 数据，否则初始化为空的 JSON 对象
@@ -170,8 +170,8 @@ public class RuntimeInfo {
             joAll.put(userId, joCurrent);
         } catch (JSONException e) {
             // 错误日志
-            Log.runtime(TAG, "put err:");
-            Log.printStackTrace(TAG, e);
+            LogUtil.runtime(TAG, "put err:");
+            LogUtil.printStackTrace(TAG, e);
         }
         // 保存数据到文件
         save();
