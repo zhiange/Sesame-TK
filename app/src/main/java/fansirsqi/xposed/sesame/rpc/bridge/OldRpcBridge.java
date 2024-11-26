@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.util.*;
 
@@ -34,15 +34,15 @@ public class OldRpcBridge implements RpcBridge {
         loader = ApplicationHook.getClassLoader();
         try {
             h5PageClazz = loader.loadClass(ClassUtil.H5PAGE_NAME);
-            Log.runtime(TAG, "RPC 类加载成功");
+            LogUtil.runtime(TAG, "RPC 类加载成功");
             loadRpcMethods(); // 加载 RPC 方法
         } catch (ClassNotFoundException e) {
-            Log.runtime(TAG, "加载 RPC 类时出错：");
-            Log.printStackTrace(TAG, e);
+            LogUtil.runtime(TAG, "加载 RPC 类时出错：");
+            LogUtil.printStackTrace(TAG, e);
             throw new RuntimeException(e);
         } catch (Throwable t) {
-            Log.runtime(TAG, "加载 RPC 类时发生意外错误：");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "加载 RPC 类时发生意外错误：");
+            LogUtil.printStackTrace(TAG, t);
             throw t;
         }
     }
@@ -59,10 +59,10 @@ public class OldRpcBridge implements RpcBridge {
                         boolean.class, loader.loadClass(ClassUtil.JSON_OBJECT_NAME), String.class,
                         boolean.class, h5PageClazz, int.class, String.class, boolean.class, int.class, String.class);
                 getResponseMethod = responseClass.getMethod("getResponse");
-                Log.runtime(TAG, "RPC 调用方法加载成功");
+                LogUtil.runtime(TAG, "RPC 调用方法加载成功");
             } catch (Exception e) {
-                Log.runtime(TAG, "加载 RPC 调用方法时出错：");
-                Log.printStackTrace(TAG, e);
+                LogUtil.runtime(TAG, "加载 RPC 调用方法时出错：");
+                LogUtil.printStackTrace(TAG, e);
             }
         }
     }
@@ -147,13 +147,13 @@ public class OldRpcBridge implements RpcBridge {
         if (resultObject.optString("memo", "").contains("系统繁忙")) {
             ApplicationHook.setOffline(true); // 设置为离线状态
             NotificationUtil.updateStatusText("系统繁忙，可能需要滑动验证");
-            Log.record("系统繁忙，可能需要滑动验证");
+            LogUtil.record("系统繁忙，可能需要滑动验证");
             return null; // 返回 null
         }
 
         if (!resultObject.optBoolean("success")) {
             rpcEntity.setError(); // 设置为错误状态
-            Log.error("旧 RPC 响应 | id: " + id + " | method: " + method + " args: " + args + " | data: " + rpcEntity.getResponseString());
+            LogUtil.error("旧 RPC 响应 | id: " + id + " | method: " + method + " args: " + args + " | data: " + rpcEntity.getResponseString());
         }
 
         return rpcEntity; // 返回更新后的 RPC 实体
@@ -170,8 +170,8 @@ public class OldRpcBridge implements RpcBridge {
      */
     private void handleError(RpcEntity rpcEntity, Throwable t, String method, int id, String args) {
         rpcEntity.setError(); // 设置为错误状态
-        Log.error("旧 RPC 请求 | id: " + id + " | method: " + method + " err:");
-        Log.printStackTrace(t); // 打印堆栈跟踪
+        LogUtil.error("旧 RPC 请求 | id: " + id + " | method: " + method + " err:");
+        LogUtil.printStackTrace(t); // 打印堆栈跟踪
 
         if (t instanceof InvocationTargetException) {
             handleInvocationException(rpcEntity, (InvocationTargetException) t, method); // 处理调用异常
@@ -220,7 +220,7 @@ public class OldRpcBridge implements RpcBridge {
             ApplicationHook.setOffline(true);
             NotificationUtil.updateStatusText("登录超时");
             if (BaseModel.getTimeoutRestart().getValue()) {
-                Log.record("尝试重新登录");
+                LogUtil.record("尝试重新登录");
                 ApplicationHook.reLoginByBroadcast();
             }
         }
@@ -234,7 +234,7 @@ public class OldRpcBridge implements RpcBridge {
             long waitTime = System.currentTimeMillis() + BaseModel.getWaitWhenException().getValue();
             RuntimeInfo.getInstance().put(RuntimeInfo.RuntimeInfoKey.ForestPauseTime, waitTime);
             NotificationUtil.updateStatusText("异常");
-            Log.record("触发异常, 等待至" + TimeUtil.getCommonDate(waitTime));
+            LogUtil.record("触发异常, 等待至" + TimeUtil.getCommonDate(waitTime));
         }
     }
 
@@ -255,7 +255,7 @@ public class OldRpcBridge implements RpcBridge {
 
             rpcEntity.setResponseObject(new JSONObject(jsonString), jsonString); // 设置 MMTP 异常响应
         } catch (JSONException e) {
-            Log.printStackTrace(e); // 打印异常信息
+            LogUtil.printStackTrace(e); // 打印异常信息
         }
     }
 }
