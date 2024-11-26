@@ -1,14 +1,17 @@
 package fansirsqi.xposed.sesame.rpc.intervallimit;
 
 import android.os.Build;
-
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * RpcIntervalLimit类用于管理不同方法的调用间隔限制，确保调用间隔不小于设定值。
+ * 提供添加、更新、进入间隔限制以及清除限制的功能。
+ */
 public class RpcIntervalLimit {
 
     // 默认的间隔限制设置为50毫秒
@@ -18,7 +21,7 @@ public class RpcIntervalLimit {
     private static final Map<String, IntervalLimit> intervalLimitMap = new ConcurrentHashMap<>();
 
     /**
-     * 为指定方法添加间隔限制
+     * 为指定方法添加间隔限制。
      *
      * @param method  方法名称
      * @param interval 间隔时间（毫秒）
@@ -28,17 +31,17 @@ public class RpcIntervalLimit {
     }
 
     /**
-     * 为指定方法添加自定义间隔限制对象
+     * 为指定方法添加自定义间隔限制对象。
      *
      * @param method 方法名称
      * @param intervalLimit 自定义的间隔限制对象
      */
     public static void addIntervalLimit(String method, IntervalLimit intervalLimit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Android N及以上版本可以使用compute
+            // Android N及以上版本可以使用compute方法
             intervalLimitMap.compute(method, (key, existingLimit) -> {
                 if (existingLimit != null) {
-                    Log.runtime("方法：" + method + " 间隔限制已存在");
+                    LogUtil.runtime("方法：" + method + " 间隔限制已存在");
                     throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
                 }
                 return intervalLimit;
@@ -47,7 +50,7 @@ public class RpcIntervalLimit {
             // 低于Android N的版本手动实现compute的功能
             synchronized (intervalLimitMap) {
                 if (intervalLimitMap.containsKey(method)) {
-                    Log.runtime("方法：" + method + " 间隔限制已存在");
+                    LogUtil.runtime("方法：" + method + " 间隔限制已存在");
                     throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
                 }
                 intervalLimitMap.put(method, intervalLimit);
@@ -56,7 +59,7 @@ public class RpcIntervalLimit {
     }
 
     /**
-     * 更新指定方法的间隔限制
+     * 更新指定方法的间隔限制。
      *
      * @param method 方法名称
      * @param interval 新的间隔时间（毫秒）
@@ -66,7 +69,7 @@ public class RpcIntervalLimit {
     }
 
     /**
-     * 更新指定方法的间隔限制对象
+     * 更新指定方法的间隔限制对象。
      *
      * @param method 方法名称
      * @param intervalLimit 新的自定义间隔限制对象
@@ -76,7 +79,7 @@ public class RpcIntervalLimit {
     }
 
     /**
-     * 进入指定方法的间隔限制，确保调用间隔时间不小于设定值
+     * 进入指定方法的间隔限制，确保调用间隔时间不小于设定值。
      *
      * @param method 方法名称
      */
@@ -84,7 +87,7 @@ public class RpcIntervalLimit {
         IntervalLimit intervalLimit;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Android N及以上使用getOrDefault
+            // Android N及以上使用getOrDefault方法
             intervalLimit = intervalLimitMap.getOrDefault(method, DEFAULT_INTERVAL_LIMIT);
         } else {
             // 低于Android N手动实现getOrDefault的功能
@@ -102,7 +105,7 @@ public class RpcIntervalLimit {
     }
 
     /**
-     * 清除所有方法的间隔限制
+     * 清除所有方法的间隔限制。
      */
     public static void clearIntervalLimit() {
         intervalLimitMap.clear();
