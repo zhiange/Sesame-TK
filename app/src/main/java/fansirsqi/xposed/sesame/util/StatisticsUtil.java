@@ -7,10 +7,10 @@ import java.io.File;
 import java.util.Calendar;
 
 @Data
-public class Statistics {
+public class StatisticsUtil {
 
-    private static final String TAG = Statistics.class.getSimpleName();
-    public static final Statistics INSTANCE = new Statistics();
+    private static final String TAG = StatisticsUtil.class.getSimpleName();
+    public static final StatisticsUtil INSTANCE = new StatisticsUtil();
 
     private TimeStatistics year = new TimeStatistics();
     private TimeStatistics month = new TimeStatistics();
@@ -22,7 +22,7 @@ public class Statistics {
      * @param i 增加的数量
      */
     public static void addData(DataType dt, int i) {
-        Statistics stat = INSTANCE;
+        StatisticsUtil stat = INSTANCE;
         switch (dt) {
             case COLLECTED:
                 stat.day.collected += i;
@@ -49,7 +49,7 @@ public class Statistics {
      * @return 统计值
      */
     public static int getData(TimeType tt, DataType dt) {
-        Statistics stat = INSTANCE;
+        StatisticsUtil stat = INSTANCE;
         int data = 0;
         TimeStatistics ts = null;
         switch (tt) {
@@ -103,7 +103,7 @@ public class Statistics {
      * 加载统计数据
      * @return 统计实例
      */
-    public static synchronized Statistics load() {
+    public static synchronized StatisticsUtil load() {
         File statisticsFile = FileUtil.getStatisticsFile();
         try {
             if (statisticsFile.exists()) {
@@ -111,25 +111,25 @@ public class Statistics {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "重新格式化 statistics.json");
-                    Log.system(TAG, "重新格式化 statistics.json");
+                    LogUtil.runtime(TAG, "重新格式化 statistics.json");
+                    LogUtil.system(TAG, "重新格式化 statistics.json");
                     FileUtil.write2File(formatted, statisticsFile);
                 }
             } else {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
-                Log.runtime(TAG, "初始化 statistics.json");
-                Log.system(TAG, "初始化 statistics.json");
+                JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
+                LogUtil.runtime(TAG, "初始化 statistics.json");
+                LogUtil.system(TAG, "初始化 statistics.json");
                 FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), statisticsFile);
             }
         } catch (Throwable t) {
-            Log.printStackTrace(TAG, t);
-            Log.runtime(TAG, "统计文件格式有误，已重置统计文件");
-            Log.system(TAG, "统计文件格式有误，已重置统计文件");
+            LogUtil.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "统计文件格式有误，已重置统计文件");
+            LogUtil.system(TAG, "统计文件格式有误，已重置统计文件");
             try {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
+                JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
                 FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), FileUtil.getStatisticsFile());
             } catch (JsonMappingException e) {
-                Log.printStackTrace(TAG, e);
+                LogUtil.printStackTrace(TAG, e);
             }
         }
         return INSTANCE;
@@ -140,9 +140,9 @@ public class Statistics {
      */
     public static synchronized void unload() {
         try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
+            JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
         } catch (JsonMappingException e) {
-            Log.printStackTrace(TAG, e);
+            LogUtil.printStackTrace(TAG, e);
         }
     }
 
@@ -159,9 +159,9 @@ public class Statistics {
      */
     public static synchronized void save(Calendar nowCalendar) {
         if (updateDay(nowCalendar)) {
-            Log.system(TAG, "重置 statistics.json");
+            LogUtil.system(TAG, "重置 statistics.json");
         } else {
-            Log.system(TAG, "保存 statistics.json");
+            LogUtil.system(TAG, "保存 statistics.json");
         }
         FileUtil.write2File(JsonUtil.toFormatJsonString(INSTANCE), FileUtil.getStatisticsFile());
     }
