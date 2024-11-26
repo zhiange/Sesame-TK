@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 沙滩ID映射工具类。
  * 提供了一个线程安全的ID映射，支持添加、删除、加载和保存ID映射。
  */
-public class BeachIdMap {
+public class BeachIdMapUtil {
 
     /**
      * 存储ID映射的并发HashMap。
@@ -70,7 +70,7 @@ public class BeachIdMap {
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
     }
 
@@ -84,7 +84,7 @@ public class BeachIdMap {
             String json = objectMapper.writeValueAsString(idMap);
             return FileUtil.write2File(json, FileUtil.getBeachIdMapFile());
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
             return false;
         }
     }
