@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.omegakoiTown;
+package fansirsqi.xposed.sesame.task.omegakoiTown;
 
 import java.util.UUID;
 
