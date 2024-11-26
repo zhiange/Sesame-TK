@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.data.modelFieldExt;
+package fansirsqi.xposed.sesame.model.modelFieldExt;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.ModelField;
+import fansirsqi.xposed.sesame.model.ModelField;
 
 public class EmptyModelField extends ModelField<Object> {
 
