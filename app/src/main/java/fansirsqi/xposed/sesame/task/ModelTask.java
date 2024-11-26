@@ -1,12 +1,13 @@
-package fansirsqi.xposed.sesame.data.task;
+package fansirsqi.xposed.sesame.task;
 
 import android.os.Build;
+
+import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Getter;
-import fansirsqi.xposed.sesame.data.Model;
-import fansirsqi.xposed.sesame.data.ModelFields;
-import fansirsqi.xposed.sesame.data.ModelType;
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelType;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
 import java.util.Map;
@@ -42,7 +43,7 @@ public abstract class ModelTask extends Model {
             try {
                 task.run();
             } catch (Exception e) {
-                Log.printStackTrace(e);
+                LogUtil.printStackTrace(e);
             } finally {
                 MAIN_TASK_MAP.remove(task);
             }
@@ -219,7 +220,7 @@ public abstract class ModelTask extends Model {
                 return true;
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
         return false;
     }
@@ -232,7 +233,7 @@ public abstract class ModelTask extends Model {
             try {
                 childModelTask.cancel();
             } catch (Exception e) {
-                Log.printStackTrace(e);
+                LogUtil.printStackTrace(e);
             }
         }
         if (childTaskExecutor != null) {
@@ -261,7 +262,7 @@ public abstract class ModelTask extends Model {
                     try {
                         Thread.sleep(750);
                     } catch (InterruptedException e) {
-                        Log.printStackTrace(e);
+                        LogUtil.printStackTrace(e);
                     }
                 }
             }
@@ -279,7 +280,7 @@ public abstract class ModelTask extends Model {
                         ((ModelTask) model).stopTask();
                     }
                 } catch (Exception e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                 }
             }
         }
@@ -398,7 +399,7 @@ public abstract class ModelTask extends Model {
                     cancelTask.cancel();
                     isCancel = true;
                 } catch (Exception e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                 }
             }
         }
