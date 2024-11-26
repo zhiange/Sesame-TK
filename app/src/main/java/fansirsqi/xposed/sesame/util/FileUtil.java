@@ -144,9 +144,9 @@ public class FileUtil {
       statisticsFile.delete();
     }
     if (statisticsFile.exists()) {
-      Log.runtime(TAG, "[statistics]读:" + statisticsFile.canRead() + ";写:" + statisticsFile.canWrite());
+      LogUtil.runtime(TAG, "[statistics]读:" + statisticsFile.canRead() + ";写:" + statisticsFile.canWrite());
     } else {
-      Log.runtime(TAG, "statisticsFile.json文件不存在");
+      LogUtil.runtime(TAG, "statisticsFile.json文件不存在");
     }
     return statisticsFile;
   }
@@ -254,36 +254,36 @@ public class FileUtil {
   }
 
   public static File getRuntimeLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("runtime"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("runtime"));
   }
 
   public static File getRecordLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("record"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("record"));
   }
 
   public static File getSystemLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("system"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("system"));
   }
 
 
   public static File getDebugLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("debug"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("debug"));
   }
 
   public static File getForestLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("forest"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("forest"));
   }
 
   public static File getFarmLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("farm"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("farm"));
   }
 
   public static File getOtherLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("other"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("other"));
   }
 
   public static File getErrorLogFile() {
-    return ensureLogFile(LOG_DIRECTORY_FILE, Log.getLogFileName("error"));
+    return ensureLogFile(LOG_DIRECTORY_FILE, LogUtil.getLogFileName("error"));
   }
 
   public static void clearLog() {
@@ -292,7 +292,7 @@ public class FileUtil {
       return;
     }
     // 获取当前日期的格式化字符串
-    SimpleDateFormat sdf = Log.DATE_FORMAT_THREAD_LOCAL.get();
+    SimpleDateFormat sdf = LogUtil.DATE_FORMAT_THREAD_LOCAL.get();
     if (sdf == null) {
       sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     }
@@ -317,7 +317,7 @@ public class FileUtil {
         }
       } catch (SecurityException se) {
         // 记录安全异常，不应该抛出
-        Log.printStackTrace(se);
+        LogUtil.printStackTrace(se);
       }
     }
   }
@@ -333,7 +333,7 @@ public class FileUtil {
       if (c != null) c.close(); // 关闭流
     } catch (Throwable t) {
       // 捕获并打印关闭流时的异常
-      Log.printStackTrace(TAG, t);
+      LogUtil.printStackTrace(TAG, t);
     }
   }
 
@@ -367,7 +367,7 @@ public class FileUtil {
       }
     } catch (Throwable t) {
       // 捕获并记录异常
-      Log.printStackTrace(TAG, t);
+      LogUtil.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fr);
@@ -409,7 +409,7 @@ public class FileUtil {
       success = true;
     } catch (Throwable t) {
       // 捕获并记录异常
-      Log.printStackTrace(TAG, t);
+      LogUtil.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fw);
@@ -441,7 +441,7 @@ public class FileUtil {
       success = true;
     } catch (Throwable t) {
       // 捕获并记录异常
-      Log.printStackTrace(TAG, t);
+      LogUtil.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fw);
@@ -471,7 +471,7 @@ public class FileUtil {
       return true;  // 复制成功
     } catch (IOException e) {
       // 捕获并打印文件操作中的异常
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     }
     return false;  // 复制失败
   }
@@ -500,7 +500,7 @@ public class FileUtil {
       return true; // 成功拷贝数据
     } catch (IOException e) {
       // 捕获 IO 异常并打印堆栈信息
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
     } finally {
       // 关闭输入流和输出流
       closeStream(source);
@@ -520,7 +520,7 @@ public class FileUtil {
         stream.close(); // 关闭流
       } catch (Exception e) {
         // 捕获并打印关闭流时的异常
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
     }
   }
@@ -555,7 +555,7 @@ public class FileUtil {
         if (!file.createNewFile()) return null;
       } catch (Exception e) {
         // 捕获异常并打印堆栈信息
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
         return null;
       }
     }
@@ -576,7 +576,7 @@ public class FileUtil {
           return null;
         }
       } catch (Exception e) {
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
         return null;
       }
     }
@@ -601,7 +601,7 @@ public class FileUtil {
         return true; // 返回清空成功
       } catch (IOException e) {
         // 发生 IO 异常时打印堆栈信息
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       } finally {
         // 确保 FileWriter 在操作完成后关闭，防止资源泄露
         try {
@@ -610,7 +610,7 @@ public class FileUtil {
           }
         } catch (IOException e) {
           // 如果关闭流时发生异常，打印堆栈信息
-          Log.printStackTrace(e);
+          LogUtil.printStackTrace(e);
         }
       }
     }
