@@ -18,7 +18,7 @@ import java.io.File;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.FileUtil;
 import fansirsqi.xposed.sesame.util.LanguageUtil;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
 
 public class HtmlViewerActivity extends BaseActivity {
@@ -162,23 +162,23 @@ public class HtmlViewerActivity extends BaseActivity {
     try {
       if (uri != null) {
         String path = uri.getPath();
-        Log.runtime(TAG, "URI path: " + path);
+        LogUtil.runtime(TAG, "URI path: " + path);
         if (path != null) {
           File exportFile = FileUtil.exportFile(new File(path));
           if (exportFile != null && exportFile.exists()) {
             //            OtherDialog.showToast(this, "文件已导出到: " + exportFile.getPath(), Toast.LENGTH_SHORT).show();
             ToastUtil.showToast(this, getString(R.string.file_exported) + exportFile.getPath());
           } else {
-            Log.runtime(TAG, "导出失败，exportFile 对象为 null 或不存在！");
+            LogUtil.runtime(TAG, "导出失败，exportFile 对象为 null 或不存在！");
           }
         } else {
-          Log.runtime(TAG, "路径为 null！");
+          LogUtil.runtime(TAG, "路径为 null！");
         }
       } else {
-        Log.runtime(TAG, "URI 为 null！");
+        LogUtil.runtime(TAG, "URI 为 null！");
       }
     } catch (Exception e) {
-      Log.printStackTrace(TAG, e);
+      LogUtil.printStackTrace(TAG, e);
     }
   }
 
@@ -196,7 +196,7 @@ public class HtmlViewerActivity extends BaseActivity {
         }
       }
     } catch (Exception e) {
-      Log.printStackTrace(TAG, e);
+      LogUtil.printStackTrace(TAG, e);
     }
   }
 
