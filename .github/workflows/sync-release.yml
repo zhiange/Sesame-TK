@@ -6,7 +6,7 @@ on:
     types:
       - completed
   workflow_dispatch:
-   inputs:
+    inputs:
       tag_name:
         description: "The tag name of the release to sync"
         required: true
@@ -20,33 +20,45 @@ jobs:
         id: determine_tag
         run: |
           if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "tag_name=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+            echo "TAG_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
           else
-            echo "tag_name=${{ inputs.tag_name }}" >> $GITHUB_ENV
+            echo "TAG_NAME=${{ inputs.tag_name }}" >> $GITHUB_ENV
           fi
-          echo "Determined tag: ${{ env.tag_name }}"
+          echo "Determined tag: ${{ env.TAG_NAME }}"
 
       - name: Debug Sync Process
         run: |
-          echo "Tag Name: $SOURCE_TAG"
+          echo "Tag Name: ${{ env.TAG_NAME }}"
           echo "Release ID: $TARGET_RELEASE"
           echo "Upload URL: https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets"
 
       - name: Debug APK Paths
         run: |
-          echo "Normal APK Path: ${{ steps.sign_normal_apk.outputs.signedFile }}"
-          echo "Compatible APK Path: ${{ steps.sign_compatible_apk.outputs.signedFile }}"
-          ls -al /home/runner/work/Sesame-TK/Sesame-TK/app/build/outputs/apk/normal/release/
-          ls -al /home/runner/work/Sesame-TK/Sesame-TK/app/build/outputs/apk/compatible/release/
+          echo "Normal APK Path: ${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${{ env.TAG_NAME }}.apk"
+          echo "Compatible APK Path: ${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ env.TAG_NAME }}.apk"
+          ls -al ${{ github.workspace }}/app/build/outputs/apk/normal/release/
+          ls -al ${{ github.workspace }}/app/build/outputs/apk/compatible/release/
 
       - name: Sync Release to Target Repository
         env:
-          TAG_NAME: ${{ env.tag_name }}
+          TAG_NAME: ${{ env.TAG_NAME }}
         run: |
           TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"
           API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
 
-          # 创建目标仓库的 Release
+          # 获取目标仓库是否已有相同标签的 Release
+          EXISTING_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+               $API_URL | jq -r ".[] | select(.tag_name==\"$TAG_NAME\")")
+
+          if [ "$EXISTING_RELEASE" != "null" ]; then
+            # 删除已存在的 Release
+            RELEASE_ID=$(echo "$EXISTING_RELEASE" | jq -r '.id')
+            curl -X DELETE -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+                 "https://api.github.com/repos/$TARGET_REPO/releases/$RELEASE_ID"
+            echo "Deleted existing release with tag $TAG_NAME."
+          fi
+
+          # 创建新的 Release
           RELEASE_RESPONSE=$(curl -s -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -d '{
                      "tag_name": "'"$TAG_NAME"'",
