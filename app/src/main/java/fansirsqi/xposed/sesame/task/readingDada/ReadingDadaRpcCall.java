@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.model.task.readingDada;
+package fansirsqi.xposed.sesame.task.readingDada;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.util.StringUtil;
