@@ -14,9 +14,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.*;
-import fansirsqi.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.data.task.ModelTask;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
+import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelConfig;
+import fansirsqi.xposed.sesame.model.ModelField;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.ui.dto.ModelDto;
 import fansirsqi.xposed.sesame.ui.dto.ModelFieldInfoDto;
 import fansirsqi.xposed.sesame.ui.dto.ModelFieldShowDto;
@@ -68,12 +73,12 @@ public class NewSettingsActivity extends BaseActivity {
             debug = intent.getBooleanExtra("debug", debug);
         }
         Model.initAllModel();
-        UserIdMap.setCurrentUserId(userId);
-        UserIdMap.load(userId);
-        CooperationIdMap.load(userId);
-        ReserveIdMap.load();
-        BeachIdMap.load();
-        ConfigV2.load(userId);
+        UserIdMapUtil.setCurrentUserId(userId);
+        UserIdMapUtil.load(userId);
+        CooperationIdMapUtil.load(userId);
+        ReserveIdMapUtil.load();
+        BeachIdMapUtil.load();
+        Config.load(userId);
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_new_settings);
         if (userName != null) {
@@ -240,7 +245,7 @@ public class NewSettingsActivity extends BaseActivity {
                     }
                     return "SUCCESS";
                 } catch (Exception e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                 }
             }
             return "FAILED";
@@ -268,14 +273,14 @@ public class NewSettingsActivity extends BaseActivity {
                         return "SUCCESS";
                     }
                 } catch (Exception e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                 }
             }
             return "FAILED";
         }
         @JavascriptInterface
         public void Log(String log) {
-            Log.record("设置："+ log);
+            LogUtil.record("设置："+ log);
         }
     }
 
@@ -369,7 +374,7 @@ public class NewSettingsActivity extends BaseActivity {
                         Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                     Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -392,7 +397,7 @@ public class NewSettingsActivity extends BaseActivity {
                                 intent.putExtra("userId", userId);
                                 sendBroadcast(intent);
                             } catch (Throwable th) {
-                                Log.printStackTrace(th);
+                                LogUtil.printStackTrace(th);
                             }
                         }
                         Intent intent = getIntent();
@@ -402,7 +407,7 @@ public class NewSettingsActivity extends BaseActivity {
                         Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
-                    Log.printStackTrace(e);
+                    LogUtil.printStackTrace(e);
                     Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -410,7 +415,7 @@ public class NewSettingsActivity extends BaseActivity {
     }
 
     private void save() {
-        if (ConfigV2.isModify(userId) && ConfigV2.save(userId, false)) {
+        if (Config.isModify(userId) && Config.save(userId, false)) {
             Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
             if (!StringUtil.isEmpty(userId)) {
                 try {
@@ -418,13 +423,13 @@ public class NewSettingsActivity extends BaseActivity {
                     intent.putExtra("userId", userId);
                     sendBroadcast(intent);
                 } catch (Throwable th) {
-                    Log.printStackTrace(th);
+                    LogUtil.printStackTrace(th);
                 }
             }
         }
         if (!StringUtil.isEmpty(userId)) {
-            UserIdMap.save(userId);
-            CooperationIdMap.save(userId);
+            UserIdMapUtil.save(userId);
+            CooperationIdMapUtil.save(userId);
         }
     }
 
