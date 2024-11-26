@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId "fansirsqi.xposed.sesame" // 应用程序ID
         minSdk 21 // 最低SDK版本
-        //noinspection ExpiredTargetSdkVersion
+        //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk 34 // 目标SDK版本
         versionCode 80 // 版本代码
         versionName version // 版本名称
