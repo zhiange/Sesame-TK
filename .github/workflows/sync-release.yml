@@ -6,47 +6,68 @@ on:
     types:
       - completed
   workflow_dispatch:
-    inputs:
-      tag_name:
-        description: "The tag name of the release to sync"
-        required: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Determine Source Tag
-        id: determine_tag
+      - name: Get Source Repository Latest Release
+        id: get_source_release
         run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "TAG_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-          else
-            echo "TAG_NAME=${{ inputs.tag_name }}" >> $GITHUB_ENV
+          SOURCE_REPO="your-username/your-repo-name"  # 替换为源仓库
+          API_URL="https://api.github.com/repos/$SOURCE_REPO/releases/latest"
+          
+          # 获取源仓库最新的 Release 信息
+          SOURCE_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $API_URL)
+          
+          if [ "$SOURCE_RELEASE" == "null" ]; then
+            echo "No release found in the source repository."
+            exit 1
           fi
-          echo "Determined tag: ${{ env.TAG_NAME }}"
 
-      - name: Debug Sync Process
-        run: |
-          echo "Tag Name: ${{ env.TAG_NAME }}"
-          echo "Release ID: $TARGET_RELEASE"
-          echo "Upload URL: https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets"
+          # 提取相关信息
+          TAG_NAME=$(echo "$SOURCE_RELEASE" | jq -r '.tag_name')
+          RELEASE_NAME=$(echo "$SOURCE_RELEASE" | jq -r '.name')
+          BODY=$(echo "$SOURCE_RELEASE" | jq -r '.body')
 
-      - name: Debug APK Paths
+          echo "Source Release Tag: $TAG_NAME"
+          echo "Release Name: $RELEASE_NAME"
+          echo "Release Body: $BODY"
+
+      - name: Get Source Release Assets
+        id: get_assets
         run: |
-          echo "Normal APK Path: ${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${{ env.TAG_NAME }}.apk"
-          echo "Compatible APK Path: ${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ env.TAG_NAME }}.apk"
-          ls -al ${{ github.workspace }}/app/build/outputs/apk/normal/release/
-          ls -al ${{ github.workspace }}/app/build/outputs/apk/compatible/release/
+          SOURCE_REPO="your-username/your-repo-name"  # 替换为源仓库
+          API_URL="https://api.github.com/repos/$SOURCE_REPO/releases/tags/$TAG_NAME"
+          
+          # 获取源仓库该标签下所有的 Release 资产
+          ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $API_URL | jq -r '.assets[] | {name: .name, browser_download_url: .browser_download_url}')
+
+          # 输出所有资产的 URL
+          echo "Assets for release $TAG_NAME: $ASSETS"
+          echo "$ASSETS" > assets.json
+
+      - name: Download Assets from Source Repository
+        id: download_assets
+        run: |
+          # 下载所有的资产文件
+          mkdir -p downloaded_assets
+          for asset in $(cat assets.json | jq -r '.name'); do
+            url=$(cat assets.json | jq -r --arg asset "$asset" '.[] | select(.name == $asset) | .browser_download_url')
+            curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o "downloaded_assets/$asset" $url
+          done
+          
+          # 输出下载的文件列表
+          echo "Downloaded assets:"
+          ls downloaded_assets
 
       - name: Sync Release to Target Repository
-        env:
-          TAG_NAME: ${{ env.TAG_NAME }}
         run: |
-          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"
+          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"  # 目标仓库
           API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
 
-          # 获取目标仓库是否已有相同标签的 Release
+          # 检查目标仓库是否已有相同标签的 Release
           EXISTING_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                $API_URL | jq -r ".[] | select(.tag_name==\"$TAG_NAME\")")
 
@@ -62,8 +83,8 @@ jobs:
           RELEASE_RESPONSE=$(curl -s -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
                -d '{
                      "tag_name": "'"$TAG_NAME"'",
-                     "name": "'"$TAG_NAME"'",
-                     "body": "Release synced from source repository",
+                     "name": "'"$RELEASE_NAME"'",
+                     "body": "'"$BODY"'",
                      "draft": false,
                      "prerelease": false
                    }' \
@@ -78,13 +99,11 @@ jobs:
             exit 1
           fi
 
-          # 上传 APK 到目标仓库的 Release
-          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @${{ github.workspace }}/app/build/outputs/apk/normal/release/Sesame-Normal-${TAG_NAME}.apk \
-               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${TAG_NAME}.apk"
-
-          curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @${{ github.workspace }}/app/build/outputs/apk/compatible/release/Sesame-Compatible-${TAG_NAME}.apk \
-               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${TAG_NAME}.apk"
+          # 上传所有资产到目标仓库的 Release
+          for asset in $(ls downloaded_assets); do
+            curl -X POST -H "Authorization: token ${{ secrets.TARGET_REPO_PAT }}" \
+                 -H "Content-Type: application/octet-stream" \
+                 --data-binary @downloaded_assets/$asset \
+                 "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=$asset"
+            echo "Uploaded asset: $asset"
+          done
