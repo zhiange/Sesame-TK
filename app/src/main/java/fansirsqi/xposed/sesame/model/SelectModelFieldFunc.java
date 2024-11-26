@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.data.modelFieldExt.common;
+package fansirsqi.xposed.sesame.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
