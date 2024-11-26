@@ -41,12 +41,24 @@ jobs:
           SOURCE_REPO="${{ github.repository }}"  # 自动获取当前仓库名称
           API_URL="https://api.github.com/repos/$SOURCE_REPO/releases/tags/$TAG_NAME"
 
-          # 获取源仓库该标签下所有的 Release 资产
-          ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $API_URL | jq -r '.assets[] | {name: .name, browser_download_url: .browser_download_url}')
+          # 获取源仓库该标签下的 Release 资产
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $API_URL)
+
+          # 打印 API 响应内容进行调试
+          echo "API Response: $RESPONSE"
+
+          # 检查资产是否存在
+          ASSETS=$(echo "$RESPONSE" | jq -r '.assets | select(length > 0) | .[] | {name: .name, browser_download_url: .browser_download_url}')
+
+          if [ -z "$ASSETS" ]; then
+            echo "No assets found for release $TAG_NAME."
+            exit 1
+          fi
 
           # 输出所有资产的 URL
           echo "Assets for release $TAG_NAME: $ASSETS"
           echo "$ASSETS" > assets.json
+      
       
 
       - name: Download Assets from Source Repository
