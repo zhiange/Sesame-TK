@@ -891,7 +891,7 @@ public class AntFarm extends ModelTask {
                                                 for (int k = 0; k < actionTitle.length(); k++) {
                                                     JSONObject joActionTitle = actionTitle.getJSONObject(k);
                                                     if (joActionTitle.getBoolean("correct")) {
-                                                        dadaDailySet.add(TimeUtil.getDateStr(1)
+                                                        dadaDailySet.add(TimeUtil.getDateStr(1, "YYYY-MM-dd")
                                                                 + joActionTitle.getString("title"));
                                                     }
                                                 }
