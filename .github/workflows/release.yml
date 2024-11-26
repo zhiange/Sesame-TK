@@ -100,13 +100,35 @@ jobs:
           checksums: sha256
           checksums_file_name: CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.%algo%
 
-      # 上传 APKs 到目标仓库的 Release
-      - name: Create Release in Target Repository
+      # 同步源仓库的 Release 到目标仓库
+      - name: Sync Release to Target Repository
         run: |
-          gh release create ${{ github.ref_name }} \
-            app/build/outputs/apk/normal/release/*.apk \
-            app/build/outputs/apk/compatible/release/*.apk \
-            -t ${{ github.ref_name }} \
-            -R Xposed-Modules-Repo/fansirsqi.xposed.sesame \
-            -n "Release ${{ github.ref_name }}"
-      
+          TARGET_REPO="Xposed-Modules-Repo/fansirsqi.xposed.sesame"  # 目标仓库名称
+          SOURCE_TAG="${{ github.ref_name }}"  # 源仓库的标签
+          API_URL="https://api.github.com/repos/$TARGET_REPO/releases"
+          
+          # 创建目标仓库的 Release
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -d '{
+                     "tag_name": "'"$SOURCE_TAG"'",
+                     "name": "'"$SOURCE_TAG"'",
+                     "body": "Release synced from source repository",
+                     "draft": false,
+                     "prerelease": false
+                   }' \
+               $API_URL
+          
+          # 获取目标仓库的 Release ID
+          TARGET_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                            $API_URL | jq -r "select(.tag_name==\"$SOURCE_TAG\") | .id")
+
+          # 上传 APK 到目标仓库的 Release
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Content-Type: application/octet-stream" \
+               --data-binary @${{ steps.sign_normal_apk.outputs.signedFile }} \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Normal-${SOURCE_TAG}.apk"
+
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Content-Type: application/octet-stream" \
+               --data-binary @${{ steps.sign_compatible_apk.outputs.signedFile }} \
+               "https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets?name=Sesame-Compatible-${SOURCE_TAG}.apk"
