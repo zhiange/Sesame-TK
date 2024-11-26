@@ -26,6 +26,19 @@ jobs:
           fi
           echo "Determined tag: ${{ env.tag_name }}"
 
+      - name: Debug Sync Process
+        run: |
+          echo "Tag Name: $SOURCE_TAG"
+          echo "Release ID: $TARGET_RELEASE"
+          echo "Upload URL: https://uploads.github.com/repos/$TARGET_REPO/releases/$TARGET_RELEASE/assets"
+
+      - name: Debug APK Paths
+        run: |
+          echo "Normal APK Path: ${{ steps.sign_normal_apk.outputs.signedFile }}"
+          echo "Compatible APK Path: ${{ steps.sign_compatible_apk.outputs.signedFile }}"
+          ls -al /home/runner/work/Sesame-TK/Sesame-TK/app/build/outputs/apk/normal/release/
+          ls -al /home/runner/work/Sesame-TK/Sesame-TK/app/build/outputs/apk/compatible/release/
+
       - name: Sync Release to Target Repository
         env:
           TAG_NAME: ${{ env.tag_name }}
