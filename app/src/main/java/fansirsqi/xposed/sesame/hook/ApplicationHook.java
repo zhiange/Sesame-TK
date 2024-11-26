@@ -9,37 +9,35 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
-
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import fansirsqi.xposed.sesame.data.Config;
-import lombok.Getter;
 import fansirsqi.xposed.sesame.BuildConfig;
-import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
-import fansirsqi.xposed.sesame.task.BaseTask;
-import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AlipayVersion;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
-import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.model.BaseModel;
-import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
+import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.rpc.bridge.NewRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.OldRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.RpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.RpcVersion;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
+import fansirsqi.xposed.sesame.task.BaseTask;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.util.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
 
@@ -102,10 +100,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       } catch (ClassNotFoundException e) {
         LogUtil.printStackTrace(e);
       }
-    } else if (ClassUtil.PACKAGE_NAME.equals(lpparam.packageName) && ClassUtil.PACKAGE_NAME.equals(lpparam.processName)) {
-      if (hooked) {
-        return;
-      }
+    }
+    else if (ClassUtil.PACKAGE_NAME.equals(lpparam.packageName) && ClassUtil.PACKAGE_NAME.equals(lpparam.processName)) {
+      if (hooked) return;
       classLoader = lpparam.classLoader;
       XposedHelpers.findAndHookMethod(
           Application.class,
@@ -187,7 +184,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             classLoader,
             "onCreate",
             new XC_MethodHook() {
-
               @SuppressLint("WakelockTimeout")
               @Override
               protected void afterHookedMethod(MethodHookParam param) {
@@ -203,9 +199,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     BaseTask.newInstance(
                         "MAIN_TASK",
                         new Runnable() {
-
                           private volatile long lastExecTime = 0;
-
                           @Override
                           public void run() {
                             if (!init) {
@@ -263,9 +257,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               TaskCommon.update();
                               ModelTask.startAllTask(false);
                               lastExecTime = System.currentTimeMillis();
-
                               try {
-                                //定时执行的时间列表
+                                // 定时执行的时间列表
                                 List<String> execAtTimeList = BaseModel.getExecAtTimeList().getValue();
                                 if (execAtTimeList != null) {
                                   Calendar lastExecTimeCalendar = TimeUtil.getCalendarByTimeMillis(lastExecTime);
@@ -466,13 +459,21 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               () -> {
                 if (!PermissionUtil.checkOrRequestAlarmPermissions(context)) {
                   ToastUtil.makeText(context, "请授予支付宝使用闹钟权限", android.widget.Toast.LENGTH_SHORT).show();
-//                  //打开闹钟权限授权页面
-//                  Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-//                  context.startActivity(intent);
                 }
               },
               2000);
           return false;
+        }
+        // 检查并请求后台运行权限
+        if (BaseModel.getBatteryPerm().getValue() && !init && !PermissionUtil.checkBatteryPermissions()) {
+          LogUtil.record("支付宝无始终在后台运行权限");
+          mainHandler.postDelayed(
+              () -> {
+                if (!PermissionUtil.checkOrRequestBatteryPermissions(context)) {
+                  ToastUtil.makeText(context, "请授予支付宝始终在后台运行权限", android.widget.Toast.LENGTH_SHORT).show();
+                }
+              },
+              2000);
         }
         UserIdMapUtil.initUser(userId);
         Model.initAllModel();
@@ -484,16 +485,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           Toast.show("芝麻粒已禁用");
           return false;
         }
-        if (BaseModel.getBatteryPerm().getValue() && !init && !PermissionUtil.checkBatteryPermissions()) {
-          LogUtil.record("支付宝无始终在后台运行权限");
-          mainHandler.postDelayed(
-              () -> {
-                if (!PermissionUtil.checkOrRequestBatteryPermissions(context)) {
-                  ToastUtil.makeText(context, "请授予支付宝终在后台运行权限", android.widget.Toast.LENGTH_SHORT).show();
-                }
-              },
-              2000);
-        }
         if (BaseModel.getNewRpc().getValue()) {
           rpcBridge = new NewRpcBridge();
         } else {
@@ -501,16 +492,19 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
         rpcBridge.load();
         rpcVersion = rpcBridge.getVersion();
+        // 保持唤醒锁，防止设备休眠
         if (BaseModel.getStayAwake().getValue()) {
           try {
             PowerManager pm = (PowerManager) service.getSystemService(Context.POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, service.getClass().getName());
-            wakeLock.acquire();
+            wakeLock.acquire(); // 确保唤醒锁在前台服务启动前
           } catch (Throwable t) {
             LogUtil.printStackTrace(t);
           }
         }
+        // 设置闹钟
         setWakenAtTimeAlarm();
+        // Hook RPC 请求和响应
         if (BaseModel.getNewRpc().getValue() && BaseModel.getDebugMode().getValue()) {
           try {
             rpcRequestUnhook =
@@ -535,7 +529,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"),
                     classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback"),
                     new XC_MethodHook() {
-
                       @SuppressLint("WakelockTimeout")
                       @Override
                       protected void beforeHookedMethod(MethodHookParam param) {
@@ -573,7 +566,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     "sendJSONResponse",
                     classLoader.loadClass(ClassUtil.JSON_OBJECT_NAME),
                     new XC_MethodHook() {
-
                       @SuppressLint("WakelockTimeout")
                       @Override
                       protected void beforeHookedMethod(MethodHookParam param) {
@@ -590,7 +582,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             LogUtil.printStackTrace(TAG, t);
           }
         }
+        // 启动前台服务
         NotificationUtil.start(service);
+        // 启动模型
         Model.bootAllModel(classLoader);
         StatusUtil.load();
         updateDay();
@@ -715,11 +709,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       } else {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
       }
-      LogUtil.runtime(
-              "setAlarmTask triggerAtMillis:"
-                  + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis)
-                  + " operation:"
-                  + operation);
+      LogUtil.runtime("setAlarmTask triggerAtMillis:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(triggerAtMillis) + " operation:" + operation);
       return true;
     } catch (Throwable th) {
       LogUtil.runtime(TAG, "setAlarmTask err:");
@@ -758,7 +748,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     return rpcBridge.requestString(method, data, relation);
   }
 
-
   public static String requestString(String method, String data, int tryCount, int retryInterval) {
     return rpcBridge.requestString(method, data, tryCount, retryInterval);
   }
@@ -767,13 +756,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     return rpcBridge.requestString(method, data, relation, tryCount, retryInterval);
   }
 
-
   public static RpcEntity requestObject(RpcEntity rpcEntity) {
     return rpcBridge.requestObject(rpcEntity, 3, -1);
   }
 
   public static void requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
-      rpcBridge.requestObject(rpcEntity, tryCount, retryInterval);
+    rpcBridge.requestObject(rpcEntity, tryCount, retryInterval);
   }
 
   public static RpcEntity requestObject(String method, String data) {
@@ -784,7 +772,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     return rpcBridge.requestObject(method, data, relation);
   }
 
-
   public static RpcEntity requestObject(String method, String data, int tryCount, int retryInterval) {
     return rpcBridge.requestObject(method, data, tryCount, retryInterval);
   }
@@ -792,7 +779,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
   public static RpcEntity requestObject(String method, String data, String relation, int tryCount, int retryInterval) {
     return rpcBridge.requestObject(method, data, relation, tryCount, retryInterval);
   }
-
 
   public static void reLoginByBroadcast() {
     try {
