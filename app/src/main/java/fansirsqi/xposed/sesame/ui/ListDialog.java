@@ -12,15 +12,15 @@ import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectAndCountModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectAndCountOneModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.SelectOneModelField;
-import fansirsqi.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountOneModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectOneModelField;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.AreaCode;
 import fansirsqi.xposed.sesame.entity.CooperateUser;
 import fansirsqi.xposed.sesame.entity.IdAndName;
-import fansirsqi.xposed.sesame.util.CooperationIdMap;
+import fansirsqi.xposed.sesame.util.CooperationIdMapUtil;
 
 import java.util.List;
 
@@ -241,7 +241,7 @@ public class ListDialog {
                                     .setTitle("删除 " + curIdAndName.name)
                                     .setPositiveButton(c.getString(R.string.ok), (dialog, which) -> {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            CooperationIdMap.remove(curIdAndName.id);
+                                            CooperationIdMapUtil.remove(curIdAndName.id);
                                             selectModelFieldFunc.remove(curIdAndName.id);
                                             ListAdapter.get(c).exitFind();
                                         }
