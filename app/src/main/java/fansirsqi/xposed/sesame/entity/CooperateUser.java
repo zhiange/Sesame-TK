@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.CooperationIdMap;
+import fansirsqi.xposed.sesame.util.CooperationIdMapUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class CooperateUser extends IdAndName {
      */
     public static List<CooperateUser> getList() {
         List<CooperateUser> list = new ArrayList<>();
-        Set<Map.Entry<String, String>> idSet = CooperationIdMap.getMap().entrySet();
+        Set<Map.Entry<String, String>> idSet = CooperationIdMapUtil.getMap().entrySet();
 
         // 遍历映射表的每一项，添加到用户列表中
         for (Map.Entry<String, String> entry : idSet) {
