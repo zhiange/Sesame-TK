@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.ui;
+package fansirsqi.xposed.sesame.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -7,9 +7,8 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.util.Log;
 
-public class OneWord {
+public class FansirsqiUtil {
 
   // 定义一言API的URL
   private static final String HITOKOTO_API_URL = "https://v1.hitokoto.cn/";
@@ -50,7 +49,7 @@ public class OneWord {
             String hitokoto = "忘形雨笠烟蓑，知心牧唱樵歌。\n明月清风共我，闲人三个，从他今古消磨。";
             String from = "天净沙·渔父";
             String formattedSentence = String.format("%s\n\n                    -----Re: %s", hitokoto, from);
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
             callback.onFailure(formattedSentence); // 调用回调返回失败信息
           }
         });
