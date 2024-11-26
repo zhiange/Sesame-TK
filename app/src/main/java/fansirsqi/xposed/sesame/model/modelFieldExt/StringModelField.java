@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.data.modelFieldExt;
+package fansirsqi.xposed.sesame.model.modelFieldExt;
 
 
 import android.content.Context;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.ModelField;
+import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.ui.StringDialog;
 
 public class StringModelField extends ModelField<String> {
