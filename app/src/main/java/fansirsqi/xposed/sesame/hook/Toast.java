@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import fansirsqi.xposed.sesame.model.normal.base.BaseModel;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.model.BaseModel;
+import fansirsqi.xposed.sesame.util.LogUtil;
 
 public class Toast {
     private static final String TAG = Toast.class.getSimpleName();
@@ -28,7 +28,7 @@ public class Toast {
     public static void show(CharSequence message, boolean force) {
         Context context = ApplicationHook.getContext();
         if (context == null) {
-            Log.runtime(TAG, "Context is null, cannot show toast");
+            LogUtil.runtime(TAG, "Context is null, cannot show toast");
             return;
         }
         boolean shouldShow = force || (BaseModel.getShowToast() != null && BaseModel.getShowToast().getValue());
@@ -54,8 +54,8 @@ public class Toast {
                 mainHandler.post(() -> createAndShowToast(context, message));
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "displayToast err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "displayToast err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 
@@ -75,8 +75,8 @@ public class Toast {
             );
             toast.show();
         } catch (Throwable t) {
-            Log.runtime(TAG, "createAndShowToast err:");
-            Log.printStackTrace(TAG, t);
+            LogUtil.runtime(TAG, "createAndShowToast err:");
+            LogUtil.printStackTrace(TAG, t);
         }
     }
 }
