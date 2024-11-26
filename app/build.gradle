@@ -35,14 +35,14 @@ android {
         buildNumber = "00000000"
     }
 
-    def version = "${buildNumber}-${buildTag}"
+    def version = "${buildDate}-${buildNumber}-${buildTag}"
     namespace "fansirsqi.xposed.sesame" // 命名空间
     compileSdk 34    // 编译SDK版本
     defaultConfig {
         applicationId "fansirsqi.xposed.sesame" // 应用程序ID
         minSdk 21 // 最低SDK版本
         //noinspection ExpiredTargetSdkVersion
-        targetSdk 31 // 目标SDK版本
+        targetSdk 34 // 目标SDK版本
         versionCode 80 // 版本代码
         versionName version // 版本名称
         // 使用 buildConfigField 添加自定义字段
