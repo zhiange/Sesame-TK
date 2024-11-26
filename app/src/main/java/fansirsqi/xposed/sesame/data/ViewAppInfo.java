@@ -7,11 +7,12 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Bundle;
+
+import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Getter;
 import lombok.Setter;
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.util.Log;
 
 /**
  * ViewAppInfo 类用于提供应用信息相关的功能，包括初始化应用信息、检查运行状态、设置运行类型等。
@@ -56,7 +57,7 @@ public final class ViewAppInfo {
       try {
         appVersion = BuildConfig.BUILD_TAG + "." + BuildConfig.BUILD_NUMBER;
       } catch (Exception e) {
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
     }
   }
