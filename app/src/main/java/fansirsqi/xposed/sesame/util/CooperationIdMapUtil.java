@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 提供了一个线程安全的ID映射，支持添加、删除、加载和保存ID映射。
  * 用于存储和检索与合作相关的ID映射信息。
  */
-public class CooperationIdMap {
+public class CooperationIdMapUtil {
 
     /**
      * 存储ID映射的并发HashMap。
@@ -63,7 +63,7 @@ public class CooperationIdMap {
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
         }
     }
 
@@ -78,7 +78,7 @@ public class CooperationIdMap {
             String json = objectMapper.writeValueAsString(idMap);
             return FileUtil.write2File(json, FileUtil.getCooperationIdMapFile(userId));
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            LogUtil.printStackTrace(e);
             return false;
         }
     }
