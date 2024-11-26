@@ -194,21 +194,14 @@ public class AntForest extends ModelTask {
     modelFields.addField(sendEnergyByAction = new BooleanModelField("sendEnergyByAction", "森林集市", false));
     modelFields.addField(giveEnergyRainList = new SelectModelField("giveEnergyRainList", "赠送能量雨列表", new LinkedHashSet<>(), AlipayUser::getList));
     modelFields.addField(whoYouWantToGiveTo = new SelectModelField("whoYouWantToGiveTo", "赠送道具好友列表（所有可送道具）", new LinkedHashSet<>(), AlipayUser::getList));
+    modelFields.addField(youthPrivilege = new BooleanModelField("youthPrivilege", "青春特权 | 森林道具领取", false));
+    modelFields.addField(studentCheckIn = new BooleanModelField("studentCheckIn", "青春特权 | 每日签到红包", false));
     modelFields.addField(ecoLifeTick = new BooleanModelField("ecoLifeTick", "绿色 | 行动打卡", false));
     modelFields.addField(ecoLifeOpen = new BooleanModelField("ecoLifeOpen", "绿色 | 自动开通", false));
     modelFields.addField(photoGuangPan = new BooleanModelField("photoGuangPan", "绿色 | 光盘行动", false));
     modelFields.addField(photoGuangPanBefore = new TextModelField("photoGuangPanBefore", "绿色 | 光盘前图片ID", ""));
     modelFields.addField(photoGuangPanAfter = new TextModelField("photoGuangPanAfter", "绿色 | 光盘后图片ID", ""));
-    modelFields.addField(youthPrivilege = new BooleanModelField("youthPrivilege", "青春特权 | 森林道具领取", false));
-    modelFields.addField(studentCheckIn = new BooleanModelField("studentCheckIn", "青春特权 | 每日签到红包", false));
-    modelFields.addField(
-        new EmptyModelField(
-            "photoGuangPanClear",
-            "绿色 | 清空图片ID",
-            () -> {
-              photoGuangPanBefore.reset();
-              photoGuangPanAfter.reset();
-            }));
+    modelFields.addField(new EmptyModelField("photoGuangPanClear","绿色 | 清空图片ID",() -> {photoGuangPanBefore.reset();photoGuangPanAfter.reset();}));
 
     return modelFields;
   }
