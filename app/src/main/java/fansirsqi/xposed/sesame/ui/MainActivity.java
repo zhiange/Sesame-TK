@@ -18,7 +18,7 @@ import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
-import fansirsqi.xposed.sesame.data.modelFieldExt.common.SelectModelFieldFunc;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.util.*;
@@ -69,7 +69,7 @@ public class MainActivity extends BaseActivity {
           @Override
           public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.runtime("receive broadcast:" + action + " intent:" + intent);
+            LogUtil.runtime("receive broadcast:" + action + " intent:" + intent);
             if (action != null) {
               switch (action) {
                 case "fansirsqi.xposed.sesame.status":
@@ -78,9 +78,9 @@ public class MainActivity extends BaseActivity {
                   }
                   viewHandler.removeCallbacks(titleRunner);
                   if (isClick) {
-                    // 调用 OneWord 获取句子
-                    OneWord.getOneWord(
-                            new OneWord.OneWordCallback() {
+                    // 调用 FansirsqiUtil 获取句子
+                    FansirsqiUtil.getOneWord(
+                            new FansirsqiUtil.OneWordCallback() {
                               @Override
                               public void onSuccess(String result) {
                                 runOnUiThread(() -> updateOneWord(result,oneWord)); // 在主线程中更新UI
@@ -96,8 +96,8 @@ public class MainActivity extends BaseActivity {
                   }
                   break;
                 case "fansirsqi.xposed.sesame.update":
-                  Statistics.load();
-                  tvStatistics.setText(Statistics.getText());
+                  StatisticsUtil.load();
+                  tvStatistics.setText(StatisticsUtil.getText());
                   break;
               }
             }
@@ -111,11 +111,11 @@ public class MainActivity extends BaseActivity {
     } else {
       registerReceiver(broadcastReceiver, intentFilter);
     }
-    Statistics.load();
-    tvStatistics.setText(Statistics.getText());
-    // 调用 OneWord 获取句子
-    OneWord.getOneWord(
-        new OneWord.OneWordCallback() {
+    StatisticsUtil.load();
+    tvStatistics.setText(StatisticsUtil.getText());
+    // 调用 FansirsqiUtil 获取句子
+    FansirsqiUtil.getOneWord(
+        new FansirsqiUtil.OneWordCallback() {
           @Override
           public void onSuccess(String result) {
             runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
@@ -168,14 +168,14 @@ public class MainActivity extends BaseActivity {
         try {
           sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.status"));
         } catch (Throwable th) {
-          Log.runtime("view sendBroadcast status err:");
-          Log.printStackTrace(th);
+          LogUtil.runtime("view sendBroadcast status err:");
+          LogUtil.printStackTrace(th);
         }
       }
       try {
         UIConfig.load();
       } catch (Exception e) {
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
       try {
         List<String> userNameList = new ArrayList<>();
@@ -185,8 +185,8 @@ public class MainActivity extends BaseActivity {
           for (File configDir : configFiles) {
             if (configDir.isDirectory()) {
               String userId = configDir.getName();
-              UserIdMap.loadSelf(userId);
-              UserEntity userEntity = UserIdMap.get(userId);
+              UserIdMapUtil.loadSelf(userId);
+              UserEntity userEntity = UserIdMapUtil.get(userId);
               String userName;
               if (userEntity == null) {
                 userName = userId;
@@ -205,14 +205,14 @@ public class MainActivity extends BaseActivity {
       } catch (Exception e) {
         userNameArray = new String[] {"默认"};
         userEntityArray = new UserEntity[] {null};
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
       try {
-        Statistics.load();
-        Statistics.updateDay(Calendar.getInstance());
-        tvStatistics.setText(Statistics.getText());
+        StatisticsUtil.load();
+        StatisticsUtil.updateDay(Calendar.getInstance());
+        tvStatistics.setText(StatisticsUtil.getText());
       } catch (Exception e) {
-        Log.printStackTrace(e);
+        LogUtil.printStackTrace(e);
       }
     }
   }
@@ -223,8 +223,8 @@ public class MainActivity extends BaseActivity {
         sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.status"));
         isClick = true;
       } catch (Throwable th) {
-        Log.runtime("view sendBroadcast status err:");
-        Log.printStackTrace(th);
+        LogUtil.runtime("view sendBroadcast status err:");
+        LogUtil.printStackTrace(th);
       }
       return;
     }
@@ -276,7 +276,7 @@ public class MainActivity extends BaseActivity {
       menu.add(0, 7, 7, R.string.view_debug);
       menu.add(0, 8, 8, R.string.settings);
     } catch (Exception e) {
-      Log.printStackTrace(e);
+      LogUtil.printStackTrace(e);
       ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
     }
     return super.onCreateOptionsMenu(menu);
@@ -331,7 +331,7 @@ public class MainActivity extends BaseActivity {
 
       case 6:
         if (FileUtil.copyTo(FileUtil.getExportedStatisticsFile(), FileUtil.getStatisticsFile())) {
-          tvStatistics.setText(Statistics.getText());
+          tvStatistics.setText(StatisticsUtil.getText());
           ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
