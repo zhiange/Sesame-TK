@@ -1,7 +1,7 @@
 package fansirsqi.xposed.sesame.ui.dto;
 
 import lombok.Data;
-import fansirsqi.xposed.sesame.data.ModelField;
+import fansirsqi.xposed.sesame.model.ModelField;
 
 import java.io.Serializable;
 
