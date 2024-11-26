@@ -13,9 +13,13 @@ public class AntMemberRpcCall {
     }
 
     public static Boolean check() {
+        boolean z = true;
         RpcEntity rpcEntity = ApplicationHook.requestObject("alipay.antmember.biz.rpc.member.h5.queryPointCert",
                 "[{\"page\":" + 1 + ",\"pageSize\":" + 8 + "}]", 1, 0);
-        return rpcEntity != null && !rpcEntity.getHasError();
+        if (rpcEntity == null || rpcEntity.getHasError()){
+            z = false;
+        }
+        return z;
     }
 
     /* ant member point */
