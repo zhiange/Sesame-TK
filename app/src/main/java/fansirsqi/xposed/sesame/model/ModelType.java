@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.data;
+package fansirsqi.xposed.sesame.model;
 
 import java.util.HashMap;
 import java.util.Map;
