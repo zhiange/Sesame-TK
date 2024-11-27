@@ -49,6 +49,7 @@
             android:text="@string/text_api"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#5A5A5A"
+
             android:textSize="12sp" />
 
         <TextView
@@ -56,21 +57,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2sp"
+            android:fontFamily="sans-serif-smallcaps"
             android:gravity="center"
             android:text="@string/bulid_target"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:paddingBottom="8dp"
+            android:typeface="normal" />
 
         <TextView
             android:id="@+id/bulid_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12sp"
-            android:fontFamily="monospace"
+            android:fontFamily="sans-serif-smallcaps"
+            android:lineSpacingExtra="12sp"
             android:text="@string/build_version_1_0_0"
+            android:textAllCaps="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#FF5722"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:typeface="sans" />
 
 
 
