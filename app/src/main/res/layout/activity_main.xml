@@ -46,9 +46,19 @@
             android:layout_marginBottom="35sp"
             android:fontFamily=""
             android:gravity="center"
-            android:text="@string/bulid_target"
+            android:text="@string/text_api"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#5A5A5A"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/bulid_target"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2sp"
+            android:gravity="center"
+            android:text="@string/bulid_target"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textSize="12sp" />
 
         <TextView
@@ -62,15 +72,7 @@
             android:textColor="#FF5722"
             android:textSize="12sp" />
 
-        <TextView
-            android:id="@+id/bulid_target"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2sp"
-            android:gravity="center"
-            android:text="@string/bulid_target"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="12sp" />
+
 
 
         <LinearLayout
