@@ -6,6 +6,10 @@ apply plugin: 'com.android.application'
 
 // Android配置信息
 android {
+
+    buildFeatures {
+        buildConfig = true
+    }
     //    版本号组成
     def major = 1          // 主版本号
     def minor = 5          // 次版本号
@@ -14,46 +18,48 @@ android {
     def buildDate
     def buildTime
     def buildTimeFormatted
-    def buildVersionCode
+    def buildTargetCode
+    def _versionCode
+    def _versionName
 
     try {
-        // 获取当前日期并格式化为 "yyyy-MM-dd"
+        // 获取当前日期并格式化为 "yyyy-MM-dd" 构建日期
         def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
         buildDate = dateFormat.format(new Date())
 
-        // 获取当前时间并格式化为 "HH:mm:ss" 作为构建时间
+        // 获取当前时间并格式化为 "HH:mm:ss" 作为构建时间，此处时间只用于app展示
         def timeFormat = new SimpleDateFormat("HH:mm:ss")
         buildTime = timeFormat.format(new Date())
 
         // 获取当前时间并格式化为 "HH.mm.ss" 用于构建编号
-        def timeFormatWithDots = new SimpleDateFormat("HH.mm.ss")
+        def timeFormatWithDots = new SimpleDateFormat("yy.MM.dd.HH.mm.ss")
         buildTimeFormatted = timeFormatWithDots.format(new Date())
 
         // 使用 MD5 哈希算法生成构建号 (前8位)
         MessageDigest md = MessageDigest.getInstance("MD5")
         md.update(buildTime.bytes)
-        buildVersionCode = md.digest().encodeHex().toString().substring(0, 8)
-    } catch (Exception e) {
+        buildTargetCode = md.digest().encodeHex().toString().substring(0, 8)
+    }
+    catch (Exception e) {
         // 错误处理机制
         println("时间或日期格式化错误: ${e.message}")
         buildDate = "unknown"
         buildTime = "unknown"
-        buildVersionCode = "00000000"
+        buildTargetCode = "00000000"
+        buildTimeFormatted="00.00.00"
     }
-    // 使用 Git 提交次数生成构建号
-    def commitCount = 'git rev-list --count HEAD'.execute().text.trim()
-    // 生成 versionCode，使用 Git 提交次数生成 (也可以加上当前时间戳来确保唯一性)
-    def code = commitCount.toInteger() // 将 Git 提交次数作为 versionCode
 
-    // 构建版本号: MAJOR.MINOR.PATCH-BUILD_TAG-BUILD_DATE
-    def version = "${major}.${minor}.${patch}-${buildTag}-${buildVersionCode}"
+    // 使用 Git 提交次数生成版本号
+    _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
 
-    // 打印日志，调试时使用
-    println("Build Date: ${buildDate}")
-    println("Build Time: ${buildTime}")
-    println("Git Commit Count: ${commitCount}")
-    println("Version Name: ${version}")
-    println("Version Code: ${code}")
+    // 应用版本信息，用于展示在LSP
+    if (buildTag == "alpha"||buildTag == "beta") {
+        _versionName = "${buildTimeFormatted}.${buildTag}"
+    }
+    else {
+        _versionName = "${major}.${minor}.${patch}.${buildTag}"
+        buildTag = ""
+    }
 
     // 配置 Android 构建设置
     namespace "fansirsqi.xposed.sesame" // 命名空间
@@ -62,16 +68,13 @@ android {
         minSdk 21 // 最低SDK版本
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
         targetSdk 34 // 目标SDK版本
-        versionCode code  // 设置版本号
-        versionName version  // 设置版本名称 (使用 SemVer 格式)
+        versionCode _versionCode  // 设置版本号
+        versionName _versionName  // 设置版本名称 (使用 SemVer 格式)
 
-        // 使用 buildConfigField 添加自定义字段
-        buildConfigField "String", "VERSION_CODE", "\"${code}\"" // 创建常量
-        buildConfigField "String", "VERSION_NAME", "\"${version}\"" // 创建常量
+        // 使用 buildConfigField 添加自定义字段 for show ViewInfo.class of BuildConfig.class
         buildConfigField "String", "BUILD_DATE", "\"${buildDate}\"" // 创建常量
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\"" // 创建常量
-        buildConfigField "String", "BUILD_TIME2", "\"${buildTimeFormatted}\"" // 创建常量
-        buildConfigField "String", "BUILD_NUMBER", "\"${buildVersionCode}\"" // 创建常量
+        buildConfigField "String", "BUILD_NUMBER", "\"${buildTargetCode}\"" // 创建常量
         buildConfigField "String", "BUILD_TAG", "\"${buildTag}\"" // 创建常量
     }
 
@@ -84,10 +87,14 @@ android {
         normal {
             dimension "default" // 普通产品风味
             ext.applicationType = "Normal"
+            minSdkVersion 30    // 适用于较新的 Android 版本
+            targetSdkVersion 34
         }
         compatible {
             dimension "default" // 兼容产品风味
             ext.applicationType = "Compatible"
+            minSdkVersion 21    // 支持较老的 Android 版本
+            targetSdkVersion 30
         }
     }
     buildTypes {
@@ -115,26 +122,25 @@ android {
             }
         }
     }
+
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
 
-// 依赖项配置
 // 依赖项配置
 dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0' // 支持库
     compileOnly 'de.robv.android.xposed:api:82' // Xposed API
     //noinspection AnnotationProcessorOnCompilePath
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.32' // Lombok 库
-    annotationProcessor 'org.projectlombok:lombok:1.18.32' // Lombok 注解处理器
-    implementation 'com.elvishew:xlog:1.11.0' // 日志库
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0' // OkHttp库
-
-    // 普通产品风味的 Jackson 核心库
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.17.1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.17.1'
-
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.36' // Lombok 库
+    annotationProcessor 'org.projectlombok:lombok:1.18.36' // Lombok 注解处理器
+    implementation 'com.elvishew:xlog:1.11.1' // 日志库
+    //noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3' // OkHttp库
     // 兼容产品风味的 Jackson 核心库
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.17.1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.5'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.1'
 }
