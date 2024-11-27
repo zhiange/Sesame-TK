@@ -125,8 +125,8 @@ public class MainActivity extends BaseActivity {
             runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
           }
         });
-    buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());
-    buildTarget.setText(ViewAppInfo.getAppBuildTarget());
+    buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());//版本信息
+    buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget());//编译日期信息
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
   }
   private void updateOneWord(String str, TextView oneWord) {
