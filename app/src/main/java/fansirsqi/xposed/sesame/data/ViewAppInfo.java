@@ -47,12 +47,12 @@ public final class ViewAppInfo {
     // 防止重复初始化
     if (ViewAppInfo.context == null) {
       ViewAppInfo.context = context;
-      // 设置构建编号
-      appBuildNumber = BuildConfig.VERSION_CODE;
-      // 设置应用名称
-      appTitle = context.getString(R.string.app_name) + "-TK·alpha";
+      // 此处
+      appBuildNumber = String.valueOf(BuildConfig.VERSION_CODE);
+      // 设置标题栏-应用名称
+      appTitle = context.getString(R.string.app_name) + "-TK·"+BuildConfig.BUILD_TAG;
       // 设置构建目标信息
-      appBuildTarget = "Build Date: " + BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
+      appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
       // 设置版本号
       try {
         appVersion = BuildConfig.VERSION_NAME;
