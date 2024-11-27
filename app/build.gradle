@@ -32,7 +32,7 @@ android {
         buildTime = timeFormat.format(new Date())
 
         // 获取当前时间并格式化为 "HH.mm.ss" 用于构建编号
-        def timeFormatWithDots = new SimpleDateFormat("yy.MM.dd.HH.mm.ss")
+        def timeFormatWithDots = new SimpleDateFormat("yy.MM.dd")
         buildTimeFormatted = timeFormatWithDots.format(new Date())
 
         // 使用 MD5 哈希算法生成构建号 (前8位)
@@ -54,7 +54,7 @@ android {
 
     // 应用版本信息，用于展示在LSP
     if (buildTag == "alpha"||buildTag == "beta") {
-        _versionName = "${buildTimeFormatted}.${buildTag}"
+        _versionName = "${buildTimeFormatted}.${buildTag}.${buildTargetCode}"
     }
     else {
         _versionName = "${major}.${minor}.${patch}.${buildTag}"
