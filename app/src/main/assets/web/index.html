@@ -318,9 +318,8 @@
         );
 
         // 更新报名请改这儿
-        // const isVersion = ref(window.HOOK.getBuildInfo() === "tkaxv7s.xposed.sesame:v1.3.4-TK")
-
-         const isVersion = ref(true);
+        //const isVersion = ref(window.HOOK.getBuildInfo() === "fansirsqi.xposed.sesame:1.5.4.alpha")
+        const isVersion = ref(true);
 
         const theme = ref(localStorage.getItem("theme") || "theme1");
 
@@ -595,7 +594,7 @@
           theme,
           addEvent,
         };
-      },h
+      },
     })
       .use(vant)
       .use(vant.Lazyload)
