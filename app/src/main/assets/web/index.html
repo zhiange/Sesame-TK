@@ -318,7 +318,8 @@
         );
 
         // 更新报名请改这儿
-        const isVersion = ref(window.HOOK.getBuildInfo() === "fansirsqi.xposed.sesame:1.5.4.alpha")
+        //const isVersion = ref(window.HOOK.getBuildInfo() === "fansirsqi.xposed.sesame:1.5.4.alpha")
+        const isVersion = ref(true);
 
         const theme = ref(localStorage.getItem("theme") || "theme1");
 
