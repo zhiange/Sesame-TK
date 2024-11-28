@@ -104,7 +104,7 @@ jobs:
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 使用具有写入目标仓库权限的PAT
+          token: ${{ secrets.TARGET_REPO_PAT }} # 使用具有写入目标仓库权限的PAT
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
           draft: false
