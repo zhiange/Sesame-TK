@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -29,14 +31,14 @@
         });
 
         window.history.pushState({ page: 1 }, "", "");
-        // ¼àÌı·µ»Ø¼üÊÂ¼ş
+        // ç›‘å¬è¿”å›é”®äº‹ä»¶
         document.addEventListener("keydown", function (event) {
           if (event.key === "Backspace" || event.key === "Escape") {
             onBackPressed();
           }
         });
 
-        // ¼àÌıÒ³ÃæĞ¶ÔØÊÂ¼ş
+        // ç›‘å¬é¡µé¢å¸è½½äº‹ä»¶
         window.addEventListener("beforeunload", function (event) {
           onExit();
         });
@@ -67,7 +69,7 @@
 
                     <div class="content-box">
                         <div class="flex-space-between pdTB10" v-if="tabs_index===1">
-                            <div class="title main-color">¹ÙÍøÏÂÔØµØÖ·</div>
+                            <div class="title main-color">å®˜ç½‘ä¸‹è½½åœ°å€</div>
                             <div class="flex-center">
                                 <a href="https://github.com/Fansirsqi/Sesame-TK" target="_blank" class="main-color">
                                     Sesame-TK
@@ -86,12 +88,12 @@
                                  v-if="['MULTIPLY_INTEGER','LIST','MULTIPLY_INTEGER','INTEGER','STRING','TEXT'].includes(item.type)">
                                 <div class="title">{{item.name}}</div>
                                 <div class="w120">
-                                    <van-field v-model="item.configValue" placeholder="ÇëÊäÈë..." :disabled="item.type==='TEXT'" />
+                                    <van-field v-model="item.configValue" placeholder="è¯·è¾“å…¥..." :disabled="item.type==='TEXT'" />
                                 </div>
                             </div>
 
                             <div class="flex-space-between pdTB10" v-if="['TEXT'].includes(item.type)">
-                                <div class="title">Çå³ı</div>
+                                <div class="title">æ¸…é™¤</div>
                                 <div class="flex-center">
                                     <div class="link" @click="clearValue(item)">
                                         {{item.name}}
@@ -114,7 +116,7 @@
                                      @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type)}">
                                     <div class="title">{{item.name}}</div>
                                     <div class="link">
-                                        ÒÑÉèÖÃÊı£º{{item.type==='SELECT'?JSON.parse(item.configValue).length:Object.keys(JSON.parse(item.configValue)).length}}
+                                        å·²è®¾ç½®æ•°ï¼š{{item.type==='SELECT'?JSON.parse(item.configValue).length:Object.keys(JSON.parse(item.configValue)).length}}
                                     </div>
                                 </div>
                             </div>
@@ -122,7 +124,7 @@
                     </div>
                 </van-collapse-item>
 
-                <van-collapse-item name="13" title="Ö÷ÌâÉèÖÃ" id="collapse-item_13">
+                <van-collapse-item name="13" title="ä¸»é¢˜è®¾ç½®" id="collapse-item_13">
                     <template #title>
                         <div class="title-box">
                             <div v-show="currentTab==13">
@@ -131,15 +133,15 @@
                             <div v-show="currentTab!=13">
                                 <van-image width="20" height="20" fit="contain" class="list-icon" src="./png/13.png" />
                             </div>
-                            <div>Ö÷ÌâÉèÖÃ</div>
+                            <div>ä¸»é¢˜è®¾ç½®</div>
                         </div>
                     </template>
                     <div class="content-box">
-                        <div class="title">Ö÷ÌâÉèÖÃ</div>
+                        <div class="title">ä¸»é¢˜è®¾ç½®</div>
                         <div class="flex-space-between">
                             <van-radio-group v-model="theme" direction="horizontal">
-                                <van-radio icon-size="16px" name="theme1">ÕÛµşÖ÷Ìâ</van-radio>
-                                <van-radio icon-size="16px" name="theme2">¶¥²¿µ¼º½Ö÷Ìâ</van-radio>
+                                <van-radio icon-size="16px" name="theme1">æŠ˜å ä¸»é¢˜</van-radio>
+                                <van-radio icon-size="16px" name="theme2">é¡¶éƒ¨å¯¼èˆªä¸»é¢˜</van-radio>
                             </van-radio-group>
                         </div>
                     </div>
@@ -164,7 +166,7 @@
                     </template>
                     <div class="content-box">
                         <div class="flex-space-between pdTB10" v-if="tabs_index===1">
-                            <div class="title main-color">¹ÙÍøÏÂÔØµØÖ·</div>
+                            <div class="title main-color">å®˜ç½‘ä¸‹è½½åœ°å€</div>
                             <div class="flex-center">
                                 <a href="https://github.com/Fansirsqi/Sesame-TK" target="_blank" class="main-color">
                                     Sesame-TK
@@ -183,12 +185,12 @@
                                  v-if="['MULTIPLY_INTEGER','LIST','MULTIPLY_INTEGER','INTEGER','STRING','TEXT'].includes(item.type)">
                                 <div class="title">{{item.name}}</div>
                                 <div class="w120">
-                                    <van-field v-model="item.configValue" placeholder="ÇëÊäÈë..." :disabled="item.type==='TEXT'" />
+                                    <van-field v-model="item.configValue" placeholder="è¯·è¾“å…¥..." :disabled="item.type==='TEXT'" />
                                 </div>
                             </div>
 
                             <div class="flex-space-between pdTB10" v-if="['TEXT'].includes(item.type)">
-                                <div class="title">Çå³ı</div>
+                                <div class="title">æ¸…é™¤</div>
                                 <div class="flex-center">
                                     <div class="link" @click="clearValue(item)">
                                         {{item.name}}
@@ -211,7 +213,7 @@
                                      @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type)}">
                                     <div class="title">{{item.name}}</div>
                                     <div class="link">
-                                        ÒÑÉèÖÃÊı£º{{item.type==='SELECT'?JSON.parse(item.configValue).length:Object.keys(JSON.parse(item.configValue)).length}}
+                                        å·²è®¾ç½®æ•°ï¼š{{item.type==='SELECT'?JSON.parse(item.configValue).length:Object.keys(JSON.parse(item.configValue)).length}}
                                     </div>
                                 </div>
                             </div>
@@ -219,7 +221,7 @@
                     </div>
                 </van-tab>
 
-                <van-tab name="13" title="Ö÷ÌâÉèÖÃ">
+                <van-tab name="13" title="ä¸»é¢˜è®¾ç½®">
                     <template #title>
                         <div class="title-box">
                             <div v-show="currentTab==13">
@@ -228,15 +230,15 @@
                             <div v-show="currentTab!=13">
                                 <van-image width="20" height="20" fit="contain" class="list-icon" src="./png/13.png" />
                             </div>
-                            <div class="list-label">Ö÷ÌâÉèÖÃ</div>
+                            <div class="list-label">ä¸»é¢˜è®¾ç½®</div>
                         </div>
                     </template>
                     <div class="content-box">
-                        <div class="title">Ö÷ÌâÉèÖÃ</div>
+                        <div class="title">ä¸»é¢˜è®¾ç½®</div>
                         <div class="flex-space-between">
                             <van-radio-group v-model="theme" direction="horizontal">
-                                <van-radio icon-size="16px" name="theme1">ÕÛµşÖ÷Ìâ</van-radio>
-                                <van-radio icon-size="16px" name="theme2">¶¥²¿µ¼º½Ö÷Ìâ</van-radio>
+                                <van-radio icon-size="16px" name="theme1">æŠ˜å ä¸»é¢˜</van-radio>
+                                <van-radio icon-size="16px" name="theme2">é¡¶éƒ¨å¯¼èˆªä¸»é¢˜</van-radio>
                             </van-radio-group>
                         </div>
                     </div>
@@ -245,15 +247,15 @@
         </div>
     </div>
 
-    <!-- ÁĞ±íµ¯´° -->
+    <!-- åˆ—è¡¨å¼¹çª— -->
     <van-dialog v-model:show="person_list.visible"
-                :title="`${person_list.title}${person_list.isLoading?'-ÒÑ¼ÓÔØ:('+person_list.list.length+'/'+person_list.len+')':''}`"
-                show-cancel-button cancelButtonText="È¡Ïû" confirmButtonText="±£´æ" @confirm="handleSubmitBtn"
+                :title="`${person_list.title}${person_list.isLoading?'-å·²åŠ è½½:('+person_list.list.length+'/'+person_list.len+')':''}`"
+                show-cancel-button cancelButtonText="å–æ¶ˆ" confirmButtonText="ä¿å­˜" @confirm="handleSubmitBtn"
                 @cancel="handleCancelBtn" @opened="addEvent">
         <template #footer>
             <div class="flex borderTop">
-                <div @click="handleCancelBtn" class="dialog-footer-btn">È¡Ïû</div>
-                <div class="main-color dialog-footer-btn borderLeft" @click="handleSubmitBtn">±£´æ</div>
+                <div @click="handleCancelBtn" class="dialog-footer-btn">å–æ¶ˆ</div>
+                <div class="main-color dialog-footer-btn borderLeft" @click="handleSubmitBtn">ä¿å­˜</div>
             </div>
         </template>
 
@@ -263,14 +265,14 @@
                     <van-cell>
                         <van-checkbox @change="changeAll" v-model="person_list.check_all" shape="square"
                                       :disabled="person_list.type!=='SELECT'">
-                <span class="link">È«Ñ¡/·´Ñ¡({{person_list.list.filter(item=>{return
+                <span class="link">å…¨é€‰/åé€‰({{person_list.list.filter(item=>{return
                   person_list.type!=='SELECT'?item.count>0:item.isChecked}).length}}/{{person_list.len}})</span>
                         </van-checkbox>
                     </van-cell>
                 </van-list>
             </div>
             <div class="mr15 w120">
-                <van-field v-model="person_list.keys" placeholder="ËÑË÷..." />
+                <van-field v-model="person_list.keys" placeholder="æœç´¢..." />
             </div>
         </div>
 
@@ -303,28 +305,26 @@
     const { showToast } = vant;
     createApp({
       setup() {
-        // ×ó²àµ¼º½²Ëµ¥
+        // å·¦ä¾§å¯¼èˆªèœå•
         const tabs = ref(JSON.parse(window.HOOK.getTabs()));
         const currentTab = ref(
           localStorage.getItem("theme") === "theme1" ? null : 0
         );
-        //ÉèÖÃÄ¬ÈÏÖµ
+        //è®¾ç½®é»˜è®¤å€¼
         const setData = ref(
           tabs.value.map((item) => {
             return JSON.parse(window.HOOK.getModel(item.modelCode));
           })
         );
 
+        // æ›´æ–°æŠ¥åè¯·æ”¹è¿™å„¿
+        // const isVersion = ref(window.HOOK.getBuildInfo() === "tkaxv7s.xposed.sesame:v1.3.4-TK")
 
-
-		// ¸üĞÂ±¨ÃûÇë¸ÄÕâ¶ù
-        //const isVersion = ref(window.HOOK.getBuildInfo() === "tkaxv7s.xposed.sesame:v1.3.4-TK")
-
-        const isVersion = ref(true);
+         const isVersion = ref(true);
 
         const theme = ref(localStorage.getItem("theme") || "theme1");
 
-        // ÓÃ»§ÁĞ±íµ¯´°
+        // ç”¨æˆ·åˆ—è¡¨å¼¹çª—
         const person_list = ref({
           visible: false,
           title: "",
@@ -595,11 +595,12 @@
           theme,
           addEvent,
         };
-      },
+      },h
     })
       .use(vant)
       .use(vant.Lazyload)
       .mount("#app");
 </script>
 </body>
+
 </html>
