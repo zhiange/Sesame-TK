@@ -102,7 +102,6 @@ jobs:
           name: Sesame-Compatible-${{ github.ref_name }}
           body: |
             Sesame-Compatible-${{ github.ref_name }} Release
-
             **更新内容**:
             ${{ github.event.release.body || '无更新说明' }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
