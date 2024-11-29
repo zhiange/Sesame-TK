@@ -539,7 +539,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         recordArray[0] = System.currentTimeMillis();
                         recordArray[1] = args[0];
                         recordArray[2] = args[4];
-                        rpcHookMap.put(object, recordArray);
+                        if (object != null) {
+                          rpcHookMap.put(object, recordArray);
+                          LogUtil.debug("记录Hook ID: " + object.hashCode() + "\n方法: " + args[0] + "\n参数: " + args[4] + "\n");
+                        }
                       }
 
                       @SuppressLint("WakelockTimeout")
