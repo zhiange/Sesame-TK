@@ -209,7 +209,6 @@ public class DebugRpc {
         int currentBudget = exchangeableTree.getInt("currentBudget");
         // 获取区域信息
         String region = exchangeableTree.getString("region");
-
         // 记录树木查询结果
         LogUtil.record("树苗查询🌱[" + region + "-" + treeName + "]#剩余:" + currentBudget);
       } else {
@@ -255,23 +254,18 @@ public class DebugRpc {
           // 检查迷你游戏是否完成成功
           if (jo.getBoolean("success")) {
             JSONObject miniGamedata = jo.getJSONObject("data");
-
             // 检查是否有广告任务信息
             if (miniGamedata.has("adVO")) {
               JSONObject adVO = miniGamedata.getJSONObject("adVO");
-
               // 检查是否有广告业务编号
               if (adVO.has("adBizNo")) {
                 String adBizNo = adVO.getString("adBizNo");
-
                 // 调用RPC方法完成广告任务
                 jo = new JSONObject(DebugRpcCall.taskFinish(adBizNo));
-
                 // 检查广告任务是否完成成功
                 if (jo.getBoolean("success")) {
                   // 查询广告任务是否真的完成
                   jo = new JSONObject(DebugRpcCall.queryAdFinished(adBizNo, "NEVERLAND_DOUBLE_AWARD_AD"));
-
                   // 检查查询结果是否成功
                   if (jo.getBoolean("success")) {
                     LogUtil.farm("完成双倍奖励🎁");
