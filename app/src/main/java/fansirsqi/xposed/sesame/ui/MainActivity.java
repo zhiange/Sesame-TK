@@ -13,14 +13,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
-import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.UserEntity;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.util.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -80,18 +79,19 @@ public class MainActivity extends BaseActivity {
                   if (isClick) {
                     // 调用 FansirsqiUtil 获取句子
                     FansirsqiUtil.getOneWord(
-                            new FansirsqiUtil.OneWordCallback() {
-                              @Override
-                              public void onSuccess(String result) {
-                                runOnUiThread(() -> updateOneWord(result,oneWord)); // 在主线程中更新UI
-                              }
-                              @Override
-                              public void onFailure(String error) {
-                                runOnUiThread(() -> updateOneWord(error,oneWord)); // 在主线程中更新UI
-                              }
-                            });
+                        new FansirsqiUtil.OneWordCallback() {
+                          @Override
+                          public void onSuccess(String result) {
+                            runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
+                          }
+
+                          @Override
+                          public void onFailure(String error) {
+                            runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
+                          }
+                        });
                     Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
-                    TimeUtil.sleep(5000);//别急，等一会儿再说
+                    TimeUtil.sleep(5000); // 别急，等一会儿再说
                     isClick = false;
                   }
                   break;
@@ -120,19 +120,22 @@ public class MainActivity extends BaseActivity {
           public void onSuccess(String result) {
             runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
           }
+
           @Override
           public void onFailure(String error) {
             runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
           }
         });
-    buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion());//版本信息
-    buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget());//编译日期信息
+    buildVersion.setText("Build Version: " + ViewAppInfo.getAppVersion()); // 版本信息
+    buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget()); // 编译日期信息
     StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
   }
+
   private void updateOneWord(String str, TextView oneWord) {
-//    ToastUtil.showToast(str);
+    //    ToastUtil.showToast(str);
     oneWord.setText(str);
   }
+
   @Override
   public void onWindowFocusChanged(boolean hasFocus) {
     if (!hasPermissions) {
@@ -159,6 +162,7 @@ public class MainActivity extends BaseActivity {
           });
     }
   }
+
   @Override
   protected void onResume() {
     super.onResume();
@@ -216,6 +220,7 @@ public class MainActivity extends BaseActivity {
       }
     }
   }
+
   @SuppressLint("NonConstantResourceId")
   public void onClick(View v) {
     if (v.getId() == R.id.btn_test) {
@@ -259,6 +264,7 @@ public class MainActivity extends BaseActivity {
     it.setData(Uri.parse(data));
     startActivity(it);
   }
+
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     PackageManager packageManager = getPackageManager();
@@ -274,8 +280,8 @@ public class MainActivity extends BaseActivity {
       menu.add(0, 5, 5, R.string.export_the_statistic_file);
       menu.add(0, 6, 6, R.string.import_the_statistic_file);
       menu.add(0, 7, 7, R.string.view_debug);
-      menu.add(0, 9, 9, R.string.extend);
-      menu.add(0, 8, 8, R.string.settings);
+      menu.add(0, 8, 9, R.string.extend);
+      menu.add(0, 9, 8, R.string.settings);
     } catch (Exception e) {
       LogUtil.printStackTrace(e);
       ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -312,7 +318,6 @@ public class MainActivity extends BaseActivity {
         otherIt.setData(Uri.parse(otherData));
         startActivity(otherIt);
         break;
-
       case 4:
         String allData = "file://";
         allData += FileUtil.getRuntimeLogFile().getAbsolutePath();
@@ -322,21 +327,18 @@ public class MainActivity extends BaseActivity {
         allIt.setData(Uri.parse(allData));
         startActivity(allIt);
         break;
-
       case 5:
         File statisticsFile = FileUtil.exportFile(FileUtil.getStatisticsFile());
         if (statisticsFile != null) {
           ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
-
       case 6:
         if (FileUtil.copyTo(FileUtil.getExportedStatisticsFile(), FileUtil.getStatisticsFile())) {
           tvStatistics.setText(StatisticsUtil.getText());
           ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
-
       case 7:
         String debugData = "file://";
         debugData += FileUtil.getDebugLogFile().getAbsolutePath();
@@ -345,15 +347,13 @@ public class MainActivity extends BaseActivity {
         debugIt.putExtra("canClear", true);
         startActivity(debugIt);
         break;
-
       case 8:
-        selectSettingUid();
-        break;
-      case 9:
-        //扩展功能
+        // 扩展功能
         startActivity(new Intent(this, ExtendActivity.class));
         break;
-
+      case 9:
+        selectSettingUid();
+        break;
     }
     return super.onOptionsItemSelected(item);
   }
@@ -361,7 +361,8 @@ public class MainActivity extends BaseActivity {
   private void selectSettingUid() {
     AtomicBoolean selected = new AtomicBoolean(false);
 
-    AlertDialog dialog = StringDialog.showSelectionDialog(
+    AlertDialog dialog =
+        StringDialog.showSelectionDialog(
             this,
             "请选择配置",
             userNameArray,
@@ -378,22 +379,24 @@ public class MainActivity extends BaseActivity {
 
     int length = userNameArray.length;
     if (length > 0 && length < 3) {
-      new Thread(() -> {
-        TimeUtil.sleep(800);
-        if (!selected.get()) {
-          goSettingActivity(length - 1);
+      new Thread(
+              () -> {
+                TimeUtil.sleep(800);
+                if (!selected.get()) {
+                  goSettingActivity(length - 1);
 
-          // 在主线程中关闭对话框
-          runOnUiThread(() -> {
-            if (dialog.isShowing()) {
-              dialog.dismiss();
-            }
-          });
-        }
-      }).start();
+                  // 在主线程中关闭对话框
+                  runOnUiThread(
+                      () -> {
+                        if (dialog.isShowing()) {
+                          dialog.dismiss();
+                        }
+                      });
+                }
+              })
+          .start();
     }
   }
-
 
   /**
    * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
@@ -403,7 +406,7 @@ public class MainActivity extends BaseActivity {
   private void goSettingActivity(int index) {
     UserEntity userEntity = userEntityArray[index];
 
-    Class<?> targetActivity = (UIConfig.INSTANCE.getNewUI()) ? NewSettingsActivity.class : SettingsActivity.class;//调整为由UIConfig决定启动哪个Activity,暂时不启用新UI，配置森林无法保存，
+    Class<?> targetActivity = UIConfig.INSTANCE.getNewUI()  ? NewSettingsActivity.class : SettingsActivity.class; // 调整为由UIConfig决定启动哪个Activity,暂时不启用新UI，配置森林无法保存，
     // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
     // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
 
