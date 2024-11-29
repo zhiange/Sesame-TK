@@ -49,10 +49,10 @@ public final class ViewAppInfo {
       // 设置标题栏-应用名称
       appTitle = context.getString(R.string.app_name) + "-TK·" + BuildConfig.BUILD_TAG;
       // 设置构建目标信息
-      appBuildTarget = "🗓 " +BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
+      appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME+" ⏰";
       // 设置版本号
       try {
-        appVersion = "📦 " + BuildConfig.VERSION_NAME.replace(BuildConfig.BUILD_TIME.replace(":", "."), BuildConfig.BUILD_NUMBER);
+        appVersion =BuildConfig.VERSION_NAME.replace(BuildConfig.BUILD_TIME.replace(":", "."), BuildConfig.BUILD_NUMBER)+ " 📦" ;
       } catch (Exception e) {
         LogUtil.printStackTrace(e);
       }
