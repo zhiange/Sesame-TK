@@ -297,6 +297,9 @@ public class FileUtil {
       sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     }
     String today = sdf.format(new Date());
+    //获取昨天日期的格式化字符串
+    String yesterday = sdf.format(new Date(System.currentTimeMillis() - 60 * 60 * 1000 * 24));
+    // 遍历日志目录下的所有文件，删除符合条件的文件
     // 获取日志目录下的所有文件
     File[] files = LOG_DIRECTORY_FILE.listFiles();
     if (files == null) {
@@ -305,15 +308,22 @@ public class FileUtil {
     // 遍历文件，根据条件进行清理
     for (File file : files) {
       String name = file.getName();
-      // 如果文件名以今天的日期结尾，并且文件大小小于100MB，则跳过
-      if (name.endsWith(today + ".log") && file.length() < 104_857_600) {
+      if (name.endsWith(today + ".log") && file.length() < 31457280) {//调整文件大小至30M重置
         continue;
       }
       // 尝试删除文件，忽略可能出现的SecurityException
       try {
-        if (!file.delete()) {
-          // 如果删除失败，可以在这里记录日志或者进行其他处理
-          ToastUtil.showToast("Failed to delete log file: " + file.getName());
+        if(name.contains(yesterday)){// 删除昨天的日志文件
+          if (!file.delete()) {
+            // 如果删除失败，可以在这里记录日志或者进行其他处理
+            ToastUtil.showToast("Failed to delete log file: " + file.getName());
+          }
+        }else {
+          //重命名文件用以记录
+          //获取当前时间的格式化字符串(不再自动删除日志,而是记录日志文件名)
+          SimpleDateFormat nsdf = new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.getDefault());
+          String now = nsdf.format(new Date());
+          file.renameTo(new File(file.getParent(), name.replace(".log", "-" + now + ".log.bak")));
         }
       } catch (SecurityException se) {
         // 记录安全异常，不应该抛出
