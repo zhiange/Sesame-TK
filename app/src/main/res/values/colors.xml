@@ -23,4 +23,7 @@
     <color name="button">#216eee</color>
     <color name="button_text">#ffffff</color>
 
+    <color name="switch_white">#FFFFFF</color>
+    <color name="switch_gray">#DFDFDF</color>
+
 </resources>

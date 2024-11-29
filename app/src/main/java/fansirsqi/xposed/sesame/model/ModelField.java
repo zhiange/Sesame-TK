@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.content.ContextCompat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import fansirsqi.xposed.sesame.R;
@@ -177,7 +178,7 @@ public class ModelField<T> implements Serializable {
         TextView btn = new TextView(context); // 创建 TextView 控件
         btn.setText(getName()); // 设置文本为字段名称
         btn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)); // 设置布局参数
-        btn.setTextColor(Color.parseColor("#216EEE")); // 设置文本颜色
+        btn.setTextColor(ContextCompat.getColor(context, R.color.button)); // 设置文本颜色
         btn.setBackground(context.getResources().getDrawable(R.drawable.button)); // 设置背景
         btn.setGravity(Gravity.START | Gravity.CENTER_VERTICAL); // 设置文本对齐方式
         btn.setMinHeight(150); // 设置最小高度
