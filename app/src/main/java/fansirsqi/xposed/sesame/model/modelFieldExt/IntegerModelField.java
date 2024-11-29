@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.core.content.ContextCompat;
+
 import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.R;
@@ -123,7 +125,7 @@ public class IntegerModelField extends ModelField<Integer> {
         // 设置按钮的布局参数
         btn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         // 设置按钮的文本颜色
-        btn.setTextColor(Color.parseColor("#216EEE"));
+        btn.setTextColor(ContextCompat.getColor(context, R.color.button));
         // 设置按钮的背景
         btn.setBackground(context.getResources().getDrawable(R.drawable.button));
         // 设置按钮的文本对齐方式

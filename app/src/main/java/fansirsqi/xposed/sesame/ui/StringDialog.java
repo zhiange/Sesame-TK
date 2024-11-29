@@ -9,9 +9,11 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
+import fansirsqi.xposed.sesame.util.LogUtil;
 
 /**
  * 字符串对话框工具类。
@@ -58,22 +60,47 @@ public class StringDialog {
      */
     private static AlertDialog getEditDialog(Context c) {
         EditText edt = new EditText(c);
-        edt.setText(String.valueOf(modelField.getConfigValue()));
-        // Corrected import and class
-        return new AlertDialog.Builder(c)
-                .setTitle("编辑")
+        AlertDialog editDialog = new AlertDialog.Builder(c)
+                .setTitle("title")
                 .setView(edt)
                 .setPositiveButton(
                         c.getString(R.string.ok),
-                        (dialog, which) -> {
-                            Editable text = edt.getText();
-                            if (text == null || text.toString().isEmpty()) {
-                                modelField.setConfigValue(null);
-                            } else {
-                                modelField.setConfigValue(text.toString());
+                        new DialogInterface.OnClickListener() {
+                            Context context;
+
+                            public DialogInterface.OnClickListener setData(Context c) {
+                                context = c;
+                                return this;
                             }
-                        })
+
+                            public void onClick(DialogInterface p1, int p2) {
+                                try {
+                                    Editable text = edt.getText();
+                                    if (text == null) {
+                                        modelField.setConfigValue(null);
+                                        return;
+                                    }
+                                    String textString = text.toString();
+                                    if (textString.isEmpty()) {
+                                        modelField.setConfigValue(null);
+                                        return;
+                                    }
+                                    modelField.setConfigValue(textString);
+                                } catch (Throwable e) {
+                                    LogUtil.printStackTrace(e);
+                                }
+                            }
+                        }.setData(c))
                 .create();
+        editDialog.setOnShowListener(dialog -> {
+            // 设置确认按钮颜色
+            Button positiveButton = editDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            if (positiveButton != null) {
+                positiveButton.setTextColor(ContextCompat.getColor(c, R.color.button));
+            }
+        });
+        edt.setText(String.valueOf(modelField.getConfigValue()));
+        return editDialog;
     }
 
     /**
@@ -153,7 +180,7 @@ public class StringDialog {
         // 获取按钮并设置颜色
         Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (button != null) {
-            button.setTextColor(c.getResources().getColor(R.color.colorPrimary));
+            button.setTextColor(c.getResources().getColor(R.color.button));
         }
     }
 
@@ -182,7 +209,7 @@ public class StringDialog {
         // 获取并设置确认按钮的颜色
         Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (button != null) {
-            button.setTextColor(c.getResources().getColor(R.color.colorPrimary));
+            button.setTextColor(c.getResources().getColor(R.color.button));
         }
         return alertDialog;
     }

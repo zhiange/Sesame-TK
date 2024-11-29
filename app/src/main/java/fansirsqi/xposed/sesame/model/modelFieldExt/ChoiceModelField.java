@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.core.content.ContextCompat;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.ui.ChoiceDialog;
@@ -39,7 +42,7 @@ public class ChoiceModelField extends ModelField<Integer> {
         Button btn = new Button(context);
         btn.setText(getName());
         btn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        btn.setTextColor(Color.parseColor("#216EEE"));
+        btn.setTextColor(ContextCompat.getColor(context, R.color.button));
         btn.setBackground(context.getResources().getDrawable(R.drawable.button));
         btn.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         btn.setMinHeight(150);
