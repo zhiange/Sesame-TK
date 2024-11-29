@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountOneModelField;
@@ -98,9 +100,9 @@ public class ListDialog {
             ListAdapter.get(c).notifyDataSetChanged();
         });
         listDialog.show();
-         Button positiveButton = listDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        Button positiveButton = listDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (positiveButton != null) {
-            positiveButton.setTextColor(Color.parseColor("#216EEE")); // 设置按钮颜色为红色
+            positiveButton.setTextColor(ContextCompat.getColor(c, R.color.button));
         }
     }
 

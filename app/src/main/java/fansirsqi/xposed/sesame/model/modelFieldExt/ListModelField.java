@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.core.content.ContextCompat;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
@@ -57,7 +60,7 @@ public class ListModelField extends ModelField<List<String>> {
         Button btn = new Button(context);
         btn.setText(getName());
         btn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        btn.setTextColor(Color.parseColor("#216EEE"));
+        btn.setTextColor(ContextCompat.getColor(context, R.color.button));
         // 根据API版本选择合适的方法获取Drawable资源
         Drawable drawable;
         drawable = context.getResources().getDrawable(R.drawable.button, context.getTheme());

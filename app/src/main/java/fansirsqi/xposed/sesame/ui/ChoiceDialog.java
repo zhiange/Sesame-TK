@@ -1,7 +1,12 @@
 package fansirsqi.xposed.sesame.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.widget.Button;
+
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 
@@ -16,15 +21,19 @@ public class ChoiceDialog {
      */
     public static void show(Context context, CharSequence title, ChoiceModelField choiceModelField) {
         // 创建并显示单选对话框
-        new AlertDialog.Builder(context)
-                .setTitle(title) // 设置对话框标题
-                .setSingleChoiceItems(
-                        choiceModelField.getExpandKey(), // 获取选项列表
-                        choiceModelField.getValue(),     // 当前选中的选项
-                        (dialog, which) -> choiceModelField.setObjectValue(which) // 选中某个选项时更新其值
-                )
-                .setPositiveButton(context.getString(R.string.ok), null) // 确定按钮
-                .create()
-                .show(); // 显示对话框
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setSingleChoiceItems(choiceModelField.getExpandKey(), choiceModelField.getValue(),
+                        (p1, p2) -> choiceModelField.setObjectValue(p2))
+                .setPositiveButton(context.getString(R.string.ok), null)
+                .create();
+        dialog.setOnShowListener(dialogInterface -> {
+            // 设置确认按钮颜色
+            Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            if (positiveButton != null) {
+                positiveButton.setTextColor(ContextCompat.getColor(context, R.color.button));
+            }
+        });
+        dialog.show();
     }
 }
