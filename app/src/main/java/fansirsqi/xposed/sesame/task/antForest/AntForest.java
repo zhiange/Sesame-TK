@@ -52,6 +52,8 @@ public class AntForest extends ModelTask {
 
   private final AtomicInteger taskCount = new AtomicInteger(0);
 
+
+
   private String selfId;
 
   private Integer tryCountInt;
@@ -251,9 +253,10 @@ public class AntForest extends ModelTask {
     delayTimeMath.clear();
     AntForestRpcCall.init();
   }
-
+  List<String> NotificationList = new ArrayList<>();
   @Override
   public void run() {
+
     try {
       // 获取当前时间
       LogUtil.record("执行开始-蚂蚁森林");
@@ -329,7 +332,7 @@ public class AntForest extends ModelTask {
                         if (collected > 0) {
                           String msg = "收取金球🍯浇水[" + collected + "g]";
                           LogUtil.forest(msg);
-                          NotificationUtil.updateLastExecText(msg);
+                          NotificationList.add(msg);
                           Toast.show(msg);
                           totalCollected += collected;
                           StatisticsUtil.addData(StatisticsUtil.DataType.COLLECTED, collected);
@@ -350,7 +353,7 @@ public class AntForest extends ModelTask {
                         collected = joEnergy.getInt("energy");
                         String msg = "收取金球🍯复活[" + collected + "g]";
                         LogUtil.forest(msg);
-                        NotificationUtil.updateLastExecText(msg);
+                        NotificationList.add(msg);
                         Toast.show(msg);
                         totalCollected += collected;
                         StatisticsUtil.addData(StatisticsUtil.DataType.COLLECTED, collected);
@@ -373,7 +376,7 @@ public class AntForest extends ModelTask {
                         if (collected > 0) {
                           String msg = "收取金球🍯[" + UserIdMapUtil.getMaskName(friendId) + "]复活回赠[" + collected + "g]";
                           LogUtil.forest(msg);
-                          NotificationUtil.updateLastExecText(msg);
+                          NotificationList.add(msg);
                           Toast.show(msg);
                           totalCollected += collected;
                           StatisticsUtil.addData(StatisticsUtil.DataType.COLLECTED, collected);
@@ -405,7 +408,7 @@ public class AntForest extends ModelTask {
                 jo = new JSONObject(AntForestRpcCall.collectProp(giveConfigId, giveId));
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                   String str = "领取道具🎭[" + propName + "]";
-                  NotificationUtil.updateLastExecText(str);
+                  NotificationList.add(str);
                   LogUtil.forest(str);
                 } else {
                   String str = "领取道具🎭[" + propName + "]失败:" + jo.getString("resultDesc");
@@ -439,7 +442,7 @@ public class AntForest extends ModelTask {
               jo = new JSONObject(AntForestRpcCall.collectAnimalRobEnergy(propId, propType, shortDay));
               if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 String str = "收取动物能量🦩[" + energy + "g]";
-                NotificationUtil.updateLastExecText(str);
+                NotificationList.add(str);
                 Toast.show(str);
                 LogUtil.forest(str);
               } else {
@@ -466,7 +469,7 @@ public class AntForest extends ModelTask {
           if (!canConsumeAnimalProp) {
             String str = "啦啦~ 已经有动物伙伴在巡护森林~";
             LogUtil.record(str);
-            NotificationUtil.updateLastExecText(str);
+            NotificationList.add(str);
             Toast.show(str);
           } else {
             queryAnimalPropList();
@@ -588,7 +591,14 @@ public class AntForest extends ModelTask {
       }
       StatisticsUtil.save();
       FriendWatch.save();
-      NotificationUtil.updateLastExecText("收:" + totalCollected + " 帮:" + totalHelpCollected);
+      String str_totalCollected = "收:" + totalCollected + " 帮:" + totalHelpCollected;
+      NotificationList.add(str_totalCollected);
+      for (String msg : NotificationList) {
+        TimeUtil.sleep(3000L);
+        NotificationUtil.updateLastExecText(msg);
+        NotificationList.remove(msg);
+      }
+      NotificationUtil.updateLastExecText(str_totalCollected);
     }
   }
 
@@ -1112,6 +1122,11 @@ public class AntForest extends ModelTask {
     collectEnergy(collectEnergyEntity, false);
   }
 
+  /**收能量
+   *
+   * @param collectEnergyEntity 收能量实体
+   * @param joinThread 是否加入线程
+   */
   private void collectEnergy(CollectEnergyEntity collectEnergyEntity, Boolean joinThread) {
     Runnable runnable =
         () -> {
@@ -1194,11 +1209,11 @@ public class AntForest extends ModelTask {
                 String str = "一键收取🎈[" + UserIdMapUtil.getMaskName(userId) + "]#" + collected + "g";
                 if (needDouble) {
                   LogUtil.forest(str + "耗时[" + spendTime + "]ms[双击]");
-                  NotificationUtil.updateLastExecText(str);
+                  NotificationList.add(str);
                   Toast.show(str + "[双击]");
                 } else {
                   LogUtil.forest(str + "耗时[" + spendTime + "]ms");
-                  NotificationUtil.updateLastExecText(str);
+                  NotificationList.add(str);
                   Toast.show(str);
                 }
                 totalCollected += collected;
@@ -1220,11 +1235,11 @@ public class AntForest extends ModelTask {
                 String str = "收取能量🎈[" + UserIdMapUtil.getMaskName(userId) + "]#" + collected + "g";
                 if (needDouble) {
                   LogUtil.forest(str + "耗时[" + spendTime + "]ms[双击]");
-                  NotificationUtil.updateLastExecText(str);
+                  NotificationList.add(str);
                   Toast.show(str + "[双击]");
                 } else {
                   LogUtil.forest(str + "耗时[" + spendTime + "]ms");
-                  NotificationUtil.updateLastExecText(str);
+                  NotificationList.add(str);
                   Toast.show(str);
                 }
                 totalCollected += collected;
@@ -1264,7 +1279,9 @@ public class AntForest extends ModelTask {
             LogUtil.printStackTrace(e);
           } finally {
             StatisticsUtil.save();
-            NotificationUtil.updateLastExecText("收:" + totalCollected + " 帮:" + totalHelpCollected);
+            String str_totalCollected = "收:" + totalCollected + " 帮:" + totalHelpCollected;
+            NotificationList.add(str_totalCollected);
+            NotificationUtil.updateLastExecText(str_totalCollected);
             notifyMain();
           }
         };
