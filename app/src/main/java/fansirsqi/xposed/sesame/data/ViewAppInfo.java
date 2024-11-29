@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Bundle;
-
+import fansirsqi.xposed.sesame.BuildConfig;
+import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Getter;
 import lombok.Setter;
-import fansirsqi.xposed.sesame.BuildConfig;
-import fansirsqi.xposed.sesame.R;
 
-/**
- * ViewAppInfo 类用于提供应用信息相关的功能，包括初始化应用信息、检查运行状态、设置运行类型等。
- */
+/** ViewAppInfo 类用于提供应用信息相关的功能，包括初始化应用信息、检查运行状态、设置运行类型等。 */
 public final class ViewAppInfo {
 
   @SuppressLint("StaticFieldLeak")
@@ -50,22 +47,19 @@ public final class ViewAppInfo {
       // 此处
       appBuildNumber = String.valueOf(BuildConfig.VERSION_CODE);
       // 设置标题栏-应用名称
-      appTitle = context.getString(R.string.app_name) + "-TK·"+BuildConfig.BUILD_TAG;
+      appTitle = context.getString(R.string.app_name) + "-TK·" + BuildConfig.BUILD_TAG;
       // 设置构建目标信息
-      appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
+      appBuildTarget = "🗓 " +BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME;
       // 设置版本号
       try {
-        appVersion = BuildConfig.VERSION_NAME;
+        appVersion = "📦 " + BuildConfig.VERSION_NAME.replace(BuildConfig.BUILD_TIME.replace(":", "."), BuildConfig.BUILD_NUMBER);
       } catch (Exception e) {
         LogUtil.printStackTrace(e);
       }
     }
   }
 
-  /**
-   * 检查当前应用的运行类型，判断是否启用或禁用
-   * 通过与 content provider 交互来检查应用是否处于激活状态
-   */
+  /** 检查当前应用的运行类型，判断是否启用或禁用 通过与 content provider 交互来检查应用是否处于激活状态 */
   public static void checkRunType() {
     // 如果 runType 已经被设置，则无需再执行检查
     if (runType != null) {
