@@ -1,9 +1,6 @@
 package fansirsqi.xposed.sesame.rpc.bridge;
 
 import de.robv.android.xposed.XposedHelpers;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Map;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.model.BaseModel;
@@ -12,6 +9,9 @@ import fansirsqi.xposed.sesame.util.ClassUtil;
 import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.NotificationUtil;
 import fansirsqi.xposed.sesame.util.RandomUtil;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Map;
 
 /** 新版rpc接口，支持最低支付宝版本v10.3.96.8100 记录rpc抓包，支持最低支付宝版本v10.3.96.8100 */
 public class NewRpcBridge implements RpcBridge {
@@ -159,7 +159,7 @@ public class NewRpcBridge implements RpcBridge {
                   loader,
                   bridgeCallbackClazzArray,
                   (proxy, innerMethod, args) -> {
-                    if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
+                    if (args!= null && args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
                       try {
                         Object obj = args[0];
                         rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
@@ -177,7 +177,8 @@ public class NewRpcBridge implements RpcBridge {
                                   + rpcEntity.getResponseString()
                                   + "\n=======================================================<");
                         }
-                      } catch (Exception e) {
+                      }
+                      catch (Exception e) {
                         rpcEntity.setError();
                         LogUtil.error("新 RPC 响应 | id: " + id + " | 方法: " + method + " 错误:");
                         LogUtil.printStackTrace(e);
