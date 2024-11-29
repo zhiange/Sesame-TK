@@ -16,6 +16,7 @@ import fansirsqi.xposed.sesame.util.TimeUtil;
 import fansirsqi.xposed.sesame.util.UserIdMapUtil;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class AntDodo extends ModelTask {
@@ -258,20 +259,10 @@ public class AntDodo extends ModelTask {
                         JSONObject prop = propList.getJSONObject(i);
                         String propType = prop.getString("propType");
 
-                        boolean usePropType = useProp.getValue();
-                        if ("COLLECT_TIMES_7_DAYS".equals(propType)) {
-                            usePropType = usePropType || usePropCollectTimes7Days.getValue();
-                        }
-                        if ("COLLECT_HISTORY_ANIMAL_7_DAYS".equals(propType)) {
-                            usePropType = usePropType || usePropCollectHistoryAnimal7Days.getValue();
-                        }
-                        if ("COLLECT_TO_FRIEND_TIMES_7_DAYS".equals(propType)) {
-                            usePropType = usePropType || usePropCollectToFriendTimes7Days.getValue();
-                        }
+                        boolean usePropType = isUsePropType(propType);
                         if (!usePropType) {
                             continue;
                         }
-
                         JSONArray propIdList = prop.getJSONArray("propIdList");
                         String propId = propIdList.getString(0);
                         String propName = prop.getJSONObject("propConfig").getString("propName");
@@ -283,7 +274,6 @@ public class AntDodo extends ModelTask {
                             LogUtil.runtime(jo.toString());
                             continue;
                         }
-
                         if ("COLLECT_TIMES_7_DAYS".equals(propType)) {
                             JSONObject useResult = jo.getJSONObject("data").getJSONObject("useResult");
                             JSONObject animal = useResult.getJSONObject("animal");
@@ -316,12 +306,38 @@ public class AntDodo extends ModelTask {
         }
     }
 
+    /**
+     * 判断是否存在使用道具类型
+     * @param propType 道具类型
+     * @return 是否使用
+     */
+    private boolean isUsePropType(String propType) {
+        boolean usePropType = useProp.getValue();
+        switch (propType) {
+            case "COLLECT_TIMES_7_DAYS":
+                usePropType = usePropType || usePropCollectTimes7Days.getValue();
+                break;
+            case "COLLECT_HISTORY_ANIMAL_7_DAYS":
+                usePropType = usePropType || usePropCollectHistoryAnimal7Days.getValue();
+                break;
+            case "COLLECT_TO_FRIEND_TIMES_7_DAYS":
+                usePropType = usePropType || usePropCollectToFriendTimes7Days.getValue();
+                break;
+        }
+        return usePropType;
+    }
+
+    /**
+     * 发送神奇物种卡片
+     * @param bookId 卡片图鉴ID
+     * @param targetUser 目标用户ID
+     */
     private void sendAntDodoCard(String bookId, String targetUser) {
         try {
             JSONObject jo = new JSONObject(AntDodoRpcCall.queryBookInfo(bookId));
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 JSONArray animalForUserList = jo.getJSONObject("data").optJSONArray("animalForUserList");
-                for (int i = 0; i < animalForUserList.length(); i++) {
+                for (int i = 0; i < Objects.requireNonNull(animalForUserList).length(); i++) {
                     JSONObject animalForUser = animalForUserList.getJSONObject(i);
                     int count = animalForUser.getJSONObject("collectDetail").optInt("count");
                     if (count <= 0)
@@ -329,7 +345,7 @@ public class AntDodo extends ModelTask {
                     JSONObject animal = animalForUser.getJSONObject("animal");
                     for (int j = 0; j < count; j++) {
                         sendCard(animal, targetUser);
-                        Thread.sleep(500L);
+                        TimeUtil.sleep(500L);
                     }
                 }
             }
