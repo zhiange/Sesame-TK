@@ -39,6 +39,12 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # 获取原仓库的预发行版属性
+      - name: Get Original Repository Pre-release Property
+        id: pre_release
+        run: |
+           echo "IS_PRERELEASE=$(if [ "${{ github.event.release.prerelease }}" = true ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_OUTPUT
+
       # 赋予 Gradlew 执行权限
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -76,7 +82,7 @@ jobs:
       - name: Upload Normal APK to Source Release
         uses: termux/upload-release-action@v4.2.0
         with:
-          asset_name: Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.apk
+#          asset_name: Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.apk
           file: ${{ steps.sign_normal_apk.outputs.signedFile }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -88,7 +94,7 @@ jobs:
       - name: Upload Compatible APK to Source Release
         uses: termux/upload-release-action@v4.2.0
         with:
-          asset_name: Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.apk
+#          asset_name: Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.apk
           file: ${{ steps.sign_compatible_apk.outputs.signedFile }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -111,7 +117,7 @@ jobs:
           release_name: ${{ github.ref_name }}
           draft: false #指示此版本是否为草稿
           prerelease: false #是否为预发行
-          append_body: true #是否将源仓库 Release 内容附加到此版本
+          append_body: ${{ steps.pre_release.outputs.IS_PRERELEASE }} #是否为预发行，同步原仓库属性 #是否将源仓库 Release 内容附加到此版本
           make_latest: true #是否将此版本设为最新版本
           body: | #传达此版本中显著变化的文本
             本 Release 同步自源仓库 [Sesame-TK](https://github.com/${{ github.repository }})
