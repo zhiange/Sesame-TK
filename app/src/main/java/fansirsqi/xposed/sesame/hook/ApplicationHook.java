@@ -27,6 +27,7 @@ import fansirsqi.xposed.sesame.rpc.bridge.NewRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.OldRpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.RpcBridge;
 import fansirsqi.xposed.sesame.rpc.bridge.RpcVersion;
+import fansirsqi.xposed.sesame.rpc.debug.DebugRpc;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.task.BaseTask;
 import fansirsqi.xposed.sesame.task.ModelTask;
@@ -892,28 +893,56 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               LogUtil.printStackTrace(TAG, th);
             }
             break;
+          case "com.eg.android.AlipayGphone.sesame.rpctest":
+            try {
+              String method = intent.getStringExtra("method");
+              String data = intent.getStringExtra("data");
+              String type = intent.getStringExtra("type");
+              DebugRpc rpcInstance = new DebugRpc(); // 创建实例
+              rpcInstance.start(method, data, type); // 通过实例调用非静态方法
+            } catch (Throwable th) {
+              LogUtil.runtime(TAG, "sesame 测试RPC请求失败:");
+              LogUtil.printStackTrace(TAG, th);
+            }
+            break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + action);
         }
       }
     }
   }
 
-  @SuppressLint("UnspecifiedRegisterReceiverFlag")
+  /**
+   * 注册广播接收器以监听支付宝相关动作。
+   *
+   * @param context 应用程序上下文
+   */
+  @SuppressLint("UnspecifiedRegisterReceiverFlag") // 忽略Lint关于注册广播接收器时未指定导出属性的警告
   private void registerBroadcastReceiver(Context context) {
+    //       创建一个IntentFilter实例，用于过滤出我们需要捕获的广播
     try {
       IntentFilter intentFilter = new IntentFilter();
-      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.restart");
-      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.execute");
-      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.reLogin");
-      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.status");
+      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.restart"); // 重启支付宝服务的动作
+      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.execute"); // 执行特定命令的动作
+      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.reLogin"); // 重新登录支付宝的动作
+      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.status"); // 查询支付宝状态的动作
+      intentFilter.addAction("com.eg.android.AlipayGphone.sesame.rpctest"); // 调试RPC的动作
+      // 根据Android SDK版本注册广播接收器
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        // 在Android 13及以上版本，注册广播接收器并指定其可以被其他应用发送的广播触发
         context.registerReceiver(new AlipayBroadcastReceiver(), intentFilter, Context.RECEIVER_EXPORTED);
       } else {
+        // 在Android 13以下版本，注册广播接收器
         context.registerReceiver(new AlipayBroadcastReceiver(), intentFilter);
       }
+      // 记录成功注册广播接收器的日志
       LogUtil.runtime(TAG, "hook registerBroadcastReceiver successfully");
     } catch (Throwable th) {
+      // 记录注册广播接收器失败的日志
       LogUtil.runtime(TAG, "hook registerBroadcastReceiver err:");
+      // 打印异常堆栈信息
       LogUtil.printStackTrace(TAG, th);
     }
   }
+
 }
