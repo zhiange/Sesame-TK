@@ -55,7 +55,7 @@
 
 ## [本仓库](https://github.com/TKaxv-7S/Sesame-TK) 已存档
 
-新版本可前往由 [@LazyImmortal](https://github.com/LazyImmortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新
+新版本可前往由 [@lazy-immortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/lazy-immortal/Sesame) 更新
 
 <h1>🚨 为了大家的资金安全与个人信息安全，墙裂建议</h1>
 <p>
@@ -86,7 +86,7 @@
 ## 主要功能
 感谢蚂蚁森林对绿化事业的贡献。快速收取蚂蚁森林能量，也为祖国的绿化事业出一份微薄之力~
 
-### 版本特点 By [TKaxv-7S](https://github.com/TKaxv-7S)
+### 版本特点 By [@TKaxv-7S](https://github.com/TKaxv-7S)
 1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/TKaxv-7S/Sesame-TK/wiki)或如下图所示，非常欢迎大家提[PR](https://github.com/TKaxv-7S/Sesame-TK/pulls)
 ![Sesame-TK开发指南](https://github.com/TKaxv-7S/Sesame-TK/assets/22593101/4d8451fe-2b7f-4f19-9439-b0afbf683510)
 2. 重构 **森林收能量代码**，大幅提升能量多的账号收取效率
