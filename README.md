@@ -1,9 +1,15 @@
 # Sesame-TK
+<center>
 
-[![License](https://img.shields.io/github/license/Fansirsqi/Sesame-TK.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/release/Fansirsqi/Sesame-TK.svg)](../../releases)
-[![All Releases Download](https://img.shields.io/github/downloads/Fansirsqi/Sesame-TK/total.svg)](../../releases)
-[![Telegram](https://img.shields.io/static/v1?label=Telegram&message=Channel&color=0088cc)](https://t.me/fansirsqi_xposed_sesame)
+![Sesame-TK](https://socialify.git.ci/Fansirsqi/Sesame-TK/image?description=1&font=Source%20Code%20Pro&forks=1&issues=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FFansirsqi%2FSesame-TK%2Frefs%2Fheads%2Fmain%2Fapp%2Fsrc%2Fmain%2Fassets%2Fweb%2FSesame-TK-logo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Auto)
+
+
+[![License](https://img.shields.io/github/license/Fansirsqi/Sesame-TK?labelColor=fff&label=License&logo=gnuprivacyguard)](https://raw.githubusercontent.com/Fansirsqi/Sesame-TK/refs/heads/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/release/Fansirsqi/Sesame-TK?labelColor=fff&label=Releases&logo=gitlfs)](../../releases)
+[![All Releases Download](https://img.shields.io/github/downloads/Fansirsqi/Sesame-TK/total?labelColor=fff&label=Downloads&logo=codefresh)](../../releases)
+[![Telegram](https://img.shields.io/badge/Sesame--TK-nul?&logo=Telegram&label=Telegram-Channel&labelColor=fff&link=https%3A%2F%2Ft.me%2Ffansirsqi_xposed_sesame)](https://t.me/fansirsqi_xposed_sesame)
+
+</center>
 ## 本人不是专业的开发者，仅仅是一名热爱开源的爱好者，欢迎大家提出宝贵意见，共同完善此项目。
 
 大部分代码内容由`GPT4-o`模型完辅助成
