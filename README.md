@@ -18,7 +18,7 @@
 
 </center>
 
-大部分代码内容由`GPT4-o`模型完辅助成
+代码的大部分内容是通过 `GPT-4o` 模型的辅助来完成的。
 
 `bug`请[提交issues](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
 功能建议请提交PR
