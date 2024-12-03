@@ -184,7 +184,7 @@ public class MainActivity extends BaseActivity {
       try {
         List<String> userNameList = new ArrayList<>();
         List<UserEntity> userEntityList = new ArrayList<>();
-        File[] configFiles = FileUtil.CONFIG_DIRECTORY_FILE.listFiles();
+        File[] configFiles = FileUtil.CONFIG_DIRECTORY.listFiles();
         if (configFiles != null) {
           for (File configDir : configFiles) {
             if (configDir.isDirectory()) {
@@ -272,16 +272,15 @@ public class MainActivity extends BaseActivity {
     try {
       int componentEnabledSetting = packageManager.getComponentEnabledSetting(new ComponentName(this, aliasName));
       MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
-      checkable.setChecked(componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+      checkable.setChecked(componentEnabledSetting > PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
       menu.add(0, 2, 2, R.string.view_error_log_file);
       menu.add(0, 3, 3, R.string.view_other_log_file);
       menu.add(0, 4, 4, R.string.view_all_log_file);
-      // menu.add(0, 5, 5, R.string.export_runtime_log_file);
       menu.add(0, 5, 5, R.string.export_the_statistic_file);
       menu.add(0, 6, 6, R.string.import_the_statistic_file);
-      menu.add(0, 7, 7, R.string.view_debug);
-      menu.add(0, 8, 9, R.string.extend);
-      menu.add(0, 9, 8, R.string.settings);
+      menu.add(0, 7, 7, R.string.view_capture);
+      menu.add(0, 8, 8, R.string.extend);
+      menu.add(0, 9, 9, R.string.settings);
     } catch (Exception e) {
       LogUtil.printStackTrace(e);
       ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -340,10 +339,10 @@ public class MainActivity extends BaseActivity {
         }
         break;
       case 7:
-        String debugData = "file://";
-        debugData += FileUtil.getDebugLogFile().getAbsolutePath();
+        String captureData = "file://";
+        captureData += FileUtil.getCaptureLogFile().getAbsolutePath();
         Intent debugIt = new Intent(this, HtmlViewerActivity.class);
-        debugIt.setData(Uri.parse(debugData));
+        debugIt.setData(Uri.parse(captureData));
         debugIt.putExtra("canClear", true);
         startActivity(debugIt);
         break;
