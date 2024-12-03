@@ -42,11 +42,11 @@ import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
 
-  private static final String TAG = ApplicationHook.class.getSimpleName();
+  static final String TAG = ApplicationHook.class.getSimpleName();
 
   @Getter private static final String modelVersion = BuildConfig.VERSION_NAME;
 
-  private static final Map<Object, Object[]> rpcHookMap = new ConcurrentHashMap<>();
+  static final Map<Object, Object[]> rpcHookMap = new ConcurrentHashMap<>();
 
   private static final Map<String, PendingIntent> wakenAtTimeAlarmMap = new ConcurrentHashMap<>();
 
@@ -56,26 +56,26 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
   @Getter
   @SuppressLint("StaticFieldLeak")
-  private static Context context = null;
+  static Context context = null;
 
-  @Getter private static AlipayVersion alipayVersion = new AlipayVersion("");
+  @Getter static AlipayVersion alipayVersion = new AlipayVersion("");
 
   @Getter private static volatile boolean hooked = false;
 
-  private static volatile boolean init = false;
+  static volatile boolean init = false;
 
-  private static volatile Calendar dayCalendar;
+  static volatile Calendar dayCalendar;
 
-  @Getter private static volatile boolean offline = false;
+  @Getter static volatile boolean offline = false;
 
-  @Getter private static final AtomicInteger reLoginCount = new AtomicInteger(0);
+  @Getter static final AtomicInteger reLoginCount = new AtomicInteger(0);
 
   @SuppressLint("StaticFieldLeak")
-  private static Service service;
+  static Service service;
 
-  @Getter private static Handler mainHandler;
+  @Getter static Handler mainHandler;
 
-  private static BaseTask mainTask;
+  static BaseTask mainTask;
 
   private static RpcBridge rpcBridge;
 
@@ -441,7 +441,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
   }
 
   @SuppressLint("WakelockTimeout")
-  private synchronized Boolean initHandler(Boolean force) {
+  synchronized Boolean initHandler(Boolean force) {
     if (service == null) {
       return false;
     }
@@ -607,7 +607,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
-  private static synchronized void destroyHandler(Boolean force) {
+  static synchronized void destroyHandler(Boolean force) {
     try {
       if (force) {
         if (service != null) {
@@ -652,11 +652,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
-  private static void execHandler() {
+  static void execHandler() {
     mainTask.startTask(false);
   }
 
-  private static void execDelayedHandler(long delayMillis) {
+  static void execDelayedHandler(long delayMillis) {
     mainHandler.postDelayed(() -> mainTask.startTask(false), delayMillis);
     try {
       NotificationUtil.updateNextExecText(System.currentTimeMillis() + delayMillis);
@@ -704,7 +704,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
-  @SuppressLint("ScheduleExactAlarm")
+  @SuppressLint({"ScheduleExactAlarm", "ObsoleteSdkInt"})
   private static Boolean setAlarmTask(long triggerAtMillis, PendingIntent operation) {
     try {
       AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -802,6 +802,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
+  @SuppressLint("ObsoleteSdkInt")
   private static int getPendingIntentFlag() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       return PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
@@ -869,7 +870,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         });
   }
 
-  private class AlipayBroadcastReceiver extends BroadcastReceiver {
+  class AlipayBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
@@ -921,7 +922,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
    * @param context 应用程序上下文
    */
   @SuppressLint("UnspecifiedRegisterReceiverFlag") // 忽略Lint关于注册广播接收器时未指定导出属性的警告
-  private void registerBroadcastReceiver(Context context) {
+  void registerBroadcastReceiver(Context context) {
     //       创建一个IntentFilter实例，用于过滤出我们需要捕获的广播
     try {
       IntentFilter intentFilter = new IntentFilter();
