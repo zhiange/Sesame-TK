@@ -14,6 +14,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+
 import java.io.File;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.FileUtil;
@@ -24,8 +27,8 @@ import fansirsqi.xposed.sesame.util.ToastUtil;
 public class HtmlViewerActivity extends BaseActivity {
   private static final String TAG = HtmlViewerActivity.class.getSimpleName();
 
-  private MyWebView mWebView;
-  private ProgressBar progressBar;
+  MyWebView mWebView;
+  ProgressBar progressBar;
   private Uri uri;
   private Boolean canClear;
 
@@ -34,9 +37,9 @@ public class HtmlViewerActivity extends BaseActivity {
     super.onCreate(savedInstanceState);
     LanguageUtil.setLocale(this);
     setContentView(R.layout.activity_html_viewer);
-    setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
+      setBaseSubtitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
 
-    // 初始化 WebView 和进度条
+      // 初始化 WebView 和进度条
     mWebView = findViewById(R.id.mwv_webview);
     progressBar = findViewById(R.id.pgb_webview);
 
@@ -166,7 +169,6 @@ public class HtmlViewerActivity extends BaseActivity {
         if (path != null) {
           File exportFile = FileUtil.exportFile(new File(path));
           if (exportFile != null && exportFile.exists()) {
-            //            OtherDialog.showToast(this, "文件已导出到: " + exportFile.getPath(), Toast.LENGTH_SHORT).show();
             ToastUtil.showToast(this, getString(R.string.file_exported) + exportFile.getPath());
           } else {
             LogUtil.runtime(TAG, "导出失败，exportFile 对象为 null 或不存在！");
