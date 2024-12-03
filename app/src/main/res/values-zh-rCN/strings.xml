@@ -75,7 +75,7 @@
     <string name="export_the_statistic_file">导出统计</string>
     <string name="import_the_statistic_file">导入统计</string>
     <string name="view_all_log_file">查看运行日志</string>
-    <string name="view_debug">抓包记录</string>
+    <string name="view_capture">抓包记录</string>
     <string name="settings">设  置</string>
     <string name="extend">扩展功能</string>
     <string name="limit_collect">限制收取</string>

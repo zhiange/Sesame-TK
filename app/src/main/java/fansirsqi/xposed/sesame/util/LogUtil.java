@@ -22,21 +22,6 @@ public class LogUtil {
     XLog.init(LogLevel.ALL);
   }
 
-  // 使用 ThreadLocal 避免多线程环境下 SimpleDateFormat 的线程安全问题
-  public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd");
-  public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd HH:mm:ss");
-  public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy.MM.dd HH:mm:ss");
-
-  // 日志记录器
-  private static final Logger runtimeLogger = createLogger("runtime", "{d HH:mm:ss.SSS} {t}: {m}");
-  private static final Logger recordLogger = createLogger("record", "{d HH:mm:ss.SSS} {m}");
-  private static final Logger systemLogger = createLogger("system", "{d HH:mm:ss.SSS} {t}: {m}");
-  private static final Logger debugLogger = createLogger("debug", "{d HH:mm:ss.SSS} {t}: {m}");
-  private static final Logger forestLogger = createLogger("forest", "{d HH:mm:ss.SSS} {m}");
-  private static final Logger farmLogger = createLogger("farm", "{d HH:mm:ss.SSS} {m}");
-  private static final Logger otherLogger = createLogger("other", "{d HH:mm:ss.SSS} {m}");
-  private static final Logger errorLogger = createLogger("error", "{d HH:mm:ss.SSS} {t}: {m}");
-
   /**
    * 创建一个 ThreadLocal<SimpleDateFormat> 实例，用于日期格式化。
    *
@@ -44,12 +29,7 @@ public class LogUtil {
    * @return 一个线程安全的 SimpleDateFormat 实例
    */
   private static ThreadLocal<SimpleDateFormat> createThreadLocal(final String pattern) {
-    return new ThreadLocal<SimpleDateFormat>() {
-      @Override
-      protected SimpleDateFormat initialValue() {
-        return new SimpleDateFormat(pattern, Locale.getDefault());
-      }
-    };
+    return ThreadLocal.withInitial(() -> new SimpleDateFormat(pattern, Locale.getDefault()));
   }
 
   /**
@@ -61,15 +41,32 @@ public class LogUtil {
    */
   private static Logger createLogger(String tag, String pattern) {
     return XLog.tag(tag)
-        .printers(
-            new FilePrinter.Builder(FileUtil.LOG_DIRECTORY_FILE.getPath())
-                .fileNameGenerator(new CustomDateFileNameGenerator(tag))
-                .backupStrategy(new NeverBackupStrategy())
-                .cleanStrategy(new NeverCleanStrategy())
-                .flattener(new PatternFlattener(pattern))
-                .build())
-        .build();
+            .printers(
+                    new FilePrinter.Builder(FileUtil.LOG_DIRECTORY.getPath())
+                            .fileNameGenerator(new CustomDateFileNameGenerator(tag))
+                            .backupStrategy(new NeverBackupStrategy())
+                            .cleanStrategy(new NeverCleanStrategy())
+                            .flattener(new PatternFlattener(pattern))
+                            .build())
+            .build();
   }
+
+  // 使用 ThreadLocal 避免多线程环境下 SimpleDateFormat 的线程安全问题
+  public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd");
+  public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy-MM-dd HH:mm:ss");
+  public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = createThreadLocal("yyyy.MM.dd HH:mm:ss");
+
+  // 日志记录器
+  private static final Logger runtimeLogger = createLogger("runtime", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger recordLogger = createLogger("record", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger systemLogger = createLogger("system", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger captureLogger = createLogger("capture", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger forestLogger = createLogger("forest", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger farmLogger = createLogger("farm", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger otherLogger = createLogger("other", "{d HH:mm:ss.SSS} {m}");
+  private static final Logger errorLogger = createLogger("error", "{d HH:mm:ss.SSS} {t}: {m}");
+  private static final Logger debugLogger = createLogger("debug", "{d HH:mm:ss.SSS} {m}");
+
 
   /**
    * 输出信息级别的日志。
@@ -113,12 +110,12 @@ public class LogUtil {
   }
 
   /**
-   * 输出调试级别的日志。
+   * 输出网络抓包相关的日志。
    *
    * @param s 日志内容
    */
-  public static void debug(String s) {
-    debugLogger.d(s);
+  public static void capture(String s) {
+    captureLogger.d(s);
   }
 
   /**
@@ -149,6 +146,10 @@ public class LogUtil {
   public static void other(String s) {
     record(s);
     otherLogger.i(s);
+  }
+
+  public static void debug(String s) {
+    debugLogger.i(s);
   }
 
   /**
