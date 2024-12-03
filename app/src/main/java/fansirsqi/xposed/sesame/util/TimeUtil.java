@@ -369,15 +369,6 @@ public class TimeUtil {
         return isLessThanSecondOfDays(timestamp, System.currentTimeMillis());
     }
 
-    /**
-     * 获取通用的日期格式化对象。
-     *
-     * @return 日期格式化对象。
-     */
-    @SuppressLint("SimpleDateFormat")
-    public static DateFormat getCommonDateFormat() {
-        return new SimpleDateFormat("dd日HH:mm:ss");
-    }
 
     /**
      * 获取通用的日期字符串表示。
@@ -387,6 +378,6 @@ public class TimeUtil {
      */
     @SuppressLint("SimpleDateFormat")
     public static String getCommonDate(Long timestamp) {
-        return getCommonDateFormat().format(timestamp);
+        return new SimpleDateFormat("dd日HH:mm:ss").format(timestamp);
     }
 }
