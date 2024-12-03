@@ -541,7 +541,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         recordArray[2] = args[4];
                         if (object != null) {
                           rpcHookMap.put(object, recordArray);
-                          LogUtil.debug("记录Hook ID: " + object.hashCode() + "\n方法: " + args[0] + "\n参数: " + args[4] + "\n");
+                          LogUtil.capture("记录Hook ID: " + object.hashCode() + "\n方法: " + args[0] + "\n参数: " + args[4] + "\n");
                         }
                       }
 
@@ -551,9 +551,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Object object = param.args[15];
                         Object[] recordArray = rpcHookMap.remove(object);
                         if (recordArray != null) {
-                          LogUtil.debug("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
+                          LogUtil.capture("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
                         } else {
-                          LogUtil.debug("删除记录ID: " + object.hashCode());
+                          LogUtil.capture("删除记录ID: " + object.hashCode());
                         }
                       }
                     });
