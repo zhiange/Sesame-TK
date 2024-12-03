@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.rpc.bridge;
 
+import org.json.JSONObject;
+
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -165,6 +167,13 @@ public class NewRpcBridge implements RpcBridge {
                         rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
                         if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")) {
                           rpcEntity.setError();
+                          JSONObject res = (JSONObject) rpcEntity.getResponseObject();
+                          if (res.has("errorMessage") && res.getString("errorMessage") != null) {
+                            String errorMessage = res.getString("errorMessage");
+                            if (errorMessage.contains("繁忙") || errorMessage.contains("错")) {
+                              NotificationUtil.updateStatusText("⚠️已触发请求频繁,请手动进入支付宝过验证(没有请忽略)");
+                            }
+                          }
                           LogUtil.error(
                               "\n=======================================================>\n"
                                   + "新 RPC 响应 | id: "
