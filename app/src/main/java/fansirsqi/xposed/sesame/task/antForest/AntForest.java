@@ -461,9 +461,8 @@ public class AntForest extends ModelTask {
         }
         if (consumeAnimalProp.getValue()) {
           if (!canConsumeAnimalProp) {
-            String str = "啦啦~ 已经有动物伙伴在巡护森林~";
+            String str = "🐼 已经有动物伙伴在巡护森林~";
             LogUtil.record(str);
-            Toast.show(str);
           } else {
             queryAnimalPropList();
           }
@@ -1495,86 +1494,139 @@ public class AntForest extends ModelTask {
     }
   }
 
+  /**
+   * 弹出任务列表方法，用于处理森林任务。
+   */
   private void popupTask() {
     try {
+      // 调用RPC获取任务数据
       JSONObject resData = new JSONObject(AntForestRpcCall.popupTask());
+      // 检查RPC调用结果是否为SUCCESS
       if ("SUCCESS".equals(resData.getString("resultCode"))) {
+        // 获取任务列表
         JSONArray forestSignVOList = resData.optJSONArray("forestSignVOList");
+        // 如果任务列表不为空，则遍历任务
         if (forestSignVOList != null) {
           for (int i = 0; i < forestSignVOList.length(); i++) {
+            // 获取单个任务对象
             JSONObject forestSignVO = forestSignVOList.getJSONObject(i);
-            String signId = forestSignVO.getString("signId");
-            String currentSignKey = forestSignVO.getString("currentSignKey");
-            JSONArray signRecords = forestSignVO.getJSONArray("signRecords");
-            for (int j = 0; j < signRecords.length(); j++) {
-              JSONObject signRecord = signRecords.getJSONObject(j);
-              String signKey = signRecord.getString("signKey");
-              if (signKey.equals(currentSignKey)) {
-                if (!signRecord.getBoolean("signed")) {
-                  JSONObject resData2 = new JSONObject(AntForestRpcCall.antiepSign(signId, UserIdMapUtil.getCurrentUid()));
-                  if ("100000000".equals(resData2.getString("code"))) {
-                    LogUtil.forest("过期能量💊[" + signRecord.getInt("awardCount") + "g]");
-                  }
-                }
-                break;
-              }
-            }
+            // 处理单个任务
+            processTask(forestSignVO);
           }
         }
       } else {
-        LogUtil.record(resData.getString("resultDesc"));
+        // 如果RPC调用结果不是SUCCESS，记录错误描述和完整响应
+        LogUtil.record("任务弹出失败: " + resData.getString("resultDesc"));
         LogUtil.runtime(resData.toString());
       }
-    } catch (Throwable t) {
-      LogUtil.runtime(TAG, "popupTask err:");
-      LogUtil.printStackTrace(TAG, t);
+    } catch (JSONException e) {
+      // 捕获并记录JSON异常信息
+      LogUtil.runtime(TAG, "popupTask JSON错误:");
+      LogUtil.printStackTrace(TAG, e);
+    } catch (Exception e) {
+      // 捕获并记录其他异常信息
+      LogUtil.runtime(TAG, "popupTask 错误:");
+      LogUtil.printStackTrace(TAG, e);
     }
   }
 
+  /**
+   * 处理单个任务的方法。
+   *
+   * @param forestSignVO 任务对象
+   * @throws JSONException 如果解析JSON时发生错误
+   */
+  private void processTask(JSONObject forestSignVO) throws JSONException {
+    // 获取任务ID和当前签名密钥
+    String signId = forestSignVO.getString("signId");
+    String currentSignKey = forestSignVO.getString("currentSignKey");
+    // 获取签名记录列表
+    JSONArray signRecords = forestSignVO.getJSONArray("signRecords");
+    // 遍历签名记录，寻找匹配当前签名密钥的记录
+    for (int j = 0; j < signRecords.length(); j++) {
+      JSONObject signRecord = signRecords.getJSONObject(j);
+      String signKey = signRecord.getString("signKey");
+      // 如果找到匹配的签名密钥且记录未签名，则进行签名操作
+      if (signKey.equals(currentSignKey) && !signRecord.getBoolean("signed")) {
+        // 调用签名RPC
+        JSONObject resData2 = new JSONObject(AntForestRpcCall.antiepSign(signId, UserIdMapUtil.getCurrentUid()));
+        // 检查签名结果
+        if ("100000000".equals(resData2.getString("code"))) {
+          // 记录成功签名的能量值
+          LogUtil.forest("收集能量💊[" + signRecord.getInt("awardCount") + "g]");
+        }
+        // 找到匹配的记录后，跳出循环
+        break;
+      }
+    }
+  }
+
+
+  /**
+   * 为好友浇水并返回浇水次数和是否可以继续浇水的状态。
+   *
+   * @param userId    好友的用户ID
+   * @param bizNo     业务编号
+   * @param count     需要浇水的次数
+   * @param waterEnergy 每次浇水的能量值
+   * @return KVNode 包含浇水次数和是否可以继续浇水的状态
+   */
   private KVNode<Integer, Boolean> returnFriendWater(String userId, String bizNo, int count, int waterEnergy) {
+    // 如果业务编号为空，则直接返回默认值
     if (bizNo == null || bizNo.isEmpty()) {
       return new KVNode<>(0, true);
     }
-    int wateredTimes = 0;
-    boolean isContinue = true;
+    int wateredTimes = 0; // 已浇水次数
+    boolean isContinue = true; // 是否可以继续浇水
     try {
-      String s;
-      JSONObject jo;
+      // 获取能量ID
       int energyId = getEnergyId(waterEnergy);
+      // 循环浇水操作
       label:
       for (int waterCount = 1; waterCount <= count; waterCount++) {
-        s = AntForestRpcCall.transferEnergy(userId, bizNo, energyId);
-        Thread.sleep(1500);
-        jo = new JSONObject(s);
+        // 调用RPC进行浇水操作
+        String rpcResponse = AntForestRpcCall.transferEnergy(userId, bizNo, energyId);
+        Thread.sleep(1500); // 休眠一段时间以避免请求过于频繁
+        // 解析RPC响应
+        JSONObject jo = new JSONObject(rpcResponse);
         String resultCode = jo.getString("resultCode");
+        // 根据响应结果进行不同处理
         switch (resultCode) {
           case "SUCCESS":
+            // 成功浇水，记录日志并更新统计数据
             String currentEnergy = jo.getJSONObject("treeEnergy").getString("currentEnergy");
             LogUtil.forest("好友浇水🚿[" + UserIdMapUtil.getMaskName(userId) + "]#" + waterEnergy + "g，剩余能量[" + currentEnergy + "g]");
             wateredTimes++;
             StatisticsUtil.addData(StatisticsUtil.DataType.WATERED, waterEnergy);
             break;
           case "WATERING_TIMES_LIMIT":
+            // 达到浇水次数上限，记录日志并退出循环
             LogUtil.record("好友浇水🚿今日给[" + UserIdMapUtil.getMaskName(userId) + "]浇水已达上限");
-            wateredTimes = 3;
+            wateredTimes = 3; // 假设上限为3次
             break label;
           case "ENERGY_INSUFFICIENT":
+            // 能量不足，记录日志并停止继续浇水
             LogUtil.record("好友浇水🚿" + jo.getString("resultDesc"));
             isContinue = false;
             break label;
           default:
+            // 其他错误，记录日志和详细响应
             LogUtil.record("好友浇水🚿" + jo.getString("resultDesc"));
             LogUtil.runtime(jo.toString());
             break;
         }
       }
     } catch (Throwable t) {
+      // 捕获并记录异常信息
       LogUtil.runtime(TAG, "returnFriendWater err:");
       LogUtil.printStackTrace(TAG, t);
     }
+    // 返回浇水次数和是否可以继续浇水的状态
     return new KVNode<>(wateredTimes, isContinue);
   }
 
+
+  /** 获取能量ID */
   private int getEnergyId(int waterEnergy) {
     if (waterEnergy <= 0) return 0;
     if (waterEnergy >= 66) return 42;
@@ -1583,6 +1635,8 @@ public class AntForest extends ModelTask {
     return 39;
   }
 
+
+  /** -*/
   private void exchangeEnergyDoubleClick() {
     try {
       JSONObject jo = findPropShop("CR20230516000362", "CR20230516000363");
@@ -1596,7 +1650,7 @@ public class AntForest extends ModelTask {
     }
   }
 
-  // 兑换永久双击卡
+  /** 兑换永久双击卡*/
   private void exchangeEnergyDoubleClickLongTime(int count) {
     int exchangedTimes;
     try {
@@ -1665,21 +1719,21 @@ public class AntForest extends ModelTask {
     }
   }
 
-  // 兑换 能量保护罩
+  /** 兑换 能量保护罩*/
   private void exchangeEnergyShield() {
     if (exchangePropShop(findPropShop("CR20230517000497", "CR20230516000371"), 1)) {
       StatusUtil.exchangeEnergyShield();
     }
   }
 
-  // 兑换 神奇物种抽历史卡机会
+  /** 兑换 神奇物种抽历史卡机会*/
   private void exchangeCollectHistoryAnimal7Days() {
     if (exchangePropShop(findPropShop("SP20230518000022", "SK20230518000062"), 1)) {
       StatusUtil.exchangeCollectHistoryAnimal7Days();
     }
   }
 
-  // 兑换 神奇物种抽好友卡机会
+  /** 兑换 神奇物种抽好友卡机会*/
   private void exchangeCollectToFriendTimes7Days() {
     if (exchangePropShop(findPropShop("SP20230518000021", "SK20230518000061"), 1)) {
       StatusUtil.exchangeCollectToFriendTimes7Days();

@@ -175,9 +175,9 @@ public class SettingsActivity extends BaseActivity {
                             if (StringUtil.isEmpty(userId)) {
                                 userConfigDirectoryFile = FileUtil.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = FileUtil.getUserConfigDirectoryFile(userId);
+                                userConfigDirectoryFile = FileUtil.getUserConfigDirectory(userId);
                             }
-                            if (FileUtil.deleteFile(userConfigDirectoryFile)) {
+                            if (FileUtil.delFile(userConfigDirectoryFile)) {
                                 Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
@@ -275,7 +275,7 @@ public class SettingsActivity extends BaseActivity {
     private void save() {
         // 保存当前用户的配置信息
         if (Config.isModify(userId) && Config.save(userId, false)) {
-            Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
             if (!StringUtil.isEmpty(userId)) {
                 try {
                     Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");

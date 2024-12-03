@@ -319,9 +319,9 @@ public class NewSettingsActivity extends BaseActivity {
                             if (StringUtil.isEmpty(userId)) {
                                 userConfigDirectoryFile = FileUtil.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = FileUtil.getUserConfigDirectoryFile(userId);
+                                userConfigDirectoryFile = FileUtil.getUserConfigDirectory(userId);
                             }
-                            if (FileUtil.deleteFile(userConfigDirectoryFile)) {
+                            if (FileUtil.delFile(userConfigDirectoryFile)) {
                                 Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
