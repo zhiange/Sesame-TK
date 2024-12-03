@@ -87,7 +87,7 @@ android {
         normal {
             dimension "default" // 普通产品风味
             ext.applicationType = "Normal"
-            minSdkVersion 30    // 适用于较新的 Android 版本
+            minSdkVersion 28    // 适用于较新的 Android 版本9
             targetSdkVersion 34
         }
         compatible {
