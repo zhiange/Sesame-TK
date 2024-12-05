@@ -109,7 +109,7 @@ public class MainActivity extends BaseActivity {
                         });
                     Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
 //                    NotificationUtil.sendNewNotification(context.getApplicationContext(), "⚠️已触发请求频繁", "请手动进入支付宝查看详情，正常请忽略😛", 9527);
-                    TimeUtil.sleep(5000); // 别急，等一会儿再说
+                    ThreadUtil.sleep(200); // 别急，等一会儿再说
                     isClick = false;
                   }
                   break;
@@ -398,7 +398,7 @@ public class MainActivity extends BaseActivity {
     if (length > 0 && length < 3) {
       new Thread(
               () -> {
-                TimeUtil.sleep(100);
+                ThreadUtil.sleep(100);
                 if (!selected.get()) {
                   goSettingActivity(length - 1);
 

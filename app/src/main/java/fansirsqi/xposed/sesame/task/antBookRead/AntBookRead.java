@@ -10,7 +10,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class AntBookRead extends ModelTask {
     private static final String TAG = AntBookRead.class.getSimpleName();
@@ -142,9 +142,9 @@ public class AntBookRead extends ModelTask {
                                 String taskId = taskInfo.getString("taskId");
                                 for (int m = 0; m < 5; m++) {
                                     taskFinish(taskId, taskType);
-                                    TimeUtil.sleep(1500L);
+                                    ThreadUtil.sleep(1500L);
                                     collectTaskPrize(taskId, taskType, title);
-                                    TimeUtil.sleep(1500L);
+                                    ThreadUtil.sleep(1500L);
                                 }
                             } else if ("FOLLOW_UP".equals(taskType) || "JUMP".equals(taskType)) {
                                 String taskId = taskInfo.getString("taskId");

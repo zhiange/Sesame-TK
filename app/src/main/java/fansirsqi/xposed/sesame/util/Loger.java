@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.util;
 
+import static fansirsqi.xposed.sesame.util.TimeUtil.getFormatDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,18 +100,10 @@ public class Loger {
     }
 
     public static String getLogFileName(String logName) {
-        String date = TimeUtil.getDateStr();
+        String date = TimeUtil.getFormatDate();
         return logName + "." + date + ".log";
     }
 
-    public static String getFormatDateTime() {
-        SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
-        if (simpleDateFormat != null) {
-            return simpleDateFormat.format(new Date());
-        } else {
-            throw new IllegalStateException("Date format not initialized properly");
-        }
-    }
 
     public static String getFormatDate() {
         return getFormatDateTime().split(" ")[0];
@@ -119,18 +113,4 @@ public class Loger {
         return getFormatDateTime().split(" ")[1];
     }
 
-    public static long timeToStamp(String timers) {
-        Date d = new Date();
-        try {
-            SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
-            if (simpleDateFormat != null) {
-                Date newD = simpleDateFormat.parse(timers);
-                if (newD != null) {
-                    d = newD;
-                }
-            }
-        } catch (ParseException ignored) {
-        }
-        return d.getTime();
-    }
 }

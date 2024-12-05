@@ -844,11 +844,11 @@ public class AntFarm extends ModelTask {
                                     String anotherAnswer = null;
                                     boolean existsResult = false;
                                     Set<String> dadaDailySet = StatusUtil.getDadaDailySet();
-                                    if (dadaDailySet.contains(TimeUtil.getDateStr() + labels.getString(0))) {
+                                    if (dadaDailySet.contains(TimeUtil.getFormatDate() + labels.getString(0))) {
                                         answer = labels.getString(0);
                                         anotherAnswer = labels.getString(1);
                                         existsResult = true;
-                                    } else if (dadaDailySet.contains(TimeUtil.getDateStr() + labels.getString(1))) {
+                                    } else if (dadaDailySet.contains(TimeUtil.getFormatDate() + labels.getString(1))) {
                                         answer = labels.getString(1);
                                         anotherAnswer = labels.getString(0);
                                         existsResult = true;
@@ -869,9 +869,9 @@ public class AntFarm extends ModelTask {
                                         JSONObject extInfo = joDailySubmit.getJSONObject("extInfo");
                                         boolean correct = joDailySubmit.getBoolean("correct");
                                         if (!correct || !existsResult) {
-                                            dadaDailySet.add(TimeUtil.getDateStr() + anotherAnswer);
+                                            dadaDailySet.add(TimeUtil.getFormatDate() + anotherAnswer);
                                         } else {
-                                            dadaDailySet.add(TimeUtil.getDateStr() + answer);
+                                            dadaDailySet.add(TimeUtil.getFormatDate() + answer);
                                         }
                                         Log.record("答题" + (correct ? "正确" : "错误") + "可领取［"
                                                 + extInfo.getString("award") + "克］");
@@ -887,7 +887,7 @@ public class AntFarm extends ModelTask {
                                                 for (int k = 0; k < actionTitle.length(); k++) {
                                                     JSONObject joActionTitle = actionTitle.getJSONObject(k);
                                                     if (joActionTitle.getBoolean("correct")) {
-                                                        dadaDailySet.add(TimeUtil.getDateStr(1, "YYYY-MM-dd")
+                                                        dadaDailySet.add(TimeUtil.getFormatDate(1, "YYYY-MM-dd")
                                                                 + joActionTitle.getString("title"));
                                                     }
                                                 }
@@ -960,7 +960,7 @@ public class AntFarm extends ModelTask {
                     }
                     break;
                 } finally {
-                    TimeUtil.sleep(2000);
+                    ThreadUtil.sleep(2000);
                 }
             } while (true);
         } catch (Throwable t) {
@@ -1004,7 +1004,7 @@ public class AntFarm extends ModelTask {
                                         videoUrl.indexOf("&refer"));
                                 jo = new JSONObject(AntFarmRpcCall.videoDeliverModule(contentId));
                                 if (jo.optBoolean("success")) {
-                                    TimeUtil.sleep(15100);
+                                    ThreadUtil.sleep(15100);
                                     jo = new JSONObject(AntFarmRpcCall.videoTrigger(contentId));
                                     if (jo.optBoolean("success")) {
                                         Log.farm("庄园任务🧾[" + title + "]#获得饲料" + awardCount + "g");
@@ -1125,7 +1125,7 @@ public class AntFarm extends ModelTask {
                 Log.record("喂鸡饲料不足");
             } else {
                 String s = AntFarmRpcCall.feedAnimal(farmId);
-                TimeUtil.sleep(500);
+                ThreadUtil.sleep(500);
                 JSONObject jo = new JSONObject(s);
                 String memo = jo.getString("memo");
                 if ("SUCCESS".equals(memo)) {
@@ -1200,7 +1200,7 @@ public class AntFarm extends ModelTask {
                 allFoodHaveEatten += consumeSpeed * 3600;
                 isUseAccelerateTool = true;
                 StatusUtil.useAccelerateTool();
-                TimeUtil.sleep(1000);
+                ThreadUtil.sleep(1000);
             } else {
                 break;
             }
@@ -1893,7 +1893,7 @@ public class AntFarm extends ModelTask {
                     if (leftDrawTimes > 0) {
                         for (int ii = 0; ii < leftDrawTimes; ii++) {
                             jo = new JSONObject(AntFarmRpcCall.DrawPrize());
-                            TimeUtil.sleep(1000);
+                            ThreadUtil.sleep(1000);
                             if (jo.optBoolean("success")) {
                                 String title = jo.getString("title");
                                 int prizeNum = jo.optInt("prizeNum", 0);
@@ -2116,7 +2116,7 @@ public class AntFarm extends ModelTask {
                     } catch (Throwable t) {
                         Log.printStackTrace(TAG, t);
                     } finally {
-                        TimeUtil.sleep(3000);
+                        ThreadUtil.sleep(3000);
                     }
                 }
             } else {

@@ -352,8 +352,8 @@ public class File {
   public static void clearLog() {
     // 检查日志目录是否存在，如果不存在或者不是一个目录，则直接返回
     if (!LOG_DIRECTORY.isDirectory())return;
-    String today = TimeUtil.getDateStr();
-    String yesterday = TimeUtil.getDateStr(-1, "yyyy-MM-dd");
+    String today = TimeUtil.getFormatDate();
+    String yesterday = TimeUtil.getFormatDate(-1, "yyyy-MM-dd");
     // 获取日志目录下的所有文件
     java.io.File[] files = LOG_DIRECTORY.listFiles();
     if (files == null)return;

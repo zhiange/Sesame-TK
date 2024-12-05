@@ -166,7 +166,7 @@ public class AntStall extends ModelTask {
                 }
                 if (stallAutoTask.getValue()) {
                     taskList();
-                    TimeUtil.sleep(500);
+                    ThreadUtil.sleep(500);
                     taskList();
                 }
                 assistFriend();
@@ -356,7 +356,7 @@ public class AntStall extends ModelTask {
                                     if (stallAutoClose.getValue()) {
                                         shopClose(shopId, rentLastBill, rentLastUser);
                                     }
-                                    TimeUtil.sleep(300L);
+                                    ThreadUtil.sleep(300L);
                                     if (stallAutoOpen.getValue()) {
                                         openShop();
                                     }
@@ -537,7 +537,7 @@ public class AntStall extends ModelTask {
                             continue;
                         }
                         Log.farm("蚂蚁新村👣任务[" + title + "]完成");
-                        TimeUtil.sleep(200L);
+                        ThreadUtil.sleep(200L);
                         continue;
                     }
                     switch (taskType) {
@@ -548,7 +548,7 @@ public class AntStall extends ModelTask {
                             break;
                         case "ANTSTALL_NORMAL_INVITE_REGISTER":
                             if (inviteRegister()) {
-                                TimeUtil.sleep(200L);
+                                ThreadUtil.sleep(200L);
                                 continue;
                             }
                             break;
@@ -567,7 +567,7 @@ public class AntStall extends ModelTask {
                             if (!jo.optBoolean("success")) {
                                 Log.runtime(TAG, "taskList.queryCallAppSchema err:" + jo.optString("resultDesc"));
                             }
-                            TimeUtil.sleep(5000);
+                            ThreadUtil.sleep(5000);
                             AntStallRpcCall.home();
                             AntStallRpcCall.taskList();
                             break;
@@ -585,12 +585,12 @@ public class AntStall extends ModelTask {
                             if (jsonArray == null || jsonArray.length() == 0) {
                                 continue;
                             }
-                            TimeUtil.sleep(5000);
+                            ThreadUtil.sleep(5000);
                             for (int j = 0; j < jsonArray.length(); j++) {
                                 try{
                                     JSONObject jsonObject = jsonArray.getJSONObject(j);
                                     s = AntStallRpcCall.finish(pid, jsonObject);
-                                    TimeUtil.sleep(5000);
+                                    ThreadUtil.sleep(5000);
                                     jo = new JSONObject(s);
                                     if (!jo.optBoolean("success")) {
                                         Log.runtime(TAG, "taskList.finish err:" + jo.optString("resultDesc"));
@@ -602,7 +602,7 @@ public class AntStall extends ModelTask {
                             }
                             break;
                     }
-                    TimeUtil.sleep(200L);
+                    ThreadUtil.sleep(200L);
                 } catch (Throwable t) {
                     Log.runtime(TAG, "taskList for err:");
                     Log.printStackTrace(TAG, t);

@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.rpc.intervallimit;
 import android.os.Build;
 
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import java.util.Map;
 import java.util.Objects;
@@ -99,7 +99,7 @@ public class RpcIntervalLimit {
         synchronized (Objects.requireNonNull(intervalLimit, "间隔限制对象不能为空")) {
             long sleep = intervalLimit.getInterval() - (System.currentTimeMillis() - intervalLimit.getTime());
             if (sleep > 0) {
-                TimeUtil.sleep(sleep);
+                ThreadUtil.sleep(sleep);
             }
             intervalLimit.setTime(System.currentTimeMillis());
         }

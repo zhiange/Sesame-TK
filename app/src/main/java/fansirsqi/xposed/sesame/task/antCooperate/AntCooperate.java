@@ -113,7 +113,7 @@ public class AntCooperate extends ModelTask {
             Log.runtime(TAG, "cooperateWater err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            TimeUtil.sleep(500);
+            ThreadUtil.sleep(500);
         }
     }
 

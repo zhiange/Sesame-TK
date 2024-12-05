@@ -13,7 +13,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -118,7 +118,7 @@ public class GreenFinance extends ModelTask {
         prizes();
         //绿色经营
         doTask("AP13159535", TAG, "绿色经营📊");
-        TimeUtil.sleep(500);
+        ThreadUtil.sleep(500);
     }
 
     /**
@@ -225,7 +225,7 @@ public class GreenFinance extends ModelTask {
                 return;
             }
             s = GreenFinanceRpcCall.signInTrigger(sceneId);
-            TimeUtil.sleep(300);
+            ThreadUtil.sleep(300);
             jo = new JSONObject(s);
             if (jo.optBoolean("success")) {
                 Log.other("绿色经营📊签到成功");
@@ -284,7 +284,7 @@ public class GreenFinance extends ModelTask {
                     continue;
                 }
                 str = GreenFinanceRpcCall.submitTick(type, jsonObject.getString("behaviorCode"));
-                TimeUtil.sleep(1500);
+                ThreadUtil.sleep(1500);
                 JSONObject object = new JSONObject(str);
                 if (!object.optBoolean("success")
                         || !String.valueOf(true).equals(JsonUtil.getValueByPath(object, "result.result"))) {
@@ -309,7 +309,7 @@ public class GreenFinance extends ModelTask {
         }
         try {
             String str = GreenFinanceRpcCall.queryExpireMcaPoint(1);
-            TimeUtil.sleep(300);
+            ThreadUtil.sleep(300);
             JSONObject jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
                 Log.runtime(TAG + ".donation.queryExpireMcaPoint", jsonObject.optString("resultDesc"));
@@ -326,7 +326,7 @@ public class GreenFinance extends ModelTask {
             //不管是否可以捐小于非100的倍数了，，第一次捐200，最后按amount-200*n
             Log.other("绿色经营📊1天内过期的金币[" + amount + "]");
             str = GreenFinanceRpcCall.queryAllDonationProjectNew();
-            TimeUtil.sleep(300);
+            ThreadUtil.sleep(300);
             jsonObject = new JSONObject(str);
             if (!jsonObject.optBoolean("success")) {
                 Log.runtime(TAG + ".donation.queryAllDonationProjectNew", jsonObject.optString("resultDesc"));
@@ -355,7 +355,7 @@ public class GreenFinance extends ModelTask {
                     am = String.valueOf(r[1]);
                 }
                 str = GreenFinanceRpcCall.donation(id, am);
-                TimeUtil.sleep(1000);
+                ThreadUtil.sleep(1000);
                 jsonObject = new JSONObject(str);
                 if (!jsonObject.optBoolean("success")) {
                     Log.runtime(TAG + ".donation." + id, jsonObject.optString("resultDesc"));
@@ -437,7 +437,7 @@ public class GreenFinance extends ModelTask {
             while (true) {
                 try {
                     String str = GreenFinanceRpcCall.queryRankingList(n);
-                    TimeUtil.sleep(1500);
+                    ThreadUtil.sleep(1500);
                     JSONObject jsonObject = new JSONObject(str);
                     if (!jsonObject.optBoolean("success")) {
                         Log.other("绿色经营🙋，好友金币巡查失败");
@@ -461,7 +461,7 @@ public class GreenFinance extends ModelTask {
                             continue;
                         }
                         str = GreenFinanceRpcCall.queryGuestIndexPoints(friendId);
-                        TimeUtil.sleep(1000);
+                        ThreadUtil.sleep(1000);
                         jsonObject = new JSONObject(str);
                         if (!jsonObject.optBoolean("success")) {
                             Log.runtime(TAG + ".batchStealFriend.queryGuestIndexPoints", jsonObject.optString("resultDesc"));
@@ -482,7 +482,7 @@ public class GreenFinance extends ModelTask {
                             continue;
                         }
                         str = GreenFinanceRpcCall.batchSteal(jsonArray, friendId);
-                        TimeUtil.sleep(1000);
+                        ThreadUtil.sleep(1000);
                         jsonObject = new JSONObject(str);
                         if (!jsonObject.optBoolean("success")) {
                             Log.runtime(TAG + ".batchStealFriend.batchSteal", jsonObject.optString("resultDesc"));

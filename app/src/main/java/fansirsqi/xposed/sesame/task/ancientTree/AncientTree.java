@@ -11,7 +11,7 @@ import fansirsqi.xposed.sesame.entity.AreaCode;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -98,7 +98,7 @@ public class AncientTree extends ModelTask {
                     JSONObject districtInfo = districtBriefInfo.getJSONObject("districtInfo");
                     String districtCode = districtInfo.getString("districtCode");
                     districtDetail(districtCode);
-                    TimeUtil.sleep(1000L);
+                    ThreadUtil.sleep(1000L);
                 }
                 StatusUtil.ancientTreeToday(cityCode);
             }
@@ -146,7 +146,7 @@ public class AncientTree extends ModelTask {
                             cityCode = ancientTreeInfo.getString("cityCode");
                             if (currentEnergy < protectExpense)
                                 break;
-                            TimeUtil.sleep(200);
+                            ThreadUtil.sleep(200);
                             jo = new JSONObject(AncientTreeRpcCall.protect(activityId, projectId, cityCode));
                             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                                 Log.forest("保护古树🎐[" + cityName + "-" + districtName
@@ -160,7 +160,7 @@ public class AncientTree extends ModelTask {
                         Log.record(jo.getString("resultDesc"));
                         Log.runtime(ancientTreeDetail.toString());
                     }
-                    TimeUtil.sleep(500L);
+                    ThreadUtil.sleep(500L);
                 }
             }
         } catch (Throwable th) {

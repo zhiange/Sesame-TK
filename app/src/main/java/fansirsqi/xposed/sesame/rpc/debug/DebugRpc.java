@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.rpc.debug;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -165,7 +165,7 @@ public class DebugRpc {
           getTreeCurrentBudget(projectId, itemName);
 
           // 在查询每个项目后暂停100毫秒
-          TimeUtil.sleep(100);
+          ThreadUtil.sleep(100);
         }
       } else {
         // 如果RPC调用失败，记录错误描述

@@ -70,7 +70,7 @@ public class FriendWatch extends IdAndName {
                 joSingle = new JSONObject();
                 joSingle.put("name", UserMap.getMaskName(id));
                 joSingle.put("allGet", 0);
-                joSingle.put("startTime", TimeUtil.getDateStr());
+                joSingle.put("startTime", TimeUtil.getFormatDate());
                 joFriendWatch.put(id, joSingle);
             }
             joSingle.put("weekGet", joSingle.optInt("weekGet", 0) + collectedEnergy);
@@ -100,7 +100,7 @@ public class FriendWatch extends IdAndName {
             return;
         }
         try {
-            String dateStr = TimeUtil.getDateStr();
+            String dateStr = TimeUtil.getFormatDate();
             Iterator<String> ids = joFriendWatch.keys();
             while (ids.hasNext()) {
                 String id = ids.next();

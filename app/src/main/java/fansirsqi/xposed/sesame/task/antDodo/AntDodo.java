@@ -13,6 +13,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 import java.util.LinkedHashSet;
@@ -80,13 +81,13 @@ public class AntDodo extends ModelTask {
      */
     private boolean lastDay(String endDate) {
         long timeStemp = System.currentTimeMillis();
-        long endTimeStemp = Log.timeToStamp(endDate);
+        long endTimeStemp = TimeUtil.timeToStamp(endDate);
         return timeStemp < endTimeStemp && (endTimeStemp - timeStemp) < 86400000L;
     }
 
     public boolean in8Days(String endDate) {
         long timeStemp = System.currentTimeMillis();
-        long endTimeStemp = Log.timeToStamp(endDate);
+        long endTimeStemp = TimeUtil.timeToStamp(endDate);
         return timeStemp < endTimeStemp && (endTimeStemp - timeStemp) < 691200000L;
     }
 
@@ -268,7 +269,7 @@ public class AntDodo extends ModelTask {
                         String propName = prop.getJSONObject("propConfig").getString("propName");
                         int holdsNum = prop.optInt("holdsNum", 0);
                         jo = new JSONObject(AntDodoRpcCall.consumeProp(propId, propType));
-                        TimeUtil.sleep(300);
+                        ThreadUtil.sleep(300);
                         if (!"SUCCESS".equals(jo.getString("resultCode"))) {
                             Log.record(jo.getString("resultDesc"));
                             Log.runtime(jo.toString());
@@ -345,7 +346,7 @@ public class AntDodo extends ModelTask {
                     JSONObject animal = animalForUser.getJSONObject("animal");
                     for (int j = 0; j < count; j++) {
                         sendCard(animal, targetUser);
-                        TimeUtil.sleep(500L);
+                        ThreadUtil.sleep(500L);
                     }
                 }
             }

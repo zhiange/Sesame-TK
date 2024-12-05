@@ -117,7 +117,7 @@ public class AntMember extends ModelTask {
     try {
       if (StatusUtil.canMemberSignInToday(UserMap.getCurrentUid())) {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
-        TimeUtil.sleep(500);
+        ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         if ("SUCCESS".equals(jo.getString("resultCode"))) {
           Log.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
@@ -141,7 +141,7 @@ public class AntMember extends ModelTask {
   private static void queryPointCert(int page, int pageSize) {
     try {
       String s = AntMemberRpcCall.queryPointCert(page, pageSize);
-      TimeUtil.sleep(500);
+      ThreadUtil.sleep(500);
       JSONObject jo = new JSONObject(s);
       if ("SUCCESS".equals(jo.getString("resultCode"))) {
         boolean hasNextPage = jo.getBoolean("hasNextPage");
@@ -370,7 +370,7 @@ public class AntMember extends ModelTask {
     try {
       do {
         String s = AntMemberRpcCall.signPageTaskList();
-        TimeUtil.sleep(500);
+        ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         boolean doubleCheck = false;
         if (!ResUtil.checkResCode(TAG, jo) || !jo.has("categoryTaskList")) return;
@@ -399,7 +399,7 @@ public class AntMember extends ModelTask {
   private void queryAllStatusTaskList() {
     try {
       String str = AntMemberRpcCall.queryAllStatusTaskList();
-      TimeUtil.sleep(500);
+      ThreadUtil.sleep(500);
       JSONObject jsonObject = new JSONObject(str);
       if (!"SUCCESS".equals(jsonObject.getString("resultCode"))) {
         Log.runtime(TAG, "queryAllStatusTaskList err:" + jsonObject.getString("resultDesc"));
@@ -633,7 +633,7 @@ public class AntMember extends ModelTask {
    */
   private boolean applyAndExecuteTask(String name, Long id, String targetBusiness) throws JSONException {
     JSONObject jo = new JSONObject(AntMemberRpcCall.applyTask(name, id));
-    TimeUtil.sleep(300);
+    ThreadUtil.sleep(300);
     if (!"SUCCESS".equals(jo.getString("resultCode"))) {
       Log.runtime(TAG, "应用任务失败:" + jo.optString("resultDesc"));
       return false;
@@ -644,7 +644,7 @@ public class AntMember extends ModelTask {
     String bizSubType = targetBusinessArray.length > 2 ? targetBusinessArray[1] : targetBusinessArray[0];
 
     jo = new JSONObject(AntMemberRpcCall.executeTask(bizParam, bizSubType));
-    TimeUtil.sleep(300);
+    ThreadUtil.sleep(300);
     if (!"SUCCESS".equals(jo.getString("resultCode"))) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
       return false;
@@ -724,7 +724,7 @@ public class AntMember extends ModelTask {
           return;
         }
         str = AntMemberRpcCall.continueSignIn();
-        TimeUtil.sleep(300);
+        ThreadUtil.sleep(300);
         jsonObject = new JSONObject(str);
         if (!jsonObject.optBoolean("success")) {
           Log.runtime(TAG + ".signIn.continueSignIn", jsonObject.optString("resultDesc"));
@@ -747,7 +747,7 @@ public class AntMember extends ModelTask {
           return;
         }
         str = AntMemberRpcCall.batchReceivePointBall();
-        TimeUtil.sleep(300);
+        ThreadUtil.sleep(300);
         jsonObject = new JSONObject(str);
         if (jsonObject.optBoolean("success")) {
           Log.other("游戏中心🎮全部领取成功[" + JsonUtil.getValueByPath(jsonObject, "data.totalAmount") + "]乐豆");
@@ -777,7 +777,7 @@ public class AntMember extends ModelTask {
         return;
       }
       JSONObject jo2 = new JSONObject(AntMemberRpcCall.queryCreditFeedback());
-      TimeUtil.sleep(300);
+      ThreadUtil.sleep(300);
       if (!jo2.optBoolean("success")) {
         Log.runtime(TAG + ".collectSesame.queryCreditFeedback", jo2.optString("resultView"));
         return;
@@ -792,7 +792,7 @@ public class AntMember extends ModelTask {
         String creditFeedbackId = jo2.getString("creditFeedbackId");
         String potentialSize = jo2.getString("potentialSize");
         jo2 = new JSONObject(AntMemberRpcCall.collectCreditFeedback(creditFeedbackId));
-        TimeUtil.sleep(300);
+        ThreadUtil.sleep(300);
         if (!jo2.optBoolean("success")) {
           Log.runtime(TAG + ".collectSesame.collectCreditFeedback", jo2.optString("resultView"));
           continue;
