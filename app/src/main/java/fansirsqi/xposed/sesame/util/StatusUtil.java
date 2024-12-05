@@ -7,6 +7,9 @@ import lombok.Data;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.antForest.AntForest;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Data
@@ -450,8 +453,7 @@ public class StatusUtil {
     }
 
     public static boolean canKbSignInToday() {
-        StatusUtil stat = INSTANCE;
-        return stat.kbSignIn < StatisticsUtil.INSTANCE.getDay().time;
+        return INSTANCE.kbSignIn < StatisticsUtil.INSTANCE.getDay().time;
     }
 
     public static void KbSignInToday() {
@@ -484,8 +486,7 @@ public class StatusUtil {
     }
 
     public static boolean canSyncStepToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        return !stat.syncStepList.contains(uid);
+        return !INSTANCE.syncStepList.contains(uid);
     }
 
     public static void SyncStepToday(String uid) {
@@ -514,14 +515,14 @@ public class StatusUtil {
      * @return true是，false否
      */
     public static boolean canGreenFinancePointFriend() {
-        return !INSTANCE.greenFinancePointFriend.contains(UserMap.getCurrentUid());
+        return INSTANCE.greenFinancePointFriend.contains(UserMap.getCurrentUid());
     }
 
     /**
      * 绿色经营-收好友金币完了
      */
     public static void greenFinancePointFriend() {
-        if (!canGreenFinancePointFriend()) {
+        if (canGreenFinancePointFriend()) {
             return;
         }
         INSTANCE.greenFinancePointFriend.add(UserMap.getCurrentUid());
@@ -534,23 +535,26 @@ public class StatusUtil {
      * @return true是，false否
      */
     public static boolean canGreenFinancePrizesMap() {
-        int week = TimeUtil.getWeekNumber(new Date());
+        LocalDate currentDate = LocalDate.now();
+        int week = TimeUtil.getWeekNumber(currentDate);
         String currentUid = UserMap.getCurrentUid();
         if (INSTANCE.greenFinancePrizesMap.containsKey(currentUid)) {
             Integer storedWeek = INSTANCE.greenFinancePrizesMap.get(currentUid);
-            return storedWeek == null || storedWeek != week;
+            return storedWeek != null && storedWeek == week;
         }
-        return true;
+        return false;
     }
 
     /**
      * 绿色经营-评级任务完了
      */
     public static void greenFinancePrizesMap() {
-        if (!canGreenFinancePrizesMap()) {
+        if (canGreenFinancePrizesMap()) {
             return;
         }
-        INSTANCE.greenFinancePrizesMap.put(UserMap.getCurrentUid(), TimeUtil.getWeekNumber(new Date()));
+        // 获取当前的日期
+        LocalDate currentDate = LocalDate.now();
+        INSTANCE.greenFinancePrizesMap.put(UserMap.getCurrentUid(), TimeUtil.getWeekNumber(currentDate));
         save();
     }
 
@@ -558,7 +562,7 @@ public class StatusUtil {
         String currentUid = UserMap.getCurrentUid();
         try {
             if (StringUtil.isEmpty(currentUid)) {
-                LogUtil.runtime(TAG, "用户为空，状态加载失败");
+                Log.runtime(TAG, "用户为空，状态加载失败");
                 throw new RuntimeException("用户为空，状态加载失败");
             }
             java.io.File statusFile = File.getStatusFile(currentUid);
@@ -567,25 +571,25 @@ public class StatusUtil {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
-                    LogUtil.runtime(TAG, "重新格式化 status.json");
-                    LogUtil.system(TAG, "重新格式化 status.json");
+                    Log.runtime(TAG, "重新格式化 status.json");
+                    Log.system(TAG, "重新格式化 status.json");
                     File.write2File(formatted, File.getStatusFile(currentUid));
                 }
             } else {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
-                LogUtil.runtime(TAG, "初始化 status.json");
-                LogUtil.system(TAG, "初始化 status.json");
+                Log.runtime(TAG, "初始化 status.json");
+                Log.system(TAG, "初始化 status.json");
                 File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
             }
         } catch (Throwable t) {
-            LogUtil.printStackTrace(TAG, t);
-            LogUtil.runtime(TAG, "状态文件格式有误，已重置");
-            LogUtil.system(TAG, "状态文件格式有误，已重置");
+            Log.printStackTrace(TAG, t);
+            Log.runtime(TAG, "状态文件格式有误，已重置");
+            Log.system(TAG, "状态文件格式有误，已重置");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
                 File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
             } catch (JsonMappingException e) {
-                LogUtil.printStackTrace(TAG, e);
+                Log.printStackTrace(TAG, e);
             }
         }
         if (INSTANCE.saveTime == 0) {
@@ -598,37 +602,38 @@ public class StatusUtil {
         try {
             JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
         } catch (JsonMappingException e) {
-            LogUtil.printStackTrace(TAG, e);
+            Log.printStackTrace(TAG, e);
         }
     }
 
     public static synchronized void save() {
-        save(Calendar.getInstance());
+        save(LocalDateTime.now());
     }
 
-    public static synchronized void save(Calendar nowCalendar) {
+    public static synchronized void save(LocalDateTime nowDateTime) {
         String currentUid = UserMap.getCurrentUid();
         if (StringUtil.isEmpty(currentUid)) {
-            LogUtil.record("用户为空，状态保存失败");
+            Log.record("用户为空，状态保存失败");
             throw new RuntimeException("用户为空，状态保存失败");
         }
-        if (updateDay(nowCalendar)) {
-            LogUtil.system(TAG, "重置 statistics.json");
+        if (updateDay(nowDateTime)) {
+            Log.system(TAG, "重置 statistics.json");
         } else {
-            LogUtil.system(TAG, "保存 status.json");
+            Log.system(TAG, "保存 status.json");
         }
         long lastSaveTime = INSTANCE.saveTime;
         try {
             INSTANCE.saveTime = System.currentTimeMillis();
             File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
-        } catch (Exception e){
+        } catch (Exception e) {
             INSTANCE.saveTime = lastSaveTime;
             throw e;
         }
     }
 
-    public static Boolean updateDay(Calendar nowCalendar) {
-        if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowCalendar.getTimeInMillis())) {
+    public static Boolean updateDay(LocalDateTime nowDateTime) {
+        long nowMillis = nowDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowMillis)) {
             StatusUtil.unload();
             return true;
         } else {

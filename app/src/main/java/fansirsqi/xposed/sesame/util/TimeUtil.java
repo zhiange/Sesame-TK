@@ -2,14 +2,16 @@ package fansirsqi.xposed.sesame.util;
 
 import android.annotation.SuppressLint;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * 时间工具类。
@@ -59,7 +61,7 @@ public class TimeUtil {
                 return isAfterOrCompareTimeStr(timeMillis, min) && isBeforeOrCompareTimeStr(timeMillis, max);
             }
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
         return false;
     }
@@ -173,14 +175,12 @@ public class TimeUtil {
      */
     public static Integer isCompareTimeStr(Long timeMillis, String compareTimeStr) {
         try {
-            Calendar timeCalendar = Calendar.getInstance();
-            timeCalendar.setTimeInMillis(timeMillis);
-            Calendar compareCalendar = getTodayCalendarByTimeStr(compareTimeStr);
-            if (compareCalendar != null) {
-                return timeCalendar.compareTo(compareCalendar);
-            }
+            LocalDateTime timeDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault());
+            LocalTime compareTime = LocalTime.parse(compareTimeStr, DateTimeFormatter.ofPattern("HH-mm-ss"));
+            LocalDateTime compareDateTime = LocalDateTime.of(timeDateTime.toLocalDate(), compareTime);
+            return timeDateTime.compareTo(compareDateTime);
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
         return null;
     }
@@ -191,9 +191,25 @@ public class TimeUtil {
      * @param timeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 日历对象。
      */
-    public static Calendar getTodayCalendarByTimeStr(String timeStr) {
-        return getCalendarByTimeStr((Long) null, timeStr);
+
+    public static LocalDateTime getTodayLocalDateTimeByTimeStr(String timeStr) {
+        return getLocalDateTimeByTimeStr(null, timeStr);
     }
+
+
+
+    public static LocalDateTime getLocalDateTimeByTimeStr(String timeStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH-mm-ss");
+            LocalTime localTime = LocalTime.parse(timeStr, formatter);
+            return LocalDateTime.now().toLocalDate().atTime(localTime);
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+        return null;
+    }
+
+
 
     /**
      * 根据时间毫秒数和时间字符串获取日历对象。
@@ -202,49 +218,13 @@ public class TimeUtil {
      * @param timeStr    时间字符串，格式为 "HH-mm-ss"。
      * @return 日历对象。
      */
-    public static Calendar getCalendarByTimeStr(Long timeMillis, String timeStr) {
+    public static LocalDateTime getLocalDateTimeByTimeStr(LocalDateTime timeMillis, String timeStr) {
         try {
-            Calendar timeCalendar = getCalendarByTimeMillis(timeMillis);
-            return getCalendarByTimeStr(timeCalendar, timeStr);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH-mm-ss");
+            LocalTime localTime = LocalTime.parse(timeStr, formatter);
+            return timeMillis.with(localTime);
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
-        }
-        return null;
-    }
-
-    /**
-     * 根据日历对象和时间字符串设置时间。
-     *
-     * @param timeCalendar 日历对象。
-     * @param timeStr      时间字符串，格式为 "HH-mm-ss"。
-     * @return 设置后的时间日历对象。
-     */
-    public static Calendar getCalendarByTimeStr(Calendar timeCalendar, String timeStr) {
-        try {
-            int length = timeStr.length();
-            switch (length) {
-                case 6:
-                    timeCalendar.set(Calendar.SECOND, Integer.parseInt(timeStr.substring(4)));
-                    timeCalendar.set(Calendar.MINUTE, Integer.parseInt(timeStr.substring(2, 4)));
-                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
-                    break;
-                case 4:
-                    timeCalendar.set(Calendar.SECOND, 0);
-                    timeCalendar.set(Calendar.MINUTE, Integer.parseInt(timeStr.substring(2, 4)));
-                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
-                    break;
-                case 2:
-                    timeCalendar.set(Calendar.SECOND, 0);
-                    timeCalendar.set(Calendar.MINUTE, 0);
-                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
-                    break;
-                default:
-                    return null;
-            }
-            timeCalendar.set(Calendar.MILLISECOND, 0);
-            return timeCalendar;
-        } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
         return null;
     }
@@ -255,13 +235,12 @@ public class TimeUtil {
      * @param timeMillis 时间毫秒数。
      * @return 日历对象。
      */
-    public static Calendar getCalendarByTimeMillis(Long timeMillis) {
-        Calendar timeCalendar = Calendar.getInstance();
-        if (timeMillis != null) {
-            timeCalendar.setTimeInMillis(timeMillis);
-        }
-        return timeCalendar;
+
+    public static LocalDateTime getLocalDateTimeByTimeMillis(Long timeMillis) {
+        return (timeMillis != null) ? LocalDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault()) : LocalDateTime.now();
     }
+
+
 
     /**
      * 获取当前时间的字符串表示。
@@ -270,7 +249,9 @@ public class TimeUtil {
      * @return 时间字符串，格式为 "HH:mm:ss"。
      */
     public static String getTimeStr(long ts) {
-        return DateFormat.getTimeInstance().format(new java.util.Date(ts));
+        LocalTime time = Instant.ofEpochMilli(ts).atZone(ZoneId.systemDefault()).toLocalTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return time.format(formatter);
     }
 
     /**
@@ -322,7 +303,7 @@ public class TimeUtil {
             LocalDate today = LocalDate.now();
             return LocalDateTime.of(today, LocalDateTime.parse(timeStr, formatter).toLocalTime());
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
             return null;
         }
     }
@@ -346,12 +327,12 @@ public class TimeUtil {
      * @param dateTime 时间。
      * @return 当前年的第几周。
      */
-    public static int getWeekNumber(Date dateTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateTime);
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-        return calendar.get(Calendar.WEEK_OF_YEAR);
+    public static int getWeekNumber(LocalDate dateTime) {
+        // 使用 WeekFields 获取当前日期是该年的第几周
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        return dateTime.get(weekFields.weekOfYear());
     }
+
 
     /**
      * 比较第一个时间戳的天数是否小于第二个时间戳的天数。
