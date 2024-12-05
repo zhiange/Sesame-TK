@@ -1,7 +1,8 @@
 package fansirsqi.xposed.sesame.rpc.intervallimit;
 
 import android.os.Build;
-import fansirsqi.xposed.sesame.util.LogUtil;
+
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 import java.util.Map;
@@ -41,7 +42,7 @@ public class RpcIntervalLimit {
             // Android N及以上版本可以使用compute方法
             intervalLimitMap.compute(method, (key, existingLimit) -> {
                 if (existingLimit != null) {
-                    LogUtil.runtime("方法：" + method + " 间隔限制已存在");
+                    Log.runtime("方法：" + method + " 间隔限制已存在");
                     throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
                 }
                 return intervalLimit;
@@ -50,7 +51,7 @@ public class RpcIntervalLimit {
             // 低于Android N的版本手动实现compute的功能
             synchronized (intervalLimitMap) {
                 if (intervalLimitMap.containsKey(method)) {
-                    LogUtil.runtime("方法：" + method + " 间隔限制已存在");
+                    Log.runtime("方法：" + method + " 间隔限制已存在");
                     throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
                 }
                 intervalLimitMap.put(method, intervalLimit);

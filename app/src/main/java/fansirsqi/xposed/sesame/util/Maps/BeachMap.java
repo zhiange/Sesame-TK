@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import fansirsqi.xposed.sesame.util.File;
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 
 /**
  * 沙滩ID映射工具类。
@@ -73,7 +73,7 @@ public class BeachMap {
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
     }
 
@@ -87,7 +87,7 @@ public class BeachMap {
             String json = objectMapper.writeValueAsString(idMap);
             return File.write2File(json, File.getBeachIdMapFile());
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
             return false;
         }
     }

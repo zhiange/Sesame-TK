@@ -137,7 +137,7 @@ public class AntStall extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 if (!jo.getBoolean("hasRegister") || jo.getBoolean("hasQuit")) {
-                    LogUtil.farm("蚂蚁新村⛪请先开启蚂蚁新村");
+                    Log.farm("蚂蚁新村⛪请先开启蚂蚁新村");
                     return;
                 }
 
@@ -180,11 +180,11 @@ public class AntStall extends ModelTask {
                     pasteTicket();
                 }
             } else {
-                LogUtil.record("home err:" + " " + s);
+                Log.record("home err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "home err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "home err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -199,20 +199,20 @@ public class AntStall extends ModelTask {
                 s = AntStallRpcCall.shopSendBack(seatId);
                 jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪请走[" + UserMap.getMaskName(shopUserId) + "]的小摊"
+                    Log.farm("蚂蚁新村⛪请走[" + UserMap.getMaskName(shopUserId) + "]的小摊"
                             + (amount > 0 ? "获得金币" + amount : ""));
                 } else {
-                    LogUtil.record("sendBack err:" + " " + s);
+                    Log.record("sendBack err:" + " " + s);
                 }
                 if (stallInviteShop.getValue()) {
                     inviteOpen(seatId);
                 }
             } else {
-                LogUtil.record("sendBackPre err:" + " " + s);
+                Log.record("sendBackPre err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "sendBack err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "sendBack err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -236,17 +236,17 @@ public class AntStall extends ModelTask {
                         s = AntStallRpcCall.oneKeyInviteOpenShop(friendUserId, seatId);
                         jo = new JSONObject(s);
                         if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                            LogUtil.farm("蚂蚁新村⛪邀请[" + UserMap.getMaskName(friendUserId) + "]开店成功");
+                            Log.farm("蚂蚁新村⛪邀请[" + UserMap.getMaskName(friendUserId) + "]开店成功");
                             return;
                         }
                     }
                 }
             } else {
-                LogUtil.record("inviteOpen err:" + " " + s);
+                Log.record("inviteOpen err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "inviteOpen err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "inviteOpen err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -290,7 +290,7 @@ public class AntStall extends ModelTask {
                                 sendBack(rentLastBill, seatId, rentLastShop, rentLastUser);
                             }
                         }, endTime));
-                        LogUtil.record("添加蹲点请走⛪在[" + TimeUtil.getCommonDate(endTime) + "]执行");
+                        Log.record("添加蹲点请走⛪在[" + TimeUtil.getCommonDate(endTime) + "]执行");
                     } /*else {
                         addChildTask(new ChildModelTask(taskId, "SB", () -> {
                             if (stallAllowOpenReject.getValue()) {
@@ -301,8 +301,8 @@ public class AntStall extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "sendBack err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "sendBack err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -319,16 +319,16 @@ public class AntStall extends ModelTask {
                     String s = AntStallRpcCall.settle(assetId, settleCoin);
                     JSONObject jo = new JSONObject(s);
                     if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                        LogUtil.farm("蚂蚁新村⛪[收取金币]#" + settleCoin);
+                        Log.farm("蚂蚁新村⛪[收取金币]#" + settleCoin);
                     } else {
-                        LogUtil.record("settle err:" + " " + s);
+                        Log.record("settle err:" + " " + s);
                     }
                 }
             }
 
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "settle err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "settle err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -361,7 +361,7 @@ public class AntStall extends ModelTask {
                                         openShop();
                                     }
                                 }, shopTime));
-                                LogUtil.record("添加蹲点收摊⛪在[" + TimeUtil.getCommonDate(shopTime) + "]执行");
+                                Log.record("添加蹲点收摊⛪在[" + TimeUtil.getCommonDate(shopTime) + "]执行");
                             } /*else {
                                 addChildTask(new ChildModelTask(taskId, "SH", () -> {
                                     if (stallAutoClose.getValue()) {
@@ -373,11 +373,11 @@ public class AntStall extends ModelTask {
                     }
                 }
             } else {
-                LogUtil.record("closeShop err:" + " " + s);
+                Log.record("closeShop err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "closeShop err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "closeShop err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -396,11 +396,11 @@ public class AntStall extends ModelTask {
                 }
                 rankCoinDonate(shopIds);
             } else {
-                LogUtil.record("closeShop err:" + " " + s);
+                Log.record("closeShop err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "closeShop err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "closeShop err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -428,11 +428,11 @@ public class AntStall extends ModelTask {
                 }
                 friendHomeOpen(seats, shopIds);
             } else {
-                LogUtil.record("rankCoinDonate err:" + " " + s);
+                Log.record("rankCoinDonate err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "rankCoinDonate err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "rankCoinDonate err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -441,11 +441,11 @@ public class AntStall extends ModelTask {
         try {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.optString("resultCode"))) {
-                LogUtil.farm("蚂蚁新村⛪在[" + UserMap.getMaskName(userId) + "]家摆摊");
+                Log.farm("蚂蚁新村⛪在[" + UserMap.getMaskName(userId) + "]家摆摊");
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "openShop err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "openShop err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -472,11 +472,11 @@ public class AntStall extends ModelTask {
                         }
                     }
                 } else {
-                    LogUtil.record("新村摆摊失败: " + s);
+                    Log.record("新村摆摊失败: " + s);
                     return;
                 }
             } catch (Throwable t) {
-                LogUtil.printStackTrace(TAG, t);
+                Log.printStackTrace(TAG, t);
             }
         }
     }
@@ -490,16 +490,16 @@ public class AntStall extends ModelTask {
                 s = AntStallRpcCall.shopClose(shopId);
                 jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪收取在[" + UserMap.getMaskName(userId) + "]的摊位获得" + income.getString("amount"));
+                    Log.farm("蚂蚁新村⛪收取在[" + UserMap.getMaskName(userId) + "]的摊位获得" + income.getString("amount"));
                 } else {
-                    LogUtil.record("shopClose err:" + " " + s);
+                    Log.record("shopClose err:" + " " + s);
                 }
             } else {
-                LogUtil.record("shopClose  err:" + " " + s);
+                Log.record("shopClose  err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "shopClose  err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "shopClose  err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -508,7 +508,7 @@ public class AntStall extends ModelTask {
             String s = AntStallRpcCall.taskList();
             JSONObject jo = new JSONObject(s);
             if (!"SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.record("taskList err:" + " " + s);
+                Log.record("taskList err:" + " " + s);
                 return;
             }
             JSONObject signListModel = jo.getJSONObject("signListModel");
@@ -536,7 +536,7 @@ public class AntStall extends ModelTask {
                         if (!finishTask(taskType)) {
                             continue;
                         }
-                        LogUtil.farm("蚂蚁新村👣任务[" + title + "]完成");
+                        Log.farm("蚂蚁新村👣任务[" + title + "]完成");
                         TimeUtil.sleep(200L);
                         continue;
                     }
@@ -565,7 +565,7 @@ public class AntStall extends ModelTask {
                             s = AntStallRpcCall.queryCallAppSchema(sceneCode);
                             jo = new JSONObject(s);
                             if (!jo.optBoolean("success")) {
-                                LogUtil.runtime(TAG, "taskList.queryCallAppSchema err:" + jo.optString("resultDesc"));
+                                Log.runtime(TAG, "taskList.queryCallAppSchema err:" + jo.optString("resultDesc"));
                             }
                             TimeUtil.sleep(5000);
                             AntStallRpcCall.home();
@@ -576,7 +576,7 @@ public class AntStall extends ModelTask {
                             s = AntStallRpcCall.xlightPlugin();
                             jo = new JSONObject(s);
                             if (!jo.has("playingResult")) {
-                                LogUtil.runtime(TAG, "taskList.xlightPlugin err:" + jo.optString("resultDesc"));
+                                Log.runtime(TAG, "taskList.xlightPlugin err:" + jo.optString("resultDesc"));
                                 continue;
                             }
                             jo = jo.getJSONObject("playingResult");
@@ -593,24 +593,24 @@ public class AntStall extends ModelTask {
                                     TimeUtil.sleep(5000);
                                     jo = new JSONObject(s);
                                     if (!jo.optBoolean("success")) {
-                                        LogUtil.runtime(TAG, "taskList.finish err:" + jo.optString("resultDesc"));
+                                        Log.runtime(TAG, "taskList.finish err:" + jo.optString("resultDesc"));
                                     }
                                 } catch (Throwable t) {
-                                    LogUtil.runtime(TAG, "taskList for err:");
-                                    LogUtil.printStackTrace(TAG, t);
+                                    Log.runtime(TAG, "taskList for err:");
+                                    Log.printStackTrace(TAG, t);
                                 }
                             }
                             break;
                     }
                     TimeUtil.sleep(200L);
                 } catch (Throwable t) {
-                    LogUtil.runtime(TAG, "taskList for err:");
-                    LogUtil.printStackTrace(TAG, t);
+                    Log.runtime(TAG, "taskList for err:");
+                    Log.printStackTrace(TAG, t);
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "taskList err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "taskList err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -619,13 +619,13 @@ public class AntStall extends ModelTask {
         try {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.farm("蚂蚁新村⛪[签到成功]");
+                Log.farm("蚂蚁新村⛪[签到成功]");
             } else {
-                LogUtil.record("signToday err:" + " " + s);
+                Log.record("signToday err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "signToday err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "signToday err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -637,13 +637,13 @@ public class AntStall extends ModelTask {
         try {
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success")) {
-                LogUtil.farm("蚂蚁新村⛪[领取奖励]");
+                Log.farm("蚂蚁新村⛪[领取奖励]");
             } else {
-                LogUtil.record("receiveTaskAward err:" + " " + s);
+                Log.record("receiveTaskAward err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "receiveTaskAward err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "receiveTaskAward err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -656,11 +656,11 @@ public class AntStall extends ModelTask {
             if (jo.optBoolean("success")) {
                 return true;
             } else {
-                LogUtil.record("finishTask err:" + " " + s);
+                Log.record("finishTask err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "finishTask err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "finishTask err:");
+            Log.printStackTrace(TAG, t);
         }
         return false;
     }
@@ -673,7 +673,7 @@ public class AntStall extends ModelTask {
             String s = AntStallRpcCall.rankInviteRegister();
             JSONObject jo = new JSONObject(s);
             if (!"SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.record("rankInviteRegister err:" + " " + s);
+                Log.record("rankInviteRegister err:" + " " + s);
                 return false;
             }
             JSONArray friendRankList = jo.optJSONArray("friendRankList");
@@ -693,15 +693,15 @@ public class AntStall extends ModelTask {
                 }
                 jo = new JSONObject(AntStallRpcCall.friendInviteRegister(userId));
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪邀请好友[" + UserMap.getMaskName(userId) + "]#开通新村");
+                    Log.farm("蚂蚁新村⛪邀请好友[" + UserMap.getMaskName(userId) + "]#开通新村");
                     return true;
                 } else {
-                    LogUtil.record("friendInviteRegister err:" + " " + jo);
+                    Log.record("friendInviteRegister err:" + " " + jo);
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "InviteRegister err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "InviteRegister err:");
+            Log.printStackTrace(TAG, t);
         }
         return false;
     }
@@ -712,14 +712,14 @@ public class AntStall extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success")) {
                 String shareId = jo.getString("shareId");
-                LogUtil.record("蚂蚁新村⛪[分享助力]");
+                Log.record("蚂蚁新村⛪[分享助力]");
                 return shareId;
             } else {
-                LogUtil.record("shareP2P err:" + " " + s);
+                Log.record("shareP2P err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "shareP2P err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "shareP2P err:");
+            Log.printStackTrace(TAG, t);
         }
         return null;
     }
@@ -742,11 +742,11 @@ public class AntStall extends ModelTask {
                 if (!jsonObject.optBoolean("success")) {
                     String code = jsonObject.getString("code");
                     if ("600000028".equals(code)) {
-                        LogUtil.record("新村助力🐮被助力次数上限[" + name + "]");
+                        Log.record("新村助力🐮被助力次数上限[" + name + "]");
                         continue;
                     }
                     if ("600000027".equals(code)) {
-                        LogUtil.record("新村助力💪今日助力他人次数上限");
+                        Log.record("新村助力💪今日助力他人次数上限");
                         StatusUtil.antStallAssistFriendToday();
                         return;
                     }
@@ -754,16 +754,16 @@ public class AntStall extends ModelTask {
                     //600000015 人传人完成邀请，菲方用户
                     //600000031 人传人完成邀请过于频繁
                     //600000029 人传人分享一对一接受邀请达到限制
-                    LogUtil.record("新村助力😔失败[" + name + "]" + jsonObject.optString("desc"));
+                    Log.record("新村助力😔失败[" + name + "]" + jsonObject.optString("desc"));
                     continue;
                 }
-                LogUtil.farm("新村助力🎉成功[" + name + "]");
+                Log.farm("新村助力🎉成功[" + name + "]");
             }
             //暂时一天只做一次
             StatusUtil.antStallAssistFriendToday();
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "assistFriend err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "assistFriend err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -816,7 +816,7 @@ public class AntStall extends ModelTask {
                                     String title = astProjectVO.optString("title", "未知项目");
                                     // 检查捐赠操作返回结果是否成功
                                     if ("SUCCESS".equals(donateResponse.optString("resultCode", ""))) {
-                                        LogUtil.farm("蚂蚁新村⛪[捐赠:" + title + "]");
+                                        Log.farm("蚂蚁新村⛪[捐赠:" + title + "]");
                                         StatusUtil.setStallDonateToday();
                                     }
                                 }
@@ -826,8 +826,8 @@ public class AntStall extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "donate err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "donate err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -849,11 +849,11 @@ public class AntStall extends ModelTask {
                     return;
                 }
                 String villageName = road.getString("villageName");
-                LogUtil.farm("蚂蚁新村⛪[进入:" + villageName + "]成功");
+                Log.farm("蚂蚁新村⛪[进入:" + villageName + "]成功");
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "roadmap err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "roadmap err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -868,15 +868,15 @@ public class AntStall extends ModelTask {
                     s = AntStallRpcCall.collectManure();
                     jo = new JSONObject(s);
                     if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                        LogUtil.farm("蚂蚁新村⛪获得肥料" + manure + "g");
+                        Log.farm("蚂蚁新村⛪获得肥料" + manure + "g");
                     }
                 }
             } else {
-                LogUtil.record("collectManure err:" + " " + s);
+                Log.record("collectManure err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "collectManure err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "collectManure err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -885,16 +885,16 @@ public class AntStall extends ModelTask {
             String s = AntStallRpcCall.throwManure(dynamicList);
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.farm("蚂蚁新村⛪扔肥料");
+                Log.farm("蚂蚁新村⛪扔肥料");
             }
         } catch (Throwable th) {
-            LogUtil.runtime(TAG, "throwManure err:");
-            LogUtil.printStackTrace(TAG, th);
+            Log.runtime(TAG, "throwManure err:");
+            Log.printStackTrace(TAG, th);
         } finally {
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
-                LogUtil.printStackTrace(e);
+                Log.printStackTrace(e);
             }
         }
     }
@@ -932,11 +932,11 @@ public class AntStall extends ModelTask {
                     throwManure(dynamicList);
                 }
             } else {
-                LogUtil.record("throwManure err:" + " " + s);
+                Log.record("throwManure err:" + " " + s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "throwManure err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "throwManure err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -945,11 +945,11 @@ public class AntStall extends ModelTask {
         try {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.farm("蚂蚁新村⛪收取应收金币");
+                Log.farm("蚂蚁新村⛪收取应收金币");
             }
         } catch (Throwable th) {
-            LogUtil.runtime(TAG, "settleReceivable err:");
-            LogUtil.printStackTrace(TAG, th);
+            Log.runtime(TAG, "settleReceivable err:");
+            Log.printStackTrace(TAG, th);
         }
     }
 
@@ -966,11 +966,11 @@ public class AntStall extends ModelTask {
                     String str = AntStallRpcCall.nextTicketFriend();
                     JSONObject jsonObject = new JSONObject(str);
                     if (!jsonObject.optBoolean("success")) {
-                        LogUtil.runtime(TAG, "pasteTicket.nextTicketFriend err:" + jsonObject.optString("resultDesc"));
+                        Log.runtime(TAG, "pasteTicket.nextTicketFriend err:" + jsonObject.optString("resultDesc"));
                         return;
                     }
                     if (jsonObject.getInt("canPasteTicketCount") == 0) {
-                        LogUtil.farm("蚂蚁新村👍[今日罚单已贴完]");
+                        Log.farm("蚂蚁新村👍[今日罚单已贴完]");
                         StatusUtil.pasteTicketTime();
                         return;
                     }
@@ -988,7 +988,7 @@ public class AntStall extends ModelTask {
                     str = AntStallRpcCall.friendHome(friendId);
                     jsonObject = new JSONObject(str);
                     if (!jsonObject.optBoolean("success")) {
-                        LogUtil.runtime(TAG, "pasteTicket.friendHome err:" + jsonObject.optString("resultDesc"));
+                        Log.runtime(TAG, "pasteTicket.friendHome err:" + jsonObject.optString("resultDesc"));
                         return;
                     }
                     JSONObject object = jsonObject.getJSONObject("seatsMap");
@@ -1016,15 +1016,15 @@ public class AntStall extends ModelTask {
                                     jo.getString("rentLastShop"), rentLastUser, jo.getString("userId"));
                             jo = new JSONObject(str);
                             if (!jo.optBoolean("success")) {
-                                LogUtil.runtime(TAG, "pasteTicket.ticket err:" + jo.optString("resultDesc"));
+                                Log.runtime(TAG, "pasteTicket.ticket err:" + jo.optString("resultDesc"));
                                 return;
                             }
-                            LogUtil.farm("蚂蚁新村🚫在[" + UserMap.getMaskName(friendId) + "]贴罚单");
+                            Log.farm("蚂蚁新村🚫在[" + UserMap.getMaskName(friendId) + "]贴罚单");
                         } finally {
                             try {
                                 Thread.sleep(1000);
                             } catch (Exception e) {
-                                LogUtil.printStackTrace(e);
+                                Log.printStackTrace(e);
                             }
                         }
                     }
@@ -1032,13 +1032,13 @@ public class AntStall extends ModelTask {
                     try {
                         Thread.sleep(1500);
                     } catch (Exception e) {
-                        LogUtil.printStackTrace(e);
+                        Log.printStackTrace(e);
                     }
                 }
             }
         } catch (Throwable th) {
-            LogUtil.runtime(TAG, "pasteTicket err:");
-            LogUtil.printStackTrace(TAG, th);
+            Log.runtime(TAG, "pasteTicket err:");
+            Log.printStackTrace(TAG, th);
         }
     }
 

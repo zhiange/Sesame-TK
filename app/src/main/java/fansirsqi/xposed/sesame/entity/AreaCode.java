@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fansirsqi.xposed.sesame.util.File;
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 
 /**
  * 区域代码类，继承自IdAndName。
@@ -48,7 +48,7 @@ public class AreaCode extends IdAndName {
                     JSONObject jo = ja.getJSONObject(i);
                     list.add(new AreaCode(jo.getString("cityCode"), jo.getString("cityName")));
                 } catch (JSONException e) {
-                    LogUtil.printStackTrace(TAG, e);
+                    Log.printStackTrace(TAG, e);
                 }
             }
         }

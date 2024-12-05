@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.util.File;
 import fansirsqi.xposed.sesame.util.JsonUtil;
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -75,7 +75,7 @@ public class UserMap {
                 // 获取类加载器
                 loader = ApplicationHook.getClassLoader();
             } catch (Exception e) {
-                LogUtil.runtime("Error getting classloader");
+                Log.runtime("Error getting classloader");
                 return;
             }
             try {
@@ -120,8 +120,8 @@ public class UserMap {
                             }
                             UserMap.add(userEntity);
                         } catch (Throwable t) {
-                            LogUtil.runtime("addUserObject err:");
-                            LogUtil.printStackTrace(t);
+                            Log.runtime("addUserObject err:");
+                            Log.printStackTrace(t);
                         }
                     }
 
@@ -130,8 +130,8 @@ public class UserMap {
                 }
                 UserMap.save(selfId);
             } catch (Throwable t) {
-                LogUtil.runtime("checkUnknownId.run err:");
-                LogUtil.printStackTrace(t);
+                Log.runtime("checkUnknownId.run err:");
+                Log.printStackTrace(t);
             }
         });
     }
@@ -222,7 +222,7 @@ public class UserMap {
                 }
             }
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
     }
 
@@ -258,7 +258,7 @@ public class UserMap {
                 userMap.put(dto.getUserId(), dto.toEntity());
             }
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
     }
 

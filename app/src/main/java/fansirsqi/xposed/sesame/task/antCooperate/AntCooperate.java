@@ -89,12 +89,12 @@ public class AntCooperate extends ModelTask {
                         }
                     }
                 } else {
-                    LogUtil.runtime(TAG, jo.getString("resultDesc"));
+                    Log.runtime(TAG, jo.getString("resultDesc"));
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "start.run err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "start.run err:");
+            Log.printStackTrace(TAG, t);
         }
         CooperateMap.save(UserMap.getCurrentUid());
     }
@@ -104,14 +104,14 @@ public class AntCooperate extends ModelTask {
             String s = AntCooperateRpcCall.cooperateWater(uid, coopId, count);
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
+                Log.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
                 StatusUtil.cooperateWaterToday(UserMap.getCurrentUid(), coopId);
             } else {
-                LogUtil.runtime(TAG, jo.getString("resultDesc"));
+                Log.runtime(TAG, jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "cooperateWater err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "cooperateWater err:");
+            Log.printStackTrace(TAG, t);
         } finally {
             TimeUtil.sleep(500);
         }
@@ -136,8 +136,8 @@ public class AntCooperate extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "calculatedWaterNum err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "calculatedWaterNum err:");
+            Log.printStackTrace(TAG, t);
         } finally {
             return num;
         }

@@ -233,7 +233,7 @@ public class SettingsActivity extends BaseActivity {
                         Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
-                    LogUtil.printStackTrace(e);
+                    Log.printStackTrace(e);
                     Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -257,7 +257,7 @@ public class SettingsActivity extends BaseActivity {
                                 intent.putExtra("userId", userId);
                                 sendBroadcast(intent);
                             } catch (Throwable th) {
-                                LogUtil.printStackTrace(th);
+                                Log.printStackTrace(th);
                             }
                         }
                         Intent intent = getIntent();
@@ -267,7 +267,7 @@ public class SettingsActivity extends BaseActivity {
                         Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
-                    LogUtil.printStackTrace(e);
+                    Log.printStackTrace(e);
                     Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -284,7 +284,7 @@ public class SettingsActivity extends BaseActivity {
                     intent.putExtra("userId", userId);
                     sendBroadcast(intent);
                 } catch (Throwable th) {
-                    LogUtil.printStackTrace(th);
+                    Log.printStackTrace(th);
                 }
             }
         }

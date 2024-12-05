@@ -120,7 +120,7 @@ public class BaseModel extends Model {
                 initReserve();
                 initBeach();
               } catch (Exception e) {
-                LogUtil.printStackTrace(e);
+                Log.printStackTrace(e);
               }
             })
         .start();
@@ -132,7 +132,7 @@ public class BaseModel extends Model {
       ReserveIdMapUtil.clear();
       BeachMap.clear();
     } catch (Exception e) {
-      LogUtil.printStackTrace(e);
+      Log.printStackTrace(e);
     }
   }
 
@@ -180,17 +180,17 @@ public class BaseModel extends Model {
         ReserveIdMapUtil.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
-        LogUtil.runtime(jsonResponse.optString("resultDesc", "未知错误"));
+        Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
       }
     } catch (JSONException e) {
       // 捕获 JSON 解析错误并记录日志
-      LogUtil.runtime("JSON 解析错误：" + e.getMessage());
-      LogUtil.printStackTrace(e);
+      Log.runtime("JSON 解析错误：" + e.getMessage());
+      Log.printStackTrace(e);
       ReserveIdMapUtil.load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
-      LogUtil.runtime("初始化保护地任务时出错：" + e.getMessage());
-      LogUtil.printStackTrace(e);
+      Log.runtime("初始化保护地任务时出错：" + e.getMessage());
+      Log.printStackTrace(e);
       ReserveIdMapUtil.load(); // 加载备份的 ReserveIdMapUtil
     }
   }
@@ -240,17 +240,17 @@ public class BaseModel extends Model {
         BeachMap.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
-        LogUtil.runtime(jsonResponse.optString("resultDesc", "未知错误"));
+        Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
       }
     } catch (JSONException e) {
       // 记录 JSON 解析过程中的异常
-      LogUtil.runtime("JSON 解析错误：" + e.getMessage());
-      LogUtil.printStackTrace(e);
+      Log.runtime("JSON 解析错误：" + e.getMessage());
+      Log.printStackTrace(e);
       BeachMap.load(); // 若出现异常则加载保存的 BeachMap 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
-      LogUtil.runtime("初始化沙滩任务时出错：" + e.getMessage());
-      LogUtil.printStackTrace(e);
+      Log.runtime("初始化沙滩任务时出错：" + e.getMessage());
+      Log.printStackTrace(e);
       BeachMap.load(); // 加载保存的 BeachMap 备份
     }
   }

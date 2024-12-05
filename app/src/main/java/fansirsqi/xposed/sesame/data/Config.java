@@ -66,7 +66,7 @@ public class Config {
                             }
                         }
                     } catch (Exception e) {
-                        LogUtil.printStackTrace(e);
+                        Log.printStackTrace(e);
                     }
                     newModelFields.addField(configModelField);
                 }
@@ -155,7 +155,7 @@ public class Config {
             success = File.setConfigV2File(userId, json);
         }
 
-        LogUtil.record("保存配置: " + userId);
+        Log.record("保存配置: " + userId);
         return success;
     }
 
@@ -166,7 +166,7 @@ public class Config {
      * @return 加载后的 Config 实例
      */
     public static synchronized Config load(String userId) {
-        LogUtil.runtime(TAG, "开始加载配置");
+        Log.runtime(TAG, "开始加载配置");
         String userName = "";
         java.io.File configV2File = null;
         try {
@@ -182,7 +182,7 @@ public class Config {
                     userName = userEntity.getShowName();
                 }
             }
-            LogUtil.record("加载配置: " + userName);
+            Log.record("加载配置: " + userName);
 
             // 如果配置文件存在，加载内容
             if (configV2File.exists()) {
@@ -191,8 +191,8 @@ public class Config {
                 String formatted = toSaveStr();
 
                 if (formatted != null && !formatted.equals(json)) {
-                    LogUtil.runtime(TAG, "格式化配置: " + userName);
-                    LogUtil.system(TAG, "格式化配置: " + userName);
+                    Log.runtime(TAG, "格式化配置: " + userName);
+                    Log.system(TAG, "格式化配置: " + userName);
                     File.write2File(formatted, configV2File);
                 }
             } else {
@@ -201,31 +201,31 @@ public class Config {
                 if (defaultConfigV2File.exists()) {
                     String json = File.readFromFile(defaultConfigV2File);
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                    LogUtil.runtime(TAG, "复制新配置: " + userName);
-                    LogUtil.system(TAG, "复制新配置: " + userName);
+                    Log.runtime(TAG, "复制新配置: " + userName);
+                    Log.system(TAG, "复制新配置: " + userName);
                     File.write2File(json, configV2File);
                 } else {
                     unload();
-                    LogUtil.runtime(TAG, "初始新配置: " + userName);
-                    LogUtil.system(TAG, "初始新配置: " + userName);
+                    Log.runtime(TAG, "初始新配置: " + userName);
+                    Log.system(TAG, "初始新配置: " + userName);
                     File.write2File(toSaveStr(), configV2File);
                 }
             }
         } catch (Throwable t) {
-            LogUtil.printStackTrace(TAG, t);
-            LogUtil.runtime(TAG, "重置配置: " + userName);
-            LogUtil.system(TAG, "重置配置: " + userName);
+            Log.printStackTrace(TAG, t);
+            Log.runtime(TAG, "重置配置: " + userName);
+            Log.system(TAG, "重置配置: " + userName);
             try {
                 unload();
                 if (configV2File != null) {
                     File.write2File(toSaveStr(), configV2File);
                 }
             } catch (Exception e) {
-                LogUtil.printStackTrace(TAG, t);
+                Log.printStackTrace(TAG, t);
             }
         }
         INSTANCE.setInit(true);
-        LogUtil.runtime(TAG, "加载配置结束");
+        Log.runtime(TAG, "加载配置结束");
         return INSTANCE;
     }
 

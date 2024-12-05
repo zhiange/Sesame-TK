@@ -38,7 +38,7 @@ public class ReserveIdMapUtil {
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
-            LogUtil.printStackTrace(e);
+            Log.printStackTrace(e);
         }
     }
 

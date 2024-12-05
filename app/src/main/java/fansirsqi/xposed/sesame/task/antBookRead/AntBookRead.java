@@ -7,7 +7,7 @@ import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
@@ -47,8 +47,8 @@ public class AntBookRead extends ModelTask {
             queryTask();
             queryTreasureBox();
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "start.run err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "start.run err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -83,7 +83,7 @@ public class AntBookRead extends ModelTask {
                                         if (tips.contains("已得")) {
                                             energy = Integer.parseInt(StringUtil.getSubString(tips, "已得", "g"));
                                         }
-                                        LogUtil.forest("阅读书籍📚[" + name + "]#累计能量" + energy + "g");
+                                        Log.forest("阅读书籍📚[" + name + "]#累计能量" + energy + "g");
                                     }
                                 }
                                 if (energy >= 150) {
@@ -96,12 +96,12 @@ public class AntBookRead extends ModelTask {
                     }
                 }
             } else {
-                LogUtil.record(jo.getString("resultDesc"));
-                LogUtil.runtime(s);
+                Log.record(jo.getString("resultDesc"));
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "queryTaskCenterPage err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "queryTaskCenterPage err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -157,12 +157,12 @@ public class AntBookRead extends ModelTask {
                 if (doubleCheck)
                     queryTask();
             } else {
-                LogUtil.record(jo.getString("resultDesc"));
-                LogUtil.runtime(s);
+                Log.record(jo.getString("resultDesc"));
+                Log.runtime(s);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "queryTask err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "queryTask err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -172,11 +172,11 @@ public class AntBookRead extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success")) {
                 int coinNum = jo.getJSONObject("data").getInt("coinNum");
-                LogUtil.other("阅读任务📖[" + name + "]#" + coinNum);
+                Log.other("阅读任务📖[" + name + "]#" + coinNum);
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "collectTaskPrize err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "collectTaskPrize err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -186,8 +186,8 @@ public class AntBookRead extends ModelTask {
             JSONObject jo = new JSONObject(s);
             jo.optBoolean("success");
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "taskFinish err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "taskFinish err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 
@@ -204,13 +204,13 @@ public class AntBookRead extends ModelTask {
                     jo = new JSONObject(AntBookReadRpcCall.openTreasureBox());
                     if (jo.optBoolean("success")) {
                         int coinNum = jo.getJSONObject("data").getInt("coinNum");
-                        LogUtil.other("阅读任务📖[打开宝箱]#" + coinNum);
+                        Log.other("阅读任务📖[打开宝箱]#" + coinNum);
                     }
                 }
             }
         } catch (Throwable t) {
-            LogUtil.runtime(TAG, "queryTreasureBox err:");
-            LogUtil.printStackTrace(TAG, t);
+            Log.runtime(TAG, "queryTreasureBox err:");
+            Log.printStackTrace(TAG, t);
         }
     }
 }

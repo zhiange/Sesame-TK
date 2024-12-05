@@ -3,10 +3,8 @@ package fansirsqi.xposed.sesame.util;
 import android.os.Environment;
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -202,9 +200,9 @@ public class File {
       statisticsFile.delete();
     }
     if (statisticsFile.exists()) {
-      LogUtil.runtime(TAG, "[statistics]读:" + statisticsFile.canRead() + ";写:" + statisticsFile.canWrite());
+      Log.runtime(TAG, "[statistics]读:" + statisticsFile.canRead() + ";写:" + statisticsFile.canWrite());
     } else {
-      LogUtil.runtime(TAG, "statisticsFile.json文件不存在");
+      Log.runtime(TAG, "statisticsFile.json文件不存在");
     }
     return statisticsFile;
   }
@@ -316,39 +314,39 @@ public class File {
   }
 
   public static java.io.File getRuntimeLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("runtime"));
+    return ensureLogFile(Log.getLogFileName("runtime"));
   }
 
   public static java.io.File getRecordLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("record"));
+    return ensureLogFile(Log.getLogFileName("record"));
   }
 
   public static java.io.File getSystemLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("system"));
+    return ensureLogFile(Log.getLogFileName("system"));
   }
 
   public static java.io.File getDebugLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("debug"));
+    return ensureLogFile(Log.getLogFileName("debug"));
   }
 
   public static java.io.File getCaptureLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("capture"));
+    return ensureLogFile(Log.getLogFileName("capture"));
   }
 
   public static java.io.File getForestLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("forest"));
+    return ensureLogFile(Log.getLogFileName("forest"));
   }
 
   public static java.io.File getFarmLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("farm"));
+    return ensureLogFile(Log.getLogFileName("farm"));
   }
 
   public static java.io.File getOtherLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("other"));
+    return ensureLogFile(Log.getLogFileName("other"));
   }
 
   public static java.io.File getErrorLogFile() {
-    return ensureLogFile(LogUtil.getLogFileName("error"));
+    return ensureLogFile(Log.getLogFileName("error"));
   }
 
   public static void clearLog() {
@@ -375,14 +373,14 @@ public class File {
           String now = LocalDateTime.now().format(formatter);
           java.io.File newFile = new java.io.File(file.getParent(), name.replace(".log", "-" + now + ".log.bak"));
           if (file.renameTo(newFile)) {
-            LogUtil.runtime(TAG, "👌 日志文件备份成功：" + file.getName() + " -> " + newFile.getName());
+            Log.runtime(TAG, "👌 日志文件备份成功：" + file.getName() + " -> " + newFile.getName());
           } else {
-            LogUtil.runtime(TAG, "🥀 日志文件备份失败：" + file.getName() + " -> " + newFile.getName());
+            Log.runtime(TAG, "🥀 日志文件备份失败：" + file.getName() + " -> " + newFile.getName());
           }
         }
       } catch (SecurityException se) {
         // 记录安全异常，不应该抛出
-        LogUtil.printStackTrace(se);
+        Log.printStackTrace(se);
       }
     }
   }
@@ -397,7 +395,7 @@ public class File {
       if (c != null) c.close(); // 关闭流
     } catch (Throwable t) {
       // 捕获并打印关闭流时的异常
-      LogUtil.printStackTrace(TAG, t);
+      Log.printStackTrace(TAG, t);
     }
   }
 
@@ -431,7 +429,7 @@ public class File {
       }
     } catch (Throwable t) {
       // 捕获并记录异常
-      LogUtil.printStackTrace(TAG, t);
+      Log.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fr);
@@ -473,7 +471,7 @@ public class File {
       success = true;
     } catch (Throwable t) {
       // 捕获并记录异常
-      LogUtil.printStackTrace(TAG, t);
+      Log.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fw);
@@ -505,7 +503,7 @@ public class File {
       success = true;
     } catch (Throwable t) {
       // 捕获并记录异常
-      LogUtil.printStackTrace(TAG, t);
+      Log.printStackTrace(TAG, t);
     } finally {
       // 关闭文件流
       close(fw);
@@ -531,7 +529,7 @@ public class File {
       return true; // 复制成功
     } catch (IOException e) {
       // 捕获并打印文件操作中的异常
-      LogUtil.printStackTrace(e);
+      Log.printStackTrace(e);
     }
     return false; // 复制失败
   }
@@ -556,7 +554,7 @@ public class File {
       return true; // 成功拷贝数据
     } catch (IOException e) {
       // 捕获 IO 异常并打印堆栈信息
-      LogUtil.printStackTrace(e);
+      Log.printStackTrace(e);
     } finally {
       // 关闭输入流和输出流
       closeStream(source);
@@ -576,7 +574,7 @@ public class File {
         stream.close(); // 关闭流
       } catch (Exception e) {
         // 捕获并打印关闭流时的异常
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
       }
     }
   }
@@ -609,7 +607,7 @@ public class File {
         if (!file.createNewFile()) return null;
       } catch (Exception e) {
         // 捕获异常并打印堆栈信息
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
         return null;
       }
     }
@@ -629,7 +627,7 @@ public class File {
           return null;
         }
       } catch (Exception e) {
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
         return null;
       }
     }
@@ -654,7 +652,7 @@ public class File {
         return true; // 返回清空成功
       } catch (IOException e) {
         // 发生 IO 异常时打印堆栈信息
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
       } finally {
         // 确保 FileWriter 在操作完成后关闭，防止资源泄露
         try {
@@ -663,7 +661,7 @@ public class File {
           }
         } catch (IOException e) {
           // 如果关闭流时发生异常，打印堆栈信息
-          LogUtil.printStackTrace(e);
+          Log.printStackTrace(e);
         }
       }
     }

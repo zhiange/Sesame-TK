@@ -24,8 +24,8 @@ import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -85,7 +85,7 @@ public class MainActivity extends BaseActivity {
           @Override
           public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            LogUtil.runtime("receive broadcast:" + action + " intent:" + intent);
+            Log.runtime("receive broadcast:" + action + " intent:" + intent);
             if (action != null) {
               switch (action) {
                 case "fansirsqi.xposed.sesame.status":
@@ -190,14 +190,14 @@ public class MainActivity extends BaseActivity {
         try {
           sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.status"));
         } catch (Throwable th) {
-          LogUtil.runtime("view sendBroadcast status err:");
-          LogUtil.printStackTrace(th);
+          Log.runtime("view sendBroadcast status err:");
+          Log.printStackTrace(th);
         }
       }
       try {
         UIConfig.load();
       } catch (Exception e) {
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
       }
       try {
         List<String> userNameList = new ArrayList<>();
@@ -227,14 +227,14 @@ public class MainActivity extends BaseActivity {
       } catch (Exception e) {
         userNameArray = new String[] {"默认"};
         userEntityArray = new UserEntity[] {null};
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
       }
       try {
         StatisticsUtil.load();
-        StatisticsUtil.updateDay(Calendar.getInstance());
+        StatisticsUtil.updateDay(LocalDate.now());
         tvStatistics.setText(StatisticsUtil.getText());
       } catch (Exception e) {
-        LogUtil.printStackTrace(e);
+        Log.printStackTrace(e);
       }
     }
   }
@@ -246,8 +246,8 @@ public class MainActivity extends BaseActivity {
         sendBroadcast(new Intent("com.eg.android.AlipayGphone.sesame.status"));
         isClick = true;
       } catch (Throwable th) {
-        LogUtil.runtime("view sendBroadcast status err:");
-        LogUtil.printStackTrace(th);
+        Log.runtime("view sendBroadcast status err:");
+        Log.printStackTrace(th);
       }
       return;
     }
@@ -300,7 +300,7 @@ public class MainActivity extends BaseActivity {
       menu.add(0, 8, 8, R.string.extend);
       menu.add(0, 9, 9, R.string.settings);
     } catch (Exception e) {
-      LogUtil.printStackTrace(e);
+      Log.printStackTrace(e);
       ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
     }
     return super.onCreateOptionsMenu(menu);

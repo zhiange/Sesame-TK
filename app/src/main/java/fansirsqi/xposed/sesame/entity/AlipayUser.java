@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class AlipayUser extends IdAndName {
                     list.add(new AlipayUser(entry.getKey(), userEntity.getFullName()));
                 }
             } catch (Throwable t) {
-                LogUtil.printStackTrace(t); // 捕获并记录异常
+                Log.printStackTrace(t); // 捕获并记录异常
             }
         }
         return list;

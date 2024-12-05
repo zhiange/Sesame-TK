@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.data;
 import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.util.File;
-import fansirsqi.xposed.sesame.util.LogUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.Objects;
@@ -170,8 +170,8 @@ public class RuntimeInfo {
             joAll.put(userId, joCurrent);
         } catch (JSONException e) {
             // 错误日志
-            LogUtil.runtime(TAG, "put err:");
-            LogUtil.printStackTrace(TAG, e);
+            Log.runtime(TAG, "put err:");
+            Log.printStackTrace(TAG, e);
         }
         // 保存数据到文件
         save();

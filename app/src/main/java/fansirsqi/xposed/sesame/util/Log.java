@@ -15,7 +15,7 @@ import java.util.Locale;
 import fansirsqi.xposed.sesame.model.BaseModel;
 
 /** 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。 */
-public class LogUtil {
+public class Log {
 
   // 日志初始化，设置日志等级
   static {
@@ -37,7 +37,7 @@ public class LogUtil {
    *
    * @param tag 日志标签
    * @param pattern 日志输出的模式
-   * @return Logger 实例
+   * @return Loger 实例
    */
   private static Logger createLogger(String tag, String pattern) {
     return XLog.tag(tag)
