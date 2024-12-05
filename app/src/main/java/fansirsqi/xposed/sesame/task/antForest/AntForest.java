@@ -36,7 +36,7 @@ public class AntForest extends ModelTask {
 
   private static final String TAG = AntForest.class.getSimpleName();
 
-  private static final AverageMathUtil offsetTimeMath = new AverageMathUtil(5);
+  private static final Average offsetTimeMath = new Average(5);
 
   private static final Set<String> AntForestTaskTypeSet;
 
@@ -80,7 +80,7 @@ public class AntForest extends ModelTask {
   /** 保护罩结束时间 */
   private volatile long shieldEndTime = 0;
 
-  private final AverageMathUtil delayTimeMath = new AverageMathUtil(5);
+  private final Average delayTimeMath = new Average(5);
 
   private final ObjReference<Long> collectEnergyLockLimit = new ObjReference<>(0L);
 
