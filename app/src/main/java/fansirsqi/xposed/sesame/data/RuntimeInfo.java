@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.util.FileUtil;
 import fansirsqi.xposed.sesame.util.LogUtil;
-import fansirsqi.xposed.sesame.util.UserIdMapUtil;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.util.Objects;
 
@@ -41,7 +41,7 @@ public class RuntimeInfo {
      * @return 返回 RuntimeInfo 的单例实例
      */
     public static RuntimeInfo getInstance() {
-        if (instance == null || !Objects.equals(instance.userId, UserIdMapUtil.getCurrentUid())) {
+        if (instance == null || !Objects.equals(instance.userId, UserIdMap.getCurrentUid())) {
             instance = new RuntimeInfo();
         }
         return instance;
@@ -52,7 +52,7 @@ public class RuntimeInfo {
      * 从文件中读取运行时数据，并初始化相关的 JSON 对象。
      */
     private RuntimeInfo() {
-        userId = UserIdMapUtil.getCurrentUid();
+        userId = UserIdMap.getCurrentUid();
         String content = FileUtil.readFromFile(FileUtil.runtimeInfoFile(userId));
 
         // 如果文件读取成功，则解析 JSON 数据，否则初始化为空的 JSON 对象

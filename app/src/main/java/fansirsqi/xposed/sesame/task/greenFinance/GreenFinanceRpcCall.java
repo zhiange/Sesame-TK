@@ -1,7 +1,7 @@
 package fansirsqi.xposed.sesame.task.greenFinance;
 
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
-import fansirsqi.xposed.sesame.util.UserIdMapUtil;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import org.json.JSONArray;
 
@@ -58,7 +58,7 @@ public class GreenFinanceRpcCall {
   public static String batchSelfCollect(JSONArray bsnIds) {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinancePointCollectService.batchSelfCollect",
-        "[{\"bsnIds\":" + bsnIds + ",\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"bsnIds\":" + bsnIds + ",\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -81,7 +81,7 @@ public class GreenFinanceRpcCall {
   public static String queryUserTickItem(String firstBehaviorType) {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceTickService.queryUserTickItem",
-        "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\"" + firstBehaviorType + "\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\"" + firstBehaviorType + "\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -97,7 +97,7 @@ public class GreenFinanceRpcCall {
         "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\""
             + firstBehaviorType
             + "\",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\",\"behaviorCode\":\""
             + behaviorCode
             + "\"}]");
@@ -115,7 +115,7 @@ public class GreenFinanceRpcCall {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinancePageQueryService.queryExpireMcaPoint",
         "[{\"custType\":\"MERCHANT\",\"profitType\":\"MYBK_LOAN_DISCOUNT\",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\",\"expireDate\":\""
             + (System.currentTimeMillis() + day * 24 * 60 * 60 * 1000)
             + "\"}]");
@@ -129,7 +129,7 @@ public class GreenFinanceRpcCall {
   public static String queryAllDonationProjectNew() {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceDonationService.queryAllDonationProjectNew",
-        "[{\"custType\":\"MERCHANT\",\"subjectType\":\"ALL_DONATION\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"custType\":\"MERCHANT\",\"subjectType\":\"ALL_DONATION\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -146,7 +146,7 @@ public class GreenFinanceRpcCall {
         "[{\"custType\":\"MERCHANT\",\"donationGold\":\""
             + amount
             + "\",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\",\"outbizNo\":\""
             + System.currentTimeMillis()
             + "\",\"projectId\":\""
@@ -162,7 +162,7 @@ public class GreenFinanceRpcCall {
   public static String consultProveTaskList() {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.consultProveTaskList",
-        "[{\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -195,7 +195,7 @@ public class GreenFinanceRpcCall {
   public static String proveTask(String bizType, String imageUrl) {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.proveTask",
-        "[{\"bizType\":\"" + bizType + "\",\"custType\":\"MERCHANT\",\"imageUrl\":\"" + imageUrl + "\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"bizType\":\"" + bizType + "\",\"custType\":\"MERCHANT\",\"imageUrl\":\"" + imageUrl + "\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -207,7 +207,7 @@ public class GreenFinanceRpcCall {
   public static String queryProveTaskStatus(String taskId) {
     return ApplicationHook.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.queryProveTaskStatus",
-        "[{\"taskId\":\"" + taskId + "\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMapUtil.getCurrentUid() + "\"}]");
+        "[{\"taskId\":\"" + taskId + "\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserIdMap.getCurrentUid() + "\"}]");
   }
 
   /**
@@ -223,7 +223,7 @@ public class GreenFinanceRpcCall {
             + "\"rankingType\":\"OVERALL\",\"startIndex\":"
             + startIndex
             + ",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\"}]");
   }
 
@@ -238,7 +238,7 @@ public class GreenFinanceRpcCall {
         "[{\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"guestCustType\":\"MERCHANT\",\"guestUid\":\""
             + guestId
             + "\",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\"}]");
   }
 
@@ -251,7 +251,7 @@ public class GreenFinanceRpcCall {
             + "\"collectedUid\":\""
             + collectedUid
             + "\",\"custType\":\"MERCHANT\",\"uid\":\""
-            + UserIdMapUtil.getCurrentUid()
+            + UserIdMap.getCurrentUid()
             + "\"}]");
   }
 }

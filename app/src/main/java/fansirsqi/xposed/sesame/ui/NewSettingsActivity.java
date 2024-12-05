@@ -27,6 +27,7 @@ import fansirsqi.xposed.sesame.ui.dto.ModelFieldInfoDto;
 import fansirsqi.xposed.sesame.ui.dto.ModelFieldShowDto;
 import fansirsqi.xposed.sesame.ui.dto.ModelGroupDto;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -73,8 +74,8 @@ public class NewSettingsActivity extends BaseActivity {
             debug = intent.getBooleanExtra("debug", debug);
         }
         Model.initAllModel();
-        UserIdMapUtil.setCurrentUserId(userId);
-        UserIdMapUtil.load(userId);
+        UserIdMap.setCurrentUserId(userId);
+        UserIdMap.load(userId);
         CooperationIdMapUtil.load(userId);
         ReserveIdMapUtil.load();
         BeachIdMapUtil.load();
@@ -428,7 +429,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
         }
         if (!StringUtil.isEmpty(userId)) {
-            UserIdMapUtil.save(userId);
+            UserIdMap.save(userId);
             CooperationIdMapUtil.save(userId);
         }
     }

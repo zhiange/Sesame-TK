@@ -18,6 +18,7 @@ import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,8 +59,8 @@ public class SettingsActivity extends BaseActivity {
 
         // 初始化各种配置数据
         Model.initAllModel();
-        UserIdMapUtil.setCurrentUserId(userId);
-        UserIdMapUtil.load(userId);
+        UserIdMap.setCurrentUserId(userId);
+        UserIdMap.load(userId);
         CooperationIdMapUtil.load(userId);
         ReserveIdMapUtil.load();
         BeachIdMapUtil.load();
@@ -287,7 +288,7 @@ public class SettingsActivity extends BaseActivity {
             }
         }
         if (!StringUtil.isEmpty(userId)) {
-            UserIdMapUtil.save(userId);
+            UserIdMap.save(userId);
             CooperationIdMapUtil.save(userId);
         }
     }

@@ -19,6 +19,7 @@ import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -112,7 +113,7 @@ public class AntSports extends ModelTask {
     @Override
     public void run() {
         try {
-            if (StatusUtil.canSyncStepToday(UserIdMapUtil.getCurrentUid()) && TimeUtil.isNowAfterOrCompareTimeStr("0600")) {
+            if (StatusUtil.canSyncStepToday(UserIdMap.getCurrentUid()) && TimeUtil.isNowAfterOrCompareTimeStr("0600")) {
                 addChildTask(new ChildModelTask("syncStep", () -> {
                     int step = tmpStepCount();
                     try {
@@ -122,7 +123,7 @@ public class AntSports extends ModelTask {
                         } else {
                             LogUtil.record("同步运动步数失败:" + step);
                         }
-                        StatusUtil.SyncStepToday(UserIdMapUtil.getCurrentUid());
+                        StatusUtil.SyncStepToday(UserIdMap.getCurrentUid());
                     } catch (Throwable t) {
                         LogUtil.printStackTrace(TAG, t);
                     }
@@ -142,7 +143,7 @@ public class AntSports extends ModelTask {
             if (donateCharityCoin.getValue() && StatusUtil.canDonateCharityCoin())
                 queryProjectList(loader);
 
-            if (minExchangeCount.getValue() > 0 && StatusUtil.canExchangeToday(UserIdMapUtil.getCurrentUid()))
+            if (minExchangeCount.getValue() > 0 && StatusUtil.canExchangeToday(UserIdMap.getCurrentUid()))
                 queryWalkStep(loader);
 
             if (tiyubiz.getValue()) {
@@ -728,7 +729,7 @@ public class AntSports extends ModelTask {
                     JSONObject walkDonateHomeModel = jo.getJSONObject("walkDonateHomeModel");
                     JSONObject walkUserInfoModel = walkDonateHomeModel.getJSONObject("walkUserInfoModel");
                     if (!walkUserInfoModel.has("exchangeFlag")) {
-                        StatusUtil.exchangeToday(UserIdMapUtil.getCurrentUid());
+                        StatusUtil.exchangeToday(UserIdMap.getCurrentUid());
                         return;
                     }
 
@@ -743,10 +744,10 @@ public class AntSports extends ModelTask {
                         int userCount = donateExchangeResultModel.getInt("userCount");
                         double amount = donateExchangeResultModel.getJSONObject("userAmount").getDouble("amount");
                         LogUtil.other("捐出活动❤️[" + userCount + "步]#兑换" + amount + "元公益金");
-                        StatusUtil.exchangeToday(UserIdMapUtil.getCurrentUid());
+                        StatusUtil.exchangeToday(UserIdMap.getCurrentUid());
 
                     } else if (s.contains("已捐步")) {
-                        StatusUtil.exchangeToday(UserIdMapUtil.getCurrentUid());
+                        StatusUtil.exchangeToday(UserIdMap.getCurrentUid());
                     } else {
                         LogUtil.runtime(TAG, jo.getString("resultDesc"));
                     }
@@ -1061,7 +1062,7 @@ public class AntSports extends ModelTask {
                         String memberId = member.getString("memberId");
                         String originBossId = member.getString("originBossId");
                         // 获取用户名称
-                        String userName = UserIdMapUtil.getMaskName(originBossId);
+                        String userName = UserIdMap.getMaskName(originBossId);
                         // 发送 RPC 请求获取 train item 数据
                         String responseData = AntSportsRpcCall.queryTrainItem();
                         // 解析 JSON 数据
@@ -1166,7 +1167,7 @@ public class AntSports extends ModelTask {
                                     // 处理 buyMember 的返回结果
                                     JSONObject buyMemberResponse = new JSONObject(buyMemberResult);
                                     if ("SUCCESS".equals(buyMemberResponse.getString("resultCode"))) {
-                                        String userName = UserIdMapUtil.getMaskName(originBossId);
+                                        String userName = UserIdMap.getMaskName(originBossId);
                                         LogUtil.other("抢购好友🥋[成功:将 " + userName + " 抢回来]");
                                         // 执行训练好友
                                         queryTrainItem();

@@ -13,6 +13,8 @@ import fansirsqi.xposed.sesame.util.ClassUtil;
 import fansirsqi.xposed.sesame.util.LogUtil;
 import fansirsqi.xposed.sesame.util.NotificationUtil;
 import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -129,7 +131,7 @@ null,"{\"__apiCallStartTime\":"+ System.currentTimeMillis()
           boolean containsSuccess = (Boolean) XposedHelpers.callMethod(obj, "containsKey", "success");
           if (!containsSuccess) {
           rpcEntity.setError();
-          NotificationUtil.sendNewNotification(context.getApplicationContext(),"⚠️已触发请求频繁","请手动进入支付宝查看详情，正常请忽略😛",9527);
+          NotificationUtil.sendNewNotification(context.getApplicationContext(),"⚠️已触发请求频繁 "+ TimeUtil.getTimeStr(System.currentTimeMillis()),"请手动进入支付宝查看详情，正常请忽略😛",9527);
         LogUtil.error(
             "\n=======================================================>\n"
                 + "新 RPC 响应 | id: "

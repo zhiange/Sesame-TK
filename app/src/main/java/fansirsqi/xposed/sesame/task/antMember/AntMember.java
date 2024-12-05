@@ -6,6 +6,8 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+
 import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -113,13 +115,13 @@ public class AntMember extends ModelTask {
 
   private void memberSign() {
     try {
-      if (StatusUtil.canMemberSignInToday(UserIdMapUtil.getCurrentUid())) {
+      if (StatusUtil.canMemberSignInToday(UserIdMap.getCurrentUid())) {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
         TimeUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         if ("SUCCESS".equals(jo.getString("resultCode"))) {
           LogUtil.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
-          StatusUtil.memberSignInToday(UserIdMapUtil.getCurrentUid());
+          StatusUtil.memberSignInToday(UserIdMap.getCurrentUid());
         } else {
           LogUtil.record(jo.getString("resultDesc"));
           LogUtil.runtime(s);

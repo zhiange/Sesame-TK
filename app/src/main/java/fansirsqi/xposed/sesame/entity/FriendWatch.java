@@ -3,6 +3,7 @@ package fansirsqi.xposed.sesame.entity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,7 +68,7 @@ public class FriendWatch extends IdAndName {
             JSONObject joSingle = joFriendWatch.optJSONObject(id);
             if (joSingle == null) {
                 joSingle = new JSONObject();
-                joSingle.put("name", UserIdMapUtil.getMaskName(id));
+                joSingle.put("name", UserIdMap.getMaskName(id));
                 joSingle.put("allGet", 0);
                 joSingle.put("startTime", TimeUtil.getDateStr());
                 joFriendWatch.put(id, joSingle);

@@ -22,6 +22,8 @@ import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -206,8 +208,8 @@ public class MainActivity extends BaseActivity {
           for (File configDir : configFiles) {
             if (configDir.isDirectory()) {
               String userId = configDir.getName();
-              UserIdMapUtil.loadSelf(userId);
-              UserEntity userEntity = UserIdMapUtil.get(userId);
+              UserIdMap.loadSelf(userId);
+              UserEntity userEntity = UserIdMap.get(userId);
               String userName;
               if (userEntity == null) {
                 userName = userId;

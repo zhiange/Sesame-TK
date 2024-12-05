@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 import lombok.Data;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.UserEntity;
@@ -175,7 +176,7 @@ public class Config {
                 userName = "默认";
             } else {
                 configV2File = FileUtil.getConfigV2File(userId);
-                UserEntity userEntity = UserIdMapUtil.get(userId);
+                UserEntity userEntity = UserIdMap.get(userId);
                 if (userEntity == null) {
                     userName = userId;
                 } else {

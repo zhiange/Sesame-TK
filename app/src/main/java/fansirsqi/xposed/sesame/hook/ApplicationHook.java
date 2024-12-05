@@ -38,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
@@ -156,7 +158,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                   }
                   return;
                 }
-                String currentUid = UserIdMapUtil.getCurrentUid();
+                String currentUid = UserIdMap.getCurrentUid();
                 if (!targetUid.equals(currentUid)) {
                   if (currentUid != null) {
                     initHandler(true);
@@ -164,7 +166,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     Toast.show("用户已切换");
                     return;
                   }
-                  UserIdMapUtil.initUser(targetUid);
+                  UserIdMap.initUser(targetUid);
                 }
                 if (offline) {
                   offline = false;
@@ -218,7 +220,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               }
                               updateDay();
                               String targetUid = getUserId();
-                              String currentUid = UserIdMapUtil.getCurrentUid();
+                              String currentUid = UserIdMap.getCurrentUid();
                               if (targetUid == null || currentUid == null) {
                                 LogUtil.record("用户为空，放弃执行");
                                 reLogin();
@@ -476,7 +478,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               },
               2000);
         }
-        UserIdMapUtil.initUser(userId);
+        UserIdMap.initUser(userId);
         Model.initAllModel();
         LogUtil.record("模块版本：" + modelVersion);
         LogUtil.record("开始加载");
@@ -618,7 +620,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           RpcIntervalLimit.clearIntervalLimit();
           Config.unload();
           Model.destroyAllModel();
-          UserIdMapUtil.unload();
+          UserIdMap.unload();
         }
         if (rpcResponseUnhook != null) {
           try {
@@ -889,7 +891,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         switch (action) {
           case "com.eg.android.AlipayGphone.sesame.restart":
             String userId = intent.getStringExtra("userId");
-            if (StringUtil.isEmpty(userId) || Objects.equals(UserIdMapUtil.getCurrentUid(), userId)) {
+            if (StringUtil.isEmpty(userId) || Objects.equals(UserIdMap.getCurrentUid(), userId)) {
               initHandler(true);
             }
             break;

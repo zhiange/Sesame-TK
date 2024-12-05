@@ -1,7 +1,10 @@
-package fansirsqi.xposed.sesame.util;
+package fansirsqi.xposed.sesame.util.Maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.robv.android.xposed.XposedHelpers;
+import fansirsqi.xposed.sesame.util.FileUtil;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -17,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  通过该类可以高效地加载、存储和操作用户信息，
  *  同时提供线程安全的访问机制。
  */
-public class UserIdMapUtil {
+public class UserIdMap {
 
     // 存储用户信息的线程安全映射
     private static final Map<String, UserEntity> userMap = new ConcurrentHashMap<>();
@@ -77,7 +80,7 @@ public class UserIdMapUtil {
             }
             try {
                 // 卸载现有数据
-                UserIdMapUtil.unload();
+                UserIdMap.unload();
                 String selfId = ApplicationHook.getUserId();
 
                 // 反射加载类
@@ -115,7 +118,7 @@ public class UserIdMapUtil {
                             if (Objects.equals(selfId, userId)) {
                                 selfEntity = userEntity;
                             }
-                            UserIdMapUtil.add(userEntity);
+                            UserIdMap.add(userEntity);
                         } catch (Throwable t) {
                             LogUtil.runtime("addUserObject err:");
                             LogUtil.printStackTrace(t);
@@ -123,9 +126,9 @@ public class UserIdMapUtil {
                     }
 
                     // 保存当前用户信息
-                    UserIdMapUtil.saveSelf(selfEntity);
+                    UserIdMap.saveSelf(selfEntity);
                 }
-                UserIdMapUtil.save(selfId);
+                UserIdMap.save(selfId);
             } catch (Throwable t) {
                 LogUtil.runtime("checkUnknownId.run err:");
                 LogUtil.printStackTrace(t);

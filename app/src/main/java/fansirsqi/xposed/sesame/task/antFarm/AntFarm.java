@@ -12,6 +12,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
 
 import java.util.*;
 
@@ -230,7 +231,7 @@ public class AntFarm extends ModelTask {
                     }
 
                     boolean hungry = false;
-                    String userName = UserIdMapUtil
+                    String userName = UserIdMap
                             .getMaskName(AntFarmRpcCall.farmId2UserId(ownerAnimal.currentFarmId));
                     switch (AnimalFeedStatus.valueOf(ownerAnimal.animalFeedStatus)) {
                         case HUNGRY:
@@ -438,7 +439,7 @@ public class AntFarm extends ModelTask {
 
     private JSONObject enterFarm() {
         try {
-            String s = AntFarmRpcCall.enterFarm("", UserIdMapUtil.getCurrentUid());
+            String s = AntFarmRpcCall.enterFarm("", UserIdMap.getCurrentUid());
             if (s == null) {
                 throw new RuntimeException("庄园加载失败");
             }
@@ -489,7 +490,7 @@ public class AntFarm extends ModelTask {
                 String taskId = "FA|" + ownerFarmId;
                 if (!hasChildTask(taskId)) {
                     addChildTask(new ChildModelTask(taskId, "FA", () -> feedAnimal(ownerFarmId), nextFeedTime));
-                    LogUtil.record("添加蹲点投喂🥣[" + UserIdMapUtil.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(nextFeedTime) + "]执行");
+                    LogUtil.record("添加蹲点投喂🥣[" + UserIdMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(nextFeedTime) + "]执行");
                 } else {
                     addChildTask(new ChildModelTask(taskId, "FA", () -> feedAnimal(ownerFarmId), nextFeedTime));
                 }
@@ -503,7 +504,7 @@ public class AntFarm extends ModelTask {
         String sleepTaskId = "AS|" + animalSleepTime;
         if (!hasChildTask(sleepTaskId)) {
             addChildTask(new ChildModelTask(sleepTaskId, "AS", this::animalSleepNow, animalSleepTime));
-            LogUtil.record("添加定时睡觉🛌[" + UserIdMapUtil.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(animalSleepTime) + "]执行");
+            LogUtil.record("添加定时睡觉🛌[" + UserIdMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(animalSleepTime) + "]执行");
         } else {
             addChildTask(new ChildModelTask(sleepTaskId, "AS", this::animalSleepNow, animalSleepTime));
         }
@@ -513,7 +514,7 @@ public class AntFarm extends ModelTask {
         String wakeUpTaskId = "AW|" + animalWakeUpTime;
         if (!hasChildTask(wakeUpTaskId)) {
             addChildTask(new ChildModelTask(wakeUpTaskId, "AW", this::animalWakeUpNow, animalWakeUpTime));
-            LogUtil.record("添加定时起床\uD83D\uDD06[" + UserIdMapUtil.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(animalWakeUpTime) + "]执行");
+            LogUtil.record("添加定时起床\uD83D\uDD06[" + UserIdMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(animalWakeUpTime) + "]执行");
         } else {
             addChildTask(new ChildModelTask(wakeUpTaskId, "AW", this::animalWakeUpNow, animalWakeUpTime));
         }
@@ -521,7 +522,7 @@ public class AntFarm extends ModelTask {
 
     private Boolean animalSleepNow() {
         try {
-            String s = AntFarmRpcCall.queryLoveCabin(UserIdMapUtil.getCurrentUid());
+            String s = AntFarmRpcCall.queryLoveCabin(UserIdMap.getCurrentUid());
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("memo"))) {
                 JSONObject sleepNotifyInfo = jo.getJSONObject("sleepNotifyInfo");
@@ -546,7 +547,7 @@ public class AntFarm extends ModelTask {
 
     private Boolean animalWakeUpNow() {
         try {
-            String s = AntFarmRpcCall.queryLoveCabin(UserIdMapUtil.getCurrentUid());
+            String s = AntFarmRpcCall.queryLoveCabin(UserIdMap.getCurrentUid());
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("memo"))) {
                 JSONObject sleepNotifyInfo = jo.getJSONObject("sleepNotifyInfo");
@@ -620,7 +621,7 @@ public class AntFarm extends ModelTask {
                     if ("SUCCESS".equals(memo)) {
                         double rewardCount = benevolenceScore - jo.getDouble("farmProduct");
                         benevolenceScore -= rewardCount;
-                        LogUtil.farm("打赏好友💰[" + UserIdMapUtil.getMaskName(rewardFriend.friendId) + "]#得" + rewardCount
+                        LogUtil.farm("打赏好友💰[" + UserIdMap.getMaskName(rewardFriend.friendId) + "]#得" + rewardCount
                                 + "颗爱心鸡蛋");
                     } else {
                         LogUtil.record(memo);
@@ -674,7 +675,7 @@ public class AntFarm extends ModelTask {
                         continue;
                     }
                     int sendTypeInt = sendBackAnimalWay.getValue();
-                    user = UserIdMapUtil.getMaskName(user);
+                    user = UserIdMap.getMaskName(user);
                     String s = AntFarmRpcCall.sendBackAnimal(
                             SendBackAnimalWay.nickNames[sendTypeInt], animal.animalId,
                             animal.currentFarmId, animal.masterFarmId);
@@ -1265,7 +1266,7 @@ public class AntFarm extends ModelTask {
             Map<String, Integer> feedFriendAnimalMap = feedFriendAnimalList.getValue();
             for (Map.Entry<String, Integer> entry : feedFriendAnimalMap.entrySet()) {
                 String userId = entry.getKey();
-                if (userId.equals(UserIdMapUtil.getCurrentUid()))
+                if (userId.equals(UserIdMap.getCurrentUid()))
                     continue;
                 if (!StatusUtil.canFeedFriendToday(userId, entry.getValue()))
                     continue;
@@ -1283,7 +1284,7 @@ public class AntFarm extends ModelTask {
                             jo = jo.getJSONObject("animalStatusVO");
                             if (AnimalInteractStatus.HOME.name().equals(jo.getString("animalInteractStatus"))
                                     && AnimalFeedStatus.HUNGRY.name().equals(jo.getString("animalFeedStatus"))) {
-                                feedFriendAnimal(friendFarmId, UserIdMapUtil.getMaskName(userId));
+                                feedFriendAnimal(friendFarmId, UserIdMap.getMaskName(userId));
                             }
                             break;
                         }
@@ -1350,12 +1351,12 @@ public class AntFarm extends ModelTask {
                     for (int i = 0; i < jaRankingList.length(); i++) {
                         jo = jaRankingList.getJSONObject(i);
                         String userId = jo.getString("userId");
-                        String userName = UserIdMapUtil.getMaskName(userId);
+                        String userName = UserIdMap.getMaskName(userId);
                         boolean isNotifyFriend = notifyFriendList.getValue().contains(userId);
                         if (notifyFriendType.getValue() == NotifyFriendType.DONT_NOTIFY) {
                             isNotifyFriend = !isNotifyFriend;
                         }
-                        if (!isNotifyFriend || userId.equals(UserIdMapUtil.getCurrentUid())) {
+                        if (!isNotifyFriend || userId.equals(UserIdMap.getCurrentUid())) {
                             continue;
                         }
                         boolean starve = jo.has("actionType") && "starve_action".equals(jo.getString("actionType"));
@@ -1669,7 +1670,7 @@ public class AntFarm extends ModelTask {
             for (Map.Entry<String, Integer> entry : map.entrySet()) {
                 String userId = entry.getKey();
                 Integer count = entry.getValue();
-                if (userId.equals(UserIdMapUtil.getCurrentUid()))
+                if (userId.equals(UserIdMap.getCurrentUid()))
                     continue;
                 if (count <= 0)
                     continue;
@@ -1705,10 +1706,10 @@ public class AntFarm extends ModelTask {
                     jo = new JSONObject(AntFarmRpcCall.visitFriend(farmId));
                     if ("SUCCESS".equals(jo.getString("memo"))) {
                         foodStock = jo.getInt("foodStock");
-                        LogUtil.farm("赠送麦子🌾[" + UserIdMapUtil.getMaskName(userId) + "]#" + jo.getInt("giveFoodNum") + "g");
+                        LogUtil.farm("赠送麦子🌾[" + UserIdMap.getMaskName(userId) + "]#" + jo.getInt("giveFoodNum") + "g");
                         visitedTimes++;
                         if (jo.optBoolean("isReachLimit")) {
-                            LogUtil.record("今日给[" + UserIdMapUtil.getMaskName(userId) + "]送麦子已达上限");
+                            LogUtil.record("今日给[" + UserIdMap.getMaskName(userId) + "]送麦子已达上限");
                             visitedTimes = 3;
                             break;
                         }
@@ -2020,7 +2021,7 @@ public class AntFarm extends ModelTask {
                         if (hireAnimalType.getValue() == HireAnimalType.DONT_HIRE) {
                             isHireAnimal = !isHireAnimal;
                         }
-                        if (!isHireAnimal || userId.equals(UserIdMapUtil.getCurrentUid())) {
+                        if (!isHireAnimal || userId.equals(UserIdMap.getCurrentUid())) {
                             continue;
                         }
                         String actionTypeListStr = joo.getJSONArray("actionTypeList").toString();
@@ -2063,7 +2064,7 @@ public class AntFarm extends ModelTask {
                         String animalId = animal.getString("animalId");
                         jo = new JSONObject(AntFarmRpcCall.hireAnimal(farmId, animalId));
                         if ("SUCCESS".equals(jo.getString("memo"))) {
-                            LogUtil.farm("雇佣小鸡👷[" + UserIdMapUtil.getMaskName(userId) + "] 成功");
+                            LogUtil.farm("雇佣小鸡👷[" + UserIdMap.getMaskName(userId) + "] 成功");
                             JSONArray newAnimals = jo.getJSONArray("animals");
                             for (int ii = 0, newLen = newAnimals.length(); ii < newLen; ii++) {
                                 JSONObject joo = newAnimals.getJSONObject(ii);
@@ -2138,7 +2139,7 @@ public class AntFarm extends ModelTask {
     // 小鸡换装
     private void listOrnaments() {
         try {
-            String s = AntFarmRpcCall.queryLoveCabin(UserIdMapUtil.getCurrentUid());
+            String s = AntFarmRpcCall.queryLoveCabin(UserIdMap.getCurrentUid());
             JSONObject jsonObject = new JSONObject(s);
             if ("SUCCESS".equals(jsonObject.getString("memo"))) {
                 JSONObject ownAnimal = jsonObject.getJSONObject("ownAnimal");
@@ -2257,14 +2258,14 @@ public class AntFarm extends ModelTask {
                         if (getFeedSet.contains(userId)) {
                             jo = new JSONObject(AntFarmRpcCall.giftOfFeed(bizTraceId, userId));
                             if (jo.optBoolean("success")) {
-                                LogUtil.record("一起拿小鸡饲料🥡 [送饲料：" + UserIdMapUtil.getMaskName(userId) + "]");
+                                LogUtil.record("一起拿小鸡饲料🥡 [送饲料：" + UserIdMap.getMaskName(userId) + "]");
                                 invitesToSend--; // 每成功发送一次邀请，减少一次邀请次数
                             } else {
                                 LogUtil.record("邀请失败：" + jo);
                                 break;
                             }
                         } else {
-//                            LogUtil.record("用户 " + UserIdMapUtil.getMaskName(userId) + " 不在勾选的好友列表中，不发送邀请。");
+//                            LogUtil.record("用户 " + UserIdMap.getMaskName(userId) + " 不在勾选的好友列表中，不发送邀请。");
                         }
                     }
                 } else {
@@ -2275,7 +2276,7 @@ public class AntFarm extends ModelTask {
 
                         jo = new JSONObject(AntFarmRpcCall.giftOfFeed(bizTraceId, userId));
                         if (jo.optBoolean("success")) {
-                            LogUtil.record("一起拿小鸡饲料🥡 [送饲料：" + UserIdMapUtil.getMaskName(userId) + "]");
+                            LogUtil.record("一起拿小鸡饲料🥡 [送饲料：" + UserIdMap.getMaskName(userId) + "]");
                         } else {
                             LogUtil.record("邀请失败：" + jo);
                             break;
