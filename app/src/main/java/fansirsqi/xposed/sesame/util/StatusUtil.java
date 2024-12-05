@@ -565,21 +565,21 @@ public class StatusUtil {
                 Log.runtime(TAG, "用户为空，状态加载失败");
                 throw new RuntimeException("用户为空，状态加载失败");
             }
-            java.io.File statusFile = File.getStatusFile(currentUid);
+            java.io.File statusFile = Files.getStatusFile(currentUid);
             if (statusFile.exists()) {
-                String json = File.readFromFile(statusFile);
+                String json = Files.readFromFile(statusFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "重新格式化 status.json");
                     Log.system(TAG, "重新格式化 status.json");
-                    File.write2File(formatted, File.getStatusFile(currentUid));
+                    Files.write2File(formatted, Files.getStatusFile(currentUid));
                 }
             } else {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
                 Log.runtime(TAG, "初始化 status.json");
                 Log.system(TAG, "初始化 status.json");
-                File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
+                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -587,7 +587,7 @@ public class StatusUtil {
             Log.system(TAG, "状态文件格式有误，已重置");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
-                File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
+                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
             } catch (JsonMappingException e) {
                 Log.printStackTrace(TAG, e);
             }
@@ -624,7 +624,7 @@ public class StatusUtil {
         long lastSaveTime = INSTANCE.saveTime;
         try {
             INSTANCE.saveTime = System.currentTimeMillis();
-            File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatusFile(currentUid));
+            Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
         } catch (Exception e) {
             INSTANCE.saveTime = lastSaveTime;
             throw e;

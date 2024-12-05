@@ -116,13 +116,13 @@ public class Config {
         java.io.File configV2File;
 
         if (StringUtil.isEmpty(userId)) {
-            configV2File = File.getDefaultConfigV2File();
+            configV2File = Files.getDefaultConfigV2File();
         } else {
-            configV2File = File.getConfigV2File(userId);
+            configV2File = Files.getConfigV2File(userId);
         }
 
         if (configV2File.exists()) {
-            json = File.readFromFile(configV2File);
+            json = Files.readFromFile(configV2File);
         }
 
         if (json != null) {
@@ -150,9 +150,9 @@ public class Config {
 
         if (StringUtil.isEmpty(userId)) {
             userId = "默认";
-            success = File.setDefaultConfigV2File(json);
+            success = Files.setDefaultConfigV2File(json);
         } else {
-            success = File.setConfigV2File(userId, json);
+            success = Files.setConfigV2File(userId, json);
         }
 
         Log.record("保存配置: " + userId);
@@ -171,10 +171,10 @@ public class Config {
         java.io.File configV2File = null;
         try {
             if (StringUtil.isEmpty(userId)) {
-                configV2File = File.getDefaultConfigV2File();
+                configV2File = Files.getDefaultConfigV2File();
                 userName = "默认";
             } else {
-                configV2File = File.getConfigV2File(userId);
+                configV2File = Files.getConfigV2File(userId);
                 UserEntity userEntity = UserMap.get(userId);
                 if (userEntity == null) {
                     userName = userId;
@@ -186,29 +186,29 @@ public class Config {
 
             // 如果配置文件存在，加载内容
             if (configV2File.exists()) {
-                String json = File.readFromFile(configV2File);
+                String json = Files.readFromFile(configV2File);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = toSaveStr();
 
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "格式化配置: " + userName);
                     Log.system(TAG, "格式化配置: " + userName);
-                    File.write2File(formatted, configV2File);
+                    Files.write2File(formatted, configV2File);
                 }
             } else {
                 // 如果配置文件不存在，复制默认配置或初始化
-                java.io.File defaultConfigV2File = File.getDefaultConfigV2File();
+                java.io.File defaultConfigV2File = Files.getDefaultConfigV2File();
                 if (defaultConfigV2File.exists()) {
-                    String json = File.readFromFile(defaultConfigV2File);
+                    String json = Files.readFromFile(defaultConfigV2File);
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                     Log.runtime(TAG, "复制新配置: " + userName);
                     Log.system(TAG, "复制新配置: " + userName);
-                    File.write2File(json, configV2File);
+                    Files.write2File(json, configV2File);
                 } else {
                     unload();
                     Log.runtime(TAG, "初始新配置: " + userName);
                     Log.system(TAG, "初始新配置: " + userName);
-                    File.write2File(toSaveStr(), configV2File);
+                    Files.write2File(toSaveStr(), configV2File);
                 }
             }
         } catch (Throwable t) {
@@ -218,7 +218,7 @@ public class Config {
             try {
                 unload();
                 if (configV2File != null) {
-                    File.write2File(toSaveStr(), configV2File);
+                    Files.write2File(toSaveStr(), configV2File);
                 }
             } catch (Exception e) {
                 Log.printStackTrace(TAG, t);

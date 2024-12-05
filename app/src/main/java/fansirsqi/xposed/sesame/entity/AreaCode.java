@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 
 /**
@@ -38,7 +38,7 @@ public class AreaCode extends IdAndName {
      */
     public static List<AreaCode> getList() {
         if (list == null) {
-            String cityCode = File.readFromFile(File.getCityCodeFile());
+            String cityCode = Files.readFromFile(Files.getCityCodeFile());
             JSONArray ja = parseCityCode(cityCode);
             list = new ArrayList<>();
 

@@ -31,7 +31,7 @@ public class ReserveIdMapUtil {
     public synchronized static void load() {
         idMap.clear();
         try {
-            String body = File.readFromFile(File.getReserveIdMapFile());
+            String body = Files.readFromFile(Files.getReserveIdMapFile());
             if (!body.isEmpty()) {
                 Map<String, String> newMap = JsonUtil.parseObject(body, new TypeReference<Map<String, String>>() {
                 });
@@ -43,7 +43,7 @@ public class ReserveIdMapUtil {
     }
 
     public synchronized static boolean save() {
-        return File.write2File(JsonUtil.toJsonString(idMap), File.getReserveIdMapFile());
+        return Files.write2File(JsonUtil.toJsonString(idMap), Files.getReserveIdMapFile());
     }
 
     public synchronized static void clear() {

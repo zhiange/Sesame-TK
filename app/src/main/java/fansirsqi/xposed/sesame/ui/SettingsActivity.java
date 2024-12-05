@@ -175,11 +175,11 @@ public class SettingsActivity extends BaseActivity {
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
                             java.io.File userConfigDirectoryFile;
                             if (StringUtil.isEmpty(userId)) {
-                                userConfigDirectoryFile = File.getDefaultConfigV2File();
+                                userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = File.getUserConfigDirectory(userId);
+                                userConfigDirectoryFile = Files.getUserConfigDirectory(userId);
                             }
-                            if (File.delFile(userConfigDirectoryFile)) {
+                            if (Files.delFile(userConfigDirectoryFile)) {
                                 Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
@@ -222,12 +222,12 @@ public class SettingsActivity extends BaseActivity {
                 try {
                     java.io.File configV2File;
                     if (StringUtil.isEmpty(userId)) {
-                        configV2File = File.getDefaultConfigV2File();
+                        configV2File = Files.getDefaultConfigV2File();
                     } else {
-                        configV2File = File.getConfigV2File(userId);
+                        configV2File = Files.getConfigV2File(userId);
                     }
                     FileInputStream inputStream = new FileInputStream(configV2File);
-                    if (File.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
+                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
                         Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
@@ -244,12 +244,12 @@ public class SettingsActivity extends BaseActivity {
                 try {
                     java.io.File configV2File;
                     if (StringUtil.isEmpty(userId)) {
-                        configV2File = File.getDefaultConfigV2File();
+                        configV2File = Files.getDefaultConfigV2File();
                     } else {
-                        configV2File = File.getConfigV2File(userId);
+                        configV2File = Files.getConfigV2File(userId);
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (File.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
+                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
                         Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                         if (!StringUtil.isEmpty(userId)) {
                             try {

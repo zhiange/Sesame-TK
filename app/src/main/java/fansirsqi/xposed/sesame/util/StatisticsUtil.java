@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Calendar;
 
 @Data
 public class StatisticsUtil {
@@ -104,22 +103,22 @@ public class StatisticsUtil {
      * @return 统计实例
      */
     public static synchronized StatisticsUtil load() {
-        java.io.File statisticsFile = File.getStatisticsFile();
+        java.io.File statisticsFile = Files.getStatisticsFile();
         try {
             if (statisticsFile.exists()) {
-                String json = File.readFromFile(statisticsFile);
+                String json = Files.readFromFile(statisticsFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = JsonUtil.toFormatJsonString(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "重新格式化 statistics.json");
                     Log.system(TAG, "重新格式化 statistics.json");
-                    File.write2File(formatted, statisticsFile);
+                    Files.write2File(formatted, statisticsFile);
                 }
             } else {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
                 Log.runtime(TAG, "初始化 statistics.json");
                 Log.system(TAG, "初始化 statistics.json");
-                File.write2File(JsonUtil.toFormatJsonString(INSTANCE), statisticsFile);
+                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), statisticsFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -127,7 +126,7 @@ public class StatisticsUtil {
             Log.system(TAG, "统计文件格式有误，已重置统计文件");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
-                File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatisticsFile());
+                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatisticsFile());
             } catch (JsonMappingException e) {
                 Log.printStackTrace(TAG, e);
             }
@@ -164,7 +163,7 @@ public class StatisticsUtil {
         } else {
             Log.system(TAG, "保存 statistics.json");
         }
-        File.write2File(JsonUtil.toFormatJsonString(INSTANCE), File.getStatisticsFile());
+        Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatisticsFile());
     }
 
     /**

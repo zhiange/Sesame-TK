@@ -8,7 +8,7 @@ import com.elvishew.xlog.printer.file.FilePrinter;
 import com.elvishew.xlog.printer.file.backup.NeverBackupStrategy;
 import com.elvishew.xlog.printer.file.clean.NeverCleanStrategy;
 import com.elvishew.xlog.printer.file.naming.FileNameGenerator;
-import java.text.ParseException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -42,7 +42,7 @@ public class Log {
   private static Logger createLogger(String tag, String pattern) {
     return XLog.tag(tag)
             .printers(
-                    new FilePrinter.Builder(File.LOG_DIRECTORY.getPath())
+                    new FilePrinter.Builder(Files.LOG_DIRECTORY.getPath())
                             .fileNameGenerator(new CustomDateFileNameGenerator(tag))
                             .backupStrategy(new NeverBackupStrategy())
                             .cleanStrategy(new NeverCleanStrategy())

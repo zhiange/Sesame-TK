@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 
 /**
@@ -66,7 +66,7 @@ public class BeachMap {
     public static synchronized void load() {
         idMap.clear();
         try {
-            String body = File.readFromFile(File.getBeachIdMapFile());
+            String body = Files.readFromFile(Files.getBeachIdMapFile());
             if (!body.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
@@ -85,7 +85,7 @@ public class BeachMap {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(idMap);
-            return File.write2File(json, File.getBeachIdMapFile());
+            return Files.write2File(json, Files.getBeachIdMapFile());
         } catch (Exception e) {
             Log.printStackTrace(e);
             return false;

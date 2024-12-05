@@ -1,27 +1,36 @@
 package fansirsqi.xposed.sesame.util;
 
 import android.os.Environment;
-import java.io.*;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 
-public class File {
-  private static final String TAG = File.class.getSimpleName();
+public class Files {
+  private static final String TAG = Files.class.getSimpleName();
 
   /** 配置文件夹名称 */
   public static final String CONFIG_DIRECTORY_NAME = "sesame";
 
   /** 应用配置文件夹主路径 */
-  public static final java.io.File MAIN_DIRECTORY = getMainDirectory();
+  public static final File MAIN_DIRECTORY = getMainDirectory();
 
   /** 配置文件夹路径 */
-  public static final java.io.File CONFIG_DIRECTORY = getConfigDirectory();
+  public static final File CONFIG_DIRECTORY = getConfigDirectory();
 
   /** 日志文件夹路径 */
-  public static final java.io.File LOG_DIRECTORY = getLogDirectory();
+  public static final File LOG_DIRECTORY = getLogDirectory();
 
 
 
@@ -32,7 +41,7 @@ public class File {
    *
    * @param directory 要确保的目录对应的File对象。
    */
-  public static void ensureDirectory(java.io.File directory) {
+  public static void ensureDirectory(File directory) {
     if (directory.exists()) {
       if (directory.isFile()) {
         directory.delete();
@@ -48,10 +57,10 @@ public class File {
    *
    * @return mainDir 主路径
    */
-  private static java.io.File getMainDirectory() {
-    String storageDirStr = Environment.getExternalStorageDirectory() + java.io.File.separator + "Android" + java.io.File.separator + "media" + java.io.File.separator + ClassUtil.PACKAGE_NAME;
-    java.io.File storageDir = new java.io.File(storageDirStr);
-    java.io.File mainDir = new java.io.File(storageDir, CONFIG_DIRECTORY_NAME);
+  private static File getMainDirectory() {
+    String storageDirStr = Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + ClassUtil.PACKAGE_NAME;
+    File storageDir = new File(storageDirStr);
+    File mainDir = new File(storageDir, CONFIG_DIRECTORY_NAME);
     ensureDirectory(mainDir);
     return mainDir;
   }
@@ -61,8 +70,8 @@ public class File {
    *
    * @return logDir 日志文件夹路径
    */
-  private static java.io.File getLogDirectory() {
-    java.io.File logDir = new java.io.File(MAIN_DIRECTORY, "log");
+  private static File getLogDirectory() {
+    File logDir = new File(MAIN_DIRECTORY, "log");
     ensureDirectory(logDir);
     return logDir;
   }
@@ -72,8 +81,8 @@ public class File {
    *
    * @return configDir 配置文件夹路径
    */
-  private static java.io.File getConfigDirectory() {
-    java.io.File configDir = new java.io.File(MAIN_DIRECTORY, "config");
+  private static File getConfigDirectory() {
+    File configDir = new File(MAIN_DIRECTORY, "config");
     ensureDirectory(configDir);
     return configDir;
   }
@@ -83,8 +92,8 @@ public class File {
    *
    * @param userId 用户ID
    */
-  public static java.io.File getUserConfigDirectory(String userId) {
-    java.io.File configDir = new java.io.File(CONFIG_DIRECTORY, userId);
+  public static File getUserConfigDirectory(String userId) {
+    File configDir = new File(CONFIG_DIRECTORY, userId);
     ensureDirectory(configDir);
     return configDir;
   }
@@ -94,8 +103,8 @@ public class File {
    *
    * @return configFile 默认配置文件
    */
-  public static java.io.File getDefaultConfigV2File() {
-    return new java.io.File(MAIN_DIRECTORY, "config_v2.json");
+  public static File getDefaultConfigV2File() {
+    return new File(MAIN_DIRECTORY, "config_v2.json");
   }
 
   /**
@@ -104,7 +113,7 @@ public class File {
    * @param json 新的配置文件内容
    */
   public static boolean setDefaultConfigV2File(String json) {
-    return write2File(json, new java.io.File(MAIN_DIRECTORY, "config_v2.json"));
+    return write2File(json, new File(MAIN_DIRECTORY, "config_v2.json"));
   }
 
   /**
@@ -113,11 +122,11 @@ public class File {
    * @param userId 用户ID
    * @return 指定用户的配置文件
    */
-  public static java.io.File getConfigV2File(String userId) {
-    java.io.File confV2File = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "config_v2.json");
+  public static File getConfigV2File(String userId) {
+    File confV2File = new File(CONFIG_DIRECTORY + File.separator + userId, "config_v2.json");
     if (!confV2File.exists()) {
       //尝试从旧的配置文件迁移
-      java.io.File oldFile = new java.io.File(CONFIG_DIRECTORY, "config_v2-" + userId + ".json");
+      File oldFile = new File(CONFIG_DIRECTORY, "config_v2-" + userId + ".json");
       if (oldFile.exists()) {
         if (write2File(readFromFile(oldFile), confV2File)) {
           oldFile.delete();
@@ -130,31 +139,31 @@ public class File {
   }
 
   public static boolean setConfigV2File(String userId, String json) {
-    return write2File(json, new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "config_v2.json"));
+    return write2File(json, new File(CONFIG_DIRECTORY + File.separator + userId, "config_v2.json"));
   }
 
   public static boolean setUIConfigFile(String json) {
-    return write2File(json, new java.io.File(MAIN_DIRECTORY, "ui_config.json"));
+    return write2File(json, new File(MAIN_DIRECTORY, "ui_config.json"));
   }
 
-  public static java.io.File getSelfIdFile(String userId) {
-    java.io.File file = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "self.json");
+  public static File getSelfIdFile(String userId) {
+    File file = new File(CONFIG_DIRECTORY + File.separator + userId, "self.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
     return file;
   }
 
-  public static java.io.File getFriendIdMapFile(String userId) {
-    java.io.File file = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "friend.json");
+  public static File getFriendIdMapFile(String userId) {
+    File file = new File(CONFIG_DIRECTORY + File.separator + userId, "friend.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
     return file;
   }
 
-  public static java.io.File runtimeInfoFile(String userId) {
-    java.io.File runtimeInfoFile = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "runtimeInfo.json");
+  public static File runtimeInfoFile(String userId) {
+    File runtimeInfoFile = new File(CONFIG_DIRECTORY + File.separator + userId, "runtimeInfo.json");
     if (!runtimeInfoFile.exists()) {
       try {
         runtimeInfoFile.createNewFile();
@@ -169,8 +178,8 @@ public class File {
    * @param userId 用户ID
    * @return 合种配置文件
    */
-  public static java.io.File getCooperationIdMapFile(String userId) {
-    java.io.File file = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "cooperation.json");
+  public static File getCooperationIdMapFile(String userId) {
+    File file = new File(CONFIG_DIRECTORY + File.separator + userId, "cooperation.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
@@ -183,8 +192,8 @@ public class File {
    * @param userId 用户ID
    * @return 用户状态文件
    */
-  public static java.io.File getStatusFile(String userId) {
-    java.io.File file = new java.io.File(CONFIG_DIRECTORY + java.io.File.separator + userId, "status.json");
+  public static File getStatusFile(String userId) {
+    File file = new File(CONFIG_DIRECTORY + File.separator + userId, "status.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
@@ -194,8 +203,8 @@ public class File {
   /**
    * 获取统计文件
    */
-  public static java.io.File getStatisticsFile() {
-    java.io.File statisticsFile = new java.io.File(MAIN_DIRECTORY, "statistics.json");
+  public static File getStatisticsFile() {
+    File statisticsFile = new File(MAIN_DIRECTORY, "statistics.json");
     if (statisticsFile.exists() && statisticsFile.isDirectory()) {
       statisticsFile.delete();
     }
@@ -207,54 +216,59 @@ public class File {
     return statisticsFile;
   }
 
-  public static java.io.File getReserveIdMapFile() {
-    java.io.File file = new java.io.File(MAIN_DIRECTORY, "reserve.json");
+  public static File getReserveIdMapFile() {
+    File file = new File(MAIN_DIRECTORY, "reserve.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
     return file;
   }
 
-  public static java.io.File getBeachIdMapFile() {
-    java.io.File file = new java.io.File(MAIN_DIRECTORY, "beach.json");
+  public static File getBeachIdMapFile() {
+    File file = new File(MAIN_DIRECTORY, "beach.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
     return file;
   }
 
-  public static java.io.File getUIConfigFile() {
-    java.io.File file = new java.io.File(MAIN_DIRECTORY, "ui_config.json");
+  public static File getUIConfigFile() {
+    File file = new File(MAIN_DIRECTORY, "ui_config.json");
     if (file.exists() && file.isDirectory()) {
       file.delete();
     }
     return file;
   }
 
-  public static java.io.File getExportedStatisticsFile() {
-    String storageDirStr = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + java.io.File.separator + CONFIG_DIRECTORY_NAME;
-    java.io.File storageDir = new java.io.File(storageDirStr);
+  /**
+   * 获取导出的统计文件，到下载目录
+   *
+   * @return 导出的统计文件
+   */
+  public static File getExportedStatisticsFile() {
+    String storageDirStr = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + CONFIG_DIRECTORY_NAME;
+    File storageDir = new File(storageDirStr);
     if (!storageDir.exists()) {
       storageDir.mkdirs();
     }
-    java.io.File exportedStatisticsFile = new java.io.File(storageDir, "statistics.json");
+    File exportedStatisticsFile = new File(storageDir, "statistics.json");
     if (exportedStatisticsFile.exists() && exportedStatisticsFile.isDirectory()) {
       exportedStatisticsFile.delete();
     }
     return exportedStatisticsFile;
   }
 
-  public static java.io.File getFriendWatchFile() {
-    java.io.File friendWatchFile = new java.io.File(MAIN_DIRECTORY, "friendWatch.json");
+  public static File getFriendWatchFile() {
+    File friendWatchFile = new File(MAIN_DIRECTORY, "friendWatch.json");
     if (friendWatchFile.exists() && friendWatchFile.isDirectory()) {
       friendWatchFile.delete();
     }
     return friendWatchFile;
   }
 
-  public static java.io.File getWuaFile() {
-    java.io.File wuaFile;
-      wuaFile = new java.io.File(MAIN_DIRECTORY, "wua.list");
+  public static File getWuaFile() {
+    File wuaFile;
+      wuaFile = new File(MAIN_DIRECTORY, "wua.list");
       return wuaFile;
   }
 
@@ -263,16 +277,16 @@ public class File {
    * @param file 要导出的文件
    * @return 导出后的文件
    */
-  public static java.io.File exportFile(java.io.File file) {
-    java.io.File exportDir = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + java.io.File.separator + CONFIG_DIRECTORY_NAME);
+  public static File exportFile(File file) {
+    File exportDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + CONFIG_DIRECTORY_NAME);
     if (!exportDir.exists()) {
       exportDir.mkdirs();
     }
-    java.io.File exportFile = new java.io.File(exportDir, file.getName());
+    File exportFile = new File(exportDir, file.getName());
     if (exportFile.exists() && exportFile.isDirectory()) {
       exportFile.delete();
     }
-    if (File.copyTo(file, exportFile)) {
+    if (Files.copyTo(file, exportFile)) {
       return exportFile;
     }
     return null;
@@ -283,9 +297,9 @@ public class File {
    *
    * @return 城市代码文件
    */
-  public static java.io.File getCityCodeFile() {
-    java.io.File cityCodeFile;
-      cityCodeFile = new java.io.File(MAIN_DIRECTORY, "cityCode.json");
+  public static File getCityCodeFile() {
+    File cityCodeFile;
+      cityCodeFile = new File(MAIN_DIRECTORY, "cityCode.json");
       if (cityCodeFile.exists() && cityCodeFile.isDirectory()) {
         cityCodeFile.delete();
       }
@@ -298,8 +312,8 @@ public class File {
    * @param logFileName 日志文件的名称
    * @return 日志文件的File对象
    */
-  private static java.io.File ensureLogFile(String logFileName) {
-    java.io.File logFile = new java.io.File(File.LOG_DIRECTORY, logFileName);
+  private static File ensureLogFile(String logFileName) {
+    File logFile = new File(Files.LOG_DIRECTORY, logFileName);
     if (logFile.exists() && logFile.isDirectory()) {
       logFile.delete();
     }
@@ -313,39 +327,39 @@ public class File {
     return logFile;
   }
 
-  public static java.io.File getRuntimeLogFile() {
+  public static File getRuntimeLogFile() {
     return ensureLogFile(Log.getLogFileName("runtime"));
   }
 
-  public static java.io.File getRecordLogFile() {
+  public static File getRecordLogFile() {
     return ensureLogFile(Log.getLogFileName("record"));
   }
 
-  public static java.io.File getSystemLogFile() {
+  public static File getSystemLogFile() {
     return ensureLogFile(Log.getLogFileName("system"));
   }
 
-  public static java.io.File getDebugLogFile() {
+  public static File getDebugLogFile() {
     return ensureLogFile(Log.getLogFileName("debug"));
   }
 
-  public static java.io.File getCaptureLogFile() {
+  public static File getCaptureLogFile() {
     return ensureLogFile(Log.getLogFileName("capture"));
   }
 
-  public static java.io.File getForestLogFile() {
+  public static File getForestLogFile() {
     return ensureLogFile(Log.getLogFileName("forest"));
   }
 
-  public static java.io.File getFarmLogFile() {
+  public static File getFarmLogFile() {
     return ensureLogFile(Log.getLogFileName("farm"));
   }
 
-  public static java.io.File getOtherLogFile() {
+  public static File getOtherLogFile() {
     return ensureLogFile(Log.getLogFileName("other"));
   }
 
-  public static java.io.File getErrorLogFile() {
+  public static File getErrorLogFile() {
     return ensureLogFile(Log.getLogFileName("error"));
   }
 
@@ -355,9 +369,9 @@ public class File {
     String today = TimeUtil.getFormatDate();
     String yesterday = TimeUtil.getFormatDate(-1, "yyyy-MM-dd");
     // 获取日志目录下的所有文件
-    java.io.File[] files = LOG_DIRECTORY.listFiles();
+    File[] files = LOG_DIRECTORY.listFiles();
     if (files == null)return;
-    for (java.io.File file : files) {
+    for (File file : files) {
       String name = file.getName();
       if (name.endsWith(today + ".log") && file.length() < 31457280) { // 调整文件大小至30M重置
         continue;
@@ -371,7 +385,7 @@ public class File {
           // 获取当前时间的格式化字符串(不再自动删除日志,而是记录日志文件名)
           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd.HH.mm.ss", Locale.getDefault());
           String now = LocalDateTime.now().format(formatter);
-          java.io.File newFile = new java.io.File(file.getParent(), name.replace(".log", "-" + now + ".log.bak"));
+          File newFile = new File(file.getParent(), name.replace(".log", "-" + now + ".log.bak"));
           if (file.renameTo(newFile)) {
             Log.runtime(TAG, "👌 日志文件备份成功：" + file.getName() + " -> " + newFile.getName());
           } else {
@@ -405,7 +419,7 @@ public class File {
    * @param f 要读取的文件
    * @return 文件内容，如果读取失败或没有权限，返回空字符串
    */
-  public static String readFromFile(java.io.File f) {
+  public static String readFromFile(File f) {
     // 检查文件是否存在
     if (!f.exists()) {
       return "";
@@ -444,7 +458,7 @@ public class File {
    * @param f 目标文件
    * @return 写入是否成功
    */
-  public static boolean write2File(String s, java.io.File f) {
+  public static boolean write2File(String s, File f) {
     // 文件已存在，检查是否有写入权限
     if (f.exists()) {
       if (!f.canWrite()) {
@@ -486,7 +500,7 @@ public class File {
    * @param f 目标文件
    * @return 追加是否成功
    */
-  public static boolean append2File(String s, java.io.File f) {
+  public static boolean append2File(String s, File f) {
     // 文件已存在，检查是否有写入权限
     if (f.exists() && !f.canWrite()) {
       //      Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
@@ -518,12 +532,12 @@ public class File {
    * @param dest 目标文件
    * @return 如果复制成功返回 true，否则返回 false
    */
-  public static boolean copyTo(java.io.File source, java.io.File dest) {
+  public static boolean copyTo(File source, File dest) {
     // 使用 try-with-resources 来自动管理 FileInputStream 和 FileOutputStream 以及 FileChannel 的关闭
     try (FileInputStream fileInputStream = new FileInputStream(source);
-        FileOutputStream fileOutputStream = new FileOutputStream(createFile(dest));
-        FileChannel inputChannel = fileInputStream.getChannel();
-        FileChannel outputChannel = fileOutputStream.getChannel()) {
+         FileOutputStream fileOutputStream = new FileOutputStream(createFile(dest));
+         FileChannel inputChannel = fileInputStream.getChannel();
+         FileChannel outputChannel = fileOutputStream.getChannel()) {
       // 将源文件的内容传输到目标文件
       outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
       return true; // 复制成功
@@ -587,7 +601,7 @@ public class File {
    * @param file 需要创建的文件对象
    * @return 创建成功返回文件对象；如果创建失败或发生异常，返回 null
    */
-  public static java.io.File createFile(java.io.File file) {
+  public static File createFile(File file) {
     // 如果文件已存在且是目录，则先删除该目录
     if (file.exists() && file.isDirectory()) {
       // 如果删除目录失败，返回 null
@@ -597,7 +611,7 @@ public class File {
     if (!file.exists()) {
       try {
         // 获取父目录文件对象
-        java.io.File parentFile = file.getParentFile();
+        File parentFile = file.getParentFile();
         if (parentFile != null) {
           // 如果父目录不存在，则创建父目录
           boolean ignore = parentFile.mkdirs();
@@ -615,7 +629,7 @@ public class File {
     return file;
   }
 
-  public static java.io.File createDirectory(java.io.File file) {
+  public static File createDirectory(File file) {
     if (file.exists() && file.isFile()) {
       if (!file.delete()) {
         return null;
@@ -640,7 +654,7 @@ public class File {
    * @param file 文件
    * @return 是否清空成功
    */
-  public static Boolean clearFile(java.io.File file) {
+  public static Boolean clearFile(File file) {
     // 检查文件是否存在
     if (file.exists()) {
       FileWriter fileWriter = null;
@@ -675,7 +689,7 @@ public class File {
    * @param file 要删除的文件或目录
    * @return 如果删除成功返回 true，失败返回 false
    */
-  public static Boolean delFile(java.io.File file) {
+  public static Boolean delFile(File file) {
     // 如果文件或目录不存在，则返回删除失败
     if (!file.exists()) return false;
 
@@ -683,13 +697,13 @@ public class File {
     if (file.isFile()) return file.delete();
 
     // 如果是目录，获取目录下的所有文件和子目录
-    java.io.File[] files = file.listFiles();
+    File[] files = file.listFiles();
 
     // 如果目录为空或无法列出文件，尝试删除目录
     if (files == null) return file.delete();
 
     // 遍历所有文件和子目录，递归调用 deleteFile 删除
-    for (java.io.File innerFile : files) {
+    for (File innerFile : files) {
       // 如果递归删除失败，返回 false
       if (!delFile(innerFile)) return false;
     }

@@ -2,7 +2,7 @@ package fansirsqi.xposed.sesame.util.Maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.robv.android.xposed.XposedHelpers;
-import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
@@ -214,7 +214,7 @@ public class UserMap {
     public synchronized static void load(String userId) {
         userMap.clear();
         try {
-            String body = File.readFromFile(File.getFriendIdMapFile(userId));
+            String body = Files.readFromFile(Files.getFriendIdMapFile(userId));
             if (!body.isEmpty()) {
                 Map<String, UserEntity.UserDto> dtoMap = JsonUtil.parseObject(body, new TypeReference<Map<String, UserEntity.UserDto>>() {});
                 for (UserEntity.UserDto dto : dtoMap.values()) {
@@ -241,7 +241,7 @@ public class UserMap {
      * @return 保存结果
      */
     public synchronized static boolean save(String userId) {
-        return File.write2File(JsonUtil.toJsonString(userMap), File.getFriendIdMapFile(userId));
+        return Files.write2File(JsonUtil.toJsonString(userMap), Files.getFriendIdMapFile(userId));
     }
 
     /**
@@ -252,7 +252,7 @@ public class UserMap {
     public synchronized static void loadSelf(String userId) {
         userMap.clear();
         try {
-            String body = File.readFromFile(File.getSelfIdFile(userId));
+            String body = Files.readFromFile(Files.getSelfIdFile(userId));
             if (!body.isEmpty()) {
                 UserEntity.UserDto dto = JsonUtil.parseObject(body, new TypeReference<UserEntity.UserDto>() {});
                 userMap.put(dto.getUserId(), dto.toEntity());
@@ -269,7 +269,7 @@ public class UserMap {
      * @return 保存结果
      */
     public synchronized static boolean saveSelf(UserEntity userEntity) {
-        return File.write2File(JsonUtil.toJsonString(userEntity), File.getSelfIdFile(userEntity.getUserId()));
+        return Files.write2File(JsonUtil.toJsonString(userEntity), Files.getSelfIdFile(userEntity.getUserId()));
     }
 
 }

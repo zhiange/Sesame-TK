@@ -281,7 +281,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                       Log.record("设置定时执行:" + execAtTime);
                                       // 执行延时操作
                                       execDelayedHandler(ChronoUnit.MILLIS.between(lastExecTimeDateTime, execAtTimeDateTime));
-                                      File.clearLog();
+                                      Files.clearLog();
                                       return;
                                     }
                                   }
@@ -292,7 +292,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               }
 
                               execDelayedHandler(checkInterval);
-                              File.clearLog();
+                              Files.clearLog();
                             } catch (Exception e) {
                               Log.record("执行异常:");
                               Log.printStackTrace(e);

@@ -115,7 +115,7 @@ public class AntOrchard extends ModelTask {
   private String getWua() {
     if (wuaList == null) {
       try {
-        String content = File.readFromFile(File.getWuaFile());
+        String content = Files.readFromFile(Files.getWuaFile());
         wuaList = content.split("\n");
       } catch (Throwable ignored) {
         wuaList = new String[0];

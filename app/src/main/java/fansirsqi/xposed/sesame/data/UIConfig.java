@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Data;
-import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 
 /**
@@ -34,7 +34,7 @@ public class UIConfig {
      */
     public static Boolean save() {
         Log.record("保存UI配置");
-        return File.setUIConfigFile(toSaveStr());
+        return Files.setUIConfigFile(toSaveStr());
     }
 
     /**
@@ -43,11 +43,11 @@ public class UIConfig {
      * @return 加载后的 UIConfig 实例
      */
     public static synchronized UIConfig load() {
-        java.io.File uiConfigFile = File.getUIConfigFile();
+        java.io.File uiConfigFile = Files.getUIConfigFile();
         try {
             if (uiConfigFile.exists()) {
                 Log.runtime("加载UI配置");
-                String json = File.readFromFile(uiConfigFile);
+                String json = Files.readFromFile(uiConfigFile);
                 // 使用 Jackson 将读取的 JSON 数据更新到 INSTANCE 中
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
 
@@ -56,14 +56,14 @@ public class UIConfig {
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "格式化UI配置");
                     Log.system(TAG, "格式化UI配置");
-                    File.write2File(formatted, uiConfigFile);
+                    Files.write2File(formatted, uiConfigFile);
                 }
             } else {
                 unload();  // 如果文件不存在，卸载当前配置
                 Log.runtime(TAG, "初始UI配置");
                 Log.system(TAG, "初始UI配置");
                 // 保存默认配置到文件
-                File.write2File(toSaveStr(), uiConfigFile);
+                Files.write2File(toSaveStr(), uiConfigFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -71,7 +71,7 @@ public class UIConfig {
             Log.system(TAG, "重置UI配置");
             try {
                 unload();  // 出现异常时卸载当前配置
-                File.write2File(toSaveStr(), uiConfigFile);  // 保存默认配置
+                Files.write2File(toSaveStr(), uiConfigFile);  // 保存默认配置
             } catch (Exception e) {
                 Log.printStackTrace(TAG, e);
             }

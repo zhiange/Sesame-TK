@@ -2,7 +2,7 @@ package fansirsqi.xposed.sesame.data;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
@@ -53,7 +53,7 @@ public class RuntimeInfo {
      */
     private RuntimeInfo() {
         userId = UserMap.getCurrentUid();
-        String content = File.readFromFile(File.runtimeInfoFile(userId));
+        String content = Files.readFromFile(Files.runtimeInfoFile(userId));
 
         // 如果文件读取成功，则解析 JSON 数据，否则初始化为空的 JSON 对象
         try {
@@ -82,7 +82,7 @@ public class RuntimeInfo {
      * 将运行时信息保存到文件中。
      */
     public void save() {
-        File.write2File(joAll.toString(), File.runtimeInfoFile(userId));
+        Files.write2File(joAll.toString(), Files.runtimeInfoFile(userId));
     }
 
     /**

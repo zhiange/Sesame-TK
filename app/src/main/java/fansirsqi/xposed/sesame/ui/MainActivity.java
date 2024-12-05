@@ -70,7 +70,7 @@ public class MainActivity extends BaseActivity {
           v -> {
             // 当视图被长按时执行的操作
             if (v.getId() == R.id.main_image) {
-              String data = "file://" + File.getDebugLogFile().getAbsolutePath();
+              String data = "file://" + Files.getDebugLogFile().getAbsolutePath();
               Intent it = new Intent(MainActivity.this, HtmlViewerActivity.class);
               it.setData(Uri.parse(data));
               startActivity(it);
@@ -202,7 +202,7 @@ public class MainActivity extends BaseActivity {
       try {
         List<String> userNameList = new ArrayList<>();
         List<UserEntity> userEntityList = new ArrayList<>();
-        java.io.File[] configFiles = File.CONFIG_DIRECTORY.listFiles();
+        java.io.File[] configFiles = Files.CONFIG_DIRECTORY.listFiles();
         if (configFiles != null) {
           for (java.io.File configDir : configFiles) {
             if (configDir.isDirectory()) {
@@ -254,15 +254,15 @@ public class MainActivity extends BaseActivity {
     String data = "file://";
     switch (v.getId()) {
       case R.id.btn_forest_log:
-        data += File.getForestLogFile().getAbsolutePath();
+        data += Files.getForestLogFile().getAbsolutePath();
         break;
 
       case R.id.btn_farm_log:
-        data += File.getFarmLogFile().getAbsolutePath();
+        data += Files.getFarmLogFile().getAbsolutePath();
         break;
 
       case R.id.btn_all_log:
-        data += File.getRecordLogFile().getAbsolutePath();
+        data += Files.getRecordLogFile().getAbsolutePath();
         break;
       case R.id.btn_github:
         //   欢迎自己打包 欢迎大佬pr
@@ -319,7 +319,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 2:
         String errorData = "file://";
-        errorData += File.getErrorLogFile().getAbsolutePath();
+        errorData += Files.getErrorLogFile().getAbsolutePath();
         Intent errorIt = new Intent(this, HtmlViewerActivity.class);
         errorIt.putExtra("nextLine", false);
         errorIt.putExtra("canClear", true);
@@ -328,7 +328,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 3:
         String otherData = "file://";
-        otherData += File.getOtherLogFile().getAbsolutePath();
+        otherData += Files.getOtherLogFile().getAbsolutePath();
         Intent otherIt = new Intent(this, HtmlViewerActivity.class);
         otherIt.putExtra("nextLine", false);
         otherIt.putExtra("canClear", true);
@@ -337,7 +337,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 4:
         String allData = "file://";
-        allData += File.getRuntimeLogFile().getAbsolutePath();
+        allData += Files.getRuntimeLogFile().getAbsolutePath();
         Intent allIt = new Intent(this, HtmlViewerActivity.class);
         allIt.putExtra("nextLine", false);
         allIt.putExtra("canClear", true);
@@ -345,20 +345,20 @@ public class MainActivity extends BaseActivity {
         startActivity(allIt);
         break;
       case 5:
-        java.io.File statisticsFile = File.exportFile(File.getStatisticsFile());
+        java.io.File statisticsFile = Files.exportFile(Files.getStatisticsFile());
         if (statisticsFile != null) {
           ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
       case 6:
-        if (File.copyTo(File.getExportedStatisticsFile(), File.getStatisticsFile())) {
+        if (Files.copyTo(Files.getExportedStatisticsFile(), Files.getStatisticsFile())) {
           tvStatistics.setText(StatisticsUtil.getText());
           ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
       case 7:
         String captureData = "file://";
-        captureData += File.getCaptureLogFile().getAbsolutePath();
+        captureData += Files.getCaptureLogFile().getAbsolutePath();
         Intent debugIt = new Intent(this, HtmlViewerActivity.class);
         debugIt.setData(Uri.parse(captureData));
         debugIt.putExtra("canClear", true);

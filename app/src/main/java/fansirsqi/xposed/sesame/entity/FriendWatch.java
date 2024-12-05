@@ -85,7 +85,7 @@ public class FriendWatch extends IdAndName {
      */
     public static synchronized void save() {
         try {
-            File.write2File(joFriendWatch.toString(), File.getFriendWatchFile());
+            Files.write2File(joFriendWatch.toString(), Files.getFriendWatchFile());
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
             Log.printStackTrace(TAG, e);
@@ -96,7 +96,7 @@ public class FriendWatch extends IdAndName {
      * 更新每日统计数据，如果需要更新周数据则进行重置。
      */
     public static void updateDay() {
-        if (!needUpdateAll(File.getFriendWatchFile().lastModified())) {
+        if (!needUpdateAll(Files.getFriendWatchFile().lastModified())) {
             return;
         }
         try {
@@ -125,7 +125,7 @@ public class FriendWatch extends IdAndName {
      */
     public static synchronized Boolean load() {
         try {
-            String strFriendWatch = File.readFromFile(File.getFriendWatchFile());
+            String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile());
             joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
             return true;
         } catch (JSONException e) {
@@ -167,7 +167,7 @@ public class FriendWatch extends IdAndName {
     public static List<FriendWatch> getList() {
         ArrayList<FriendWatch> list = new ArrayList<>();
         try {
-            String strFriendWatch = File.readFromFile(File.getFriendWatchFile());
+            String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile());
             JSONObject joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
 
             Iterator<String> ids = joFriendWatch.keys();
