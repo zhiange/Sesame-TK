@@ -212,15 +212,29 @@ public class HtmlViewerActivity extends BaseActivity {
     if (uri != null) {
       String scheme = uri.getScheme();
       if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
+        // HTTP/HTTPS 链接直接打开
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(intent);
       } else if ("file".equalsIgnoreCase(scheme)) {
-        ToastUtil.makeText(this, "该文件不支持用浏览器打开", Toast.LENGTH_SHORT).show();
+        // 将 file:// 转换为浏览器兼容的 file:///
+        String filePath = uri.getPath();
+        if (filePath != null) {
+          Uri fileUri = Uri.parse("file://" + filePath);
+          Intent intent = new Intent(Intent.ACTION_VIEW, fileUri);
+          intent.addCategory(Intent.CATEGORY_BROWSABLE);
+          intent.setDataAndType(fileUri, "text/html"); // 指定 MIME 类型为 HTML（可根据需求调整）
+          startActivity(intent);
+        } else {
+          ToastUtil.makeText(this, "无效的文件路径", Toast.LENGTH_SHORT).show();
+        }
       } else {
         ToastUtil.makeText(this, "不支持用浏览器打开", Toast.LENGTH_SHORT).show();
       }
+    } else {
+      ToastUtil.makeText(this, "URL 不能为空", Toast.LENGTH_SHORT).show();
     }
   }
+
 
   /** 复制当前 WebView 的 URL 到剪贴板 */
   private void copyUrlToClipboard() {
