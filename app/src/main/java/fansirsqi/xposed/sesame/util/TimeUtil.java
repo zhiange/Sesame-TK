@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -281,41 +284,47 @@ public class TimeUtil {
 
     /**
      * 获取给定天数偏移后的日期字符串表示，使用固定格式。
+     * 今天: getDateStr())<br/>
+     * 昨天: getDateStr(-1, "yyyy-MM-dd"))<br/>
+     * 明天: getDateStr(1, "yyyy-MM-dd"))<br/>
+     * 自定义 getDateStr(0, "dd/MM/yyyy"))<br/>
      *
      * @param plusDay 天数偏移量。
      * @param pattern 日期格式模板，例如 "yyyy-MM-dd"。
      * @return 格式化后的日期字符串。
      */
     public static String getDateStr(int plusDay, String pattern) {
-        Calendar c = Calendar.getInstance();
-        if (plusDay != 0) {
-            c.add(Calendar.DATE, plusDay);
+        LocalDate date = LocalDate.now();
+        if (plusDay != 0) date = date.plusDays(plusDay);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return date.format(formatter);
+    }
+
+
+    /**
+     * 获取当前的日期时间对象。
+     *
+     * @return 当前的 LocalDateTime 对象。
+     */
+    public static LocalDateTime getNow() {
+        return LocalDateTime.now();
+    }
+
+    /**
+     * 根据给定的时间字符串获取 LocalDateTime 对象。
+     *
+     * @param timeStr 时间字符串，格式为 "HH:mm"。
+     * @return LocalDateTime 对象。
+     */
+    public static LocalDateTime getTodayByTimeStr(String timeStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm"); // 根据实际格式调整
+            LocalDate today = LocalDate.now();
+            return LocalDateTime.of(today, LocalDateTime.parse(timeStr, formatter).toLocalTime());
+        } catch (Exception e) {
+            LogUtil.printStackTrace(e);
+            return null;
         }
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        return sdf.format(c.getTime());
-    }
-
-    /**
-     * 获取今天的日历对象。
-     *
-     * @return 今天的日历对象。
-     */
-    public static Calendar getToday() {
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        return c;
-    }
-
-    /**
-     * 获取当前的日历对象。
-     *
-     * @return 当前的日历对象。
-     */
-    public static Calendar getNow() {
-        return Calendar.getInstance();
     }
 
     /**
