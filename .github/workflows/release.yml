@@ -107,10 +107,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            app/build/outputs/apk/normal/release/*.apk
-            app/build/outputs/apk/compatible/release/*.apk
-            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.*
-            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.*
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
           discussion_category_name: Announcements
           make_latest: true
 
