@@ -5,13 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.ModelFields;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import lombok.Data;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.util.*;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,16 +113,16 @@ public class Config {
      */
     public static Boolean isModify(String userId) {
         String json = null;
-        File configV2File;
+        java.io.File configV2File;
 
         if (StringUtil.isEmpty(userId)) {
-            configV2File = FileUtil.getDefaultConfigV2File();
+            configV2File = File.getDefaultConfigV2File();
         } else {
-            configV2File = FileUtil.getConfigV2File(userId);
+            configV2File = File.getConfigV2File(userId);
         }
 
         if (configV2File.exists()) {
-            json = FileUtil.readFromFile(configV2File);
+            json = File.readFromFile(configV2File);
         }
 
         if (json != null) {
@@ -151,9 +150,9 @@ public class Config {
 
         if (StringUtil.isEmpty(userId)) {
             userId = "默认";
-            success = FileUtil.setDefaultConfigV2File(json);
+            success = File.setDefaultConfigV2File(json);
         } else {
-            success = FileUtil.setConfigV2File(userId, json);
+            success = File.setConfigV2File(userId, json);
         }
 
         LogUtil.record("保存配置: " + userId);
@@ -169,14 +168,14 @@ public class Config {
     public static synchronized Config load(String userId) {
         LogUtil.runtime(TAG, "开始加载配置");
         String userName = "";
-        File configV2File = null;
+        java.io.File configV2File = null;
         try {
             if (StringUtil.isEmpty(userId)) {
-                configV2File = FileUtil.getDefaultConfigV2File();
+                configV2File = File.getDefaultConfigV2File();
                 userName = "默认";
             } else {
-                configV2File = FileUtil.getConfigV2File(userId);
-                UserEntity userEntity = UserIdMap.get(userId);
+                configV2File = File.getConfigV2File(userId);
+                UserEntity userEntity = UserMap.get(userId);
                 if (userEntity == null) {
                     userName = userId;
                 } else {
@@ -187,29 +186,29 @@ public class Config {
 
             // 如果配置文件存在，加载内容
             if (configV2File.exists()) {
-                String json = FileUtil.readFromFile(configV2File);
+                String json = File.readFromFile(configV2File);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                 String formatted = toSaveStr();
 
                 if (formatted != null && !formatted.equals(json)) {
                     LogUtil.runtime(TAG, "格式化配置: " + userName);
                     LogUtil.system(TAG, "格式化配置: " + userName);
-                    FileUtil.write2File(formatted, configV2File);
+                    File.write2File(formatted, configV2File);
                 }
             } else {
                 // 如果配置文件不存在，复制默认配置或初始化
-                File defaultConfigV2File = FileUtil.getDefaultConfigV2File();
+                java.io.File defaultConfigV2File = File.getDefaultConfigV2File();
                 if (defaultConfigV2File.exists()) {
-                    String json = FileUtil.readFromFile(defaultConfigV2File);
+                    String json = File.readFromFile(defaultConfigV2File);
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                     LogUtil.runtime(TAG, "复制新配置: " + userName);
                     LogUtil.system(TAG, "复制新配置: " + userName);
-                    FileUtil.write2File(json, configV2File);
+                    File.write2File(json, configV2File);
                 } else {
                     unload();
                     LogUtil.runtime(TAG, "初始新配置: " + userName);
                     LogUtil.system(TAG, "初始新配置: " + userName);
-                    FileUtil.write2File(toSaveStr(), configV2File);
+                    File.write2File(toSaveStr(), configV2File);
                 }
             }
         } catch (Throwable t) {
@@ -219,7 +218,7 @@ public class Config {
             try {
                 unload();
                 if (configV2File != null) {
-                    FileUtil.write2File(toSaveStr(), configV2File);
+                    File.write2File(toSaveStr(), configV2File);
                 }
             } catch (Exception e) {
                 LogUtil.printStackTrace(TAG, t);

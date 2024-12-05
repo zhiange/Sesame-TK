@@ -15,7 +15,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
 import fansirsqi.xposed.sesame.util.LogUtil;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
@@ -174,7 +174,7 @@ public class AntOcean extends ModelTask {
                                 JSONObject retBubble = retBubbles.optJSONObject(j);
                                 if (retBubble != null) {
                                     int collectedEnergy = retBubble.getInt("collectedEnergy");
-                                    LogUtil.forest("神奇海洋🐳收取[" + UserIdMap.getMaskName(userId) + "]的海洋能量#"
+                                    LogUtil.forest("神奇海洋🐳收取[" + UserMap.getMaskName(userId) + "]的海洋能量#"
                                             + collectedEnergy + "g");
                                 }
                             }
@@ -198,7 +198,7 @@ public class AntOcean extends ModelTask {
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     JSONArray cleanRewardVOS = jo.getJSONArray("cleanRewardVOS");
                     checkReward(cleanRewardVOS);
-                    LogUtil.forest("神奇海洋🐳[清理:" + UserIdMap.getMaskName(userId) + "海域]");
+                    LogUtil.forest("神奇海洋🐳[清理:" + UserMap.getMaskName(userId) + "海域]");
                 } else {
                     LogUtil.runtime(TAG, jo.getString("resultDesc"));
                 }
@@ -459,7 +459,7 @@ public class AntOcean extends ModelTask {
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 s = AntOceanRpcCall.cleanFriendOcean(userId);
                 jo = new JSONObject(s);
-                LogUtil.forest("神奇海洋🐳[帮助:" + UserIdMap.getMaskName
+                LogUtil.forest("神奇海洋🐳[帮助:" + UserMap.getMaskName
                         (userId) + "清理海域]");
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     JSONArray cleanRewardVOS = jo.getJSONArray("cleanRewardVOS");

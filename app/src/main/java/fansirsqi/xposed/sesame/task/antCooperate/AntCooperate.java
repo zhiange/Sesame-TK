@@ -10,7 +10,8 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.CooperateUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.LinkedHashMap;
 
@@ -66,15 +67,15 @@ public class AntCooperate extends ModelTask {
                         }
                         String name = jo.getString("name");
                         int waterDayLimit = jo.getInt("waterDayLimit");
-                        CooperationIdMapUtil.add(cooperationId, name);
-                        if (!StatusUtil.canCooperateWaterToday(UserIdMap.getCurrentUid(), cooperationId)) {
+                        CooperateMap.add(cooperationId, name);
+                        if (!StatusUtil.canCooperateWaterToday(UserMap.getCurrentUid(), cooperationId)) {
                             continue;
                         }
                         Integer num = cooperateWaterList.getValue().get(cooperationId);
                         if (num != null) {
                             Integer limitNum = cooperateWaterTotalLimitList.getValue().get(cooperationId);
                             if (limitNum != null) {
-                                num = calculatedWaterNum(UserIdMap.getCurrentUid(), cooperationId, num, limitNum);
+                                num = calculatedWaterNum(UserMap.getCurrentUid(), cooperationId, num, limitNum);
                             }
                             if (num > waterDayLimit) {
                                 num = waterDayLimit;
@@ -83,7 +84,7 @@ public class AntCooperate extends ModelTask {
                                 num = userCurrentEnergy;
                             }
                             if (num > 0) {
-                                cooperateWater(UserIdMap.getCurrentUid(), cooperationId, num, name);
+                                cooperateWater(UserMap.getCurrentUid(), cooperationId, num, name);
                             }
                         }
                     }
@@ -95,7 +96,7 @@ public class AntCooperate extends ModelTask {
             LogUtil.runtime(TAG, "start.run err:");
             LogUtil.printStackTrace(TAG, t);
         }
-        CooperationIdMapUtil.save(UserIdMap.getCurrentUid());
+        CooperateMap.save(UserMap.getCurrentUid());
     }
 
     private static void cooperateWater(String uid, String coopId, int count, String name) {
@@ -104,7 +105,7 @@ public class AntCooperate extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 LogUtil.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
-                StatusUtil.cooperateWaterToday(UserIdMap.getCurrentUid(), coopId);
+                StatusUtil.cooperateWaterToday(UserMap.getCurrentUid(), coopId);
             } else {
                 LogUtil.runtime(TAG, jo.getString("resultDesc"));
             }

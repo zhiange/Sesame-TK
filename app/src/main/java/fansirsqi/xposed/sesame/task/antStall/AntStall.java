@@ -14,7 +14,7 @@ import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.readingDada.ReadingDada;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.*;
 
@@ -199,7 +199,7 @@ public class AntStall extends ModelTask {
                 s = AntStallRpcCall.shopSendBack(seatId);
                 jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪请走[" + UserIdMap.getMaskName(shopUserId) + "]的小摊"
+                    LogUtil.farm("蚂蚁新村⛪请走[" + UserMap.getMaskName(shopUserId) + "]的小摊"
                             + (amount > 0 ? "获得金币" + amount : ""));
                 } else {
                     LogUtil.record("sendBack err:" + " " + s);
@@ -236,7 +236,7 @@ public class AntStall extends ModelTask {
                         s = AntStallRpcCall.oneKeyInviteOpenShop(friendUserId, seatId);
                         jo = new JSONObject(s);
                         if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                            LogUtil.farm("蚂蚁新村⛪邀请[" + UserIdMap.getMaskName(friendUserId) + "]开店成功");
+                            LogUtil.farm("蚂蚁新村⛪邀请[" + UserMap.getMaskName(friendUserId) + "]开店成功");
                             return;
                         }
                     }
@@ -441,7 +441,7 @@ public class AntStall extends ModelTask {
         try {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.optString("resultCode"))) {
-                LogUtil.farm("蚂蚁新村⛪在[" + UserIdMap.getMaskName(userId) + "]家摆摊");
+                LogUtil.farm("蚂蚁新村⛪在[" + UserMap.getMaskName(userId) + "]家摆摊");
             }
         } catch (Throwable t) {
             LogUtil.runtime(TAG, "openShop err:");
@@ -490,7 +490,7 @@ public class AntStall extends ModelTask {
                 s = AntStallRpcCall.shopClose(shopId);
                 jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪收取在[" + UserIdMap.getMaskName(userId) + "]的摊位获得" + income.getString("amount"));
+                    LogUtil.farm("蚂蚁新村⛪收取在[" + UserMap.getMaskName(userId) + "]的摊位获得" + income.getString("amount"));
                 } else {
                     LogUtil.record("shopClose err:" + " " + s);
                 }
@@ -693,7 +693,7 @@ public class AntStall extends ModelTask {
                 }
                 jo = new JSONObject(AntStallRpcCall.friendInviteRegister(userId));
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    LogUtil.farm("蚂蚁新村⛪邀请好友[" + UserIdMap.getMaskName(userId) + "]#开通新村");
+                    LogUtil.farm("蚂蚁新村⛪邀请好友[" + UserMap.getMaskName(userId) + "]#开通新村");
                     return true;
                 } else {
                     LogUtil.record("friendInviteRegister err:" + " " + jo);
@@ -738,7 +738,7 @@ public class AntStall extends ModelTask {
                 String str = AntStallRpcCall.achieveBeShareP2P(shareId);
                 JSONObject jsonObject = new JSONObject(str);
                 Thread.sleep(5000);
-                String name = UserIdMap.getMaskName(uid);
+                String name = UserMap.getMaskName(uid);
                 if (!jsonObject.optBoolean("success")) {
                     String code = jsonObject.getString("code");
                     if ("600000028".equals(code)) {
@@ -1019,7 +1019,7 @@ public class AntStall extends ModelTask {
                                 LogUtil.runtime(TAG, "pasteTicket.ticket err:" + jo.optString("resultDesc"));
                                 return;
                             }
-                            LogUtil.farm("蚂蚁新村🚫在[" + UserIdMap.getMaskName(friendId) + "]贴罚单");
+                            LogUtil.farm("蚂蚁新村🚫在[" + UserMap.getMaskName(friendId) + "]贴罚单");
                         } finally {
                             try {
                                 Thread.sleep(1000);

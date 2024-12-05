@@ -12,7 +12,7 @@ import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.util.LogUtil;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 import java.util.LinkedHashSet;
@@ -142,7 +142,7 @@ public class AntDodo extends ModelTask {
                             LogUtil.forest("神奇物种🦕[" + ecosystem + "]#" + name);
                             if (!set.isEmpty()) {
                                 for (String userId : set) {
-                                    if (!UserIdMap.getCurrentUid().equals(userId)) {
+                                    if (!UserMap.getCurrentUid().equals(userId)) {
                                         int fantasticStarQuantity = animal.optInt("fantasticStarQuantity", 0);
                                         if (fantasticStarQuantity == 3) {
                                             sendCard(animal, userId);
@@ -158,7 +158,7 @@ public class AntDodo extends ModelTask {
                 }
                 if (!set.isEmpty()) {
                     for (String userId : set) {
-                        if (!UserIdMap.getCurrentUid().equals(userId)) {
+                        if (!UserMap.getCurrentUid().equals(userId)) {
                             sendAntDodoCard(bookId, userId);
                             break;
                         }
@@ -282,7 +282,7 @@ public class AntDodo extends ModelTask {
                             LogUtil.forest("使用道具🎭[" + propName + "]#" + ecosystem + "-" + name);
                             Set<String> map = sendFriendCard.getValue();
                             for (String userId : map) {
-                                if (!UserIdMap.getCurrentUid().equals(userId)) {
+                                if (!UserMap.getCurrentUid().equals(userId)) {
                                     int fantasticStarQuantity = animal.optInt("fantasticStarQuantity", 0);
                                     if (fantasticStarQuantity == 3) {
                                         sendCard(animal, userId);
@@ -362,7 +362,7 @@ public class AntDodo extends ModelTask {
             String name = animal.getString("name");
             JSONObject jo = new JSONObject(AntDodoRpcCall.social(animalId, targetUser));
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                LogUtil.forest("赠送卡片🦕[" + UserIdMap.getMaskName(targetUser) + "]#" + ecosystem + "-" + name);
+                LogUtil.forest("赠送卡片🦕[" + UserMap.getMaskName(targetUser) + "]#" + ecosystem + "-" + name);
             } else {
                 LogUtil.runtime(TAG, jo.getString("resultDesc"));
             }
@@ -407,7 +407,7 @@ public class AntDodo extends ModelTask {
                     if ("SUCCESS".equals(jo.getString("resultCode"))) {
                         String ecosystem = jo.getJSONObject("data").getJSONObject("animal").getString("ecosystem");
                         String name = jo.getJSONObject("data").getJSONObject("animal").getString("name");
-                        String userName = UserIdMap.getMaskName(useId);
+                        String userName = UserMap.getMaskName(useId);
                         LogUtil.forest("神奇物种🦕帮好友[" + userName + "]抽卡[" + ecosystem + "]#" + name);
                         count--;
                     } else {

@@ -10,7 +10,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.*;
 import org.json.JSONArray;
@@ -115,7 +115,7 @@ public class AntOrchard extends ModelTask {
   private String getWua() {
     if (wuaList == null) {
       try {
-        String content = FileUtil.readFromFile(FileUtil.getWuaFile());
+        String content = File.readFromFile(File.getWuaFile());
         wuaList = content.split("\n");
       } catch (Throwable ignored) {
         wuaList = new String[0];
@@ -416,7 +416,7 @@ public class AntOrchard extends ModelTask {
   /** 一键捉鸡除草 */
   private void batchHireAnimalRecommend() {
     try {
-      JSONObject jo = new JSONObject(AntOrchardRpcCall.batchHireAnimalRecommend(UserIdMap.getCurrentUid()));
+      JSONObject jo = new JSONObject(AntOrchardRpcCall.batchHireAnimalRecommend(UserMap.getCurrentUid()));
       if ("100".equals(jo.getString("resultCode"))) {
         JSONArray recommendGroupList = jo.optJSONArray("recommendGroupList");
         if (recommendGroupList != null && recommendGroupList.length() > 0) {
@@ -466,7 +466,7 @@ public class AntOrchard extends ModelTask {
         String str = AntOrchardRpcCall.achieveBeShareP2P(shareId);
         JSONObject jsonObject = new JSONObject(str);
         Thread.sleep(5000);
-        String name = UserIdMap.getMaskName(uid);
+        String name = UserMap.getMaskName(uid);
         if (!jsonObject.optBoolean("success")) {
           String code = jsonObject.getString("code");
           if ("600000027".equals(code)) {

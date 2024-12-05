@@ -42,7 +42,7 @@ public class LogUtil {
   private static Logger createLogger(String tag, String pattern) {
     return XLog.tag(tag)
             .printers(
-                    new FilePrinter.Builder(FileUtil.LOG_DIRECTORY.getPath())
+                    new FilePrinter.Builder(File.LOG_DIRECTORY.getPath())
                             .fileNameGenerator(new CustomDateFileNameGenerator(tag))
                             .backupStrategy(new NeverBackupStrategy())
                             .cleanStrategy(new NeverCleanStrategy())

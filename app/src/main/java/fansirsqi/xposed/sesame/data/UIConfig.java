@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import fansirsqi.xposed.sesame.util.LogUtil;
 import lombok.Data;
-import fansirsqi.xposed.sesame.util.FileUtil;
+import fansirsqi.xposed.sesame.util.File;
 import fansirsqi.xposed.sesame.util.JsonUtil;
-
-import java.io.File;
 
 /**
  * UI 配置类，用于管理应用的 UI 配置。
@@ -36,7 +34,7 @@ public class UIConfig {
      */
     public static Boolean save() {
         LogUtil.record("保存UI配置");
-        return FileUtil.setUIConfigFile(toSaveStr());
+        return File.setUIConfigFile(toSaveStr());
     }
 
     /**
@@ -45,11 +43,11 @@ public class UIConfig {
      * @return 加载后的 UIConfig 实例
      */
     public static synchronized UIConfig load() {
-        File uiConfigFile = FileUtil.getUIConfigFile();
+        java.io.File uiConfigFile = File.getUIConfigFile();
         try {
             if (uiConfigFile.exists()) {
                 LogUtil.runtime("加载UI配置");
-                String json = FileUtil.readFromFile(uiConfigFile);
+                String json = File.readFromFile(uiConfigFile);
                 // 使用 Jackson 将读取的 JSON 数据更新到 INSTANCE 中
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
 
@@ -58,14 +56,14 @@ public class UIConfig {
                 if (formatted != null && !formatted.equals(json)) {
                     LogUtil.runtime(TAG, "格式化UI配置");
                     LogUtil.system(TAG, "格式化UI配置");
-                    FileUtil.write2File(formatted, uiConfigFile);
+                    File.write2File(formatted, uiConfigFile);
                 }
             } else {
                 unload();  // 如果文件不存在，卸载当前配置
                 LogUtil.runtime(TAG, "初始UI配置");
                 LogUtil.system(TAG, "初始UI配置");
                 // 保存默认配置到文件
-                FileUtil.write2File(toSaveStr(), uiConfigFile);
+                File.write2File(toSaveStr(), uiConfigFile);
             }
         } catch (Throwable t) {
             LogUtil.printStackTrace(TAG, t);
@@ -73,7 +71,7 @@ public class UIConfig {
             LogUtil.system(TAG, "重置UI配置");
             try {
                 unload();  // 出现异常时卸载当前配置
-                FileUtil.write2File(toSaveStr(), uiConfigFile);  // 保存默认配置
+                File.write2File(toSaveStr(), uiConfigFile);  // 保存默认配置
             } catch (Exception e) {
                 LogUtil.printStackTrace(TAG, e);
             }

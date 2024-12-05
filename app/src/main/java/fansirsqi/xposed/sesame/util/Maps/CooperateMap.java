@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.util;
+package fansirsqi.xposed.sesame.util.Maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,12 +7,15 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import fansirsqi.xposed.sesame.util.File;
+import fansirsqi.xposed.sesame.util.LogUtil;
+
 /**
  * 合作ID映射工具类。
  * 提供了一个线程安全的ID映射，支持添加、删除、加载和保存ID映射。
  * 用于存储和检索与合作相关的ID映射信息。
  */
-public class CooperationIdMapUtil {
+public class CooperateMap {
 
     /**
      * 存储ID映射的并发HashMap。
@@ -56,7 +59,7 @@ public class CooperationIdMapUtil {
     public static synchronized void load(String userId) {
         idMap.clear();
         try {
-            String body = FileUtil.readFromFile(FileUtil.getCooperationIdMapFile(userId));
+            String body = File.readFromFile(File.getCooperationIdMapFile(userId));
             if (!body.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
@@ -76,7 +79,7 @@ public class CooperationIdMapUtil {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(idMap);
-            return FileUtil.write2File(json, FileUtil.getCooperationIdMapFile(userId));
+            return File.write2File(json, File.getCooperationIdMapFile(userId));
         } catch (Exception e) {
             LogUtil.printStackTrace(e);
             return false;

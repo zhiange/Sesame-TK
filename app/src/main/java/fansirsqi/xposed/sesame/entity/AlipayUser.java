@@ -1,7 +1,7 @@
 package fansirsqi.xposed.sesame.entity;
 
 import fansirsqi.xposed.sesame.util.LogUtil;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class AlipayUser extends IdAndName {
      */
     public static List<AlipayUser> getList(Filter filterFunc) {
         List<AlipayUser> list = new ArrayList<>();
-        Map<String, UserEntity> userIdMap = UserIdMap.getUserMap();
+        Map<String, UserEntity> userIdMap = UserMap.getUserMap();
         for (Map.Entry<String, UserEntity> entry : userIdMap.entrySet()) {
             UserEntity userEntity = entry.getValue();
             try {

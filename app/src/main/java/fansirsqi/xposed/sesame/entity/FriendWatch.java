@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.entity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -68,7 +68,7 @@ public class FriendWatch extends IdAndName {
             JSONObject joSingle = joFriendWatch.optJSONObject(id);
             if (joSingle == null) {
                 joSingle = new JSONObject();
-                joSingle.put("name", UserIdMap.getMaskName(id));
+                joSingle.put("name", UserMap.getMaskName(id));
                 joSingle.put("allGet", 0);
                 joSingle.put("startTime", TimeUtil.getDateStr());
                 joFriendWatch.put(id, joSingle);
@@ -85,7 +85,7 @@ public class FriendWatch extends IdAndName {
      */
     public static synchronized void save() {
         try {
-            FileUtil.write2File(joFriendWatch.toString(), FileUtil.getFriendWatchFile());
+            File.write2File(joFriendWatch.toString(), File.getFriendWatchFile());
         } catch (Exception e) {
             LogUtil.runtime(TAG, "friendWatch save err:");
             LogUtil.printStackTrace(TAG, e);
@@ -96,7 +96,7 @@ public class FriendWatch extends IdAndName {
      * 更新每日统计数据，如果需要更新周数据则进行重置。
      */
     public static void updateDay() {
-        if (!needUpdateAll(FileUtil.getFriendWatchFile().lastModified())) {
+        if (!needUpdateAll(File.getFriendWatchFile().lastModified())) {
             return;
         }
         try {
@@ -125,7 +125,7 @@ public class FriendWatch extends IdAndName {
      */
     public static synchronized Boolean load() {
         try {
-            String strFriendWatch = FileUtil.readFromFile(FileUtil.getFriendWatchFile());
+            String strFriendWatch = File.readFromFile(File.getFriendWatchFile());
             joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
             return true;
         } catch (JSONException e) {
@@ -167,7 +167,7 @@ public class FriendWatch extends IdAndName {
     public static List<FriendWatch> getList() {
         ArrayList<FriendWatch> list = new ArrayList<>();
         try {
-            String strFriendWatch = FileUtil.readFromFile(FileUtil.getFriendWatchFile());
+            String strFriendWatch = File.readFromFile(File.getFriendWatchFile());
             JSONObject joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
 
             Iterator<String> ids = joFriendWatch.keys();

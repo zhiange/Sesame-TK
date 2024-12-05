@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
@@ -158,7 +158,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                   }
                   return;
                 }
-                String currentUid = UserIdMap.getCurrentUid();
+                String currentUid = UserMap.getCurrentUid();
                 if (!targetUid.equals(currentUid)) {
                   if (currentUid != null) {
                     initHandler(true);
@@ -166,7 +166,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     Toast.show("用户已切换");
                     return;
                   }
-                  UserIdMap.initUser(targetUid);
+                  UserMap.initUser(targetUid);
                 }
                 if (offline) {
                   offline = false;
@@ -220,7 +220,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               }
                               updateDay();
                               String targetUid = getUserId();
-                              String currentUid = UserIdMap.getCurrentUid();
+                              String currentUid = UserMap.getCurrentUid();
                               if (targetUid == null || currentUid == null) {
                                 LogUtil.record("用户为空，放弃执行");
                                 reLogin();
@@ -273,7 +273,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         && nextExecTimeCalendar.compareTo(execAtTimeCalendar) > 0) {
                                       LogUtil.record("设置定时执行:" + execAtTime);
                                       execDelayedHandler(execAtTimeCalendar.getTimeInMillis() - lastExecTime);
-                                      FileUtil.clearLog();
+                                      File.clearLog();
                                       return;
                                     }
                                   }
@@ -284,7 +284,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               }
 
                               execDelayedHandler(checkInterval);
-                              FileUtil.clearLog();
+                              File.clearLog();
                             } catch (Exception e) {
                               LogUtil.record("执行异常:");
                               LogUtil.printStackTrace(e);
@@ -478,7 +478,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
               },
               2000);
         }
-        UserIdMap.initUser(userId);
+        UserMap.initUser(userId);
         Model.initAllModel();
         LogUtil.record("模块版本：" + modelVersion);
         LogUtil.record("开始加载");
@@ -620,7 +620,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
           RpcIntervalLimit.clearIntervalLimit();
           Config.unload();
           Model.destroyAllModel();
-          UserIdMap.unload();
+          UserMap.unload();
         }
         if (rpcResponseUnhook != null) {
           try {
@@ -891,7 +891,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         switch (action) {
           case "com.eg.android.AlipayGphone.sesame.restart":
             String userId = intent.getStringExtra("userId");
-            if (StringUtil.isEmpty(userId) || Objects.equals(UserIdMap.getCurrentUid(), userId)) {
+            if (StringUtil.isEmpty(userId) || Objects.equals(UserMap.getCurrentUid(), userId)) {
               initHandler(true);
             }
             break;

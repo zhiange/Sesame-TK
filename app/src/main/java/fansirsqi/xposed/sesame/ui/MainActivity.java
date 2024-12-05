@@ -22,9 +22,8 @@ import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -71,7 +70,7 @@ public class MainActivity extends BaseActivity {
           v -> {
             // 当视图被长按时执行的操作
             if (v.getId() == R.id.main_image) {
-              String data = "file://" + FileUtil.getDebugLogFile().getAbsolutePath();
+              String data = "file://" + File.getDebugLogFile().getAbsolutePath();
               Intent it = new Intent(MainActivity.this, HtmlViewerActivity.class);
               it.setData(Uri.parse(data));
               startActivity(it);
@@ -203,13 +202,13 @@ public class MainActivity extends BaseActivity {
       try {
         List<String> userNameList = new ArrayList<>();
         List<UserEntity> userEntityList = new ArrayList<>();
-        File[] configFiles = FileUtil.CONFIG_DIRECTORY.listFiles();
+        java.io.File[] configFiles = File.CONFIG_DIRECTORY.listFiles();
         if (configFiles != null) {
-          for (File configDir : configFiles) {
+          for (java.io.File configDir : configFiles) {
             if (configDir.isDirectory()) {
               String userId = configDir.getName();
-              UserIdMap.loadSelf(userId);
-              UserEntity userEntity = UserIdMap.get(userId);
+              UserMap.loadSelf(userId);
+              UserEntity userEntity = UserMap.get(userId);
               String userName;
               if (userEntity == null) {
                 userName = userId;
@@ -255,15 +254,15 @@ public class MainActivity extends BaseActivity {
     String data = "file://";
     switch (v.getId()) {
       case R.id.btn_forest_log:
-        data += FileUtil.getForestLogFile().getAbsolutePath();
+        data += File.getForestLogFile().getAbsolutePath();
         break;
 
       case R.id.btn_farm_log:
-        data += FileUtil.getFarmLogFile().getAbsolutePath();
+        data += File.getFarmLogFile().getAbsolutePath();
         break;
 
       case R.id.btn_all_log:
-        data += FileUtil.getRecordLogFile().getAbsolutePath();
+        data += File.getRecordLogFile().getAbsolutePath();
         break;
       case R.id.btn_github:
         //   欢迎自己打包 欢迎大佬pr
@@ -320,7 +319,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 2:
         String errorData = "file://";
-        errorData += FileUtil.getErrorLogFile().getAbsolutePath();
+        errorData += File.getErrorLogFile().getAbsolutePath();
         Intent errorIt = new Intent(this, HtmlViewerActivity.class);
         errorIt.putExtra("nextLine", false);
         errorIt.putExtra("canClear", true);
@@ -329,7 +328,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 3:
         String otherData = "file://";
-        otherData += FileUtil.getOtherLogFile().getAbsolutePath();
+        otherData += File.getOtherLogFile().getAbsolutePath();
         Intent otherIt = new Intent(this, HtmlViewerActivity.class);
         otherIt.putExtra("nextLine", false);
         otherIt.putExtra("canClear", true);
@@ -338,7 +337,7 @@ public class MainActivity extends BaseActivity {
         break;
       case 4:
         String allData = "file://";
-        allData += FileUtil.getRuntimeLogFile().getAbsolutePath();
+        allData += File.getRuntimeLogFile().getAbsolutePath();
         Intent allIt = new Intent(this, HtmlViewerActivity.class);
         allIt.putExtra("nextLine", false);
         allIt.putExtra("canClear", true);
@@ -346,20 +345,20 @@ public class MainActivity extends BaseActivity {
         startActivity(allIt);
         break;
       case 5:
-        File statisticsFile = FileUtil.exportFile(FileUtil.getStatisticsFile());
+        java.io.File statisticsFile = File.exportFile(File.getStatisticsFile());
         if (statisticsFile != null) {
           ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.getPath(), Toast.LENGTH_SHORT).show();
         }
         break;
       case 6:
-        if (FileUtil.copyTo(FileUtil.getExportedStatisticsFile(), FileUtil.getStatisticsFile())) {
+        if (File.copyTo(File.getExportedStatisticsFile(), File.getStatisticsFile())) {
           tvStatistics.setText(StatisticsUtil.getText());
           ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
         }
         break;
       case 7:
         String captureData = "file://";
-        captureData += FileUtil.getCaptureLogFile().getAbsolutePath();
+        captureData += File.getCaptureLogFile().getAbsolutePath();
         Intent debugIt = new Intent(this, HtmlViewerActivity.class);
         debugIt.setData(Uri.parse(captureData));
         debugIt.putExtra("canClear", true);

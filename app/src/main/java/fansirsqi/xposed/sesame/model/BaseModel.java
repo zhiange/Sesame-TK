@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.model;
 
+import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import lombok.Getter;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -129,7 +130,7 @@ public class BaseModel extends Model {
   public static void destroyData() {
     try {
       ReserveIdMapUtil.clear();
-      BeachIdMapUtil.clear();
+      BeachMap.clear();
     } catch (Exception e) {
       LogUtil.printStackTrace(e);
     }
@@ -194,7 +195,7 @@ public class BaseModel extends Model {
     }
   }
 
-  /** 初始化沙滩任务。通过调用 AntOceanRpc 接口查询养成列表，并将符合条件的任务加入 BeachIdMapUtil。 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL， 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachIdMapUtil 中。 */
+  /** 初始化沙滩任务。通过调用 AntOceanRpc 接口查询养成列表，并将符合条件的任务加入 BeachMap。 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL， 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachMap 中。 */
   private static void initBeach() {
     try {
       // 调用 AntOceanRpc 接口，查询养成列表信息
@@ -227,16 +228,16 @@ public class BaseModel extends Model {
               continue;
             }
 
-            // 将符合条件的项目添加到 BeachIdMapUtil
+            // 将符合条件的项目添加到 BeachMap
             String templateCode = item.getString("templateCode");
             String cultivationName = item.getString("cultivationName");
             int energy = item.getInt("energy");
-            BeachIdMapUtil.add(templateCode, cultivationName + "(" + energy + "g)");
+            BeachMap.add(templateCode, cultivationName + "(" + energy + "g)");
           }
         }
 
-        // 将所有筛选结果保存到 BeachIdMapUtil
-        BeachIdMapUtil.save();
+        // 将所有筛选结果保存到 BeachMap
+        BeachMap.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
         LogUtil.runtime(jsonResponse.optString("resultDesc", "未知错误"));
@@ -245,12 +246,12 @@ public class BaseModel extends Model {
       // 记录 JSON 解析过程中的异常
       LogUtil.runtime("JSON 解析错误：" + e.getMessage());
       LogUtil.printStackTrace(e);
-      BeachIdMapUtil.load(); // 若出现异常则加载保存的 BeachIdMapUtil 备份
+      BeachMap.load(); // 若出现异常则加载保存的 BeachMap 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
       LogUtil.runtime("初始化沙滩任务时出错：" + e.getMessage());
       LogUtil.printStackTrace(e);
-      BeachIdMapUtil.load(); // 加载保存的 BeachIdMapUtil 备份
+      BeachMap.load(); // 加载保存的 BeachMap 备份
     }
   }
 

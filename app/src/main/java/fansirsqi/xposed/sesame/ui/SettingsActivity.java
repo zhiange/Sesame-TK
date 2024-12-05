@@ -18,9 +18,10 @@ import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserIdMap;
+import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,11 +60,11 @@ public class SettingsActivity extends BaseActivity {
 
         // 初始化各种配置数据
         Model.initAllModel();
-        UserIdMap.setCurrentUserId(userId);
-        UserIdMap.load(userId);
-        CooperationIdMapUtil.load(userId);
+        UserMap.setCurrentUserId(userId);
+        UserMap.load(userId);
+        CooperateMap.load(userId);
         ReserveIdMapUtil.load();
-        BeachIdMapUtil.load();
+        BeachMap.load();
         Config.load(userId);
 
         // 设置语言和布局
@@ -172,13 +173,13 @@ public class SettingsActivity extends BaseActivity {
                         .setTitle("警告")
                         .setMessage("确认删除该配置？")
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
-                            File userConfigDirectoryFile;
+                            java.io.File userConfigDirectoryFile;
                             if (StringUtil.isEmpty(userId)) {
-                                userConfigDirectoryFile = FileUtil.getDefaultConfigV2File();
+                                userConfigDirectoryFile = File.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = FileUtil.getUserConfigDirectory(userId);
+                                userConfigDirectoryFile = File.getUserConfigDirectory(userId);
                             }
-                            if (FileUtil.delFile(userConfigDirectoryFile)) {
+                            if (File.delFile(userConfigDirectoryFile)) {
                                 Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
@@ -219,14 +220,14 @@ public class SettingsActivity extends BaseActivity {
             Uri uri = data.getData();
             if (uri != null) {
                 try {
-                    File configV2File;
+                    java.io.File configV2File;
                     if (StringUtil.isEmpty(userId)) {
-                        configV2File = FileUtil.getDefaultConfigV2File();
+                        configV2File = File.getDefaultConfigV2File();
                     } else {
-                        configV2File = FileUtil.getConfigV2File(userId);
+                        configV2File = File.getConfigV2File(userId);
                     }
                     FileInputStream inputStream = new FileInputStream(configV2File);
-                    if (FileUtil.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
+                    if (File.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
                         Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
@@ -241,14 +242,14 @@ public class SettingsActivity extends BaseActivity {
             Uri uri = data.getData();
             if (uri != null) {
                 try {
-                    File configV2File;
+                    java.io.File configV2File;
                     if (StringUtil.isEmpty(userId)) {
-                        configV2File = FileUtil.getDefaultConfigV2File();
+                        configV2File = File.getDefaultConfigV2File();
                     } else {
-                        configV2File = FileUtil.getConfigV2File(userId);
+                        configV2File = File.getConfigV2File(userId);
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (FileUtil.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
+                    if (File.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
                         Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                         if (!StringUtil.isEmpty(userId)) {
                             try {
@@ -288,8 +289,8 @@ public class SettingsActivity extends BaseActivity {
             }
         }
         if (!StringUtil.isEmpty(userId)) {
-            UserIdMap.save(userId);
-            CooperationIdMapUtil.save(userId);
+            UserMap.save(userId);
+            CooperateMap.save(userId);
         }
     }
 }
