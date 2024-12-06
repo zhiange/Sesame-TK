@@ -983,7 +983,7 @@ public class AntFarm extends ModelTask {
                         int awardCount = jo.optInt("awardCount");
                         String bizKey = jo.getString("bizKey");
                         if ("VIEW".equals(jo.optString("taskMode")) || bizKeyList.contains(bizKey)) {
-                            Log.debug(TAG+ ",doFarmDailyTask: " + title + " " + bizKey);
+//                            Log.debug(TAG+ ",doFarmDailyTask: " + title + " " + bizKey);
                             if (bizKey.equals("HEART_DONATION_ADVANCED_FOOD_V2")){
                                 continue; //为了本项目的长远发展，暂时屏蔽该任务
                             }else{

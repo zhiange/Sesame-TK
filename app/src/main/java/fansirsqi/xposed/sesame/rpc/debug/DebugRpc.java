@@ -127,11 +127,11 @@ public class DebugRpc {
                     tips = "可以合种-合种类型：" + coexchangeTypeIdList;
                 }
                 // 记录查询结果
-                Log.debug("新树上苗🌱[" + region + "-" + treeName + "]#" + currentBudget + "株-" + tips);
+                Log.record("新树上苗🌱[" + region + "-" + treeName + "]#" + currentBudget + "株-" + tips);
             } else {
                 // 如果RPC调用失败，记录错误描述和项目ID
                 // 注意：这里应该记录projectId而不是s（响应字符串）
-                Log.debug(jo.getString("resultDesc") + " projectId: " + projectId);
+                Log.record(jo.getString("resultDesc") + " projectId: " + projectId);
             }
         } catch (JSONException e) {
             // 处理JSON解析异常
@@ -211,10 +211,10 @@ public class DebugRpc {
                 // 获取区域信息
                 String region = exchangeableTree.getString("region");
                 // 记录树木查询结果
-                Log.debug("树苗查询🌱[" + region + "-" + treeName + "]#剩余:" + currentBudget);
+                Log.record("树苗查询🌱[" + region + "-" + treeName + "]#剩余:" + currentBudget);
             } else {
                 // 如果RPC调用失败，记录错误描述和项目ID
-                Log.debug(jo.getString("resultDesc") + " projectId: " + projectId);
+                Log.record(jo.getString("resultDesc") + " projectId: " + projectId);
             }
         } catch (JSONException e) {
             // 处理JSON解析异常
@@ -287,7 +287,7 @@ public class DebugRpc {
                 }
             } else {
                 // 如果RPC调用失败，记录错误信息
-                Log.debug(jo.getString("errorMsg") + s);
+                Log.record(jo.getString("errorMsg") + s);
             }
         } catch (JSONException e) {
             // 处理JSON解析异常

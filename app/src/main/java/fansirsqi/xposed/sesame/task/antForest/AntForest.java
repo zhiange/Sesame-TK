@@ -2514,7 +2514,7 @@ public class AntForest extends ModelTask {
       for (int i = 0; i < animalProps.length(); i++) {
         jo = animalProps.getJSONObject(i);
         if (bestAnimalProp == null || jo.getJSONObject("main").getInt("holdsNum") > bestAnimalProp.getJSONObject("main").getInt("holdsNum")) {
-          bestAnimalProp = jo; // 选择最大数量的伙伴
+          bestAnimalProp = jo; // 默认选择最大数量的伙伴
         }
       }
       // 派遣伙伴
