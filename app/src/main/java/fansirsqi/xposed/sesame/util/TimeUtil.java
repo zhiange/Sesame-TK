@@ -1,12 +1,12 @@
 package fansirsqi.xposed.sesame.util;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Locale;
@@ -212,15 +212,39 @@ public class TimeUtil {
   }
 
   public static LocalDateTime getLocalDateTimeByTimeStr(String timeStr) {
+    if (timeStr == null || timeStr.isEmpty()) {
+      return null;
+    }
+    int length = timeStr.length();
+    DateTimeFormatter formatter;
+    LocalTime localTime;
+
     try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH-mm-ss");
-      LocalTime localTime = LocalTime.parse(timeStr, formatter);
+      switch (length){
+        case 6:
+          formatter = DateTimeFormatter.ofPattern("HHmmss");
+          localTime = LocalTime.parse(timeStr, formatter);
+          break;
+        case 4:
+          formatter = DateTimeFormatter.ofPattern("HHmm");
+          localTime = LocalTime.parse(timeStr, formatter).withSecond(0).withNano(0);
+          break;
+        case 2:
+          formatter = DateTimeFormatter.ofPattern("HH");
+          localTime = LocalTime.parse(timeStr, formatter).withMinute(0).withSecond(0).withNano(0);
+          break;
+        default:
+          return null;
+      }
+      // 当前日期 + 解析的时间
       return LocalDateTime.now().toLocalDate().atTime(localTime);
-    } catch (Exception e) {
+    } catch (DateTimeParseException e) {
       Log.printStackTrace(e);
     }
+
     return null;
   }
+
 
   /**
    * 根据时间毫秒数和时间字符串获取日历对象。
@@ -380,6 +404,9 @@ public class TimeUtil {
    * @return 日期字符串，格式为 "dd日HH:mm:ss"。
    */
   public static String getCommonDate(Long timestamp) {
-    return new SimpleDateFormat("dd日HH:mm:ss").format(timestamp);
+    // 使用 DateTimeFormatter 和 java.time.Instant 来提高性能
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd日HH:mm:ss")
+            .withZone(ZoneId.systemDefault()); // 使用默认时区
+    return formatter.format(Instant.ofEpochMilli(timestamp)); // 转换时间戳为 Instant 对象
   }
 }
