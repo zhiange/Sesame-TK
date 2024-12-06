@@ -261,7 +261,7 @@ public class AntForest extends ModelTask {
     try {
       // 获取当前时间
       Log.record("执行开始-蚂蚁森林");
-      NotificationUtil.setStatusTextExec();
+      Notify.setStatusTextExec();
 
       taskCount.set(0);
       selfId = UserMap.getCurrentUid();
@@ -586,7 +586,7 @@ public class AntForest extends ModelTask {
       StatisticsUtil.save();
       FriendWatch.save();
       String str_totalCollected = "收:" + totalCollected + " 帮:" + totalHelpCollected;
-      NotificationUtil.updateLastExecText(str_totalCollected);
+      Notify.updateLastExecText(str_totalCollected);
     }
   }
 
@@ -1154,7 +1154,7 @@ public class AntForest extends ModelTask {
                 if (BaseModel.getWaitWhenException().getValue() > 0) {
                   long waitTime = System.currentTimeMillis() + BaseModel.getWaitWhenException().getValue();
                   RuntimeInfo.getInstance().put(RuntimeInfo.RuntimeInfoKey.ForestPauseTime, waitTime);
-                  NotificationUtil.updateStatusText("异常");
+                  Notify.updateStatusText("异常");
                   Log.record("触发异常,等待至" + TimeUtil.getCommonDate(waitTime));
                   return;
                 }
@@ -1263,7 +1263,7 @@ public class AntForest extends ModelTask {
           } finally {
             StatisticsUtil.save();
             String str_totalCollected = "收:" + totalCollected + " 帮:" + totalHelpCollected;
-            NotificationUtil.updateLastExecText(str_totalCollected);
+            Notify.updateLastExecText(str_totalCollected);
             notifyMain();
           }
         };

@@ -11,7 +11,7 @@ import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import lombok.Getter;
 
-public class NotificationUtil {
+public class Notify {
   @SuppressLint("StaticFieldLeak")
   public static Context context;
   private static final int NOTIFICATION_ID = 99;
@@ -26,8 +26,8 @@ public class NotificationUtil {
   @SuppressLint("ObsoleteSdkInt")//抑制SdkInt警告
   public static void start(Context context) {
     try {
-      NotificationUtil.context = context;
-      NotificationUtil.stop();
+      Notify.context = context;
+      Notify.stop();
       titleText = "🚀 启动中";
       contentText = "🔔 暂无消息";
       mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

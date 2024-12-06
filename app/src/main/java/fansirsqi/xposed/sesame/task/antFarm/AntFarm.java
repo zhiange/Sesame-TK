@@ -271,9 +271,8 @@ public class AntFarm extends ModelTask {
             }
 
             if (recordFarmGame.getValue()) {
-                long currentTimeMillis = System.currentTimeMillis();
                 for (String time : farmGameTime.getValue()) {
-                    if (TimeUtil.checkInTimeRange(currentTimeMillis, time)) {
+                    if (TimeUtil.checkNowInTimeRange(time)) {
                         recordFarmGame(GameType.starGame);
                         recordFarmGame(GameType.jumpGame);
                         recordFarmGame(GameType.flyGame);
