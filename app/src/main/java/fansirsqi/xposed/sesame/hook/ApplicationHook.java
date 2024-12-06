@@ -272,7 +272,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 if (execAtTimeList != null) {
                                   LocalDateTime lastExecTimeDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime);
                                   LocalDateTime nextExecTimeDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime + checkInterval);
-
                                   for (String execAtTime : execAtTimeList) {
                                     LocalDateTime execAtTimeDateTime = TimeUtil.getLocalDateTimeByTimeStr(execAtTime);
                                     if (execAtTimeDateTime != null
