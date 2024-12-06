@@ -160,9 +160,10 @@ public class Notify {
   public static void sendNewNotification(Context context, String title, String content, int newNotificationId) {
     try {
       NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-      // 创建新的 Notification.Builder
       Notification.Builder newBuilder;
+      Intent it = new Intent(Intent.ACTION_VIEW);
+      it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
+      PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,"🔔 芝麻粒其他提醒",NotificationManager.IMPORTANCE_HIGH);
         notifyManager.createNotificationChannel(notificationChannel);
@@ -170,7 +171,6 @@ public class Notify {
       } else {
         newBuilder = new Notification.Builder(context);
       }
-
       // 配置新通知的样式
       newBuilder
               .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -178,8 +178,8 @@ public class Notify {
               .setContentText(content)
               .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
               .setAutoCancel(true)
+              .setContentIntent(pi)
               .setPriority(Notification.PRIORITY_HIGH);
-
       // 发送新通知
       Notification newNotification = newBuilder.build();
       notifyManager.notify(newNotificationId, newNotification);
