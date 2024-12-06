@@ -190,9 +190,10 @@ public class TimeUtil {
    * @return 如果时间在之前，返回负数；如果相等，返回 0；如果之后，返回正数。
    */
   public static Integer isCompareTimeStr(Long timeMillis, String compareTimeStr) {
+
     try {
       LocalDateTime timeDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault());
-      LocalTime compareTime = LocalTime.parse(compareTimeStr, DateTimeFormatter.ofPattern("HH-mm-ss"));
+      LocalTime compareTime = LocalTime.parse(compareTimeStr, DateTimeFormatter.ofPattern("HHmm")).withSecond(0).withNano(0);
       LocalDateTime compareDateTime = LocalDateTime.of(timeDateTime.toLocalDate(), compareTime);
       return timeDateTime.compareTo(compareDateTime);
     } catch (Exception e) {
@@ -218,7 +219,6 @@ public class TimeUtil {
     int length = timeStr.length();
     DateTimeFormatter formatter;
     LocalTime localTime;
-
     try {
       switch (length){
         case 6:
@@ -254,9 +254,29 @@ public class TimeUtil {
    * @return 日历对象。
    */
   public static LocalDateTime getLocalDateTimeByTimeStr(LocalDateTime timeMillis, String timeStr) {
+    if (timeStr == null || timeStr.isEmpty()) {
+      return null;
+    }
+    int length = timeStr.length();
+    DateTimeFormatter formatter;
+    LocalTime localTime;
     try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH-mm-ss");
-      LocalTime localTime = LocalTime.parse(timeStr, formatter);
+      switch (length){
+        case 6:
+          formatter = DateTimeFormatter.ofPattern("HHmmss");
+          localTime = LocalTime.parse(timeStr, formatter);
+          break;
+        case 4:
+          formatter = DateTimeFormatter.ofPattern("HHmm");
+          localTime = LocalTime.parse(timeStr, formatter).withSecond(0).withNano(0);
+          break;
+        case 2:
+          formatter = DateTimeFormatter.ofPattern("HH");
+          localTime = LocalTime.parse(timeStr, formatter).withMinute(0).withSecond(0).withNano(0);
+          break;
+        default:
+          return null;
+      }
       return timeMillis.with(localTime);
     } catch (Exception e) {
       Log.printStackTrace(e);
