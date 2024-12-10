@@ -468,7 +468,7 @@ public class Files {
    * @param f 目标文件
    * @return 写入是否成功
    */
-  public static boolean write2File(String s, File f) {
+  public static synchronized boolean write2File(String s, File f) {
     // 检查文件权限和目录结构
     if (f.exists()) {
       if (!f.canWrite()) {
@@ -488,7 +488,6 @@ public class Files {
         return false;
       }
     }
-
     // 写入文件
     try (FileWriter fw = new FileWriter(f)) { // 使用 try-with-resources 自动关闭流
       fw.write(s);
