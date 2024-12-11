@@ -280,7 +280,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                       Log.record("设置定时执行:" + execAtTime);
                                       // 执行延时操作
                                       execDelayedHandler(ChronoUnit.MILLIS.between(lastExecTimeDateTime, execAtTimeDateTime));
-                                      Files.clearLog();
+//                                      Files.clearLog();
                                       return;
                                     }
                                   }
@@ -289,9 +289,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 Log.runtime(TAG, "execAtTime err:");
                                 Log.printStackTrace(TAG, e);
                               }
-
                               execDelayedHandler(checkInterval);
-                              Files.clearLog();
+//                              Files.clearLog();
                             } catch (Exception e) {
                               Log.record("执行异常:");
                               Log.printStackTrace(e);
@@ -313,10 +312,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         Log.printStackTrace(TAG, t);
       }
       try {
-        XposedHelpers.findAndHookMethod(
-            "android.app.Service",
-            classLoader,
-            "onDestroy",
+        XposedHelpers.findAndHookMethod( "android.app.Service", classLoader, "onDestroy",
             new XC_MethodHook() {
               @Override
               protected void afterHookedMethod(MethodHookParam param) {
@@ -526,33 +522,47 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     classLoader.loadClass("com.alibaba.ariver.app.api.Page"),
                     classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"),
                     classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback"),
-                        new XC_MethodHook() {
-                          @Override
-                          protected void beforeHookedMethod(MethodHookParam param) {
-                            Object[] args = param.args;
-                            Object object = args[15];
+                    new XC_MethodHook() {
+                      @Override
+                      protected void beforeHookedMethod(MethodHookParam param) {
+                        Object obj;
+                        Object[] args = param.args;
+                        if (args != null && args.length > 15 && (obj = args[15]) != null) {
+                          try {
                             Object[] recordArray = new Object[4];
                             recordArray[0] = System.currentTimeMillis();
                             recordArray[1] = args[0];
                             recordArray[2] = args[4];
-                            if (object != null) {
-                              rpcHookMap.put(object, recordArray);
-                              Log.capture("记录Hook ID: " + object.hashCode() + "\n方法: " + args[0] + "\n参数: " + args[4] + "\n");
-                            } else {
-                              Log.capture("警告: object 为 null，未能添加记录");
-                            }
+                            recordArray[3] = null; // 确保数组中所有值初始化
+                            rpcHookMap.put(obj, recordArray);
+                          } catch (Exception e) {
+                            Log.capture("异常: " + e.getMessage());
                           }
-                          @Override
-                          protected void afterHookedMethod(MethodHookParam param) {
-                            Object object = param.args[15];
-                            Object[] recordArray = rpcHookMap.remove(object);
-                            if (recordArray != null) {
-                              Log.capture("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
+                        } else {
+                          Log.capture("警告: object 为 null，未能添加记录");
+                        }
+                      }
+                      @Override
+                      protected void afterHookedMethod(MethodHookParam param) {
+                        Object obj;
+                        Object[] objArr = param.args;
+                        if (objArr != null && objArr.length > 15 && (obj = objArr[15]) != null) {
+                          try {
+                            Object[] objArr2 = rpcHookMap.remove(obj);
+                            if (objArr2 != null) {
+                              Log.capture("记录\n时间: " + objArr2[0] + "\n方法: " + objArr2[1] + "\n参数: " + objArr2[2] + "\n数据: " + objArr2[3] + "\n");
                             } else {
-                              Log.capture("删除记录ID: " + object.hashCode() + "，记录已不存在");
+                              Log.capture("未找到记录，可能已删除或不存在: ID = " + obj.hashCode());
                             }
+                          } catch (Exception e) {
+                            Log.capture("异常: " + e.getMessage());
                           }
-                        });
+                        } else {
+                          Log.capture("警告: object 为 null，未能删除记录");
+                        }
+                      }
+                    }
+                        );
             Log.runtime(TAG, "hook record request successfully");
           } catch (Throwable t) {
             Log.runtime(TAG, "hook record request err:");
