@@ -12,9 +12,9 @@ android {
     }
     //    版本号组成
     def major = 0          // 主版本号
-    def minor = 1          // 次版本号
+    def minor = 2          // 次版本号
     def patch = 0          // 补丁版本号
-    def buildTag = "release" // 构建标签 (alpha, beta, release, 等)
+    def buildTag = "alpha" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -53,15 +53,18 @@ android {
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
 
     // 应用版本信息，用于展示在LSP
-    if (buildTag == "alpha"||buildTag == "beta") {
-        _versionName = "${major}.${minor}.${patch}-${buildTag}"
+    if (buildTag == "alpha" ||buildTag == "beta") {
+        _versionName = "v${major}.${minor}.${patch}-${buildTag}"
     }
     else if (buildTag == "alphafix"||buildTag == "betafix") {
         buildTag = buildTag.replace("fix", "")
-        _versionName = "${major}.${minor}.${patch}-${buildTag}.fix"
+        _versionName = "v${major}.${minor}.${patch}-${buildTag}.fix"
+    }
+    else if (buildTag == "debug") {
+        _versionName = "v${buildTargetCode}-${buildTag}"
     }
     else {
-        _versionName = "${major}.${minor}.${patch}-${buildTag}"
+        _versionName = "v${major}.${minor}.${patch}-${buildTag}"
         buildTag = ""
     }
 
@@ -128,6 +131,9 @@ android {
 
 }
 
+
+
+
 // 依赖项配置
 dependencies {
 
@@ -138,7 +144,7 @@ dependencies {
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.36' // Lombok 库
     annotationProcessor 'org.projectlombok:lombok:1.18.36' // Lombok 注解处理器
-    implementation 'com.elvishew:xlog:1.11.1' // 日志库
+    //implementation 'com.elvishew:xlog:1.11.1' // 日志库
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:4.9.3' // OkHttp库
     // 兼容产品风味的 Jackson 核心库
