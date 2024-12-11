@@ -332,8 +332,8 @@ public class TimeUtil {
      *
      * @return 日期时间字符串，格式为 "yyyy-MM-dd HH:mm:ss"。
      */
-    public static String getFormatDateTime() {
-        return getFormatDateTime(0, "yyyy-MM-dd HH:mm:ss");
+    public static String getFormatTime() {
+        return getFormatTime(0, "yyyy-MM-dd HH:mm:ss");
     }
 
     /**
@@ -343,7 +343,7 @@ public class TimeUtil {
      * @param pattern 日期时间格式模板，例如 "yyyy-MM-dd HH:mm:ss"。
      * @return 格式化后的日期时间字符串。
      */
-    public static String getFormatDateTime(int plusDay, String pattern) {
+    public static String getFormatTime(int plusDay, String pattern) {
         LocalDateTime dateTime = LocalDateTime.now().plusDays(plusDay);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         return dateTime.format(formatter);
