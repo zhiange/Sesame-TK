@@ -1109,7 +1109,7 @@ public class AntFarm extends ModelTask {
             int awardCount = 0;
             for (int i = 0; i < jaFarmsignList.length(); i++) {
                 JSONObject jo = jaFarmsignList.getJSONObject(i);
-                if (Log.getFormatDate().equals(jo.getString("signKey"))) {
+                if (TimeUtil.getFormatDate().equals(jo.getString("signKey"))) {
                     signed = jo.getBoolean("signed");
                     awardCount = jo.getInt("awardCount");
                     break;

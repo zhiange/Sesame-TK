@@ -203,7 +203,7 @@ public class AntMember extends ModelTask {
         JSONObject jo = new JSONObject(AntMemberRpcCall.queryActivity());
         if (jo.optBoolean("success")) {
           String activityNo = jo.getString("activityNo");
-          if (!Log.getFormatDate().replace("-", "").equals(activityNo.split("_")[2])) {
+          if (!TimeUtil.getFormatDate().replace("-", "").equals(activityNo.split("_")[2])) {
             break;
           }
           if ("SIGN_UP".equals(jo.getString("signUpStatus"))) {

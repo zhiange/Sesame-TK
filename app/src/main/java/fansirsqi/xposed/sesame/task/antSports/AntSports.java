@@ -719,7 +719,7 @@ public class AntSports extends ModelTask {
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 jo = jo.getJSONObject("dailyStepModel");
                 int produceQuantity = jo.getInt("produceQuantity");
-                int hour = Integer.parseInt(Log.getFormatTime().split(":")[0]);
+                int hour = Integer.parseInt(TimeUtil.getFormatTime().split(":")[0]);
                 if (produceQuantity >= minExchangeCount.getValue() || hour >= latestExchangeTime.getValue()) {
                     s = AntSportsRpcCall.walkDonateSignInfo(produceQuantity);
                     s = AntSportsRpcCall.donateWalkHome(produceQuantity);
@@ -899,7 +899,7 @@ public class AntSports extends ModelTask {
                         pathMapJoin(title, pathId);
                     } else if ("GOING".equals(userPathRecordStatus)) {
                         pathMapHomepage(pathId);
-                        String countDate = Log.getFormatDate();
+                        String countDate = TimeUtil.getFormatDate();
                         jo = new JSONObject(AntSportsRpcCall.stepQuery(countDate, pathId));
                         if (jo.optBoolean("success")) {
                             int canGoStepCount = jo.getInt("canGoStepCount");
