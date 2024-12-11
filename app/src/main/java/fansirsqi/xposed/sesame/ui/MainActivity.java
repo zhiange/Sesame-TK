@@ -202,7 +202,7 @@ public class MainActivity extends BaseActivity {
       try {
         List<String> userNameList = new ArrayList<>();
         List<UserEntity> userEntityList = new ArrayList<>();
-        java.io.File[] configFiles = Files.CONFIG_DIRECTORY.listFiles();
+        java.io.File[] configFiles = Files.CONFIG_DIR.listFiles();
         if (configFiles != null) {
           for (java.io.File configDir : configFiles) {
             if (configDir.isDirectory()) {
