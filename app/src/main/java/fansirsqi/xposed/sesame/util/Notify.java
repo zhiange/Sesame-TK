@@ -187,12 +187,12 @@ public class Notify {
       Notification newNotification = newBuilder.build();
       if (context instanceof Service) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
-          notifyManager.notify(NOTIFICATION_ID, newNotification);
+          notifyManager.notify(newNotificationId, newNotification);
         }else {
-          ((Service) context).startForeground(NOTIFICATION_ID, newNotification);
+          ((Service) context).startForeground(newNotificationId, newNotification);
         }
       } else {
-        notifyManager.notify(NOTIFICATION_ID, newNotification);
+        notifyManager.notify(newNotificationId, newNotification);
       }
     } catch (Exception e) {
       Log.printStackTrace(e);
