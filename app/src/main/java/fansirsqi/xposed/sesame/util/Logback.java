@@ -3,6 +3,7 @@ package fansirsqi.xposed.sesame.util;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.android.LogcatAppender;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
@@ -38,30 +39,31 @@ public class Logback {
 
     static void setupAppender(LoggerContext loggerContext, String logName) {
 
-        RollingFileAppender rfa = new RollingFileAppender();
+        RollingFileAppender<ILoggingEvent> rfa = new RollingFileAppender<>();
         rfa.setContext(loggerContext);
         rfa.setName(logName);
         rfa.setFile(LOG_DIR + logName + ".log");
-        SizeAndTimeBasedRollingPolicy satbrp = new SizeAndTimeBasedRollingPolicy();
+
+        SizeAndTimeBasedRollingPolicy<ILoggingEvent> satbrp = new SizeAndTimeBasedRollingPolicy<>();
         satbrp.setContext(loggerContext);
         satbrp.setFileNamePattern(LOG_DIR + "bak/" + logName + "-%d{yyyy-MM-dd}.%i.log");
         satbrp.setMaxFileSize(FileSize.valueOf("10MB"));
-
         satbrp.setMaxHistory(7);
         satbrp.setTotalSizeCap(FileSize.valueOf("100MB"));
         satbrp.setParent(rfa);
         satbrp.start();
 
         rfa.setRollingPolicy(satbrp);
+
         PatternLayoutEncoder ple = new PatternLayoutEncoder();
         ple.setContext(loggerContext);
         ple.setPattern("%d{HH:mm:ss.SSS} %msg%n");
-        ple.setParent(rfa);
         ple.start();
+
         rfa.setEncoder(ple);
         rfa.start();
+
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(logName);
         root.addAppender(rfa);
     }
-
 }
