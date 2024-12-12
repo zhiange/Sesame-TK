@@ -103,7 +103,7 @@ public class SettingsActivity extends BaseActivity {
                             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
                             // 遍历字段并动态生成对应的视图
-                            for (ModelField modelField : modelFields.values()) {
+                            for (ModelField<?> modelField : modelFields.values()) {
                                 View view = modelField.getView(context);
                                 if (view != null) {
                                     linearLayout.addView(view);
