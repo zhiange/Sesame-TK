@@ -3,6 +3,7 @@ import java.text.SimpleDateFormat
 
 // 应用Android应用插件
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 // Android配置信息
 android {
@@ -13,8 +14,8 @@ android {
     //    版本号组成
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
-    def patch = 0          // 补丁版本号
-    def buildTag = "alpha" // 构建标签 (alpha, beta, release, 等)
+    def patch = 1          // 补丁版本号
+    def buildTag = "debug" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -137,6 +138,7 @@ android {
 // 依赖项配置
 dependencies {
 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.30"  // 引入 Kotlin 标准库
     implementation 'org.slf4j:slf4j-api:2.0.7'
     implementation 'com.github.tony19:logback-android:3.0.0'
     implementation 'com.android.support:appcompat-v7:28.0.0' // 支持库
