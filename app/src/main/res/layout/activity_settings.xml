@@ -6,7 +6,7 @@
 
     <include layout="@layout/base_title"/>
 
-    <TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    <TabHost
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/tab_settings">
@@ -42,7 +42,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="12dp">
-
                 </FrameLayout>
             </ScrollView>
         </LinearLayout>
