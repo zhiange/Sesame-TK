@@ -1,5 +1,6 @@
 
 buildscript {
+    ext.kotlin_version = '1.5.30'  // 你可以在这里指定 Kotlin 的版本
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
         maven { url 'https://maven.aliyun.com/repository/google/'}
@@ -7,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -16,6 +18,15 @@ allprojects {
         maven { url 'https://maven.aliyun.com/repository/google/'}
         maven { url 'https://maven.aliyun.com/repository/jcenter/'}
         mavenCentral()
+    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile).tap {
+            configureEach {
+                // -Xlint:unchecked 日志打印'未经检查或不安全的操作'的详细信息
+                // -Xlint:deprecation 日志打印`输入文件使用或覆盖了已过时的 API`的详细信息
+                options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+            }
+        }
     }
 }
 
