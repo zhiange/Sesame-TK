@@ -534,7 +534,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             recordArray[1] = args[0];
                             recordArray[2] = args[4];
                             recordArray[3] = null; // 确保数组中所有值初始化
-                            rpcHookMap.put(obj, recordArray);
+
+                            int objHashCode = System.identityHashCode(obj);
+                            Log.capture("记录对象的 identityHashCode: " + objHashCode);
+
+                            rpcHookMap.put(objHashCode, recordArray);
                           } catch (Exception e) {
                             Log.capture("异常: " + e.getMessage());
                           }
@@ -542,17 +546,22 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                           Log.capture("警告: object 为 null，未能添加记录");
                         }
                       }
+
                       @Override
                       protected void afterHookedMethod(MethodHookParam param) {
                         Object obj;
                         Object[] objArr = param.args;
                         if (objArr != null && objArr.length > 15 && (obj = objArr[15]) != null) {
                           try {
-                            Object[] objArr2 = rpcHookMap.remove(obj);
+                            int objHashCode = System.identityHashCode(obj);
+                            Object[] objArr2 = rpcHookMap.remove(objHashCode);
+
                             if (objArr2 != null) {
+                              Log.system("对象类型: " + obj.getClass().getName());
+                              Log.system("对象内容: " + obj);
                               Log.capture("记录\n时间: " + objArr2[0] + "\n方法: " + objArr2[1] + "\n参数: " + objArr2[2] + "\n数据: " + objArr2[3] + "\n");
                             } else {
-                              Log.capture("未找到记录，可能已删除或不存在: ID = " + obj.hashCode());
+                              Log.capture("未找到记录，可能已删除或不存在: identityHashCode = " + objHashCode);
                             }
                           } catch (Exception e) {
                             Log.capture("异常: " + e.getMessage());
