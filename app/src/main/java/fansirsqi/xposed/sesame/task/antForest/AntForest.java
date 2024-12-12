@@ -1801,7 +1801,7 @@ public class AntForest extends ModelTask {
                   Log.forest("任务奖励🎖️[" + taskTitle + "]#" + awardCount + "个");
                   doubleCheck = true; // 标记需要重新检查任务
                 } else {
-                  Log.record("领取失败，" + response); // 记录领取失败信息
+                  Log.record("领取失败: " + taskTitle); // 记录领取失败信息
                   Log.runtime(joAward.toString()); // 打印奖励响应
                 }
               }

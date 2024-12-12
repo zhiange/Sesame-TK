@@ -152,7 +152,7 @@ public class AntOrchard extends ModelTask {
               int awardCount = spreadManureStage.getInt("awardCount");
               JSONObject joo = new JSONObject(AntOrchardRpcCall.receiveTaskAward(sceneCode, taskType));
               if (joo.optBoolean("success")) {
-                Log.farm("丰收礼包🎁 [肥料*" + awardCount + "]");
+                Log.farm("丰收礼包🎁[肥料*" + awardCount + "]");
               } else {
                 Log.record(joo.getString("desc"));
                 Log.runtime(joo.toString());
