@@ -65,9 +65,11 @@
 
 ---
 
-## [本仓库](https://github.com/TKaxv-7S/Sesame-TK) 已存档
+## [原仓库](https://github.com/TKaxv-7S/Sesame-TK) 已存档
 
-新版本可前往由 [@lazy-immortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/lazy-immortal/Sesame) 更新
+~~新版本可前往由 [@lazy-immortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新~~
+
+新版本可前往由 [@LazyImmortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/LazyImmortal) 更新
 
 <h1>🚨 为了大家的资金安全与个人信息安全，墙裂建议</h1>
 <p>
