@@ -3,7 +3,6 @@ import java.text.SimpleDateFormat
 
 // 应用Android应用插件
 apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
 
 // Android配置信息
 android {
@@ -14,8 +13,8 @@ android {
     //    版本号组成
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
-    def patch = 0          // 补丁版本号
-    def buildTag = "alphafix" // 构建标签 (alpha, beta, release, 等)
+    def patch = 1          // 补丁版本号
+    def buildTag = "beta" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -115,9 +114,7 @@ android {
     buildFeatures {
         compose true // 启用 Jetpack Compose
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion "1.9.22" // 选择与 Compose 版本兼容的编译器扩展
-    }
+
 
     // 构建工具版本
     applicationVariants.configureEach { variant -> // 配置每个应用变体
@@ -135,6 +132,11 @@ android {
             }
         }
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.10"
+    }
+
+
 
 }
 
@@ -144,17 +146,19 @@ android {
 // 依赖项配置
 dependencies {
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"  // 引入 Kotlin 标准库
+    //noinspection GradleDependency
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.10'
     implementation 'org.slf4j:slf4j-api:2.0.7'
     implementation 'com.github.tony19:logback-android:3.0.0'
     implementation 'com.android.support:appcompat-v7:28.0.0'
-    compileOnly 'de.robv.android.xposed:api:82' // Xposed API
+
+    compileOnly 'de.robv.android.xposed:api:82'
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.36' // Lombok 库
     annotationProcessor 'org.projectlombok:lombok:1.18.36' // Lombok 注解处理器
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3' // OkHttp库
-    // 兼容产品风味的 Jackson 核心库
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.1'
