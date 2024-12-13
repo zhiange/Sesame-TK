@@ -564,7 +564,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                               Log.capture("未找到记录，可能已删除或不存在: 对象 = " + obj);
                             }
                           } catch (Exception e) {
-                            Log.capture("异常: " + e.getMessage());
+//                            Log.capture("异常: " + e.getMessage());
                           }
                         } else {
                           Log.capture("警告: object 为 null，未能删除记录");
