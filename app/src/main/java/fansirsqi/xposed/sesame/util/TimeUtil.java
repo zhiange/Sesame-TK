@@ -11,7 +11,9 @@ import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Locale;
 
-/** 时间工具类。 提供了一系列方法来处理时间相关的操作，包括时间范围检查、时间比较、日期格式化等。 */
+/**
+ * 时间工具类。 提供了一系列方法来处理时间相关的操作，包括时间范围检查、时间比较、日期格式化等。
+ */
 public class TimeUtil {
 
     // 使用新的 DateTimeFormatter 进行日期格式化
@@ -48,7 +50,7 @@ public class TimeUtil {
     /**
      * 检查给定的时间毫秒数是否在给定的时间范围列表中。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis    时间毫秒数。
      * @param timeRangeList 时间范围列表，每个范围格式为 "HHmm-HHmm"。
      * @return 如果时间在任一范围内，返回 true，否则返回 false。
      */
@@ -65,7 +67,7 @@ public class TimeUtil {
      * 检查给定的时间毫秒数是否在给定的时间范围内。
      *
      * @param timeMillis 时间毫秒数。
-     * @param timeRange 时间范围，格式为 "HHmm-HHmm"。
+     * @param timeRange  时间范围，格式为 "HHmm-HHmm"。
      * @return 如果时间在范围内，返回 true，否则返回 false。
      */
     public static Boolean checkInTimeRange(Long timeMillis, String timeRange) {
@@ -75,7 +77,7 @@ public class TimeUtil {
                 String min = timeRangeArray[0];
                 String max = timeRangeArray[1];
                 return isAfterOrCompareTimeStr(timeMillis, min) && isBeforeOrCompareTimeStr(timeMillis, max);
-            }else{
+            } else {
                 Log.error("Time range bad format: [HHmm-HHmm] but got " + timeRange);
             }
         } catch (Exception e) {
@@ -127,7 +129,7 @@ public class TimeUtil {
     /**
      * 检查给定的时间毫秒数是否在给定的时间字符串之前。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis    时间毫秒数。
      * @param beforeTimeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 如果时间在之前，返回 true，否则返回 false。
      */
@@ -142,7 +144,7 @@ public class TimeUtil {
     /**
      * 检查给定的时间毫秒数是否在给定的时间字符串之后。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis   时间毫秒数。
      * @param afterTimeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 如果时间在之后，返回 true，否则返回 false。
      */
@@ -157,7 +159,7 @@ public class TimeUtil {
     /**
      * 检查给定的时间毫秒数是否在给定的时间字符串之前或相等。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis    时间毫秒数。
      * @param beforeTimeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 如果时间在之前或相等，返回 true，否则返回 false。
      */
@@ -172,7 +174,7 @@ public class TimeUtil {
     /**
      * 检查给定的时间毫秒数是否在给定的时间字符串之后或相等。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis   时间毫秒数。
      * @param afterTimeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 如果时间在之后或相等，返回 true，否则返回 false。
      */
@@ -187,7 +189,7 @@ public class TimeUtil {
     /**
      * 比较给定的时间毫秒数和时间字符串。
      *
-     * @param timeMillis 时间毫秒数。
+     * @param timeMillis     时间毫秒数。
      * @param compareTimeStr 时间字符串，格式为 "HH-mm-ss"。
      * @return 如果时间在之前，返回负数；如果相等，返回 0；如果之后，返回正数。
      */
@@ -218,7 +220,7 @@ public class TimeUtil {
      * 根据时间毫秒数和时间字符串获取日历对象。
      *
      * @param timeMillis 时间毫秒数。
-     * @param timeStr 时间字符串，格式为 "HH-mm-ss"。
+     * @param timeStr    时间字符串，格式为 "HH-mm-ss"。
      * @return 日历对象。
      */
     public static LocalDateTime getLocalDateTimeByTimeStr(LocalDateTime timeMillis, String timeStr) {
@@ -327,6 +329,17 @@ public class TimeUtil {
         return date.format(formatter);
     }
 
+
+    /**
+     * 获取当前的小时数。
+     *
+     * @return 当前的小时数。
+     */
+    public static int getHour() {
+        LocalDateTime dateTime = LocalDateTime.now();
+        return dateTime.getHour();
+    }
+
     /**
      * 获取当前日期时间的字符串表示，使用固定格式 "yyyy-MM-dd HH:mm:ss"。
      *
@@ -393,7 +406,6 @@ public class TimeUtil {
             return null;
         }
     }
-
 
 
     /**
