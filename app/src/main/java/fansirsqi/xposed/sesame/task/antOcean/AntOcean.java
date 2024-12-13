@@ -174,7 +174,7 @@ public class AntOcean extends ModelTask {
                                 JSONObject retBubble = retBubbles.optJSONObject(j);
                                 if (retBubble != null) {
                                     int collectedEnergy = retBubble.getInt("collectedEnergy");
-                                    Log.forest("神奇海洋🐳收取[" + UserMap.getMaskName(userId) + "]的海洋能量#"
+                                    Log.forest("神奇海洋🌊收取[" + UserMap.getMaskName(userId) + "]的海洋能量#"
                                             + collectedEnergy + "g");
                                 }
                             }
@@ -198,7 +198,7 @@ public class AntOcean extends ModelTask {
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     JSONArray cleanRewardVOS = jo.getJSONArray("cleanRewardVOS");
                     checkReward(cleanRewardVOS);
-                    Log.forest("神奇海洋🐳[清理:" + UserMap.getMaskName(userId) + "海域]");
+                    Log.forest("神奇海洋🌊[清理:" + UserMap.getMaskName(userId) + "海域]");
                 } else {
                     Log.runtime(TAG, jo.getString("resultDesc"));
                 }
@@ -232,7 +232,7 @@ public class AntOcean extends ModelTask {
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 JSONObject fishDetailVO = jo.getJSONObject("fishDetailVO");
                 String name = fishDetailVO.getString("name");
-                Log.forest("神奇海洋🐳[" + name + "]合成成功");
+                Log.forest("神奇海洋🌊[" + name + "]合成成功");
             } else {
                 Log.runtime(TAG, jo.getString("resultDesc"));
             }
@@ -249,7 +249,7 @@ public class AntOcean extends ModelTask {
                 String name = reward.getString("name");
                 JSONArray attachReward = reward.getJSONArray("attachRewardBOList");
                 if (attachReward.length() > 0) {
-                    Log.forest("神奇海洋🐳[获得:" + name + "碎片]");
+                    Log.forest("神奇海洋🌊[获得:" + name + "碎片]");
                     boolean canCombine = true;
                     for (int j = 0; j < attachReward.length(); j++) {
                         JSONObject detail = attachReward.getJSONObject(j);
@@ -277,7 +277,7 @@ public class AntOcean extends ModelTask {
                 String s = AntOceanRpcCall.collectReplicaAsset();
                 JSONObject jo = new JSONObject(s);
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                    Log.forest("神奇海洋🐳[学习海洋科普知识]#潘多拉能量+1");
+                    Log.forest("神奇海洋🌊[学习海洋科普知识]#潘多拉能量+1");
                 } else {
                     Log.runtime(TAG, jo.getString("resultDesc"));
                 }
@@ -294,7 +294,7 @@ public class AntOcean extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 String name = jo.getJSONObject("currentPhaseInfo").getJSONObject("extInfo").getString("name");
-                Log.forest("神奇海洋🐳迎回[" + name + "]");
+                Log.forest("神奇海洋🌊迎回[" + name + "]");
             } else {
                 Log.runtime(TAG, jo.getString("resultDesc"));
             }
@@ -375,7 +375,7 @@ public class AntOcean extends ModelTask {
                     s = AntOceanRpcCall.switchOceanChapter(dstChapterCode);
                     jo = new JSONObject(s);
                     if ("SUCCESS".equals(jo.getString("resultCode"))) {
-                        Log.forest("神奇海洋🐳切换到[" + dstChapterName + "]系列");
+                        Log.forest("神奇海洋🌊切换到[" + dstChapterName + "]系列");
                     } else {
                         Log.runtime(TAG, jo.getString("resultDesc"));
                     }
@@ -459,7 +459,7 @@ public class AntOcean extends ModelTask {
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
                 s = AntOceanRpcCall.cleanFriendOcean(userId);
                 jo = new JSONObject(s);
-                Log.forest("神奇海洋🐳[帮助:" + UserMap.getMaskName
+                Log.forest("神奇海洋🌊[帮助:" + UserMap.getMaskName
                         (userId) + "清理海域]");
                 if ("SUCCESS".equals(jo.getString("resultCode"))) {
                     JSONArray cleanRewardVOS = jo.getJSONArray("cleanRewardVOS");

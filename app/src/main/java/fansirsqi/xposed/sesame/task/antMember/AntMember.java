@@ -380,13 +380,10 @@ public class AntMember extends ModelTask {
           if (!"BROWSE".equals(jo.getString("type"))) {
             continue;
           }
-
           JSONArray taskList = jo.getJSONArray("taskList");
           doubleCheck = doTask(taskList);
         }
-        if (doubleCheck) {
-          continue;
-        }
+        if (doubleCheck) continue;
         break;
       } while (true);
     } catch (Throwable t) {

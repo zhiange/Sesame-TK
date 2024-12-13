@@ -341,6 +341,7 @@ public class AntFarm extends ModelTask {
                     syncAnimalStatus(ownerFarmId);
                 }
                 autoFeedAnimal();
+
                 // 小鸡换装
                 if (listOrnaments.getValue() && StatusUtil.canOrnamentToday()) {
                     listOrnaments();
