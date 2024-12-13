@@ -20,15 +20,15 @@ public class ReserveIdMapUtil {
         return idMap.get(key);
     }
 
-    public synchronized static void add(String key, String value) {
+    public static synchronized void add(String key, String value) {
         idMap.put(key, value);
     }
 
-    public synchronized static void remove(String key) {
+    public static synchronized void remove(String key) {
         idMap.remove(key);
     }
 
-    public synchronized static void load() {
+    public static synchronized void load() {
         idMap.clear();
         try {
             String body = Files.readFromFile(Files.getReserveIdMapFile());
@@ -42,11 +42,11 @@ public class ReserveIdMapUtil {
         }
     }
 
-    public synchronized static boolean save() {
+    public static synchronized boolean save() {
         return Files.write2File(JsonUtil.toJsonString(idMap), Files.getReserveIdMapFile());
     }
 
-    public synchronized static void clear() {
+    public static synchronized void clear() {
         idMap.clear();
     }
 

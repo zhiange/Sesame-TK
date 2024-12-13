@@ -19,48 +19,60 @@ public class StatusUtil {
 
     public static final StatusUtil INSTANCE = new StatusUtil();
 
-    // forest
+    // ===========================forest
     private Map<String, Integer> waterFriendLogList = new HashMap<>();
-    private Set<String> cooperateWaterList = new HashSet<>();
+    private Set<String> cooperateWaterList = new HashSet<>();//合作浇水
     private Map<String, Integer> reserveLogList = new HashMap<>();
-    private Set<String> ancientTreeCityCodeList = new HashSet<>();
+    private Set<String> ancientTreeCityCodeList = new HashSet<>();//古树
     private Set<String> protectBubbleList = new HashSet<>();
-    private int exchangeDoubleCard = 0;
+    private int exchangeDoubleCard = 0; // 活力值兑换双倍卡
     private int exchangeTimes = 0;
     private int exchangeTimesLongTime = 0;
     private int doubleTimes = 0;
-    private boolean exchangeEnergyShield = false;
+    private boolean exchangeEnergyShield = false; //活力值兑换能量保护罩
     private boolean exchangeCollectHistoryAnimal7Days = false;
     private boolean exchangeCollectToFriendTimes7Days = false;
+    private boolean youthPrivilege = true;
+    private boolean studentTask = true;
 
-    // farm
+    // ===========================farm
     private Boolean answerQuestion = false;
     private Map<String, Integer> feedFriendLogList = new HashMap<>();
     private Map<String, Integer> visitFriendLogList = new HashMap<>();
     private Set<String> dailyAnswerList = new HashSet<>();
     private Set<String> donationEggList = new HashSet<>();
     private int useAccelerateToolCount = 0;
+    /**
+     * 小鸡换装
+     */
     private Boolean canOrnament = true;
     private Boolean animalSleep = false;
 
-    // stall
+
+    // =============================stall
     private Map<String, Integer> stallHelpedCountLogList = new HashMap<>();
     private Set<String> spreadManureList = new HashSet<>();
     private Set<String> stallP2PHelpedList = new HashSet<>();
     private Boolean canStallDonate = true;
 
-    // sport
+    // ==========================sport
     private Set<String> syncStepList = new HashSet<>();
     private Set<String> exchangeList = new HashSet<>();
+    /**
+     * 捐运动币
+     */
     private boolean donateCharityCoin = false;
 
-    // other
+    // =======================other
     private Set<String> memberSignInList = new HashSet<>();
+    /**
+     * 口碑签到
+     */
     private int kbSignIn = 0;
-
-    // 保存时间
+    /**
+     * 保存时间
+     */
     private Long saveTime = 0L;
-
     /**
      * 新村助力好友，已上限的用户
      */
@@ -69,28 +81,50 @@ public class StatusUtil {
      * 新村-罚单已贴完的用户
      */
     private Set<String> canPasteTicketTime = new HashSet<>();
-
     /**
      * 绿色经营，收取好友金币已完成用户
      */
     private Set<String> greenFinancePointFriend = new HashSet<>();
-
     /**
      * 绿色经营，评级领奖已完成用户
      */
     private Map<String, Integer> greenFinancePrizesMap = new HashMap<>();
-
-    // 农场助力
+    /**
+     * 农场助力
+     */
     private Set<String> antOrchardAssistFriend = new HashSet<>();
+
+
+    public static boolean canStudentTask() {
+        return INSTANCE.studentTask;
+    }
+    public static void setStudentTaskToday() {
+        if(INSTANCE.studentTask){
+            INSTANCE.studentTask = false;
+            save();
+        }
+    }
+
+
+    public static boolean canYouthPrivilegeToday() {
+        return INSTANCE.youthPrivilege;
+    }
+
+    public static void setYouthPrivilegeToday() {
+        if (INSTANCE.youthPrivilege) {
+            INSTANCE.youthPrivilege = false;
+            save();
+        }
+    }
 
     public static boolean canExchangeEnergyShield() {
         return !INSTANCE.exchangeEnergyShield;
     }
 
     public static void exchangeEnergyShield() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.exchangeEnergyShield) {
-            stat.exchangeEnergyShield = true;
+        
+        if (!INSTANCE.exchangeEnergyShield) {
+            INSTANCE.exchangeEnergyShield = true;
             save();
         }
     }
@@ -100,9 +134,9 @@ public class StatusUtil {
     }
 
     public static void exchangeCollectHistoryAnimal7Days() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.exchangeCollectHistoryAnimal7Days) {
-            stat.exchangeCollectHistoryAnimal7Days = true;
+        
+        if (!INSTANCE.exchangeCollectHistoryAnimal7Days) {
+            INSTANCE.exchangeCollectHistoryAnimal7Days = true;
             save();
         }
     }
@@ -112,9 +146,9 @@ public class StatusUtil {
     }
 
     public static void exchangeCollectToFriendTimes7Days() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.exchangeCollectToFriendTimes7Days) {
-            stat.exchangeCollectToFriendTimes7Days = true;
+        
+        if (!INSTANCE.exchangeCollectToFriendTimes7Days) {
+            INSTANCE.exchangeCollectToFriendTimes7Days = true;
             save();
         }
     }
@@ -124,9 +158,9 @@ public class StatusUtil {
     }
 
     public static void animalSleep() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.animalSleep) {
-            stat.animalSleep = true;
+        
+        if (!INSTANCE.animalSleep) {
+            INSTANCE.animalSleep = true;
             save();
         }
     }
@@ -172,10 +206,10 @@ public class StatusUtil {
     }
 
     public static void cooperateWaterToday(String uid, String coopId) {
-        StatusUtil stat = INSTANCE;
+        
         String v = uid + "_" + coopId;
-        if (!stat.cooperateWaterList.contains(v)) {
-            stat.cooperateWaterList.add(v);
+        if (!INSTANCE.cooperateWaterList.contains(v)) {
+            INSTANCE.cooperateWaterList.add(v);
             save();
         }
     }
@@ -185,9 +219,9 @@ public class StatusUtil {
     }
 
     public static void ancientTreeToday(String cityCode) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.ancientTreeCityCodeList.contains(cityCode)) {
-            stat.ancientTreeCityCodeList.add(cityCode);
+        
+        if (!INSTANCE.ancientTreeCityCodeList.contains(cityCode)) {
+            INSTANCE.ancientTreeCityCodeList.add(cityCode);
             save();
         }
     }
@@ -197,9 +231,9 @@ public class StatusUtil {
     }
 
     public static void answerQuestionToday() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.answerQuestion) {
-            stat.answerQuestion = true;
+        
+        if (!INSTANCE.answerQuestion) {
+            INSTANCE.answerQuestion = true;
             save();
         }
     }
@@ -263,9 +297,9 @@ public class StatusUtil {
     }
 
     public static void memberSignInToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.memberSignInList.contains(uid)) {
-            stat.memberSignInList.add(uid);
+        
+        if (!INSTANCE.memberSignInList.contains(uid)) {
+            INSTANCE.memberSignInList.add(uid);
             save();
         }
     }
@@ -284,9 +318,9 @@ public class StatusUtil {
     }
 
     public static void donationEgg(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.donationEggList.contains(uid)) {
-            stat.donationEggList.add(uid);
+        
+        if (!INSTANCE.donationEggList.contains(uid)) {
+            INSTANCE.donationEggList.add(uid);
             save();
         }
     }
@@ -296,9 +330,9 @@ public class StatusUtil {
     }
 
     public static void spreadManureToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.spreadManureList.contains(uid)) {
-            stat.spreadManureList.add(uid);
+        
+        if (!INSTANCE.spreadManureList.contains(uid)) {
+            INSTANCE.spreadManureList.add(uid);
             save();
         }
     }
@@ -310,9 +344,9 @@ public class StatusUtil {
 
     public static void stallP2PHelpeToday(String uid) {
         uid = UserMap.getCurrentUid() + "-" + uid;
-        StatusUtil stat = INSTANCE;
-        if (!stat.stallP2PHelpedList.contains(uid)) {
-            stat.stallP2PHelpedList.add(uid);
+        
+        if (!INSTANCE.stallP2PHelpedList.contains(uid)) {
+            INSTANCE.stallP2PHelpedList.add(uid);
             save();
         }
     }
@@ -330,10 +364,10 @@ public class StatusUtil {
      * 设置新村助力已到上限
      */
     public static void antStallAssistFriendToday() {
-        StatusUtil stat = INSTANCE;
+        
         String uid = UserMap.getCurrentUid();
-        if (!stat.antStallAssistFriend.contains(uid)) {
-            stat.antStallAssistFriend.add(uid);
+        if (!INSTANCE.antStallAssistFriend.contains(uid)) {
+            INSTANCE.antStallAssistFriend.add(uid);
             save();
         }
     }
@@ -344,10 +378,10 @@ public class StatusUtil {
     }
 
     public static void antOrchardAssistFriendToday() {
-        StatusUtil stat = INSTANCE;
+        
         String uid = UserMap.getCurrentUid();
-        if (!stat.antOrchardAssistFriend.contains(uid)) {
-            stat.antOrchardAssistFriend.add(uid);
+        if (!INSTANCE.antOrchardAssistFriend.contains(uid)) {
+            INSTANCE.antOrchardAssistFriend.add(uid);
             save();
         }
     }
@@ -357,64 +391,64 @@ public class StatusUtil {
     }
 
     public static void protectBubbleToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.protectBubbleList.contains(uid)) {
-            stat.protectBubbleList.add(uid);
+        
+        if (!INSTANCE.protectBubbleList.contains(uid)) {
+            INSTANCE.protectBubbleList.add(uid);
             save();
         }
     }
 
     public static boolean canExchangeDoubleCardToday() {
-        StatusUtil stat = INSTANCE;
-        if (stat.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
+        
+        if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
             return true;
         }
         AntForest task = ModelTask.getModel(AntForest.class);
         if (task == null) {
             return false;
         }
-        return stat.exchangeTimes < task.getExchangeEnergyDoubleClickCount().getValue();
+        return INSTANCE.exchangeTimes < task.getExchangeEnergyDoubleClickCount().getValue();
     }
 
     public static void exchangeDoubleCardToday(boolean isSuccess) {
-        StatusUtil stat = INSTANCE;
-        if (stat.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
-            stat.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
+        
+        if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
+            INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
         }
         if (isSuccess) {
-            stat.exchangeTimes += 1;
+            INSTANCE.exchangeTimes += 1;
         } else {
             AntForest task = ModelTask.getModel(AntForest.class);
             if (task == null) {
-                stat.exchangeTimes = 0;
+                INSTANCE.exchangeTimes = 0;
             } else {
-                stat.exchangeTimes = task.getExchangeEnergyDoubleClickCount().getValue();
+                INSTANCE.exchangeTimes = task.getExchangeEnergyDoubleClickCount().getValue();
             }
         }
         save();
     }
 
     public static boolean canExchangeDoubleCardTodayLongTime() {
-        StatusUtil stat = INSTANCE;
-        if (stat.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
+        
+        if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
             return true;
         }
         AntForest task = ModelTask.getModel(AntForest.class);
         if (task == null) {
             return false;
         }
-        return stat.exchangeTimesLongTime < task.getExchangeEnergyDoubleClickCountLongTime().getValue();
+        return INSTANCE.exchangeTimesLongTime < task.getExchangeEnergyDoubleClickCountLongTime().getValue();
     }
 
     public static void exchangeDoubleCardTodayLongTime(boolean isSuccess) {
-        StatusUtil stat = INSTANCE;
-        if (stat.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
-            stat.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
+        
+        if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
+            INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
         }
         if (isSuccess) {
-            stat.exchangeTimesLongTime += 1;
+            INSTANCE.exchangeTimesLongTime += 1;
         } /*else {
-            stat.exchangeTimesLongTime = AntForest.exchangeEnergyDoubleClickCountLongTime.getValue();
+            INSTANCE.exchangeTimesLongTime = AntForest.exchangeEnergyDoubleClickCountLongTime.getValue();
         }*/
         save();
     }
@@ -457,9 +491,9 @@ public class StatusUtil {
     }
 
     public static void KbSignInToday() {
-        StatusUtil stat = INSTANCE;
-        if (stat.kbSignIn != StatisticsUtil.INSTANCE.getDay().time) {
-            stat.kbSignIn = StatisticsUtil.INSTANCE.getDay().time;
+        
+        if (INSTANCE.kbSignIn != StatisticsUtil.INSTANCE.getDay().time) {
+            INSTANCE.kbSignIn = StatisticsUtil.INSTANCE.getDay().time;
             save();
         }
     }
@@ -478,9 +512,9 @@ public class StatusUtil {
     }
 
     public static void donateCharityCoin() {
-        StatusUtil stat = INSTANCE;
-        if (!stat.donateCharityCoin) {
-            stat.donateCharityCoin = true;
+        
+        if (!INSTANCE.donateCharityCoin) {
+            INSTANCE.donateCharityCoin = true;
             save();
         }
     }
@@ -490,9 +524,9 @@ public class StatusUtil {
     }
 
     public static void SyncStepToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.syncStepList.contains(uid)) {
-            stat.syncStepList.add(uid);
+        
+        if (!INSTANCE.syncStepList.contains(uid)) {
+            INSTANCE.syncStepList.add(uid);
             save();
         }
     }
@@ -502,9 +536,9 @@ public class StatusUtil {
     }
 
     public static void exchangeToday(String uid) {
-        StatusUtil stat = INSTANCE;
-        if (!stat.exchangeList.contains(uid)) {
-            stat.exchangeList.add(uid);
+        
+        if (!INSTANCE.exchangeList.contains(uid)) {
+            INSTANCE.exchangeList.add(uid);
             save();
         }
     }
@@ -592,7 +626,7 @@ public class StatusUtil {
                 Log.printStackTrace(TAG, e);
             }
         }
-        if (INSTANCE.saveTime == 0) {
+        if (INSTANCE.saveTime == null) {
             INSTANCE.saveTime = System.currentTimeMillis();
         }
         return INSTANCE;

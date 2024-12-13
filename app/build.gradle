@@ -12,9 +12,9 @@ android {
     }
     //    版本号组成
     def major = 0          // 主版本号
-    def minor = 1          // 次版本号
-    def patch = 0          // 补丁版本号
-    def buildTag = "release" // 构建标签 (alpha, beta, release, 等)
+    def minor = 2          // 次版本号
+    def patch = 1          // 补丁版本号
+    def buildTag = "beta" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -53,12 +53,15 @@ android {
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
 
     // 应用版本信息，用于展示在LSP
-    if (buildTag == "alpha"||buildTag == "beta") {
+    if (buildTag == "alpha" ||buildTag == "beta") {
         _versionName = "${major}.${minor}.${patch}-${buildTag}"
     }
     else if (buildTag == "alphafix"||buildTag == "betafix") {
         buildTag = buildTag.replace("fix", "")
         _versionName = "${major}.${minor}.${patch}-${buildTag}.fix"
+    }
+    else if (buildTag == "debug") {
+        _versionName = "${buildTargetCode}-${buildTag}"
     }
     else {
         _versionName = "${major}.${minor}.${patch}-${buildTag}"
@@ -108,6 +111,10 @@ android {
             // ProGuard配置文件
         }
     }
+    buildFeatures {
+        compose true // 启用 Jetpack Compose
+    }
+
 
     // 构建工具版本
     applicationVariants.configureEach { variant -> // 配置每个应用变体
@@ -125,23 +132,33 @@ android {
             }
         }
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.10"
+    }
+
+
 
 }
+
+
+
 
 // 依赖项配置
 dependencies {
 
+    //noinspection GradleDependency
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.10'
     implementation 'org.slf4j:slf4j-api:2.0.7'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'com.android.support:appcompat-v7:28.0.0' // 支持库
-    compileOnly 'de.robv.android.xposed:api:82' // Xposed API
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+
+    compileOnly 'de.robv.android.xposed:api:82'
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.36' // Lombok 库
     annotationProcessor 'org.projectlombok:lombok:1.18.36' // Lombok 注解处理器
-    implementation 'com.elvishew:xlog:1.11.1' // 日志库
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3' // OkHttp库
-    // 兼容产品风味的 Jackson 核心库
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.1'

@@ -81,7 +81,7 @@ public class RuntimeInfo {
     /**
      * 将运行时信息保存到文件中。
      */
-    public void save() {
+    public synchronized void save() {
         Files.write2File(joAll.toString(), Files.runtimeInfoFile(userId));
     }
 

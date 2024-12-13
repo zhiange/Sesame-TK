@@ -1,21 +1,39 @@
-
 buildscript {
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
-        maven { url 'https://maven.aliyun.com/repository/google/'}
-        maven { url 'https://maven.aliyun.com/repository/jcenter/'}
+        maven { url 'https://maven.aliyun.com/repository/google/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter/' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven {url 'https://maven.aliyun.com/repository/gradle-plugin'}
+        mavenLocal()
+        mavenCentral()
+        google()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10"
     }
 }
 
 allprojects {
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
-        maven { url 'https://maven.aliyun.com/repository/google/'}
-        maven { url 'https://maven.aliyun.com/repository/jcenter/'}
+        maven { url 'https://maven.aliyun.com/repository/google/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter/' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven {url 'https://maven.aliyun.com/repository/gradle-plugin'}
+        mavenLocal()
         mavenCentral()
+        google()
+    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile).tap {
+            configureEach {
+                // -Xlint:unchecked 日志打印'未经检查或不安全的操作'的详细信息
+                // -Xlint:deprecation 日志打印`输入文件使用或覆盖了已过时的 API`的详细信息
+                options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+            }
+        }
     }
 }
 

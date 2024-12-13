@@ -64,7 +64,7 @@ public class UserMap {
      *
      * @param currentUserId 当前用户ID
      */
-    public synchronized static void initUser(String currentUserId) {
+    public static synchronized void initUser(String currentUserId) {
         // 设置当前用户ID
         setCurrentUserId(currentUserId);
 
@@ -141,7 +141,7 @@ public class UserMap {
      *
      * @param userId 用户ID
      */
-    public synchronized static void setCurrentUserId(String userId) {
+    public static synchronized void setCurrentUserId(String userId) {
         currentUid = (userId == null || userId.isEmpty()) ? null : userId;
     }
 
@@ -191,7 +191,7 @@ public class UserMap {
      *
      * @param userEntity 用户实体
      */
-    public synchronized static void add(UserEntity userEntity) {
+    public static synchronized void add(UserEntity userEntity) {
         if (userEntity.getUserId() != null && !userEntity.getUserId().isEmpty()) {
             userMap.put(userEntity.getUserId(), userEntity);
         }
@@ -202,7 +202,7 @@ public class UserMap {
      *
      * @param userId 用户ID
      */
-    public synchronized static void remove(String userId) {
+    public static synchronized void remove(String userId) {
         userMap.remove(userId);
     }
 
@@ -211,7 +211,7 @@ public class UserMap {
      *
      * @param userId 用户ID
      */
-    public synchronized static void load(String userId) {
+    public static synchronized void load(String userId) {
         userMap.clear();
         try {
             String body = Files.readFromFile(Files.getFriendIdMapFile(userId));
@@ -230,7 +230,7 @@ public class UserMap {
     /**
      * 卸载用户数据
      */
-    public synchronized static void unload() {
+    public static synchronized void unload() {
         userMap.clear();
     }
 
@@ -240,7 +240,7 @@ public class UserMap {
      * @param userId 用户ID
      * @return 保存结果
      */
-    public synchronized static boolean save(String userId) {
+    public static synchronized boolean save(String userId) {
         return Files.write2File(JsonUtil.toJsonString(userMap), Files.getFriendIdMapFile(userId));
     }
 
@@ -249,7 +249,7 @@ public class UserMap {
      *
      * @param userId 用户ID
      */
-    public synchronized static void loadSelf(String userId) {
+    public static synchronized void loadSelf(String userId) {
         userMap.clear();
         try {
             String body = Files.readFromFile(Files.getSelfIdFile(userId));
@@ -266,10 +266,9 @@ public class UserMap {
      * 保存当前用户数据到文件
      *
      * @param userEntity 用户实体
-     * @return 保存结果
      */
-    public synchronized static boolean saveSelf(UserEntity userEntity) {
-        return Files.write2File(JsonUtil.toJsonString(userEntity), Files.getSelfIdFile(userEntity.getUserId()));
+    public static synchronized void saveSelf(UserEntity userEntity) {
+        Files.write2File(JsonUtil.toJsonString(userEntity), Files.getSelfIdFile(userEntity.getUserId()));
     }
 
 }

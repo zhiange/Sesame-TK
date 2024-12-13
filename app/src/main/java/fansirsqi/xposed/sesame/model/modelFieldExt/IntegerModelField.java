@@ -126,7 +126,7 @@ public class IntegerModelField extends ModelField<Integer> {
         // 设置按钮的文本颜色
         btn.setTextColor(ContextCompat.getColor(context, R.color.button));
         // 设置按钮的背景
-        btn.setBackground(context.getResources().getDrawable(R.drawable.button));
+        btn.setBackground(ContextCompat.getDrawable(context, R.drawable.button));
         // 设置按钮的文本对齐方式
         btn.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         // 设置按钮的最小高度

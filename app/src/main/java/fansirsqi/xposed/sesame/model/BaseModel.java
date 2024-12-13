@@ -61,7 +61,7 @@ public class BaseModel extends Model {
   @Getter private static final BooleanModelField batteryPerm = new BooleanModelField("batteryPerm", "为支付宝申请后台运行权限", true);
 
   /** 是否记录日志 */
-  @Getter private static final BooleanModelField recordLog = new BooleanModelField("recordLog", "记录日志", true);
+  @Getter private static final BooleanModelField recordLog = new BooleanModelField("recordLog", "全部 | 记录日志", true);
 
   /** 是否显示气泡提示 */
   @Getter private static final BooleanModelField showToast = new BooleanModelField("showToast", "气泡提示", true);

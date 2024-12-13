@@ -35,6 +35,7 @@ public class NewRpcBridge implements RpcBridge {
     return RpcVersion.NEW; // 返回 RPC 版本
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void load() throws Exception {
     loader = ApplicationHook.getClassLoader(); // 获取类加载器
