@@ -596,6 +596,7 @@ public class AntForest extends ModelTask {
   /** 青春特权森林道具领取 */
   private void youthPrivilege() {
     try {
+      if (!StatusUtil.canYouthPrivilegeToday()) return;
       // 定义任务列表，每个任务包含接口调用参数和标记信息
       List<List<String>> taskList =
           Arrays.asList(
@@ -613,6 +614,7 @@ public class AntForest extends ModelTask {
         // 获取任务信息列表
         JSONArray taskInfoList = getTaskStatusObject.getJSONArray("forestTasksNew").getJSONObject(0).getJSONArray("taskInfoList");
         // 遍历任务信息列表
+        List<String> resultList = new ArrayList<>();
         for (int i = 0; i < taskInfoList.length(); i++) {
           JSONObject taskInfo = taskInfoList.getJSONObject(i);
           JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo");
@@ -626,9 +628,13 @@ public class AntForest extends ModelTask {
               String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
               JSONObject resultOfReceive = new JSONObject(receiveResult);
               String resultDesc = resultOfReceive.getString("desc");
+              resultList.add(resultDesc);
               Log.forest("【青春特权】森林道具[" + taskName + "]领取结果：" + resultDesc);
             }
           }
+        }
+        if (resultList.stream().allMatch("处理成功"::equals)) {
+          StatusUtil.setYouthPrivilegeToday();
         }
       }
     } catch (Exception e) {
@@ -690,12 +696,14 @@ public class AntForest extends ModelTask {
   /** 处理不在签到时间范围内的逻辑 */
   private void studentTaskHandle(String tag) {
     try {
+      if (!StatusUtil.canStudentTask()) return;
       String isTasked = AntForestRpcCall.studentQqueryCheckInModel();
       JSONObject isTaskedJson = new JSONObject(isTasked);
       // 检查是否已经签到
       String action = isTaskedJson.getJSONObject("studentCheckInInfo").getString("action");
       if ("DO_TASK".equals(action)) {
         Log.record("【青春特权-学生签到】：今日已签到");
+        StatusUtil.setStudentTaskToday();
       } else {
         studentTask(tag);
       }
