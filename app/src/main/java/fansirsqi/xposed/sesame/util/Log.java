@@ -124,10 +124,24 @@ public class Log {
     }
 
     public static void printStackTrace(String TAG, Throwable th) {
-        String stackTrace = "error: " + android.util.Log.getStackTraceString(th);
+        String stackTrace = "Throwable error: " + android.util.Log.getStackTraceString(th);
         error(TAG, stackTrace);
         runtime(TAG, stackTrace);
     }
+
+    public static void printStackTrace(Exception e) {
+        String stackTrace = "Exception error: " + android.util.Log.getStackTraceString(e);
+        error(stackTrace);
+        runtime(stackTrace);
+    }
+
+    public static void printStackTrace(String TAG, Exception e) {
+        String stackTrace = "Throwable error: " + android.util.Log.getStackTraceString(e);
+        error(TAG, stackTrace);
+        runtime(TAG, stackTrace);
+    }
+
+
 
     /**
      * 根据日志名称生成带有日期的日志文件名。
