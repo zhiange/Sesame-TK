@@ -42,7 +42,7 @@ public class GreenFinance extends ModelTask {
 
     @Override
     public String getName() {
-        return "绿色经营";
+        return "绿色经营🌱";
     }
 
     @Override
@@ -70,8 +70,9 @@ public class GreenFinance extends ModelTask {
 
     @Override
     public void  run() {
-        String s = GreenFinanceRpcCall.greenFinanceIndex();
         try {
+            Log.record("执行开始-" + getName());
+            String s = GreenFinanceRpcCall.greenFinanceIndex();
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.runtime(TAG, jo.optString("resultDesc"));
@@ -99,26 +100,26 @@ public class GreenFinance extends ModelTask {
             if (bsnIds.length() > 0) {
                 batchSelfCollect(bsnIds);
             }
+
+            signIn("PLAY102632271");
+//            signIn("PLAY102932217");
+            signIn("PLAY102232206");
+            //执行打卡
+            behaviorTick();
+            //捐助
+            donation();
+            //收好友金币
+            batchStealFriend();
+            //评级奖品
+            prizes();
+            //绿色经营
+            doTask("AP13159535", TAG, "绿色经营📊");
+            ThreadUtil.sleep(500);
         } catch (Throwable th) {
             Log.runtime(TAG, "index err:");
             Log.printStackTrace(TAG, th);
         }
 
-        signIn("PLAY102632271");
-//            signIn("PLAY102932217");
-        signIn("PLAY102232206");
-
-        //执行打卡
-        behaviorTick();
-        //捐助
-        donation();
-        //收好友金币
-        batchStealFriend();
-        //评级奖品
-        prizes();
-        //绿色经营
-        doTask("AP13159535", TAG, "绿色经营📊");
-        ThreadUtil.sleep(500);
     }
 
     /**
@@ -292,7 +293,7 @@ public class GreenFinance extends ModelTask {
                     break;
                 }
                 Log.other("绿色经营📊[" + jsonObject.getString("title") + "]打卡成功");
-//                Thread.sleep(executeIntervalInt);
+//                ThreadUtil.sleep(executeIntervalInt);
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "doTick err:");
