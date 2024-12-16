@@ -2,54 +2,24 @@ package fansirsqi.xposed.sesame.task.omegakoiTown;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 
 public class OmegakoiTown extends ModelTask {
     private static final String TAG = OmegakoiTown.class.getSimpleName();
 
-    public enum RewardType {
-        gold, diamond, dyestuff, rubber, glass, certificate, shipping, tpuPhoneCaseCertificate,
-        glassPhoneCaseCertificate, canvasBagCertificate, notebookCertificate, box, paper, cotton;
-
-        public static final CharSequence[] rewardNames = {"金币", "钻石", "颜料", "橡胶", "玻璃", "合格证", "包邮券", "TPU手机壳合格证",
-                "玻璃手机壳合格证", "帆布袋合格证", "记事本合格证", "快递包装盒", "纸张", "棉花"};
-
-        public CharSequence rewardName() {
-            return rewardNames[ordinal()];
-        }
-    }
-
-    public enum HouseType {
-        houseTrainStation, houseStop, houseBusStation, houseGas, houseSchool, houseService, houseHospital, housePolice,
-        houseBank, houseRecycle, houseWasteTreatmentPlant, houseMetro, houseKfc, houseManicureShop, housePhoto, house5g,
-        houseGame, houseLucky, housePrint, houseBook, houseGrocery, houseScience, housemarket1, houseMcd,
-        houseStarbucks, houseRestaurant, houseFruit, houseDessert, houseClothes, zhiketang, houseFlower, houseMedicine,
-        housePet, houseChick, houseFamilyMart, houseHouse, houseFlat, houseVilla, houseResident, housePowerPlant,
-        houseWaterPlant, houseDailyChemicalFactory, houseToyFactory, houseSewageTreatmentPlant, houseSports,
-        houseCinema, houseCotton, houseMarket, houseStadium, houseHotel, housebusiness, houseOrchard, housePark,
-        houseFurnitureFactory, houseChipFactory, houseChemicalPlant, houseThermalPowerPlant, houseExpressStation,
-        houseDormitory, houseCanteen, houseAdministrationBuilding, houseGourmetPalace, housePaperMill,
-        houseAuctionHouse, houseCatHouse, houseStarPickingPavilion;
-
-        public static final CharSequence[] houseNames = {"火车站", "停车场", "公交站", "加油站", "学校", "服务大厅", "医院", "警察局", "银行",
-                "回收站", "垃圾处理厂", "地铁站", "快餐店", "美甲店", "照相馆", "移动营业厅", "游戏厅", "运气屋", "打印店", "书店", "杂货店", "科普馆", "菜场",
-                "汉堡店", "咖啡厅", "餐馆", "水果店", "甜品店", "服装店", "支课堂", "花店", "药店", "宠物店", "庄园", "全家便利店", "平房", "公寓", "别墅",
-                "居民楼", "风力发电站", "自来水厂", "日化厂", "玩具厂", "污水处理厂", "体育馆", "电影院", "新疆棉花厂", "超市", "游泳馆", "酒店", "商场", "果园",
-                "公园", "家具厂", "芯片厂", "化工厂", "火电站", "快递驿站", "宿舍楼", "食堂", "行政楼", "美食城", "造纸厂", "拍卖行", "喵小馆", "神秘研究所"};
-
-        public CharSequence houseName() {
-            return houseNames[ordinal()];
-        }
-    }
-
     @Override
     public String getName() {
-        return "小镇";
+        return "小镇🏕";
     }
 
     @Override
@@ -60,9 +30,101 @@ public class OmegakoiTown extends ModelTask {
 
     @Override
     public ModelFields getFields() {
-        ModelFields modelFields = new ModelFields();
-        return modelFields;
+        return new ModelFields();
     }
+
+    public enum RewardType {
+        gold, diamond, dyestuff, rubber, glass, certificate, shipping, tpuPhoneCaseCertificate,
+        glassPhoneCaseCertificate, canvasBagCertificate, notebookCertificate, box, paper, cotton;
+
+        public static final CharSequence[] rewardNames = {
+                "金币", "钻石", "颜料", "橡胶",
+                "玻璃", "合格证", "包邮券", "TPU手机壳合格证",
+                "玻璃手机壳合格证", "帆布袋合格证", "记事本合格证",
+                "快递包装盒", "纸张", "棉花"};
+
+        public CharSequence rewardName() {
+            return rewardNames[ordinal()];
+        }
+    }
+
+    @Getter
+    public enum HouseType {
+        houseTrainStation("火车站"),
+        houseStop("停车场"),
+        houseBusStation("公交站"),
+        houseGas("加油站"),
+        houseSchool("学校"),
+        houseService("服务大厅"),
+        houseHospital("医院"),
+        housePolice("警察局"),
+        houseBank("银行"),
+        houseRecycle("回收站"),
+        houseWasteTreatmentPlant("垃圾处理厂"),
+        houseMetro("地铁站"),
+        houseKfc("快餐店"),
+        houseManicureShop("美甲店"),
+        housePhoto("照相馆"),
+        house5g("移动营业厅"),
+        houseGame("游戏厅"),
+        houseLucky("运气屋"),
+        housePrint("打印店"),
+        houseBook("书店"),
+        houseGrocery("杂货店"),
+        houseScience("科普馆"),
+        housemarket1("菜场"),
+        houseMcd("汉堡店"),
+        houseStarbucks("咖啡厅"),
+        houseRestaurant("餐馆"),
+        houseFruit("水果店"),
+        houseDessert("甜品店"),
+        houseClothes("服装店"),
+        zhiketang("支课堂"),
+        houseFlower("花店"),
+        houseMedicine("药店"),
+        housePet("宠物店"),
+        houseChick("庄园"),
+        houseFamilyMart("全家便利店"),
+        houseHouse("平房"),
+        houseFlat("公寓"),
+        houseVilla("别墅"),
+        houseResident("居民楼"),
+        housePowerPlant("风力发电站"),
+        houseWaterPlant("自来水厂"),
+        houseDailyChemicalFactory("日化厂"),
+        houseToyFactory("玩具厂"),
+        houseSewageTreatmentPlant("污水处理厂"),
+        houseSports("体育馆"),
+        houseCinema("电影院"),
+        houseCotton("新疆棉花厂"),
+        houseMarket("超市"),
+        houseStadium("游泳馆"),
+        houseHotel("酒店"),
+        housebusiness("商场"),
+        houseOrchard("果园"),
+        housePark("公园"),
+        houseFurnitureFactory("家具厂"),
+        houseChipFactory("芯片厂"),
+        houseChemicalPlant("化工厂"),
+        houseThermalPowerPlant("火电站"),
+        houseExpressStation("快递驿站"),
+        houseDormitory("宿舍楼"),
+        houseCanteen("食堂"),
+        houseAdministrationBuilding("行政楼"),
+        houseGourmetPalace("美食城"),
+        housePaperMill("造纸厂"),
+        houseAuctionHouse("拍卖行"),
+        houseCatHouse("喵小馆"),
+        houseStarPickingPavilion("神秘研究所");
+
+        private final String name;
+
+        HouseType(String name) {
+            this.name = name;
+        }
+
+    }
+
 
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME) {
@@ -74,6 +136,7 @@ public class OmegakoiTown extends ModelTask {
 
     public void run() {
         try {
+            Log.record("开始执行-" + getName());
             RuntimeInfo.getInstance().put("omegakoiTown", System.currentTimeMillis());
             getUserTasks();
             getSignInStatus();
@@ -81,6 +144,8 @@ public class OmegakoiTown extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        } finally {
+            Log.record("结束执行-" + getName());
         }
     }
 
@@ -170,8 +235,15 @@ public class OmegakoiTown extends ModelTask {
                             String itemId = jo.getJSONObject("result").getJSONArray("rewards").getJSONObject(0)
                                     .getString("itemId");
                             RewardType rewardType = RewardType.valueOf(itemId);
-                            Log.other("小镇收金🌇[" + houseType.houseName() + "]#" + String.format("%.2f", amount)
+
+                            NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                            ((DecimalFormat) numberFormat).applyPattern("#.00");
+                            String formattedAmount = numberFormat.format(amount);
+                            Log.other("小镇收金🌇[" + houseType.getName() + "]#" + formattedAmount
                                     + rewardType.rewardName());
+
+//                            Log.other("小镇收金🌇[" + houseType.getName() + "]#" + String.format("%.2f", amount)
+//                                    + rewardType.rewardName());
                         }
                     }
                 }
