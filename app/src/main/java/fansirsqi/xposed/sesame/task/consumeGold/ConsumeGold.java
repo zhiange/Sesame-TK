@@ -8,13 +8,14 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class ConsumeGold extends ModelTask {
     private static final String TAG = ConsumeGold.class.getSimpleName();
 
     @Override
     public String getName() {
-        return "消费金";
+        return "消费金💰";
     }
 
     @Override
@@ -24,20 +25,21 @@ public class ConsumeGold extends ModelTask {
 
     @Override
     public ModelFields getFields() {
-        ModelFields modelFields = new ModelFields();
-        return modelFields;
+        return new ModelFields();
     }
 
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME) {
             return false;
         }
+        //则检查自上次消耗金币以来是否已经过去了至少 6 个小时
         long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
         return System.currentTimeMillis() - executeTime >= 21600000;
     }
 
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             signinCalendar();
             taskV2Index("CG_TASK_LIST");
@@ -49,6 +51,8 @@ public class ConsumeGold extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        }finally {
+            Log.record("执行结束-" + getName());
         }
     }
 
@@ -65,16 +69,20 @@ public class ConsumeGold extends ModelTask {
                     String taskStatus = extInfo.getString("taskStatus");
                     String title = extInfo.getString("title");
                     String taskId = extInfo.getString("actionBizId");
-                    if ("TO_RECEIVE".equals(taskStatus)) {
-                        taskV2TriggerReceive(taskId, title);
-                    } else if ("NONE_SIGNUP".equals(taskStatus)) {
-                        taskV2TriggerSignUp(taskId);
-                        Thread.sleep(1000L);
-                        taskV2TriggerSend(taskId);
-                        doubleCheck = true;
-                    } else if ("SIGNUP_COMPLETE".equals(taskStatus)) {
-                        taskV2TriggerSend(taskId);
-                        doubleCheck = true;
+                    switch (taskStatus) {
+                        case "TO_RECEIVE":
+                            taskV2TriggerReceive(taskId, title);
+                            break;
+                        case "NONE_SIGNUP":
+                            taskV2TriggerSignUp(taskId);
+                            ThreadUtil.sleep(1000L);
+                            taskV2TriggerSend(taskId);
+                            doubleCheck = true;
+                            break;
+                        case "SIGNUP_COMPLETE":
+                            taskV2TriggerSend(taskId);
+                            doubleCheck = true;
+                            break;
                     }
                 }
                 if (doubleCheck)
@@ -107,9 +115,7 @@ public class ConsumeGold extends ModelTask {
         try {
             String s = ConsumeGoldRpcCall.taskV2TriggerSignUp(taskId);
             JSONObject jo = new JSONObject(s);
-            if (jo.optBoolean("success")) {
-
-            }
+            jo.optBoolean("success");
         } catch (Throwable t) {
             Log.runtime(TAG, "taskV2TriggerSignUp err:");
             Log.printStackTrace(TAG, t);
@@ -120,9 +126,7 @@ public class ConsumeGold extends ModelTask {
         try {
             String s = ConsumeGoldRpcCall.taskV2TriggerSend(taskId);
             JSONObject jo = new JSONObject(s);
-            if (jo.optBoolean("success")) {
-
-            }
+            jo.optBoolean("success");
         } catch (Throwable t) {
             Log.runtime(TAG, "taskV2TriggerSend err:");
             Log.printStackTrace(TAG, t);
@@ -137,7 +141,6 @@ public class ConsumeGold extends ModelTask {
                 JSONObject homePromoInfoDTO = jo.getJSONObject("homePromoInfoDTO");
                 JSONArray homePromoTokenDTOList = homePromoInfoDTO.getJSONArray("homePromoTokenDTOList");
                 int tokenLeftAmount = 0;
-                int tokenTotalAmount = 0;
                 for (int i = 0; i < homePromoTokenDTOList.length(); i++) {
                     jo = homePromoTokenDTOList.getJSONObject(i);
                     String tokenType = jo.getString("tokenType");
