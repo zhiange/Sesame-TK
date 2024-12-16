@@ -7,6 +7,7 @@ import lombok.Getter;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -195,6 +196,7 @@ public abstract class Model {
         return readOnlyModelList;
     }
 
+
     /**
      * 初始化所有模型，销毁之前的模型实例，避免重复初始化
      */
@@ -203,7 +205,8 @@ public abstract class Model {
         for (int i = 0, len = modelClazzList.size(); i < len; i++) {
             Class<Model> modelClazz = modelClazzList.get(i);
             try {
-                Model model = modelClazz.newInstance();
+                // 使用 getDeclaredConstructor().newInstance() 替代已过时的 newInstance()
+                Model model = modelClazz.getDeclaredConstructor().newInstance();
                 ModelConfig modelConfig = new ModelConfig(model);
                 modelArray[i] = model;
                 modelMap.put(modelClazz, model);
@@ -222,11 +225,12 @@ public abstract class Model {
                     }
                     Objects.requireNonNull(groupModelConfigMap.get(group)).put(modelCode, modelConfig);
                 }
-            } catch (IllegalAccessException | InstantiationException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 Log.printStackTrace(e);
             }
         }
     }
+
 
     /**
      * 启动所有模型
