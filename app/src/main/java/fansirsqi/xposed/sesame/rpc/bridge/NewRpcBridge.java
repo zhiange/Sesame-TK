@@ -132,7 +132,9 @@ null,"{\"__apiCallStartTime\":"+ System.currentTimeMillis()
           boolean containsSuccess = (Boolean) XposedHelpers.callMethod(obj, "containsKey", "success");
           if (!containsSuccess) {
           rpcEntity.setError();
-          Notify.sendNewNotification(context.getApplicationContext(),"⚠️已触发请求频繁 "+ TimeUtil.getTimeStr(System.currentTimeMillis()),"请手动进入支付宝查看详情，正常请忽略😛",9527);
+          if(BaseModel.getErrNotify().getValue()){
+            Notify.sendNewNotification(context.getApplicationContext(),"⚠️已触发请求频繁 "+ TimeUtil.getTimeStr(System.currentTimeMillis()),"请手动进入支付宝查看详情，正常请忽略😛",9527);
+          }
         Log.error(
             "\n=======================================================>\n"
                 + "新 RPC 响应 | id: "
