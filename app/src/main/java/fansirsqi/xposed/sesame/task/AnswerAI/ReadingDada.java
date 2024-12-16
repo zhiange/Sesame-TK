@@ -1,9 +1,8 @@
-package fansirsqi.xposed.sesame.task.readingDada;
+package fansirsqi.xposed.sesame.task.AnswerAI;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.model.ModelGroup;
-import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StringUtil;
@@ -14,11 +13,9 @@ import fansirsqi.xposed.sesame.util.StringUtil;
  */
 public class ReadingDada {
     private static final String TAG = ReadingDada.class.getSimpleName();
-
     public ModelGroup getGroup() {
         return ModelGroup.STALL;
     }
-
     public static boolean answerQuestion(JSONObject bizInfo) {
         try {
             String taskJumpUrl = bizInfo.optString("taskJumpUrl");
