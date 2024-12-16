@@ -12,7 +12,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.task.readingDada.ReadingDada;
+import fansirsqi.xposed.sesame.task.AnswerAI.ReadingDada;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
@@ -54,7 +54,7 @@ public class AntStall extends ModelTask {
 
     @Override
     public String getName() {
-        return "新村";
+        return "新村🏵";
     }
 
     @Override
@@ -133,6 +133,7 @@ public class AntStall extends ModelTask {
     @Override
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             String s = AntStallRpcCall.home();
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
@@ -185,6 +186,8 @@ public class AntStall extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "home err:");
             Log.printStackTrace(TAG, t);
+        }finally {
+            Log.record("执行结束-" + getName());
         }
     }
 
@@ -737,7 +740,7 @@ public class AntStall extends ModelTask {
                 String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandom(5) + "ANUTSALTML_2PA_SHARE").getBytes(), Base64.NO_WRAP);
                 String str = AntStallRpcCall.achieveBeShareP2P(shareId);
                 JSONObject jsonObject = new JSONObject(str);
-                Thread.sleep(5000);
+                ThreadUtil.sleep(5000);
                 String name = UserMap.getMaskName(uid);
                 if (!jsonObject.optBoolean("success")) {
                     String code = jsonObject.getString("code");
@@ -892,7 +895,7 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, th);
         } finally {
             try {
-                Thread.sleep(1000);
+                ThreadUtil.sleep(1000);
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
@@ -1022,7 +1025,7 @@ public class AntStall extends ModelTask {
                             Log.farm("蚂蚁新村🚫在[" + UserMap.getMaskName(friendId) + "]贴罚单");
                         } finally {
                             try {
-                                Thread.sleep(1000);
+                                ThreadUtil.sleep(1000);
                             } catch (Exception e) {
                                 Log.printStackTrace(e);
                             }
@@ -1030,7 +1033,7 @@ public class AntStall extends ModelTask {
                     }
                 } finally {
                     try {
-                        Thread.sleep(1500);
+                        ThreadUtil.sleep(1500);
                     } catch (Exception e) {
                         Log.printStackTrace(e);
                     }
