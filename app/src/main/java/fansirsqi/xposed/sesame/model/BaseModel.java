@@ -51,6 +51,9 @@ public class BaseModel extends Model {
   private static final IntegerModelField.MultiplyIntegerModelField waitWhenException =
       new IntegerModelField.MultiplyIntegerModelField("waitWhenException", "异常等待时间(分钟)", 60, 0, 24 * 60, 60_000);
 
+  /**异常通知开关*/
+  @Getter private static final BooleanModelField errNotify = new BooleanModelField("errNotify", "开启异常通知", false);
+
   /** 是否启用新接口（最低支持版本 v10.3.96.8100） */
   @Getter private static final BooleanModelField newRpc = new BooleanModelField("newRpc", "使用新接口(最低支持v10.3.96.8100)", true);
 
@@ -67,7 +70,7 @@ public class BaseModel extends Model {
   @Getter private static final BooleanModelField showToast = new BooleanModelField("showToast", "气泡提示", true);
 
   /** 气泡提示的纵向偏移量 */
-  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 85);
+  @Getter private static final IntegerModelField toastOffsetY = new IntegerModelField("toastOffsetY", "气泡纵向偏移", 99);
 
   /** 只显示中文并设置时区 */
   @Getter private static final BooleanModelField languageSimplifiedChinese = new BooleanModelField("languageSimplifiedChinese", "只显示中文并设置时区", true);
@@ -77,7 +80,7 @@ public class BaseModel extends Model {
 
   @Override
   public String getName() {
-    return "基础";
+    return "基础⚙️";
   }
 
   @Override
@@ -93,22 +96,23 @@ public class BaseModel extends Model {
   @Override
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
-    modelFields.addField(stayAwake);
-    modelFields.addField(checkInterval);
-    modelFields.addField(execAtTimeList);
-    modelFields.addField(wakenAtTimeList);
-    modelFields.addField(energyTime);
-    modelFields.addField(timedTaskModel);
-    modelFields.addField(timeoutRestart);
-    modelFields.addField(waitWhenException);
-    modelFields.addField(newRpc);
-    modelFields.addField(debugMode);
-    modelFields.addField(batteryPerm);
-    modelFields.addField(recordLog);
-    modelFields.addField(showToast);
-    modelFields.addField(enableOnGoing);
-    modelFields.addField(languageSimplifiedChinese);
-    modelFields.addField(toastOffsetY);
+    modelFields.addField(stayAwake);//是否保持唤醒状态
+    modelFields.addField(checkInterval);//执行间隔时间
+    modelFields.addField(execAtTimeList);//定时执行的时间点列表
+    modelFields.addField(wakenAtTimeList);//定时唤醒的时间点列表
+    modelFields.addField(energyTime);//能量收集的时间范围
+    modelFields.addField(timedTaskModel);//定时任务模式选择
+    modelFields.addField(timeoutRestart);//超时是否重启
+    modelFields.addField(waitWhenException);//异常发生时的等待时间
+    modelFields.addField(errNotify);//异常通知开关
+    modelFields.addField(newRpc);//是否启用新接口
+    modelFields.addField(debugMode);//是否开启抓包调试模式
+    modelFields.addField(batteryPerm);//是否申请支付宝的后台运行权限
+    modelFields.addField(recordLog);//是否记录日志
+    modelFields.addField(showToast);//是否显示气泡提示
+    modelFields.addField(enableOnGoing);//是否开启状态栏禁删
+    modelFields.addField(languageSimplifiedChinese);//是否只显示中文并设置时区
+    modelFields.addField(toastOffsetY);//气泡提示的纵向偏移量
     return modelFields;
   }
 
@@ -144,7 +148,7 @@ public class BaseModel extends Model {
 
       // 若首次调用结果为空，进行延迟后再次调用
       if (response == null) {
-        Thread.sleep(RandomUtil.delay());
+        ThreadUtil.sleep(RandomUtil.delay());
         response = ReserveRpcCall.queryTreeItemsForExchange();
       }
 
