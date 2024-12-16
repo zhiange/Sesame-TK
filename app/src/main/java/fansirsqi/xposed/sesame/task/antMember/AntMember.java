@@ -18,7 +18,7 @@ public class AntMember extends ModelTask {
 
   @Override
   public String getName() {
-    return "会员";
+    return "会员🏆";
   }
 
   @Override
@@ -63,6 +63,7 @@ public class AntMember extends ModelTask {
   @Override
   public void run() {
     try {
+      Log.record("执行开始-" + getName());
       if (memberSign.getValue()) {
         memberSign();
       }
@@ -110,6 +111,8 @@ public class AntMember extends ModelTask {
       }
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
+    }finally {
+      Log.record("执行结束-" + getName());
     }
   }
 
@@ -225,7 +228,7 @@ public class AntMember extends ModelTask {
           Log.record("queryActivity");
           Log.runtime(jo.toString());
         }
-        Thread.sleep(500);
+        ThreadUtil.sleep(500);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "kmdkSignUp err:");
@@ -337,7 +340,7 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     } finally {
       try {
-        Thread.sleep(1000);
+        ThreadUtil.sleep(1000);
       } catch (Exception e) {
         Log.printStackTrace(e);
       }
@@ -535,7 +538,6 @@ public class AntMember extends ModelTask {
     Log.other("生活记录💰领取保障金[" + JsonUtil.getValueByPath(jo, "data.gainSumInsuredDTO.gainSumInsuredYuan") + "]" + "元");
     if (isRepeat) {
       promiseQueryDetail(recordId);
-      promiseQueryDetail(recordId);
       return false;
     }
     return true;
@@ -547,13 +549,11 @@ public class AntMember extends ModelTask {
    * @param recordId recordId
    * @throws JSONException JSONException
    */
-  private JSONObject promiseQueryDetail(String recordId) throws JSONException {
+  private void promiseQueryDetail(String recordId) throws JSONException {
     JSONObject jo = new JSONObject(AntMemberRpcCall.promiseQueryDetail(recordId));
     if (!jo.optBoolean("success")) {
       Log.runtime(TAG + ".promiseQueryDetail", jo.optString("errorMsg"));
-      return null;
     }
-    return jo;
   }
 
   /**
