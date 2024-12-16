@@ -249,7 +249,7 @@ public class DebugRpc {
                     String gameId = miniGameInfo.getString("gameId");
                     String key = miniGameInfo.getString("key");
                     // 模拟等待迷你游戏完成
-                    Thread.sleep(4000L);
+                    ThreadUtil.sleep(4000L);
                     // 调用RPC方法完成迷你游戏
                     jo = new JSONObject(DebugRpcCall.miniGameFinish(gameId, key));
                     // 检查迷你游戏是否完成成功
@@ -282,7 +282,7 @@ public class DebugRpc {
 
                 // 如果还有剩余次数，继续行走
                 if (leftCount > 0) {
-                    Thread.sleep(3000L);
+                    ThreadUtil.sleep(3000L);
                     walkGrid(); // 递归调用，继续行走
                 }
             } else {
@@ -292,10 +292,6 @@ public class DebugRpc {
         } catch (JSONException e) {
             // 处理JSON解析异常
             Log.runtime(TAG, "JSON解析错误:");
-            Log.printStackTrace(TAG, e);
-        } catch (InterruptedException e) {
-            // 处理线程中断异常
-            Log.runtime(TAG, "线程中断错误:");
             Log.printStackTrace(TAG, e);
         } catch (Throwable t) {
             // 处理其他可能的异常
