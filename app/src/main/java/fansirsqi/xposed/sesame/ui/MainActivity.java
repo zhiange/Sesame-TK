@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,7 +64,7 @@ public class MainActivity extends BaseActivity {
     // 获取并设置一言句子
     ViewAppInfo.checkRunType();
     updateSubTitle(ViewAppInfo.getRunType());
-    viewHandler = new Handler();
+    viewHandler = new Handler(Looper.getMainLooper());
     titleRunner = () -> updateSubTitle(RunType.DISABLE);
     if (mainImage != null) {
       mainImage.setOnLongClickListener(
@@ -261,8 +262,8 @@ public class MainActivity extends BaseActivity {
         data += Files.getFarmLogFile().getAbsolutePath();
         break;
 
-      case R.id.btn_all_log:
-        data += Files.getRecordLogFile().getAbsolutePath();
+      case R.id.btn_other_log:
+        data += Files.getOtherLogFile().getAbsolutePath();
         break;
       case R.id.btn_github:
         //   欢迎自己打包 欢迎大佬pr
@@ -292,8 +293,8 @@ public class MainActivity extends BaseActivity {
       MenuItem checkable = menu.add(0, 1, 1, R.string.hide_the_application_icon).setCheckable(true);
       checkable.setChecked(componentEnabledSetting > PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
       menu.add(0, 2, 2, R.string.view_error_log_file);
-      menu.add(0, 3, 3, R.string.view_other_log_file);
-      menu.add(0, 4, 4, R.string.view_all_log_file);
+      menu.add(0, 3, 3, R.string.view_all_log_file);
+      menu.add(0, 4, 4, R.string.view_runtim_log_file);
       menu.add(0, 5, 5, R.string.export_the_statistic_file);
       menu.add(0, 6, 6, R.string.import_the_statistic_file);
       menu.add(0, 7, 7, R.string.view_capture);
@@ -327,21 +328,21 @@ public class MainActivity extends BaseActivity {
         startActivity(errorIt);
         break;
       case 3:
-        String otherData = "file://";
-        otherData += Files.getOtherLogFile().getAbsolutePath();
+        String RecordData = "file://";
+        RecordData += Files.getRecordLogFile().getAbsolutePath();
         Intent otherIt = new Intent(this, HtmlViewerActivity.class);
         otherIt.putExtra("nextLine", false);
         otherIt.putExtra("canClear", true);
-        otherIt.setData(Uri.parse(otherData));
+        otherIt.setData(Uri.parse(RecordData));
         startActivity(otherIt);
         break;
       case 4:
-        String allData = "file://";
-        allData += Files.getRuntimeLogFile().getAbsolutePath();
+        String runtimeData = "file://";
+        runtimeData += Files.getRuntimeLogFile().getAbsolutePath();
         Intent allIt = new Intent(this, HtmlViewerActivity.class);
         allIt.putExtra("nextLine", false);
         allIt.putExtra("canClear", true);
-        allIt.setData(Uri.parse(allData));
+        allIt.setData(Uri.parse(runtimeData));
         startActivity(allIt);
         break;
       case 5:
