@@ -40,7 +40,7 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
                 try {
                     long delay = childTask.getExecTime() - System.currentTimeMillis();
                     if (delay > 0) {
-                        Thread.sleep(delay); // 延时执行任务
+                        ThreadUtil.sleep(delay); // 延时执行任务
                     }
                     childTask.run(); // 执行子任务
                 } catch (Exception e) {
@@ -70,12 +70,10 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
      * 移除指定的子任务
      *
      * @param childTask 要移除的子任务
-     * @return 移除是否成功
      */
     @Override
-    public Boolean removeChildTask(ModelTask.ChildModelTask childTask) {
+    public void removeChildTask(ModelTask.ChildModelTask childTask) {
         childTask.cancel(); // 取消子任务
-        return true;
     }
 
     /**
@@ -86,40 +84,26 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
      */
     @Override
     public Boolean clearGroupChildTask(String group) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
-                if (valueInner != null) {
-                    // 等待线程池中任务结束并关闭线程池
-                    ThreadUtil.shutdownAndAwaitTermination(valueInner, 3, TimeUnit.SECONDS);
-                }
-                return null;
-            });
-        } else {
-            synchronized (groupChildTaskExecutorMap) {
-                ThreadPoolExecutor groupThreadPool = groupChildTaskExecutorMap.get(group);
-                if (groupThreadPool != null) {
-                    // 等待线程池中任务结束并关闭线程池
-                    ThreadUtil.shutdownAndAwaitTermination(groupThreadPool, 3, TimeUnit.SECONDS);
-                    groupChildTaskExecutorMap.remove(group); // 移除该任务组的线程池
-                }
+        groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
+            if (valueInner != null) {
+                // 等待线程池中任务结束并关闭线程池
+                ThreadUtil.shutdownAndAwaitTermination(valueInner, 3, TimeUnit.SECONDS);
             }
-        }
+            return null;
+        });
         return true;
     }
 
     /**
      * 清除所有子任务
-     *
-     * @return 清除是否成功
      */
     @Override
-    public Boolean clearAllChildTask() {
+    public void clearAllChildTask() {
         // 遍历所有任务组，关闭对应的线程池
         for (ThreadPoolExecutor threadPoolExecutor : groupChildTaskExecutorMap.values()) {
             ThreadUtil.shutdownNow(threadPoolExecutor); // 立即关闭线程池
         }
         groupChildTaskExecutorMap.clear(); // 清空所有任务组
-        return true;
     }
 
     /**
