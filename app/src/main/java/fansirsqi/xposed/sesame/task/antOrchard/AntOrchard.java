@@ -37,7 +37,7 @@ public class AntOrchard extends ModelTask {
 
   @Override
   public String getName() {
-    return "农场";
+    return "农场🌾";
   }
 
   @Override
@@ -66,6 +66,7 @@ public class AntOrchard extends ModelTask {
   @Override
   public void run() {
     try {
+      Log.record("执行开始-" + getName());
       executeIntervalInt = Math.max(executeInterval.getValue(), 500);
       String s = AntOrchardRpcCall.orchardIndex();
       JSONObject jo = new JSONObject(s);
@@ -109,6 +110,8 @@ public class AntOrchard extends ModelTask {
     } catch (Throwable t) {
       Log.runtime(TAG, "start.run err:");
       Log.printStackTrace(TAG, t);
+    }finally {
+      Log.record("执行结束-" + getName());
     }
   }
 
@@ -191,7 +194,7 @@ public class AntOrchard extends ModelTask {
             continue;
           }
         } finally {
-          Thread.sleep(executeIntervalInt);
+          ThreadUtil.sleep(executeIntervalInt);
         }
         break;
       } while (true);
@@ -465,7 +468,7 @@ public class AntOrchard extends ModelTask {
         String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandom(5) + "ANTFARM_ORCHARD_SHARE_P2P").getBytes(), Base64.NO_WRAP);
         String str = AntOrchardRpcCall.achieveBeShareP2P(shareId);
         JSONObject jsonObject = new JSONObject(str);
-        Thread.sleep(5000);
+        ThreadUtil.sleep(5000);
         String name = UserMap.getMaskName(uid);
         if (!jsonObject.optBoolean("success")) {
           String code = jsonObject.getString("code");
