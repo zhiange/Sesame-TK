@@ -13,8 +13,8 @@ android {
     //    版本号组成
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
-    def patch = 1          // 补丁版本号
-    def buildTag = "beta" // 构建标签 (alpha, beta, release, 等)
+    def patch = 2          // 补丁版本号
+    def buildTag = "alpha" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
