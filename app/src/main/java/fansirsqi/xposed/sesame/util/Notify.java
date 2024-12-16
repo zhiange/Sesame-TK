@@ -118,7 +118,7 @@ public class Notify {
    */
   public static void updateNextExecText(long nextExecTime) {
     try {
-      titleText = nextExecTime > 0 ? "⏰ 下次施工时间 " + TimeUtil.getTimeStr(nextExecTime) : "";
+      titleText = nextExecTime > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTime) : "";
       sendText();
     } catch (Exception e) {
       Log.printStackTrace(e);
@@ -132,7 +132,7 @@ public class Notify {
    */
   public static void updateLastExecText(String content) {
     try {
-      contentText = "📌 上次施工时间 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + " \n🔔 " + content;
+      contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n 🌾 "+ content;
       lastNoticeTime = System.currentTimeMillis();
       sendText();
     } catch (Exception e) {
