@@ -11,6 +11,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class Reserve extends ModelTask {
 
     @Override
     public String getName() {
-        return "保护地";
+        return "保护地🌏";
     }
 
     @Override
@@ -54,9 +55,10 @@ public class Reserve extends ModelTask {
 
     private void animalReserve() {
         try {
+            Log.record("开始执行-"+getName());
             String s = ReserveRpcCall.queryTreeItemsForExchange();
             if (s == null) {
-                Thread.sleep(RandomUtil.delay());
+                ThreadUtil.sleep(RandomUtil.delay());
                 s = ReserveRpcCall.queryTreeItemsForExchange();
             }
             JSONObject jo = new JSONObject(s);
@@ -92,6 +94,8 @@ public class Reserve extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "animalReserve err:");
             Log.printStackTrace(TAG, t);
+        }finally {
+            Log.record("结束执行-"+getName());
         }
     }
 
@@ -150,13 +154,13 @@ public class Reserve extends ModelTask {
                     // StatisticsUtil.reserveToday(projectId, count);
                     break;
                 }
-                Thread.sleep(300);
+                ThreadUtil.sleep(300);
                 canApply = queryTreeForExchange(projectId);
                 if (!canApply) {
                     // StatisticsUtil.reserveToday(projectId, count);
                     break;
                 } else {
-                    Thread.sleep(300);
+                    ThreadUtil.sleep(300);
                 }
                 if (!StatusUtil.canReserveToday(projectId, count))
                     break;
