@@ -17,7 +17,7 @@ public class AntBookRead extends ModelTask {
 
     @Override
     public String getName() {
-        return "读书听书";
+        return "读书听书📚";
     }
 
     @Override
@@ -42,6 +42,7 @@ public class AntBookRead extends ModelTask {
     @Override
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             queryTaskCenterPage();
             queryTask();
@@ -49,6 +50,8 @@ public class AntBookRead extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        }finally {
+            Log.record("执行结束-" + getName());
         }
     }
 
@@ -89,7 +92,7 @@ public class AntBookRead extends ModelTask {
                                 if (energy >= 150) {
                                     break;
                                 } else {
-                                    Thread.sleep(1500L);
+                                    ThreadUtil.sleep(1500L);
                                 }
                             }
                         }
