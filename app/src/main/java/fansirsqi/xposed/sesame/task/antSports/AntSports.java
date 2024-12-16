@@ -52,7 +52,7 @@ public class AntSports extends ModelTask {
 
     @Override
     public String getName() {
-        return "运动";
+        return "运动🏅";
     }
 
     @Override
@@ -86,6 +86,7 @@ public class AntSports extends ModelTask {
     @Override
     public void boot(ClassLoader classLoader) {
         try {
+            Log.record("执行开始-" + getName());
             XposedHelpers.findAndHookMethod("com.alibaba.health.pedometer.core.datasource.PedometerAgent", classLoader,
                     "readDailyStep", new XC_MethodHook() {
                         @Override
@@ -102,6 +103,8 @@ public class AntSports extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "hook readDailyStep err:");
             Log.printStackTrace(TAG, t);
+        }finally{
+            Log.record("执行结束-"+getName());
         }
     }
 
