@@ -112,7 +112,6 @@ public class UserMap {
                             String nickName = (String) nickNameField.get(userObject);
                             String remarkName = (String) remarkNameField.get(userObject);
                             Integer friendStatus = (Integer) friendStatusField.get(userObject);
-
                             // 创建用户实体
                             UserEntity userEntity = new UserEntity(userId, account, friendStatus, name, nickName, remarkName);
                             if (Objects.equals(selfId, userId)) {
@@ -124,7 +123,6 @@ public class UserMap {
                             Log.printStackTrace(t);
                         }
                     }
-
                     // 保存当前用户信息
                     UserMap.saveSelf(selfEntity);
                 }
