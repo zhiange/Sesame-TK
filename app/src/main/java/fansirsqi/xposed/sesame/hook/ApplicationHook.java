@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
@@ -34,6 +36,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.util.*;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +50,7 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
+
 
   static final String TAG = ApplicationHook.class.getSimpleName();
 
@@ -100,6 +104,140 @@ public class ApplicationHook implements IXposedHookLoadPackage {
   public static void setOffline(boolean offline) {
     ApplicationHook.offline = offline;
   }
+
+
+  /**创建主任务的封装方法*/
+  private Runnable createMainTask() {
+    return new Runnable() {
+      private volatile long lastExecTime = 0;
+
+      @Override
+      public void run() {
+        if (!init) {
+          Log.record("未初始化，跳过任务执行");
+          return;
+        }
+
+        Log.runtime(TAG, "任务开始执行");
+        try {
+          if (shouldSkipExecution()) {
+            return;
+          }
+
+          if (!ensureCorrectUser()) {
+            return;
+          }
+
+          if (!executeCheckTask()) {
+            return;
+          }
+
+          TaskCommon.update();
+          ModelTask.startAllTask(false);
+
+          scheduleNextExecution();
+        } catch (Exception e) {
+          Log.record("任务执行异常:");
+          Log.printStackTrace(TAG, e);
+        }
+      }
+
+      // 检查是否需要跳过任务执行
+      private boolean shouldSkipExecution() {
+        int checkInterval = BaseModel.getCheckInterval().getValue();
+        long currentTime = System.currentTimeMillis();
+
+        if (lastExecTime + 2000 > currentTime) {
+          Log.record("执行间隔较短，跳过任务");
+          execDelayedHandler(checkInterval);
+          return true;
+        }
+
+        lastExecTime = currentTime;
+        return false;
+      }
+
+      // 确保用户正确性
+      private boolean ensureCorrectUser() {
+        String targetUid = getUserId();
+        String currentUid = UserMap.getCurrentUid();
+
+        if (targetUid == null || currentUid == null) {
+          Log.record("用户为空，重新登录");
+          reLogin();
+          return false;
+        }
+
+        if (!targetUid.equals(currentUid)) {
+          Log.record("用户切换中，重新登录");
+          Toast.show("切换用户中...");
+          reLogin();
+          return false;
+        }
+
+        return true;
+      }
+
+      // 执行检查任务
+      private boolean executeCheckTask() {
+        try {
+          FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
+          Thread checkThread = new Thread(checkTask);
+          checkThread.start();
+
+          if (!checkTask.get(10, TimeUnit.SECONDS)) {
+            handleCheckTimeout();
+            return false;
+          }
+
+          reLoginCount.set(0);
+          return true;
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+          Log.record("检查任务失败：" + e.getMessage());
+          reLogin();
+          return false;
+        }
+      }
+
+      // 处理检查超时的逻辑
+      private void handleCheckTimeout() {
+        long waitTime = 10000 - (System.currentTimeMillis() - lastExecTime);
+        if (waitTime > 0) {
+            ThreadUtil.sleep(waitTime);
+        }
+        Log.record("检查超时，重新登录");
+        reLogin();
+      }
+
+      // 调度下一次执行
+      private void scheduleNextExecution() {
+        int checkInterval = BaseModel.getCheckInterval().getValue();
+        List<String> execAtTimeList = BaseModel.getExecAtTimeList().getValue();
+
+        if (execAtTimeList != null) {
+          LocalDateTime lastExecDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime);
+          LocalDateTime nextExecDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime + checkInterval);
+
+          for (String execAtTime : execAtTimeList) {
+            if ("-1".equals(execAtTime)) {
+              return;
+            }
+
+            LocalDateTime execAtDateTime = TimeUtil.getLocalDateTimeByTimeStr(execAtTime);
+            if (execAtDateTime != null && lastExecDateTime.isBefore(execAtDateTime) && nextExecDateTime.isAfter(execAtDateTime)) {
+              Log.record("设置定时执行：" + execAtTime);
+              execDelayedHandler(ChronoUnit.MILLIS.between(lastExecDateTime, execAtDateTime));
+              return;
+            }
+          }
+        }
+
+        execDelayedHandler(checkInterval);
+      }
+    };
+  }
+
+
 
   @Override
   public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
@@ -189,128 +327,41 @@ public class ApplicationHook implements IXposedHookLoadPackage {
       }
       try {
         XposedHelpers.findAndHookMethod(
-            "android.app.Service",
-            classLoader,
-            "onCreate",
-            new XC_MethodHook() {
-              @SuppressLint("WakelockTimeout")
-              @Override
-              protected void afterHookedMethod(MethodHookParam param) {
-                Service appService = (Service) param.thisObject;
-                if (!ClassUtil.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
-                  return;
-                }
-                Log.runtime(TAG, "Service onCreate");
-                context = appService.getApplicationContext();
-                service = appService;
-                mainHandler = new Handler();
-                mainTask =
-                    BaseTask.newInstance(
-                        "MAIN_TASK",
-                        new Runnable() {
-                          private volatile long lastExecTime = 0;
-                          @Override
-                          public void run() {
-                            if (!init) {
-                              return;
-                            }
-                            Log.record("应用版本：" + alipayVersion.getVersionString());
-                            Log.record("模块版本：" + modelVersion);
-                            Log.record("开始执行");
-                            Log.record("[🔥开发者提示！！]只收能量时间段为："+BaseModel.getEnergyTime().getValue()+" \n该时间段内不会执行其他任务..若其他任务无日志，请到设置中自行调整");
-                            try {
-                              int checkInterval = BaseModel.getCheckInterval().getValue();
-                              if (lastExecTime + 2000 > System.currentTimeMillis()) {
-                                Log.record("执行间隔较短，跳过执行");
-                                execDelayedHandler(checkInterval);
-                                return;
-                              }
-                              updateDay();
-                              String targetUid = getUserId();
-                              String currentUid = UserMap.getCurrentUid();
-                              if (targetUid == null || currentUid == null) {
-                                Log.record("用户为空，放弃执行");
-                                reLogin();
-                                return;
-                              }
-                              if (!targetUid.equals(currentUid)) {
-                                Log.record("开始切换用户");
-                                Toast.show("开始切换用户");
-                                reLogin();
-                                return;
-                              }
-                              lastExecTime = System.currentTimeMillis();
-                              try {
-                                FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
-                                Thread checkThread = new Thread(checkTask);
-                                checkThread.start();
-                                if (!checkTask.get(10, TimeUnit.SECONDS)) {
-                                  long waitTime = 10000 - System.currentTimeMillis() + lastExecTime;
-                                  if (waitTime > 0) {
-                                    Thread.sleep(waitTime);
-                                  }
-                                  Log.record("执行失败：检查超时");
-                                  reLogin();
-                                  return;
-                                }
-                                reLoginCount.set(0);
-                              } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                                Log.record("执行失败：检查中断");
-                                reLogin();
-                                return;
-                              } catch (Exception e) {
-                                Log.record("执行失败：检查异常");
-                                reLogin();
-                                Log.printStackTrace(TAG, e);
-                                return;
-                              }
-                              TaskCommon.update();
-                              ModelTask.startAllTask(false);
-                              lastExecTime = System.currentTimeMillis();
-                              try {
-                                // 定时执行的时间列表
-                                List<String> execAtTimeList = BaseModel.getExecAtTimeList().getValue();
-                                if (execAtTimeList != null) {
-                                  LocalDateTime lastExecTimeDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime);
-                                  LocalDateTime nextExecTimeDateTime = TimeUtil.getLocalDateTimeByTimeMillis(lastExecTime + checkInterval);
-                                  for (String execAtTime : execAtTimeList) {
-                                    if (execAtTime.equals("-1")) return;
-                                    LocalDateTime execAtTimeDateTime = TimeUtil.getLocalDateTimeByTimeStr(execAtTime);
-                                    if (execAtTimeDateTime != null && lastExecTimeDateTime.isBefore(execAtTimeDateTime) && nextExecTimeDateTime.isAfter(execAtTimeDateTime)) {
-                                      Log.record("设置定时执行:" + execAtTime);
-                                      // 执行延时操作
-                                      execDelayedHandler(ChronoUnit.MILLIS.between(lastExecTimeDateTime, execAtTimeDateTime));
-//                                      Files.clearLog();
-                                      return;
-                                    }
-                                  }
-                                }
-                              } catch (Exception e) {
-                                Log.runtime(TAG, "execAtTime err:");
-                                Log.printStackTrace(TAG, e);
-                              }
-                              execDelayedHandler(checkInterval);
-//                              Files.clearLog();
-                            } catch (Exception e) {
-                              Log.record("执行异常:");
-                              Log.printStackTrace(e);
-                            }
-                          }
-                        });
-                registerBroadcastReceiver(appService);
-//                dayCalendar = Calendar.getInstance();
-                StatisticsUtil.load();
-                FriendWatch.load();
-                if (initHandler(true)) {
-                  init = true;
-                }
-              }
-            });
+                "android.app.Service",
+                classLoader,
+                "onCreate",
+                new XC_MethodHook() {
+                  @SuppressLint("WakelockTimeout")
+                  @Override
+                  protected void afterHookedMethod(MethodHookParam param) {
+                    Service appService = (Service) param.thisObject;
+                    if (!ClassUtil.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
+                      return;
+                    }
+                    Log.runtime(TAG, "Service onCreate");
+
+                    context = appService.getApplicationContext();
+                    service = appService;
+
+                    mainHandler = new Handler(Looper.getMainLooper());
+                    mainTask = BaseTask.newInstance("MAIN_TASK", createMainTask());
+                    registerBroadcastReceiver(appService);
+                    StatisticsUtil.load();
+                    FriendWatch.load();
+
+                    if (initHandler(true)) {
+                      init = true;
+                    }
+                  }
+                });
         Log.runtime(TAG, "hook service onCreate successfully");
       } catch (Throwable t) {
         Log.runtime(TAG, "hook service onCreate err:");
         Log.printStackTrace(TAG, t);
       }
+
+
+
       try {
         XposedHelpers.findAndHookMethod( "android.app.Service", classLoader, "onDestroy",
             new XC_MethodHook() {
@@ -538,12 +589,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     0                           // 附加数据（初始化为默认值）
                             );
                             rpcHookMap.put(obj, record);  // 存储 RpcRecord
-//                            Log.capture("记录对象的引用: " + obj);
-                          } catch (Exception e) {
-//                            Log.system("异常: " + e.getMessage());
+                          } catch (Exception ignored) {
                           }
-                        } else {
-                          Log.system("警告: object 为 null，未能添加记录");
                         }
                       }
 
@@ -563,11 +610,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             } else {
                               Log.capture("未找到记录，可能已删除或不存在: 对象 = " + obj);
                             }
-                          } catch (Exception e) {
-//                            Log.capture("异常: " + e.getMessage());
+                          } catch (Exception ignored) {
                           }
-                        } else {
-                          Log.capture("警告: object 为 null，未能删除记录");
                         }
                       }
                     }
