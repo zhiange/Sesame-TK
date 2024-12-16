@@ -26,7 +26,7 @@ public class AntDodo extends ModelTask {
 
     @Override
     public String getName() {
-        return "神奇物种";
+        return "神奇物种🐼";
     }
 
     @Override
@@ -67,6 +67,7 @@ public class AntDodo extends ModelTask {
     @Override
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             receiveTaskAward();
             propList();
             collect();
@@ -79,6 +80,8 @@ public class AntDodo extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        }finally {
+            Log.record("执行结束-" + getName());
         }
     }
 
