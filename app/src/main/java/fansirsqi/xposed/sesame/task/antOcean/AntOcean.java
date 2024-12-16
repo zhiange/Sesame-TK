@@ -30,7 +30,7 @@ public class AntOcean extends ModelTask {
 
     @Override
     public String getName() {
-        return "海洋";
+        return "海洋🌊";
     }
 
     @Override
@@ -80,6 +80,7 @@ public class AntOcean extends ModelTask {
     @Override
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             String s = AntOceanRpcCall.queryOceanStatus();
             JSONObject jo = new JSONObject(s);
             if ("SUCCESS".equals(jo.getString("resultCode"))) {
@@ -98,6 +99,9 @@ public class AntOcean extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        }
+        finally {
+            Log.record("执行结束-" + getName());
         }
     }
 
@@ -740,12 +744,12 @@ public class AntOcean extends ModelTask {
                     Log.forest("保护海洋🏖️[" + itemName + "]#发生未知错误，停止申请");
                     break;
                 }
-                Thread.sleep(300);
+                ThreadUtil.sleep(300);
                 appliedTimes = queryCultivationDetail(cultivationCode, projectCode, count);
                 if (appliedTimes < 0) {
                     break;
                 } else {
-                    Thread.sleep(300);
+                    ThreadUtil.sleep(300);
                 }
             }
         } catch (Throwable t) {
