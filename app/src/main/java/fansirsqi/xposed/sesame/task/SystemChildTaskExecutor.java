@@ -57,7 +57,7 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
                         long delay = childTask.getExecTime() - System.currentTimeMillis();
                         if (delay > 0) {
                             try {
-                                Thread.sleep(delay); // 延迟执行子任务
+                                ThreadUtil.sleep(delay); // 延迟执行子任务
                             } catch (Exception e) {
                                 return; // 如果睡眠中被中断则直接返回
                             }
@@ -103,12 +103,10 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
      * 移除指定的子任务
      *
      * @param childTask 要移除的子任务
-     * @return 是否移除成功
      */
     @Override
-    public Boolean removeChildTask(ModelTask.ChildModelTask childTask) {
+    public void removeChildTask(ModelTask.ChildModelTask childTask) {
         childTask.cancel(); // 取消子任务
-        return true;
     }
 
     /**
@@ -144,17 +142,14 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
 
     /**
      * 清除所有任务组中的所有子任务
-     *
-     * @return 是否清除成功
      */
     @Override
-    public Boolean clearAllChildTask() {
+    public void clearAllChildTask() {
         // 遍历所有任务组，关闭对应的线程池
         for (ThreadPoolExecutor threadPoolExecutor : groupChildTaskExecutorMap.values()) {
             ThreadUtil.shutdownNow(threadPoolExecutor); // 立即关闭线程池
         }
         groupChildTaskExecutorMap.clear(); // 清空所有任务组
-        return true;
     }
 
     /**
@@ -172,27 +167,14 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
         }
 
         // Android 7.0 及以上版本使用 compute 方法创建线程池
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            threadPoolExecutor = groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
-                if (valueInner == null) {
-                    // 创建一个新的线程池，最大线程数无穷大，采用调用者运行策略
-                    valueInner = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 30L, TimeUnit.SECONDS,
-                            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
-                }
-                return valueInner;
-            });
-        } else {
-            // 对于低版本 Android，使用同步块处理
-            synchronized (groupChildTaskExecutorMap) {
-                threadPoolExecutor = groupChildTaskExecutorMap.get(group);
-                if (threadPoolExecutor == null) {
-                    // 创建一个新的线程池，最大线程数无穷大，采用调用者运行策略
-                    threadPoolExecutor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 30L, TimeUnit.SECONDS,
-                            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
-                    groupChildTaskExecutorMap.put(group, threadPoolExecutor); // 将线程池添加到任务组中
-                }
+        threadPoolExecutor = groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
+            if (valueInner == null) {
+                // 创建一个新的线程池，最大线程数无穷大，采用调用者运行策略
+                valueInner = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 30L, TimeUnit.SECONDS,
+                        new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
             }
-        }
+            return valueInner;
+        });
         return threadPoolExecutor;
     }
 }
