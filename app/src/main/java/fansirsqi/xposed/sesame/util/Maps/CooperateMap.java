@@ -11,7 +11,7 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 
 /**
- * 合作ID映射工具类。
+ * 合种ID映射工具类。
  * 提供了一个线程安全的ID映射，支持添加、删除、加载和保存ID映射。
  * 用于存储和检索与合作相关的ID映射信息。
  */

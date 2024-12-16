@@ -2,6 +2,7 @@ package fansirsqi.xposed.sesame.task.antCooperate;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -20,7 +21,7 @@ public class AntCooperate extends ModelTask {
 
     @Override
     public String getName() {
-        return "合种";
+        return "合种🌳";
     }
 
     @Override
@@ -31,6 +32,7 @@ public class AntCooperate extends ModelTask {
     private final BooleanModelField cooperateWater = new BooleanModelField("cooperateWater", "合种浇水", false);
     private final SelectAndCountModelField cooperateWaterList = new SelectAndCountModelField("cooperateWaterList", "合种浇水列表", new LinkedHashMap<>(), CooperateUser::getList);
     private final SelectAndCountModelField cooperateWaterTotalLimitList = new SelectAndCountModelField("cooperateWaterTotalLimitList", "浇水总量限制列表", new LinkedHashMap<>(), CooperateUser::getList);
+
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -48,10 +50,11 @@ public class AntCooperate extends ModelTask {
     @Override
     public void run() {
         try {
+            Log.record("执行开始-" + getName());
             if (cooperateWater.getValue()) {
                 String s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 if (s == null) {
-                    Thread.sleep(RandomUtil.delay());
+                    ThreadUtil.sleep(RandomUtil.delay());
                     s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 }
                 JSONObject jo = new JSONObject(s);
@@ -89,14 +92,17 @@ public class AntCooperate extends ModelTask {
                         }
                     }
                 } else {
-                    Log.runtime(TAG, jo.getString("resultDesc"));
+                    Log.error(TAG, "获取合种列表失败:");
+                    Log.runtime(TAG + "获取合种列表失败:", jo.getString("resultDesc"));
                 }
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        } finally {
+            CooperateMap.save(UserMap.getCurrentUid());
+            Log.record("执行结束-" + getName());
         }
-        CooperateMap.save(UserMap.getCurrentUid());
     }
 
     private static void cooperateWater(String uid, String coopId, int count, String name) {
@@ -118,7 +124,7 @@ public class AntCooperate extends ModelTask {
     }
 
     private static int calculatedWaterNum(String uid, String coopId, int num, int limitNum) {
-        try{
+        try {
             String s = AntCooperateRpcCall.queryCooperateRank("A", coopId);
             JSONObject jo = new JSONObject(s);
             if (jo.optBoolean("success", false)) {
@@ -138,9 +144,7 @@ public class AntCooperate extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "calculatedWaterNum err:");
             Log.printStackTrace(TAG, t);
-        } finally {
-            return num;
         }
-
+        return num;
     }
 }
