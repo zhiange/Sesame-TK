@@ -18,9 +18,8 @@ public interface ChildTaskExecutor {
      * 移除一个子任务
      *
      * @param childTask 要移除的子任务
-     * @return 如果移除成功返回 true，否则返回 false
      */
-    Boolean removeChildTask(ModelTask.ChildModelTask childTask);
+    void removeChildTask(ModelTask.ChildModelTask childTask);
 
     /**
      * 清除指定组的所有子任务
@@ -32,8 +31,6 @@ public interface ChildTaskExecutor {
 
     /**
      * 清除所有子任务
-     *
-     * @return 如果清除成功返回 true，否则返回 false
      */
-    Boolean clearAllChildTask();
+    void clearAllChildTask();
 }
