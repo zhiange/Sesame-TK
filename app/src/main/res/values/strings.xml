@@ -17,7 +17,6 @@ If you purchased it, please contact the seller for a refund or report the seller
     <string name="hello_user">Hello User!</string>
     <string name="base_configuration">BASE CONFIGURATION</string>
     <string name="immediate_effect">Enable</string>
-    <string name="record_log">Record log</string>
     <string name="show_toast">Show toast</string>
     <string name="stay_awake">Stay awake</string>
     <string name="timeout_restart">Restart when timeout</string>
@@ -75,6 +74,7 @@ If you purchased it, please contact the seller for a refund or report the seller
     <string name="forest_log">Forest log</string>
     <string name="farm_log">Farm log</string>
     <string name="all_log">All log</string>
+    <string name="other_log">Other log</string>
     <string name="runtime_log">Runtime log</string>
     <string name="unactivated">UNACTIVATED</string>
     <string name="tips">Tips</string>
@@ -82,10 +82,10 @@ If you purchased it, please contact the seller for a refund or report the seller
     <string name="view_error_log_file">View error log file</string>
     <string name="export_error_log_file">Export error log file</string>
     <string name="export_runtime_log_file">Export all log file</string>
-    <string name="view_other_log_file">View Other log file</string>
+    <string name="view_all_log_file">View All log file</string>
     <string name="export_the_statistic_file">Export the statistic file</string>
     <string name="import_the_statistic_file">Import the statistic file</string>
-    <string name="view_all_log_file">View runtime log file</string>
+    <string name="view_runtim_log_file">View runtime log file</string>
     <string name="view_capture">View debug</string>
     <string name="settings">Settings</string>
     <string name="extend">Extend options</string>

@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
+
+import androidx.core.content.ContextCompat;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.*;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
@@ -91,6 +94,14 @@ public class SettingsActivity extends BaseActivity {
             ModelConfig modelConfig = configEntry.getValue();
             ModelFields modelFields = modelConfig.getFields();
 
+            TabHost.TabSpec tabSpec = tabHost.newTabSpec(modelCode);
+            // 创建一个新的 TextView 作为选项卡的指示器
+            TextView indicator = new TextView(context);
+            indicator.setText(modelConfig.getName()); // 设置选项卡名称
+            indicator.setGravity(Gravity.START); // 设置文本左对齐
+            indicator.setPadding(20, 40, 10, 40); // 设置内边距
+            indicator.setTextColor(ContextCompat.getColor(context, R.color.textColorBlack));
+
             tabHost.addTab(tabHost.newTabSpec(modelCode)
                     .setIndicator(modelConfig.getName()) // 设置选项卡名称
                     .setContent(new TabHost.TabContentFactory() {
@@ -101,7 +112,6 @@ public class SettingsActivity extends BaseActivity {
                             linearLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                             linearLayout.setGravity(Gravity.CENTER_HORIZONTAL);
                             linearLayout.setOrientation(LinearLayout.VERTICAL);
-
                             // 遍历字段并动态生成对应的视图
                             for (ModelField<?> modelField : modelFields.values()) {
                                 View view = modelField.getView(context);
