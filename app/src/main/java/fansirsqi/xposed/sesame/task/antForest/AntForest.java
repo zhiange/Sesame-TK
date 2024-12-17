@@ -285,16 +285,13 @@ public class AntForest extends ModelTask {
 
             taskCount.set(0);
             selfId = UserMap.getCurrentUid();
-
             JSONObject selfHomeObj = collectSelfEnergy();
             updateSelfHomePage(selfHomeObj);
-            Log.other("获取[我]主页成功" + shieldEndTime + System.currentTimeMillis());
             boolean needshield = shieldCard.getValue() && shieldEndTime < System.currentTimeMillis();
             // 获取背包对象
             JSONObject bagObject = getBag();
             // 如果需要使用保护罩
             if (needshield) useShieldCard(bagObject);
-
             try {
                 JSONObject friendsObject = new JSONObject(AntForestRpcCall.queryEnergyRanking());
                 if ("SUCCESS".equals(friendsObject.getString("resultCode"))) {
