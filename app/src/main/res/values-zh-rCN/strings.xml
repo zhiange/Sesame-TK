@@ -197,6 +197,6 @@
     <string name="extended_func">扩展功能</string>
     <string name="the_image_of_main">Main image</string>
     <string name="the_image_of_unactivated">The image of unactivated</string>
-    <string name="debug_tips">已发送请求，请在全部日志查看结果！</string>
+    <string name="debug_tips">请在debug日志查看结果！</string>
 
 </resources>

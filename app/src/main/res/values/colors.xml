@@ -11,7 +11,7 @@
     <color name="dashboard_item_4">#F6B900</color>
 
     <color name="textColorRed">#e10000</color>
-    <color name="textColorGreen">#00e100</color>
+    <color name="textColorGreen">#0F960F</color>
     <color name="textColorBlue">#0000e1</color>
     <color name="textColorYellow">#e1e100</color>
     <color name="textColorCyan">#00e1e1</color>
@@ -23,6 +23,7 @@
     <color name="button_pressed">#2555FD</color>
     <color name="button">#2489FD</color>
     <color name="button_text">#ffffff</color>
+    <color name="alpla_background">#FCF4F4F4</color>
 
     <color name="switch_white">#FFFFFF</color>
     <color name="switch_gray">#DFDFDF</color>

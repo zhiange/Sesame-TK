@@ -1,15 +1,13 @@
 package fansirsqi.xposed.sesame.ui;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.*;
 import android.widget.*;
-
-import androidx.core.content.ContextCompat;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.*;
@@ -48,7 +46,7 @@ public class SettingsActivity extends BaseActivity {
         return getString(R.string.settings); // 返回界面的副标题
     }
 
-    @SuppressLint("MissingInflatedId")
+    //    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,9 +77,7 @@ public class SettingsActivity extends BaseActivity {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
         setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
-
         context = this;
-
         // 初始化 TabHost
         tabHost = findViewById(R.id.tab_settings);
         tabHost.setup();
@@ -93,15 +89,6 @@ public class SettingsActivity extends BaseActivity {
             String modelCode = configEntry.getKey();
             ModelConfig modelConfig = configEntry.getValue();
             ModelFields modelFields = modelConfig.getFields();
-
-            TabHost.TabSpec tabSpec = tabHost.newTabSpec(modelCode);
-            // 创建一个新的 TextView 作为选项卡的指示器
-            TextView indicator = new TextView(context);
-            indicator.setText(modelConfig.getName()); // 设置选项卡名称
-            indicator.setGravity(Gravity.START); // 设置文本左对齐
-            indicator.setPadding(20, 40, 10, 40); // 设置内边距
-            indicator.setTextColor(ContextCompat.getColor(context, R.color.textColorBlack));
-
             tabHost.addTab(tabHost.newTabSpec(modelCode)
                     .setIndicator(modelConfig.getName()) // 设置选项卡名称
                     .setContent(new TabHost.TabContentFactory() {
@@ -190,9 +177,9 @@ public class SettingsActivity extends BaseActivity {
                                 userConfigDirectoryFile = Files.getUserConfigDirectory(userId);
                             }
                             if (Files.delFile(userConfigDirectoryFile)) {
-                                Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
+                                ToastUtil.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
+                                ToastUtil.makeText(this, "配置删除失败", Toast.LENGTH_SHORT).show();
                             }
                             finish();
                         })
@@ -212,7 +199,7 @@ public class SettingsActivity extends BaseActivity {
                     finish();
                     startActivity(intent);
                 } else {
-                    Toast.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
+                    ToastUtil.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -238,13 +225,13 @@ public class SettingsActivity extends BaseActivity {
                     }
                     FileInputStream inputStream = new FileInputStream(configV2File);
                     if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
-                        Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
+                        ToastUtil.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+                        ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
                     Log.printStackTrace(e);
-                    Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+                    ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
                 }
             }
         } else if (requestCode == IMPORT_REQUEST_CODE) {
@@ -260,7 +247,7 @@ public class SettingsActivity extends BaseActivity {
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
                     if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
-                        Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
+                        ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                         if (!StringUtil.isEmpty(userId)) {
                             try {
                                 Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
@@ -274,11 +261,11 @@ public class SettingsActivity extends BaseActivity {
                         finish();
                         startActivity(intent);
                     } else {
-                        Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+                        ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                     }
                 } catch (IOException e) {
                     Log.printStackTrace(e);
-                    Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+                    ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -286,21 +273,21 @@ public class SettingsActivity extends BaseActivity {
 
     private void save() {
         // 保存当前用户的配置信息
-        if (Config.isModify(userId) && Config.save(userId, false)) {
-            ToastUtil.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
-            if (!StringUtil.isEmpty(userId)) {
-                try {
+        try {
+            if (Config.isModify(userId) && Config.save(userId, false)) {
+                ToastUtil.showToastWithDelay(this, "保存成功！", 100);
+                if (!StringUtil.isEmpty(userId)) {
                     Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
                     intent.putExtra("userId", userId);
                     sendBroadcast(intent);
-                } catch (Throwable th) {
-                    Log.printStackTrace(th);
                 }
             }
-        }
-        if (!StringUtil.isEmpty(userId)) {
-            UserMap.save(userId);
-            CooperateMap.save(userId);
+            if (!StringUtil.isEmpty(userId)) {
+                UserMap.save(userId);
+                CooperateMap.save(userId);
+            }
+        } catch (Throwable th) {
+            Log.printStackTrace(th);
         }
     }
 }

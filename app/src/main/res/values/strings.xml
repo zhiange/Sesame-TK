@@ -200,6 +200,6 @@ If you purchased it, please contact the seller for a refund or report the seller
     <string name="search_for_new_items_on_saplings">search_for_new_items_on_saplings</string>
     <string name="query_the_remaining_amount_of_saplings">query the_remaining_amount_of_saplings</string>
     <string name="extended_func">扩展功能</string>
-    <string name="debug_tips">已发送请求，请在全部日志查看结果！</string>
+    <string name="debug_tips">Please check the results in the debug log!</string>
 
 </resources>

@@ -3,8 +3,8 @@
     android:shape="rectangle">
 
     <!-- 圆角设置 -->
-    <corners android:radius="22dp" />
+    <corners android:radius="18sp" />
 
     <!-- 填充的颜色 -->
-    <solid android:color="#99333333" />
+    <solid android:color="@color/alpla_background" />
 </shape>
