@@ -399,7 +399,7 @@ public class MainActivity extends BaseActivity {
     if (length > 0 && length < 3) {
       new Thread(
               () -> {
-                ThreadUtil.sleep(100);
+                ThreadUtil.sleep(1000);
                 if (!selected.get()) {
                   goSettingActivity(length - 1);
 
@@ -451,7 +451,7 @@ public class MainActivity extends BaseActivity {
         setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
         break;
       case PACKAGE:
-        setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
+        setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorGreen));
         break;
     }
   }
