@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.ToastUtil;
 
 /**
  * 扩展功能页面
@@ -61,7 +62,7 @@ public class ExtendActivity extends BaseActivity {
         intent.putExtra("data", "");
         intent.putExtra("type", type);
         sendBroadcast(intent); // 发送广播
-        Log.debug("扩展工具主动调用广播查询📢：\n=====================" + type);
+        Log.debug("扩展工具主动调用广播查询📢：" + type);
     }
 
     /**
@@ -71,7 +72,7 @@ public class ExtendActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             sendItemsBroadcast("getTreeItems");
-            Toast.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -82,7 +83,7 @@ public class ExtendActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             sendItemsBroadcast("getNewTreeItems");
-            Toast.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -93,7 +94,7 @@ public class ExtendActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             sendItemsBroadcast("queryAreaTrees");
-            Toast.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -104,7 +105,7 @@ public class ExtendActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             sendItemsBroadcast("getUnlockTreeItems");
-            Toast.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(ExtendActivity.this, debugTips, Toast.LENGTH_SHORT).show();
         }
     }
 }

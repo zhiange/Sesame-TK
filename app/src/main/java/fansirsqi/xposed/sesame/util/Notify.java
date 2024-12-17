@@ -132,7 +132,7 @@ public class Notify {
    */
   public static void updateLastExecText(String content) {
     try {
-      contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n 🌾 "+ content;
+      contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + " \n🌾 "+ content;
       lastNoticeTime = System.currentTimeMillis();
       sendText();
     } catch (Exception e) {

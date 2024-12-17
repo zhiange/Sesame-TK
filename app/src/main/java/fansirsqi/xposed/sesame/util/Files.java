@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.util;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 
 import java.io.Closeable;
@@ -14,9 +15,12 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
 
+import fansirsqi.xposed.sesame.hook.Toast;
+
 
 public class Files {
 
+  @SuppressLint("StaticFieldLeak")
 
   private static final String TAG = Files.class.getSimpleName();
 
@@ -31,9 +35,6 @@ public class Files {
 
   /** 日志文件夹路径 */
   public static final File LOG_DIR = getLogDir();
-
-
-
 
 
   /**
@@ -373,7 +374,7 @@ public class Files {
     for (File file : files) {
       String name = file.getName();
       if (name.endsWith(today + ".log") && file.length() < 31457280) { // 调整文件大小至30M重置
-        continue;
+        file.delete();
       }
     }
   }
@@ -465,7 +466,6 @@ public class Files {
    */
   public static synchronized boolean write2File(String s, File f) {
     if (!beforWrite(f)) return false;
-    //lock.lock();
     try {
       try (FileWriter fw = new FileWriter(f, false)) {
         fw.write(s);
@@ -493,7 +493,7 @@ public class Files {
     // 文件已存在，检查是否有写入权限
     if (f.exists() && !f.canWrite()) {
       //      Toast.show(f.getAbsoluteFile() + "没有写入权限！", true);
-      ToastUtil.showToast(f.getAbsoluteFile() + "没有写入权限！");
+      Toast.show(f.getAbsoluteFile() + "没有写入权限！");
       return false;
     }
     boolean success = false;

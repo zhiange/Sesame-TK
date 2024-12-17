@@ -174,7 +174,7 @@ public class HtmlViewerActivity extends BaseActivity {
         if (path != null) {
           java.io.File exportFile = Files.exportFile(new java.io.File(path));
           if (exportFile != null && exportFile.exists()) {
-            ToastUtil.showToast(this, getString(R.string.file_exported) + exportFile.getPath());
+            ToastUtil.showToast(getString(R.string.file_exported) + exportFile.getPath());
           } else {
             Log.runtime(TAG, "导出失败，exportFile 对象为 null 或不存在！");
           }
