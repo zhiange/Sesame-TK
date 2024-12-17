@@ -51,7 +51,6 @@ import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
 
-
   static final String TAG = ApplicationHook.class.getSimpleName();
 
   @Getter private static final String modelVersion = BuildConfig.VERSION_NAME;
@@ -108,9 +107,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
   /**创建主任务的封装方法*/
   private Runnable createMainTask() {
+
     return new Runnable() {
       private volatile long lastExecTime = 0;
-
       @Override
       public void run() {
         if (!init) {
@@ -260,6 +259,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
               context = (Context) param.args[0];
               try {
+
                 alipayVersion = new AlipayVersion(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
               } catch (Exception e) {
                 Log.printStackTrace(e);
@@ -342,7 +342,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                     context = appService.getApplicationContext();
                     service = appService;
-
                     mainHandler = new Handler(Looper.getMainLooper());
                     mainTask = BaseTask.newInstance("MAIN_TASK", createMainTask());
                     registerBroadcastReceiver(appService);
