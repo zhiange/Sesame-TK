@@ -36,7 +36,7 @@ public class AreaCode extends IdAndName {
      *
      * @return 区域代码列表
      */
-    public static List<AreaCode> getList() {
+    public static List<AreaCode> getList() throws JSONException {
         if (list == null) {
             String cityCode = Files.readFromFile(Files.getCityCodeFile());
             JSONArray ja = parseCityCode(cityCode);
@@ -62,24 +62,20 @@ public class AreaCode extends IdAndName {
      * @param cityCode 城市代码字符串
      * @return 解析后的JSONArray
      */
-    private static JSONArray parseCityCode(String cityCode) {
+    private static JSONArray parseCityCode(String cityCode) throws JSONException {
         try {
             return new JSONArray(cityCode);
         } catch (JSONException e) {
             // 解析失败，使用默认城市代码
-            String defaultCityCode = "[" +
-                    "{\"cityCode\":\"320100\",\"cityName\":\"南京市\"}," +
-                    "{\"cityCode\":\"330100\",\"cityName\":\"杭州市\"}," +
-                    "{\"cityCode\":\"350100\",\"cityName\":\"福州市\"}," +
-                    "{\"cityCode\":\"370100\",\"cityName\":\"济南市\"}," +
-                    "{\"cityCode\":\"430100\",\"cityName\":\"长沙市\"}," +
-                    "{\"cityCode\":\"440100\",\"cityName\":\"广州市\"}" +
-                    "]";
-            try {
-                return new JSONArray(defaultCityCode);
-            } catch (JSONException ex) {
-                return new JSONArray(); // 返回空的JSONArray
-            }
+            JSONArray defaultCities = new JSONArray();
+            defaultCities.put(new JSONObject().put("cityCode", "320100").put("cityName", "南京市"));
+            defaultCities.put(new JSONObject().put("cityCode", "330100").put("cityName", "杭州市"));
+            defaultCities.put(new JSONObject().put("cityCode", "350100").put("cityName", "福州市"));
+            defaultCities.put(new JSONObject().put("cityCode", "370100").put("cityName", "济南市"));
+            defaultCities.put(new JSONObject().put("cityCode", "430100").put("cityName", "长沙市"));
+            defaultCities.put(new JSONObject().put("cityCode", "440100").put("cityName", "广州市"));
+            return defaultCities;
         }
     }
+
 }

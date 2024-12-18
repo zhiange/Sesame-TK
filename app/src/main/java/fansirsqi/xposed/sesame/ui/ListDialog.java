@@ -19,7 +19,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectOneModelField;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.AreaCode;
-import fansirsqi.xposed.sesame.entity.CooperateUser;
+import fansirsqi.xposed.sesame.entity.CooperateEntity;
 import fansirsqi.xposed.sesame.entity.IdAndName;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 
@@ -221,7 +221,7 @@ public class ListDialog {
                                 })
                                 .setNegativeButton(c.getString(R.string.cancel), null)
                                 .create();
-                        if (curIdAndName instanceof CooperateUser)
+                        if (curIdAndName instanceof CooperateEntity)
                             edt_count.setHint("浇水克数");
                         else
                             edt_count.setHint("次数");
@@ -236,7 +236,7 @@ public class ListDialog {
         lv_list.setOnItemLongClickListener(
                 (p1, p2, p3, p4) -> {
                     IdAndName curIdAndName = (IdAndName) p1.getAdapter().getItem(p3);
-                    if (curIdAndName instanceof CooperateUser) {
+                    if (curIdAndName instanceof CooperateEntity) {
                         try {
                             new AlertDialog.Builder(c)
                                     .setTitle("删除 " + curIdAndName.name)
