@@ -6,5 +6,5 @@
     <corners android:radius="18sp" />
 
     <!-- 填充的颜色 -->
-    <solid android:color="@color/alpla_background" />
+    <solid android:color="@color/background" />
 </shape>
