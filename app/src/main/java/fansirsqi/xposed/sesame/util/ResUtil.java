@@ -69,13 +69,44 @@ public class ResUtil {
         return false;
     }
 
+
+    public static Boolean isSuccess(JSONObject jo) {
+        return isSuccess(TAG, jo);
+    }
+
+    public static Boolean isSuccess(String tag, JSONObject jo) {
+        try {
+            if (!jo.optBoolean("success") && !jo.optBoolean("isSuccess")) {
+                if (jo.has("errorMsg")) {
+                    Log.error(tag, "errorMsg: " + jo.getString("errorMsg"));
+                } else if (jo.has("errorMessage")) {
+                    Log.error(tag, "errorMessage: " + jo.getString("errorMessage"));
+                } else if (jo.has("desc")) {
+                    Log.error(tag, "desc: " + jo.getString("desc"));
+                } else if (jo.has("resultDesc")) {
+                    Log.error(tag, "resultDesc: " + jo.getString("resultDesc"));
+                } else if (jo.has("resultView")) {
+                    Log.error(tag, "resultView: " + jo.getString("resultView"));
+                } else {
+                    Log.runtime(tag, jo.toString());
+                }
+                return false;
+            }
+            return true;
+        } catch (JSONException e) {
+            Log.error(TAG, "checkSuccess err:");
+            Log.printStackTrace(e);
+        }
+        return false;
+    }
+
     private static void recordError(String TAG, JSONObject jo, String key, String prefix) throws JSONException {
         if (jo.has(key)) {
             Log.record(TAG + prefix + ": " + jo.getString(key));
         } else if (jo.has("resultView")) {
             Log.record(TAG + prefix + ": " + jo.getString("resultView"));
         } else {
-            Log.record(TAG + prefix + ": " + jo.toString());
+            Log.record(TAG + prefix + ": " + jo);
         }
     }
 }
