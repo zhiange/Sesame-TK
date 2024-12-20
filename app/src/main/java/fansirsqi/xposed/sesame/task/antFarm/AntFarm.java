@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.*;
@@ -2564,7 +2564,7 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    static class AntFarmFamilyOption extends IdAndName {
+    static class AntFarmFamilyOption extends MapperEntity {
 
         public AntFarmFamilyOption(String i, String n) {
             id = i;
