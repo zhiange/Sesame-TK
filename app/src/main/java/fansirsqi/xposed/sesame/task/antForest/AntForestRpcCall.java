@@ -455,6 +455,7 @@ public class AntForestRpcCall {
     return ApplicationHook.requestString("alipay.bizfmcg.greenlife.consultForSendEnergyByAction", "[{\"sourceType\":\"" + sourceType + "\"}]");
   }
 
+  /** 森林集市 */
   public static String sendEnergyByAction(String sourceType) {
     return ApplicationHook.requestString(
         "alipay.bizfmcg.greenlife.sendEnergyByAction",
