@@ -34,7 +34,7 @@ public class UIConfig {
      */
     public static Boolean save() {
         Log.record("保存UI配置");
-        return Files.setUIConfigFile(toSaveStr());
+        return Files.setUIConfigFile(JsonUtil.formatJson(INSTANCE));
     }
 
     /**
@@ -52,7 +52,7 @@ public class UIConfig {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
 
                 // 如果格式化后的内容与原始内容不同，则进行格式化并保存
-                String formatted = toSaveStr();
+                String formatted = JsonUtil.formatJson(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "格式化UI配置");
                     Log.system(TAG, "格式化UI配置");
@@ -63,7 +63,7 @@ public class UIConfig {
                 Log.runtime(TAG, "初始UI配置");
                 Log.system(TAG, "初始UI配置");
                 // 保存默认配置到文件
-                Files.write2File(toSaveStr(), uiConfigFile);
+                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -71,7 +71,7 @@ public class UIConfig {
             Log.system(TAG, "重置UI配置");
             try {
                 unload();  // 出现异常时卸载当前配置
-                Files.write2File(toSaveStr(), uiConfigFile);  // 保存默认配置
+                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);  // 保存默认配置
             } catch (Exception e) {
                 Log.printStackTrace(TAG, e);
             }
@@ -92,13 +92,6 @@ public class UIConfig {
         }
     }
 
-    /**
-     * 将当前 UI 配置实例转换为 JSON 字符串，供保存使用
-     *
-     * @return 格式化后的 JSON 字符串
-     */
-    public static String toSaveStr() {
-        return JsonUtil.toFormatJsonString(INSTANCE);
-    }
+
 
 }

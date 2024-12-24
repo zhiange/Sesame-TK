@@ -126,7 +126,7 @@ public class Config {
         }
 
         if (json != null) {
-            String formatted = toSaveStr();
+            String formatted = JsonUtil.formatJson(INSTANCE);
             return formatted == null || !formatted.equals(json);
         }
         return true;
@@ -145,7 +145,7 @@ public class Config {
                 return true;
             }
         }
-        String json = toSaveStr();
+        String json = JsonUtil.formatJson(INSTANCE);
         boolean success;
 
         if (StringUtil.isEmpty(userId)) {
@@ -188,8 +188,7 @@ public class Config {
             if (configV2File.exists()) {
                 String json = Files.readFromFile(configV2File);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = toSaveStr();
-
+                String formatted = JsonUtil.formatJson(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "格式化配置: " + userName);
                     Log.system(TAG, "格式化配置: " + userName);
@@ -208,7 +207,7 @@ public class Config {
                     unload();
                     Log.runtime(TAG, "初始新配置: " + userName);
                     Log.system(TAG, "初始新配置: " + userName);
-                    Files.write2File(toSaveStr(), configV2File);
+                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 }
             }
         } catch (Throwable t) {
@@ -218,7 +217,7 @@ public class Config {
             try {
                 unload();
                 if (configV2File != null) {
-                    Files.write2File(toSaveStr(), configV2File);
+                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 }
             } catch (Exception e) {
                 Log.printStackTrace(TAG, t);
@@ -242,12 +241,4 @@ public class Config {
         }
     }
 
-    /**
-     * 将配置对象转换为 JSON 格式字符串
-     *
-     * @return 配置的 JSON 字符串
-     */
-    public static String toSaveStr() {
-        return JsonUtil.toFormatJsonString(INSTANCE);
-    }
 }
