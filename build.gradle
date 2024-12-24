@@ -1,19 +1,22 @@
 buildscript {
+    ext.kotlin_version = '1.9.0'
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
         maven { url 'https://maven.aliyun.com/repository/google/' }
         maven { url 'https://maven.aliyun.com/repository/jcenter/' }
         maven { url 'https://maven.aliyun.com/repository/central' }
-        maven {url 'https://maven.aliyun.com/repository/gradle-plugin'}
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         mavenLocal()
         mavenCentral()
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.0"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10"
+        classpath "com.android.tools.build:gradle:8.5.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
+
 
 allprojects {
     repositories {
@@ -21,7 +24,7 @@ allprojects {
         maven { url 'https://maven.aliyun.com/repository/google/' }
         maven { url 'https://maven.aliyun.com/repository/jcenter/' }
         maven { url 'https://maven.aliyun.com/repository/central' }
-        maven {url 'https://maven.aliyun.com/repository/gradle-plugin'}
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         mavenLocal()
         mavenCentral()
         google()
@@ -38,5 +41,5 @@ allprojects {
 }
 
 tasks.register('clean', Delete) {
-    delete rootProject.buildDir
+    delete project.layout.buildDirectory
 }
