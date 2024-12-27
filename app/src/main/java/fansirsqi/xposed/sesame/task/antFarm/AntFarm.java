@@ -1105,7 +1105,7 @@ public class AntFarm extends ModelTask {
                             jo = new JSONObject(s);
                             memo = jo.getString("memo");
                             if ("SUCCESS".equals(memo)) {
-                                if (jo.has("foodStock")) {
+                                if (Objects.equals(jo.optString("awardType"), "ALLPURPOSE")) {
                                     add2FoodStock(awardCount);
                                     Log.farm("领取奖励🎖️[" + taskTitle + "]#" + awardCount + "g");
                                 }

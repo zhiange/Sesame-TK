@@ -154,6 +154,14 @@ public class AntForest extends ModelTask {
     private TextModelField photoGuangPanAfter;
     private BooleanModelField youthPrivilege;
     private BooleanModelField dailyCheckIn;
+    /**
+     * 加速器
+     */
+    private BooleanModelField bubbleBoostType;
+    /**
+     * 加速器定时
+     */
+    private ListModelField.ListJoinCommaToStringModelField bubbleBoostTime;
 
     private int totalCollected = 0;
     private int totalHelpCollected = 0;
@@ -193,6 +201,8 @@ public class AntForest extends ModelTask {
         modelFields.addField(stealthCard = new BooleanModelField("stealthCard", "隐身卡 | 使用", false));
         modelFields.addField(stealthCardConstant = new BooleanModelField("stealthCardConstant", "隐身卡 | 限时隐身永动机", false));
         modelFields.addField(shieldCard = new BooleanModelField("shieldCard", "能量保护罩 | 使用", true));
+        modelFields.addField(bubbleBoostType = new BooleanModelField("bubbleBoostType", "加速器 | 定时使用", false));
+        modelFields.addField(bubbleBoostTime = new ListModelField.ListJoinCommaToStringModelField("bubbleBoostTime", "加速器 | 定时使用时间", ListUtil.newArrayList("0030,0630")));
         modelFields.addField(returnWater10 = new IntegerModelField("returnWater10", "返水 | 10克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater18 = new IntegerModelField("returnWater18", "返水 | 18克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater33 = new IntegerModelField("returnWater33", "返水 | 33克需收能量(关闭:0)", 0));
@@ -574,6 +584,10 @@ public class AntForest extends ModelTask {
                 // 青春特权每日签到红包
                 if (dailyCheckIn.getValue()) {
                     FuncFactory.studentSignInRedEnvelope();
+                }
+                //加速器使用
+                if (bubbleBoostType.getValue()) {
+                    useBubbleBoost();
                 }
             }
         } catch (Throwable t) {
@@ -1994,6 +2008,9 @@ public class AntForest extends ModelTask {
             // 在背包中查询限时保护罩
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE");
             if (jo == null) {
+                jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD");
+            }
+            if (jo == null) {
                 if (youthPrivilege.getValue()) {
                     FuncFactory.youthPrivilege();
                     jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE"); // 重新查找
@@ -2750,6 +2767,61 @@ public class AntForest extends ModelTask {
         }
     }
 
+    /**
+     * 定时使用加速器
+     */
+    public void useBubbleBoost() {
+        List<String> boostTimeValue = bubbleBoostTime.getValue();
+        if (Objects.isNull(boostTimeValue)) {
+            return;
+        }
+        if (boostTimeValue.isEmpty()) {
+            return;
+        }
+        for (String bubbleBoostTimeStr : boostTimeValue) {
+            if ("-1".equals(bubbleBoostTimeStr)) {
+                return;
+            }
+            LocalDateTime bubbleBoostTimeCalendar = TimeUtil.getLocalDateTimeByTimeStr(bubbleBoostTimeStr);
+            if (bubbleBoostTimeCalendar == null) {
+                return;
+            }
+            long bubbleBoostTime = bubbleBoostTimeCalendar.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long now = System.currentTimeMillis();
+            if (now > bubbleBoostTime) {
+                continue;
+            }
+            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+            if (!hasChildTask(bubbleBoostTaskId)) {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+                Log.record("添加定时使用加速器🛌[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+            } else {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+            }
+        }
+    }
+
+    private void useBubbleBoostCard() {
+        try {
+            // 在背包中查询限时加速器
+            JSONObject bag = getBag();
+            JSONObject jo = findPropBag(bag, "LIMIT_TIME_ENERGY_BUBBLE_BOOST");
+            if (jo == null) {
+                FuncFactory.youthPrivilege();
+                jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
+                if (jo == null ) {
+                    jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
+                }
+            }
+            if (jo != null && usePropBag(jo)) {
+                Log.forest("使用道具加速器🛡️");
+                collectSelfEnergy();
+            }
+        } catch (Throwable th) {
+            Log.runtime(TAG, "useBubbleBoostCard err:");
+            Log.printStackTrace(TAG, th);
+        }
+    }
     /**
      * 收取状态的枚举类型
      */
