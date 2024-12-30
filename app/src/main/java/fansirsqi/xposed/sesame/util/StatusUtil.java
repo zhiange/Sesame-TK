@@ -603,7 +603,7 @@ public class StatusUtil {
             if (statusFile.exists()) {
                 String json = Files.readFromFile(statusFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.toFormatJsonString(INSTANCE);
+                String formatted = JsonUtil.formatJson(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "重新格式化 status.json");
                     Log.system(TAG, "重新格式化 status.json");
@@ -613,7 +613,7 @@ public class StatusUtil {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
                 Log.runtime(TAG, "初始化 status.json");
                 Log.system(TAG, "初始化 status.json");
-                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
+                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(currentUid));
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -621,7 +621,7 @@ public class StatusUtil {
             Log.system(TAG, "状态文件格式有误，已重置");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
-                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
+                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(currentUid));
             } catch (JsonMappingException e) {
                 Log.printStackTrace(TAG, e);
             }
@@ -658,7 +658,7 @@ public class StatusUtil {
         long lastSaveTime = INSTANCE.saveTime;
         try {
             INSTANCE.saveTime = System.currentTimeMillis();
-            Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatusFile(currentUid));
+            Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(currentUid));
         } catch (Exception e) {
             INSTANCE.saveTime = lastSaveTime;
             throw e;
