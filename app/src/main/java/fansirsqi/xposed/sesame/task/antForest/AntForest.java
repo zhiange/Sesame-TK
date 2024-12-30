@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.task.antForest;
 
 import de.robv.android.xposed.XposedHelpers;
+import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.entity.*;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -151,7 +152,6 @@ public class AntForest extends ModelTask {
     private SelectModelField whoYouWantToGiveTo;
     private BooleanModelField dailyCheckIn;
     private ChoiceModelField bubbleBoostCard;
-    private StringModelField bubbleBoostTime;
 
     private BooleanModelField youthPrivilege;
 
@@ -161,6 +161,14 @@ public class AntForest extends ModelTask {
 
     public static BooleanModelField ecoLifeOpen;
 
+    /**
+     * 加速器
+     */
+    private BooleanModelField bubbleBoostType;
+    /**
+     * 加速器定时
+     */
+    private ListModelField.ListJoinCommaToStringModelField bubbleBoostTime;
 
     private int totalCollected = 0;
     private int totalHelpCollected = 0;
@@ -206,11 +214,11 @@ public class AntForest extends ModelTask {
         modelFields.addField(collectWateringBubble = new BooleanModelField("collectWateringBubble", "收取金球|浇水", false));
 
 
-//        modelFields.addField(bubbleBoostCard = new ChoiceModelField("bubbleBoostCard", "加速器开关|定时使用", applyPropType.CLOSE, applyPropType.nickNames));
-//        modelFields.addField(bubbleBoostTime = new StringModelField("bubbleBoostTime", "加速器|定时使用时间", "0630"));
+        modelFields.addField(bubbleBoostCard = new ChoiceModelField("bubbleBoostCard", "加速器开关|定时使用", applyPropType.CLOSE, applyPropType.nickNames));
+        modelFields.addField(bubbleBoostTime = new ListModelField.ListJoinCommaToStringModelField("bubbleBoostTime", "加速器|使用时间/范围", ListUtil.newArrayList("0030,0630")));
         modelFields.addField(doubleCard = new ChoiceModelField("doubleCard", "双击卡开关|消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(doubleCountLimit = new IntegerModelField("doubleCountLimit", "双击卡|使用次数", 6));
-        modelFields.addField(doubleCardTime = new ListModelField.ListJoinCommaToStringModelField("doubleCardTime", "双击卡|使用时间(范围)", ListUtil.newArrayList("0700-0730")));
+        modelFields.addField(doubleCardTime = new ListModelField.ListJoinCommaToStringModelField("doubleCardTime", "双击卡|使用时间/范围", ListUtil.newArrayList("0700-0730")));
         modelFields.addField(doubleCardConstant = new BooleanModelField("DoubleCardConstant", "双击卡|限时双击永动机", false));
         modelFields.addField(shieldCard = new ChoiceModelField("shieldCard", "保护罩开关|消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(shieldCardConstant = new BooleanModelField("shieldCardConstant", "保护罩|限时保护永动机", false));
@@ -603,6 +611,10 @@ public class AntForest extends ModelTask {
                 if (dailyCheckIn.getValue()) {
                     Privilege.studentSignInRedEnvelope();
                 }
+                //加速器使用
+                if (!bubbleBoostCard.getValue().equals(applyPropType.CLOSE)) {
+                    useBubbleBoost();
+                }
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "AntForest.run err:");
@@ -821,9 +833,11 @@ public class AntForest extends ModelTask {
                     long bubbleId = bubble.getLong("id");
                     switch (CollectStatus.valueOf(bubble.getString("collectStatus"))) {
                         case AVAILABLE:
+                            // 如果能量可收取，加入列表
                             bubbleIdList.add(bubbleId);
                             break;
                         case WAITING:
+                            // 如果能量还未成熟，设置定时任务
                             long produceTime = bubble.getLong("produceTime");
                             if (checkIntervalInt + checkIntervalInt / 2 > produceTime - serverTime) {
                                 // 如果时间接近能量成熟时间，添加定时任务
@@ -833,6 +847,7 @@ public class AntForest extends ModelTask {
                                 addChildTask(new EnergyTimerTask(userId, bubbleId, produceTime));
                                 Log.record("添加蹲点能量⏰[" + userName + "]在[" + TimeUtil.getCommonDate(produceTime) + "]执行");
                             } else {
+                                // 否则记录能量成熟时间
                                 Log.runtime("用户[" + UserMap.getMaskName(userId) + "]能量成熟时间: " + TimeUtil.getCommonDate(produceTime));
                             }
                             break;
@@ -906,7 +921,9 @@ public class AntForest extends ModelTask {
                         }
                         if (collectEnergy) {
                             userHomeObj = collectFriendEnergy(userId);
-                        }
+                        } /* else {
+                  Log.i("不收取[" + UserMap.getNameById(userId) + "], userId=" + userId);
+              }*/
                     }
                     if (helpFriendCollect.getValue() && friendObject.optBoolean("canProtectBubble") && StatusUtil.canProtectBubbleToday(selfId)) {
                         boolean isHelpCollect = helpFriendCollectList.getValue().contains(userId);
@@ -1909,6 +1926,7 @@ public class AntForest extends ModelTask {
         try {
             // 在背包中查询限时保护罩
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE");
+
             if (jo == null) {
                 if (youthPrivilege.getValue()) {
                     if (Privilege.youthPrivilege()) {
@@ -1916,7 +1934,7 @@ public class AntForest extends ModelTask {
                     } // 重新查找
                 } else if (shieldCardConstant.getValue()) {
                     if (exchangeEnergyShield()) {
-                        jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE");
+                        jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD");
                     }
                 } else {
                     jo = findPropBag(bagObject, "ENERGY_SHIELD"); // 尝试查找 普通保护罩，一般用不到
@@ -2491,6 +2509,57 @@ public class AntForest extends ModelTask {
         }
     }
 
+    /**
+     * 定时使用加速器
+     */
+    public void useBubbleBoost() {
+        List<String> boostTimeValue = bubbleBoostTime.getValue();
+        if (Objects.isNull(boostTimeValue)) return;
+        if (boostTimeValue.isEmpty()) return;
+        for (String bubbleBoostTimeStr : boostTimeValue) {
+            if ("-1".equals(bubbleBoostTimeStr)) {
+                return;
+            }
+            LocalDateTime bubbleBoostTimeCalendar = TimeUtil.getLocalDateTimeByTimeStr(bubbleBoostTimeStr);
+            if (bubbleBoostTimeCalendar == null) {
+                return;
+            }
+            long bubbleBoostTime = bubbleBoostTimeCalendar.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long now = System.currentTimeMillis();
+            if (now > bubbleBoostTime) {
+                continue;
+            }
+            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+            if (!hasChildTask(bubbleBoostTaskId)) {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+                Log.record("添加定时使用加速器🛌[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+            } else {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+            }
+        }
+    }
+
+    private void useBubbleBoostCard() {
+        try {
+            // 在背包中查询限时加速器
+            JSONObject bag = getBag();
+            JSONObject jo = findPropBag(bag, "LIMIT_TIME_ENERGY_BUBBLE_BOOST");
+            if (jo == null) {
+                Privilege.youthPrivilege();
+                jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
+                if (jo == null) {
+                    jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
+                }
+            }
+            if (jo != null && usePropBag(jo)) {
+                Log.forest("使用道具加速器️");
+                collectSelfEnergy();
+            }
+        } catch (Throwable th) {
+            Log.runtime(TAG, "useBubbleBoostCard err:");
+            Log.printStackTrace(TAG, th);
+        }
+    }
 
     /**
      * 收取状态的枚举类型
