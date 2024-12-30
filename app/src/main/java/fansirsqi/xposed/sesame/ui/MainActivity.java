@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends BaseActivity {
 
-  private final Handler handler = new Handler();
+  private final Handler handler = new Handler(Looper.getMainLooper());
 
   private boolean hasPermissions = false;
 
@@ -253,31 +253,21 @@ public class MainActivity extends BaseActivity {
       return;
     }
     String data = "file://";
-    switch (v.getId()) {
-      case R.id.btn_forest_log:
-        data += Files.getForestLogFile().getAbsolutePath();
-        break;
-
-      case R.id.btn_farm_log:
-        data += Files.getFarmLogFile().getAbsolutePath();
-        break;
-
-      case R.id.btn_other_log:
-        data += Files.getOtherLogFile().getAbsolutePath();
-        break;
-      case R.id.btn_github:
-        //   欢迎自己打包 欢迎大佬pr
-        //   项目开源且公益  维护都是自愿
-        //   但是如果打包改个名拿去卖钱忽悠小白
-        //   那我只能说你妈死了 就当开源项目给你妈烧纸钱了
-        data = "https://github.com/Fansirsqi/Sesame-TK";
-        break;
-      case R.id.btn_settings:
-        selectSettingUid();
-        return;
-      case R.id.btn_friend_watch:
-        ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
-        return;
+    int id = v.getId();
+    if (id == R.id.btn_forest_log) {
+      data += Files.getForestLogFile().getAbsolutePath();
+    } else if (id == R.id.btn_farm_log) {
+      data += Files.getFarmLogFile().getAbsolutePath();
+    } else if (id == R.id.btn_other_log) {
+      data += Files.getOtherLogFile().getAbsolutePath();
+    } else if (id == R.id.btn_github) {
+      data = "https://github.com/Fansirsqi/Sesame-TK";
+    } else if (id == R.id.btn_settings) {
+      selectSettingUid();
+      return;
+    } else if (id == R.id.btn_friend_watch) {
+      ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+      return;
     }
     Intent it = new Intent(this, HtmlViewerActivity.class);
     it.setData(Uri.parse(data));
