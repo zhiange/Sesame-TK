@@ -412,6 +412,9 @@
           </div>
         </template>
 
+        <!-- 动态渲染标题描述 -->
+        <div class="dialog-desc">{{ person_list.desc }}</div>
+
         <div class="flex-space-between">
           <div>
             <van-list>
@@ -481,7 +484,6 @@
               return JSON.parse(window.HOOK.getModel(item.modelCode));
             })
           );
-
           // 更新报名请改这儿
           //const isVersion = ref(window.HOOK.getBuildInfo() === "fansirsqi.xposed.sesame:1.5.4.alpha")
           const isVersion = ref(true);
@@ -490,6 +492,7 @@
 
           // 用户列表弹窗
           const person_list = ref({
+            desc: "",
             visible: false,
             title: "",
             code: "",
