@@ -108,7 +108,7 @@ public class StatisticsUtil {
             if (statisticsFile.exists()) {
                 String json = Files.readFromFile(statisticsFile);
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.toFormatJsonString(INSTANCE);
+                String formatted = JsonUtil.formatJson(INSTANCE);
                 if (formatted != null && !formatted.equals(json)) {
                     Log.runtime(TAG, "重新格式化 statistics.json");
                     Log.system(TAG, "重新格式化 statistics.json");
@@ -118,7 +118,7 @@ public class StatisticsUtil {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
                 Log.runtime(TAG, "初始化 statistics.json");
                 Log.system(TAG, "初始化 statistics.json");
-                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), statisticsFile);
+                Files.write2File(JsonUtil.formatJson(INSTANCE), statisticsFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
@@ -126,7 +126,7 @@ public class StatisticsUtil {
             Log.system(TAG, "统计文件格式有误，已重置统计文件");
             try {
                 JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
-                Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatisticsFile());
+                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
             } catch (JsonMappingException e) {
                 Log.printStackTrace(TAG, e);
             }
@@ -163,7 +163,7 @@ public class StatisticsUtil {
         } else {
             Log.system(TAG, "保存 statistics.json");
         }
-        Files.write2File(JsonUtil.toFormatJsonString(INSTANCE), Files.getStatisticsFile());
+        Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
     }
 
     /**
