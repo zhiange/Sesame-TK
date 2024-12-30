@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.util.Maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
@@ -14,11 +15,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  用于管理和操作用户数据的映射关系，
- *  通常在应用程序中用于处理用户信息，
- *  如用户的 ID、昵称、账号、好友列表等。
- *  通过该类可以高效地加载、存储和操作用户信息，
- *  同时提供线程安全的访问机制。
+ * 用于管理和操作用户数据的映射关系，
+ * 通常在应用程序中用于处理用户信息，
+ * 如用户的 ID、昵称、账号、好友列表等。
+ * 通过该类可以高效地加载、存储和操作用户信息，
+ * 同时提供线程安全的访问机制。
  */
 public class UserMap {
 
@@ -28,7 +29,9 @@ public class UserMap {
     // 只读的用户信息映射
     private static final Map<String, UserEntity> readOnlyUserMap = Collections.unmodifiableMap(userMap);
 
-    /**当前用户ID*/
+    /**
+     * 当前用户ID
+     */
     @Getter
     private static String currentUid = null;
 
@@ -214,7 +217,8 @@ public class UserMap {
         try {
             String body = Files.readFromFile(Files.getFriendIdMapFile(userId));
             if (!body.isEmpty()) {
-                Map<String, UserEntity.UserDto> dtoMap = JsonUtil.parseObject(body, new TypeReference<Map<String, UserEntity.UserDto>>() {});
+                Map<String, UserEntity.UserDto> dtoMap = JsonUtil.parseObject(body, new TypeReference<Map<String, UserEntity.UserDto>>() {
+                });
                 for (UserEntity.UserDto dto : dtoMap.values()) {
                     userMap.put(dto.getUserId(), dto.toEntity());
                 }
@@ -239,7 +243,7 @@ public class UserMap {
      * @return 保存结果
      */
     public static synchronized boolean save(String userId) {
-        return Files.write2File(JsonUtil.toJsonString(userMap), Files.getFriendIdMapFile(userId));
+        return Files.write2File(JsonUtil.formatJson(userMap), Files.getFriendIdMapFile(userId));
     }
 
     /**
@@ -252,7 +256,8 @@ public class UserMap {
         try {
             String body = Files.readFromFile(Files.getSelfIdFile(userId));
             if (!body.isEmpty()) {
-                UserEntity.UserDto dto = JsonUtil.parseObject(body, new TypeReference<UserEntity.UserDto>() {});
+                UserEntity.UserDto dto = JsonUtil.parseObject(body, new TypeReference<UserEntity.UserDto>() {
+                });
                 userMap.put(dto.getUserId(), dto.toEntity());
             }
         } catch (Exception e) {
@@ -266,7 +271,7 @@ public class UserMap {
      * @param userEntity 用户实体
      */
     public static synchronized void saveSelf(UserEntity userEntity) {
-        Files.write2File(JsonUtil.toJsonString(userEntity), Files.getSelfIdFile(userEntity.getUserId()));
+        String body = JsonUtil.formatJson(userEntity);
+        Files.write2File(body, Files.getSelfIdFile(userEntity.getUserId()));
     }
-
 }
