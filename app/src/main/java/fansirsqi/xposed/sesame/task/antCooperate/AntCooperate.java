@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 
 public class AntCooperate extends ModelTask {
     private static final String TAG = AntCooperate.class.getSimpleName();
+    private static final String UserId = UserMap.getCurrentUid();
 
     @Override
     public String getName() {
@@ -29,8 +30,8 @@ public class AntCooperate extends ModelTask {
         return ModelGroup.FOREST;
     }
 
-    private final BooleanModelField cooperateWater = new BooleanModelField("cooperateWater", "合种浇水", false);
-    private final SelectAndCountModelField cooperateWaterList = new SelectAndCountModelField("cooperateWaterList", "合种浇水列表", new LinkedHashMap<>(), CooperateEntity::getList);
+    private final BooleanModelField cooperateWater = new BooleanModelField("cooperateWater", "合种浇水|开启", false);
+    private final SelectAndCountModelField cooperateWaterList = new SelectAndCountModelField("cooperateWaterList", "合种浇水列表", new LinkedHashMap<>(), CooperateEntity::getList,"开启合种浇水后执行一次重载");
     private final SelectAndCountModelField cooperateWaterTotalLimitList = new SelectAndCountModelField("cooperateWaterTotalLimitList", "浇水总量限制列表", new LinkedHashMap<>(), CooperateEntity::getList);
 
     @Override
@@ -58,7 +59,7 @@ public class AntCooperate extends ModelTask {
                     s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 }
                 JSONObject jo = new JSONObject(s);
-                if ("SUCCESS".equals(jo.getString("resultCode"))) {
+                if (ResUtil.checkResCode(jo)) {
                     int userCurrentEnergy = jo.getInt("userCurrentEnergy");
                     JSONArray ja = jo.getJSONArray("cooperatePlants");
                     for (int i = 0; i < ja.length(); i++) {
@@ -70,15 +71,16 @@ public class AntCooperate extends ModelTask {
                         }
                         String name = jo.getString("name");
                         int waterDayLimit = jo.getInt("waterDayLimit");
-                        CooperateMap.add(cooperationId, name);
-                        if (!StatusUtil.canCooperateWaterToday(UserMap.getCurrentUid(), cooperationId)) {
+                        Log.debug(TAG, "合种[" + name + "]:" + cooperationId + ", 限额:" + waterDayLimit);
+                        CooperateMap.getInstance(CooperateMap.class).add(cooperationId, name);
+                        if (!StatusUtil.canCooperateWaterToday(UserId, cooperationId)) {
                             continue;
                         }
                         Integer num = cooperateWaterList.getValue().get(cooperationId);
                         if (num != null) {
                             Integer limitNum = cooperateWaterTotalLimitList.getValue().get(cooperationId);
                             if (limitNum != null) {
-                                num = calculatedWaterNum(UserMap.getCurrentUid(), cooperationId, num, limitNum);
+                                num = calculatedWaterNum(cooperationId, num, limitNum);
                             }
                             if (num > waterDayLimit) {
                                 num = waterDayLimit;
@@ -87,7 +89,7 @@ public class AntCooperate extends ModelTask {
                                 num = userCurrentEnergy;
                             }
                             if (num > 0) {
-                                cooperateWater(UserMap.getCurrentUid(), cooperationId, num, name);
+                                cooperateWater(cooperationId, num, name);
                             }
                         }
                     }
@@ -100,18 +102,18 @@ public class AntCooperate extends ModelTask {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            CooperateMap.save(UserMap.getCurrentUid());
+            CooperateMap.getInstance(CooperateMap.class).save(UserId);
             Log.record("执行结束-" + getName());
         }
     }
 
-    private static void cooperateWater(String uid, String coopId, int count, String name) {
+    private static void cooperateWater(String coopId, int count, String name) {
         try {
-            String s = AntCooperateRpcCall.cooperateWater(uid, coopId, count);
+            String s = AntCooperateRpcCall.cooperateWater(AntCooperate.UserId, coopId, count);
             JSONObject jo = new JSONObject(s);
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if (ResUtil.checkResCode(jo)) {
                 Log.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
-                StatusUtil.cooperateWaterToday(UserMap.getCurrentUid(), coopId);
+                StatusUtil.cooperateWaterToday(UserId, coopId);
             } else {
                 Log.runtime(TAG, jo.getString("resultDesc"));
             }
@@ -119,11 +121,11 @@ public class AntCooperate extends ModelTask {
             Log.runtime(TAG, "cooperateWater err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            ThreadUtil.sleep(500);
+            ThreadUtil.sleep(1500);
         }
     }
 
-    private static int calculatedWaterNum(String uid, String coopId, int num, int limitNum) {
+    private static int calculatedWaterNum(String coopId, int num, int limitNum) {
         try {
             String s = AntCooperateRpcCall.queryCooperateRank("A", coopId);
             JSONObject jo = new JSONObject(s);
@@ -132,7 +134,7 @@ public class AntCooperate extends ModelTask {
                 for (int i = 0; i < jaList.length(); i++) {
                     JSONObject joItem = jaList.getJSONObject(i);
                     String userId = joItem.getString("userId");
-                    if (userId.equals(uid)) {
+                    if (userId.equals(AntCooperate.UserId)) {
                         int energySummation = joItem.optInt("energySummation", 0);
                         if (num > limitNum - energySummation) {
                             num = limitNum - energySummation;
