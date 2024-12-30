@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.model;
 
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import lombok.Getter;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -133,7 +134,7 @@ public class BaseModel extends Model {
   /** 清理数据，在模块销毁时调用，清空 Reserve 和 Beach 数据。 */
   public static void destroyData() {
     try {
-      ReserveIdMapUtil.clear();
+      ReserveaMap.clear();
       BeachMap.clear();
     } catch (Exception e) {
       Log.printStackTrace(e);
@@ -175,13 +176,13 @@ public class BaseModel extends Model {
               String itemId = item.getString("itemId");
               String itemName = item.getString("itemName");
               int energy = item.getInt("energy");
-              ReserveIdMapUtil.add(itemId, itemName + "(" + energy + "g)");
+              ReserveaMap.add(itemId, itemName + "(" + energy + "g)");
             }
           }
         }
 
         // 将筛选结果保存到 ReserveIdMapUtil
-        ReserveIdMapUtil.save();
+        ReserveaMap.save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
         Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
@@ -190,48 +191,45 @@ public class BaseModel extends Model {
       // 捕获 JSON 解析错误并记录日志
       Log.runtime("JSON 解析错误：" + e.getMessage());
       Log.printStackTrace(e);
-      ReserveIdMapUtil.load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
+      ReserveaMap.load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
       Log.runtime("初始化保护地任务时出错：" + e.getMessage());
       Log.printStackTrace(e);
-      ReserveIdMapUtil.load(); // 加载备份的 ReserveIdMapUtil
+      ReserveaMap.load(); // 加载备份的 ReserveIdMapUtil
     }
   }
 
-  /** 初始化沙滩任务。通过调用 AntOceanRpc 接口查询养成列表，并将符合条件的任务加入 BeachMap。 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL， 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachMap 中。 */
+  /**
+   * 初始化沙滩任务。
+   * 通过调用 AntOceanRpc 接口查询养成列表，
+   * 并将符合条件的任务加入 BeachMap。
+   * 条件：养成项目的类型必须为 BEACH、COOPERATE_SEA_TREE 或 SEA_ANIMAL，
+   * 并且其状态为 AVAILABLE。最后将符合条件的任务保存到 BeachMap 中。
+   */
   private static void initBeach() {
     try {
-      // 调用 AntOceanRpc 接口，查询养成列表信息
       String response = AntOceanRpcCall.queryCultivationList();
       JSONObject jsonResponse = new JSONObject(response);
-
-      // 判断调用是否成功，resultCode 为 SUCCESS 表示成功
       if ("SUCCESS".equals(jsonResponse.optString("resultCode", ""))) {
         // 获取 cultivationItemVOList 列表，包含所有养成项目
         JSONArray cultivationList = jsonResponse.optJSONArray("cultivationItemVOList");
-
-        // 遍历养成列表，筛选符合条件的项目
         if (cultivationList != null) {
           for (int i = 0; i < cultivationList.length(); i++) {
             JSONObject item = cultivationList.getJSONObject(i);
-
             // 跳过未定义 templateSubType 字段的项目
             if (!item.has("templateSubType")) {
               continue;
             }
-
             // 检查 templateSubType 是否符合指定类型
             String templateSubType = item.getString("templateSubType");
             if (!"BEACH".equals(templateSubType) && !"COOPERATE_SEA_TREE".equals(templateSubType) && !"SEA_ANIMAL".equals(templateSubType)) {
               continue;
             }
-
             // 检查 applyAction 是否为 AVAILABLE
             if (!"AVAILABLE".equals(item.getString("applyAction"))) {
               continue;
             }
-
             // 将符合条件的项目添加到 BeachMap
             String templateCode = item.getString("templateCode");
             String cultivationName = item.getString("cultivationName");
@@ -239,7 +237,6 @@ public class BaseModel extends Model {
             BeachMap.add(templateCode, cultivationName + "(" + energy + "g)");
           }
         }
-
         // 将所有筛选结果保存到 BeachMap
         BeachMap.save();
       } else {
@@ -260,11 +257,8 @@ public class BaseModel extends Model {
   }
 
   public interface TimedTaskModel {
-
     int SYSTEM = 0;
-
     int PROGRAM = 1;
-
     String[] nickNames = {"系统计时", "程序计时"};
   }
 }
