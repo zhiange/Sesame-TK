@@ -2,7 +2,6 @@ package fansirsqi.xposed.sesame.model.modelFieldExt;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +10,12 @@ import android.widget.LinearLayout;
 
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONException;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.ui.ListDialog;
 
 import java.util.List;
@@ -29,9 +30,9 @@ public class SelectModelField extends ModelField<Set<String>> implements SelectM
 
     private SelectListFunc selectListFunc;
 
-    private List<? extends IdAndName> expandValue;
+    private List<? extends MapperEntity> expandValue;
 
-    public SelectModelField(String code, String name, Set<String> value, List<? extends IdAndName> expandValue) {
+    public SelectModelField(String code, String name, Set<String> value, List<? extends MapperEntity> expandValue) {
         super(code, name, value);
         this.expandValue = expandValue;
     }
@@ -41,12 +42,22 @@ public class SelectModelField extends ModelField<Set<String>> implements SelectM
         this.selectListFunc = selectListFunc;
     }
 
+    public SelectModelField(String code, String name, Set<String> value, List<? extends MapperEntity> expandValue, String desc) {
+        super(code, name, value, desc);
+        this.expandValue = expandValue;
+    }
+
+    public SelectModelField(String code, String name, Set<String> value, SelectListFunc selectListFunc, String desc) {
+        super(code, name, value, desc);
+        this.selectListFunc = selectListFunc;
+    }
+
     @Override
     public String getType() {
         return "SELECT";
     }
 
-    public List<? extends IdAndName> getExpandValue() {
+    public List<? extends MapperEntity> getExpandValue() throws JSONException {
         return selectListFunc == null ? expandValue : selectListFunc.getList();
     }
 
@@ -62,7 +73,13 @@ public class SelectModelField extends ModelField<Set<String>> implements SelectM
         btn.setMaxHeight(180);
         btn.setPaddingRelative(40, 0, 40, 0);
         btn.setAllCaps(false);
-        btn.setOnClickListener(v -> ListDialog.show(v.getContext(), ((Button) v).getText(), this));
+        btn.setOnClickListener(v -> {
+            try {
+                ListDialog.show(v.getContext(), ((Button) v).getText(), this);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return btn;
     }
 
@@ -92,6 +109,6 @@ public class SelectModelField extends ModelField<Set<String>> implements SelectM
     }
 
     public interface SelectListFunc {
-        List<? extends IdAndName> getList();
+        List<? extends MapperEntity> getList() throws JSONException;
     }
 }

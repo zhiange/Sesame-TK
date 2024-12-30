@@ -1,7 +1,6 @@
 package fansirsqi.xposed.sesame.model.modelFieldExt;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import androidx.core.content.ContextCompat;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.entity.KVNode;
 import fansirsqi.xposed.sesame.ui.ListDialog;
 
@@ -24,9 +23,9 @@ public class SelectAndCountOneModelField extends ModelField<KVNode<String, Integ
 
     private SelectListFunc selectListFunc;
 
-    private List<? extends IdAndName> expandValue;
+    private List<? extends MapperEntity> expandValue;
 
-    public SelectAndCountOneModelField(String code, String name, KVNode<String, Integer> value, List<? extends IdAndName> expandValue) {
+    public SelectAndCountOneModelField(String code, String name, KVNode<String, Integer> value, List<? extends MapperEntity> expandValue) {
         super(code, name, value);
         this.expandValue = expandValue;
     }
@@ -41,7 +40,7 @@ public class SelectAndCountOneModelField extends ModelField<KVNode<String, Integ
         return "SELECT_AND_COUNT_ONE";
     }
 
-    public List<? extends IdAndName> getExpandValue() {
+    public List<? extends MapperEntity> getExpandValue() {
         return selectListFunc == null ? expandValue : selectListFunc.getList();
     }
 
@@ -94,6 +93,6 @@ public class SelectAndCountOneModelField extends ModelField<KVNode<String, Integ
     }
 
     public interface SelectListFunc {
-        List<? extends IdAndName> getList();
+        List<? extends MapperEntity> getList();
     }
 }
