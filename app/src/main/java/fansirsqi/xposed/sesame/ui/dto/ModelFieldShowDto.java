@@ -38,6 +38,11 @@ public class ModelFieldShowDto implements Serializable {
     private String configValue;
 
     /**
+     * 字段描述。
+     */
+    private String desc;
+
+    /**
      * 无参构造函数。
      */
     public ModelFieldShowDto() {
@@ -57,6 +62,7 @@ public class ModelFieldShowDto implements Serializable {
         dto.setType(modelField.getType());
         dto.setExpandKey(modelField.getExpandKey());
         dto.setConfigValue(modelField.getConfigValue());
+        dto.setDesc(modelField.getDesc());
         return dto;
     }
 }
