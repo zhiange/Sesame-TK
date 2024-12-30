@@ -9,6 +9,10 @@ plugins {
 // Android配置信息
 android {
 
+    signingConfigs {
+        release {
+        }
+    }
     buildFeatures {
         buildConfig = true
     }
@@ -50,17 +54,14 @@ android {
     // 使用 Git 提交次数生成版本号
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
     // 应用版本信息，用于展示在LSP
-    if (buildTag == "alpha" ||buildTag == "beta") {
+    if (buildTag == "alpha" || buildTag == "beta") {
         _versionName = "${major}.${minor}.${patch}-${buildTag}.${buildTargetCode}"
-    }
-    else if (buildTag == "alphafix"||buildTag == "betafix") {
+    } else if (buildTag == "alphafix" || buildTag == "betafix") {
         buildTag = buildTag.replace("fix", "")
         _versionName = "${major}.${minor}.${patch}-${buildTag}.fix.${buildTargetCode}"
-    }
-    else if (buildTag == "debug") {
+    } else if (buildTag == "debug") {
         _versionName = "${buildTargetCode}-${buildTag}"
-    }
-    else {
+    } else {
         _versionName = "${major}.${minor}.${patch}-${buildTag}.${buildTargetCode}"
         buildTag = ""
     }
@@ -71,7 +72,7 @@ android {
     defaultConfig {
         minSdk 26 // 最低SDK版本
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
-        targetSdk  34 // 目标SDK版本
+        targetSdk 34 // 目标SDK版本
         versionCode _versionCode  // 设置版本号
         versionName _versionName  // 设置版本名称 (使用 SemVer 格式)
         // 使用 buildConfigField 添加自定义字段 for show ViewInfo.class of BuildConfig.class
@@ -101,15 +102,29 @@ android {
         }
     }
 
+    signingConfigs {
+        config {
+            storeFile file('./byseven.jks')
+            storePassword project.properties.MY_APP_STORE_PASSWORD
+            keyAlias project.properties.MY_APP_KEY_ALIAS
+            keyPassword project.properties.MY_APP_KEY_PASSWORD
+        }
+        debug {
+
+        }
+    }
+
     buildTypes {
         debug {
             debuggable true // 默认为true，可以显式设置
+            signingConfig signingConfigs.debug
         }
         release {
             debuggable false // 默认为false，可以显式设置
-            minifyEnabled true // 启用代码压缩
-            shrinkResources true // 启用资源压缩
+            minifyEnabled false // 启用代码压缩
+            shrinkResources false // 启用资源压缩
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug //for debug apk
         }
     }
     compileOptions {
