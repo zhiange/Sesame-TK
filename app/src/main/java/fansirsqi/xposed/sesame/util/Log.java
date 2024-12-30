@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。
  */
 public class Log {
-    private static final String SELF_TAG = "[" + BuildConfig.VERSION_NAME + "]";
+    private static final String TAG = "[" + BuildConfig.VERSION_CODE +BuildConfig.BUILD_NUMBER + "]";
 
     private static final Logger RUNTIME_LOGGER;
     private static final Logger SYSTEM_LOGGER;
@@ -36,7 +36,7 @@ public class Log {
     }
 
     public static void runtime(String message) {
-        RUNTIME_LOGGER.info(SELF_TAG + "{}", message);
+        RUNTIME_LOGGER.info(TAG + "{}", message);
     }
 
     public static void runtime(String TAG, String message) {
@@ -46,19 +46,19 @@ public class Log {
     public static void record(String message) {
         runtime(message);
         if (BaseModel.getRecordLog().getValue()) {
-            RECORD_LOGGER.info(SELF_TAG + "{}", message);
+            RECORD_LOGGER.info(TAG + "{}", message);
         }
     }
 
     public static void record(String TAG, String message) {
         runtime(TAG, message);
         if (BaseModel.getRecordLog().getValue()) {
-            RECORD_LOGGER.info(SELF_TAG + "[{}],{}", TAG, message);
+            RECORD_LOGGER.info(Log.TAG + "[{}],{}", TAG, message);
         }
     }
 
     public static void system(String message) {
-        SYSTEM_LOGGER.info(SELF_TAG + "{}", message);
+        SYSTEM_LOGGER.info(TAG + "{}", message);
     }
 
     public static void system(String TAG, String message) {
@@ -66,7 +66,7 @@ public class Log {
     }
 
     public static void debug(String message) {
-        DEBUG_LOGGER.info(SELF_TAG + "{}", message);
+        DEBUG_LOGGER.info(TAG + "{}", message);
     }
 
     public static void debug(String TAG, String message) {
@@ -91,7 +91,7 @@ public class Log {
     }
 
     public static void other(String message) {
-        OTHER_LOGGER.info(SELF_TAG + "{}", message);
+        OTHER_LOGGER.info(TAG + "{}", message);
     }
 
     public static void other(String TAG, String message) {
@@ -99,7 +99,7 @@ public class Log {
     }
 
     public static void error(String message) {
-        ERROR_LOGGER.error(SELF_TAG + "{}", message);
+        ERROR_LOGGER.error(TAG + "{}", message);
     }
 
     public static void error(String TAG, String message) {
@@ -107,7 +107,7 @@ public class Log {
     }
 
     public static void capture(String message) {
-        CAPTURE_LOGGER.info(SELF_TAG + "{}", message);
+        CAPTURE_LOGGER.info(TAG + "{}", message);
     }
 
     public static void capture(String TAG, String message) {
@@ -138,16 +138,5 @@ public class Log {
         runtime(TAG, stackTrace);
     }
 
-
-
-    /**
-     * 根据日志名称生成带有日期的日志文件名。
-     *
-     * @param logName 日志名称
-     * @return 对应文件
-     */
-    public static String getLogFileName(String logName) {
-        return logName + ".log";
-    }
 
 }
