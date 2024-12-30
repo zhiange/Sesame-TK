@@ -137,10 +137,12 @@ video {
 .van-checkbox {
   min-height: 25px !important;
 }
+
 .van-dialog {
   z-index: 999999 !important;
   width: calc(100vw - 60px) !important;
 }
+
 .van-cell {
   padding-left: 12px !important;
 }
@@ -148,6 +150,7 @@ video {
 .van-tabs__line {
   display: none !important;
 }
+
 .van-tabs__nav--line {
   padding-bottom: 0 !important;
 }
@@ -155,8 +158,9 @@ video {
 .van-tabs--line .van-tabs__wrap {
   height: 55px !important;
 }
+
 .van-collapse-item__content {
-  background-color: #f6f6f6!important;
+  background-color: #f6f6f6 !important;
 }
 
 .mt5 {
@@ -195,8 +199,8 @@ video {
   padding-top: 6px;
 }
 
-.main-color{
-  color: #216eee!important;
+.main-color {
+  color: #216eee !important;
 }
 
 .title {
@@ -223,6 +227,7 @@ video {
 .borderTop {
   border-top: 1px solid #f6f6f6;
 }
+
 .borderLeft {
   border-left: 1px solid #f6f6f6;
 }
@@ -261,13 +266,16 @@ video {
   display: block;
   margin-right: 10px;
 }
-.theme1,.theme2 {
+
+.theme1,
+.theme2 {
   background-color: #f6f6f6;
 }
+
 .theme2 .van-tabs__wrap::before {
   position: fixed;
   top: 0;
-  content: '';
+  content: "";
   height: 1px;
   width: 100%;
   background-color: #fff;
@@ -325,6 +333,7 @@ video {
 .dialog-list .checked-label {
   color: #216eee !important;
 }
+
 .dialog-list .list-label {
   width: calc(100% - 40px) !important;
 }
@@ -346,29 +355,35 @@ video {
 }
 
 .dialog-list {
-  padding:0 20px 0 12px;
+  padding: 0 20px 0 12px;
   position: relative;
   border-top: 1px solid #f6f6f6;
 }
 
 .dialog-list .dialog-list-item {
   padding: 5px 0;
-  }
+}
 
 .dialog-list .dialog-list-container {
   width: 100%;
   overflow: hidden;
 }
+
 .dialog-list .dialog-list-content {
   width: 100%;
   max-height: 70vh;
   overflow-y: scroll;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
 }
+
 .dialog-list .dialog-list-content::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
+
 .dialog-list .scrollbar {
   position: absolute;
   top: 0;
@@ -377,12 +392,18 @@ video {
   height: 100%;
   background: rgba(0, 0, 0, 0.1);
 }
+
 .dialog-list .thumb {
   position: absolute;
   top: 0;
-  right:0;
+  right: 0;
   width: 10px;
   height: 50px;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
+}
+
+.dialog-desc {
+  font-size: 12px;
+  color: #f55718;
 }
