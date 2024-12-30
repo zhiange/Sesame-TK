@@ -1,6 +1,5 @@
 package fansirsqi.xposed.sesame.util;
 
-import android.annotation.SuppressLint;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -14,22 +13,21 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
-@SuppressLint("SimpleDateFormat")
 public class JsonUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper(); // JSON对象映射器
     public static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance(); // 类型工厂
     public static final JsonFactory JSON_FACTORY = new JsonFactory(); // JSON工厂
-
     static {
         // 配置 ObjectMapper
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 忽略未知属性
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); // 忽略空对象
         MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL); // 忽略空属性
         MAPPER.setTimeZone(TimeZone.getDefault()); // 设置时区
-        MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")); // 设置日期格式
+        MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())); // 设置日期格式
     }
 
     public static ObjectMapper copyMapper() {
@@ -43,8 +41,9 @@ public class JsonUtil {
      * @return JSON 字符串
      */
     public static String toJsonString(Object object) {
-        return execute(() -> MAPPER.writeValueAsString(object)); // 执行转换
+        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
     }
+
 
     /**
      * 将对象转换为格式化的 JSON 字符串
@@ -52,8 +51,8 @@ public class JsonUtil {
      * @param object 要转换的对象
      * @return 格式化后的 JSON 字符串
      */
-    public static String toFormatJsonString(Object object) {
-        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object)); // 执行转换
+    public static String formatJson(Object object) {
+        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
     }
 
     /**
