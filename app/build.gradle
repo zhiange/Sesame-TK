@@ -112,6 +112,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+    }
     // 构建工具版本
     applicationVariants.configureEach { variant -> // 配置每个应用变体
         variant.outputs.configureEach { output -> // 配置每个输出
