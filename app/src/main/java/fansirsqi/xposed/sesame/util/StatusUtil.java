@@ -491,7 +491,6 @@ public class StatusUtil {
     }
 
     public static void KbSignInToday() {
-        
         if (INSTANCE.kbSignIn != StatisticsUtil.INSTANCE.getDay().time) {
             INSTANCE.kbSignIn = StatisticsUtil.INSTANCE.getDay().time;
             save();
