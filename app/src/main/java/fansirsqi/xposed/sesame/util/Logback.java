@@ -10,10 +10,16 @@ import ch.qos.logback.core.util.FileSize;
 
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
 
 public class Logback {
-    static String LOG_DIR = Files.LOG_DIR.getPath() + "/";
+    static String LOG_DIR;
+
+    static {
+        assert Files.LOG_DIR != null;
+        LOG_DIR = Files.LOG_DIR.getPath()+File.separator;
+    }
 
     public static List<String> logNames = List.of(
             "runtime", "system", "record", "debug", "forest",
