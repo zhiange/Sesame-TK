@@ -1,15 +1,22 @@
 package fansirsqi.xposed.sesame.model;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.json.JSONException;
+
 import lombok.Data;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.JsonUtil;
@@ -33,6 +40,9 @@ public class ModelField<T> implements Serializable {
 
     @JsonIgnore
     protected T defaultValue; // 默认值
+
+    @JsonIgnore
+    private String desc;
 
     protected volatile T value; // 当前值
 
@@ -64,7 +74,17 @@ public class ModelField<T> implements Serializable {
         this.code = code;
         this.name = name;
         this.defaultValue = value; // 设置默认值
+        this.desc = null;
         setObjectValue(value); // 设置当前值
+    }
+
+    public ModelField(String code, String name, T value, String desc) {
+        this();
+        this.code = code;
+        this.name = name;
+        this.defaultValue = value;
+        this.desc = desc;
+        setObjectValue(value);
     }
 
     /**
@@ -106,7 +126,7 @@ public class ModelField<T> implements Serializable {
      * @return 扩展值
      */
     @JsonIgnore
-    public Object getExpandValue() {
+    public Object getExpandValue() throws JSONException {
         return null; // 默认返回 null
     }
 
@@ -137,7 +157,7 @@ public class ModelField<T> implements Serializable {
      */
     @JsonIgnore
     public String getConfigValue() {
-        return JsonUtil.toJsonString(toConfigValue(value)); // 转换为 JSON 字符串
+        return JsonUtil.formatJson(toConfigValue(value)); // 转换为 JSON 字符串
     }
 
     /**
@@ -160,6 +180,48 @@ public class ModelField<T> implements Serializable {
         }
     }
 
+
+    public LayerDrawable setBorder(Context context,boolean left,boolean right,boolean top,boolean bottom) {
+        // 创建 Drawable 用于绘制上边框
+        GradientDrawable topBorder = new GradientDrawable();
+        topBorder.setColor(ContextCompat.getColor(context, android.R.color.transparent));
+        topBorder.setStroke(2, ContextCompat.getColor(context, R.color.colorPrimary)); // 设置边框颜色和宽度
+        topBorder.setSize(ViewGroup.LayoutParams.MATCH_PARENT, 2); // 设置 Drawable 的大小
+        topBorder.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM); // 设置绘制方向
+        // 创建 Drawable 用于绘制下边框
+        GradientDrawable bottomBorder = new GradientDrawable();
+        bottomBorder.setColor(ContextCompat.getColor(context, android.R.color.transparent));
+        bottomBorder.setStroke(2, ContextCompat.getColor(context, R.color.colorPrimary));
+        bottomBorder.setSize(ViewGroup.LayoutParams.MATCH_PARENT, 2);
+        bottomBorder.setOrientation(GradientDrawable.Orientation.BOTTOM_TOP);
+        // 创建 Drawable 用于绘制左边框
+        GradientDrawable leftBorder = new GradientDrawable();
+        leftBorder.setColor(ContextCompat.getColor(context, android.R.color.transparent));
+        leftBorder.setStroke(2, ContextCompat.getColor(context, R.color.colorPrimary));
+        leftBorder.setSize(2, ViewGroup.LayoutParams.MATCH_PARENT);
+        leftBorder.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+        // 创建 Drawable 用于绘制右边框
+        GradientDrawable rightBorder = new GradientDrawable();
+        rightBorder.setColor(ContextCompat.getColor(context, android.R.color.transparent));
+        rightBorder.setStroke(2, ContextCompat.getColor(context, R.color.colorPrimary));
+        rightBorder.setSize(2, ViewGroup.LayoutParams.MATCH_PARENT);
+        rightBorder.setOrientation(GradientDrawable.Orientation.RIGHT_LEFT);
+        // 创建 LayerDrawable 并添加需要的 Drawable
+        Drawable[] layers = new Drawable[5]; // 根据需要绘制的边框数量调整数组大小
+        layers[0] = ContextCompat.getDrawable(context, R.drawable.button); // 背景Drawable
+        layers[1] = topBorder; // 上边框
+        layers[2] = bottomBorder; // 下边框
+        layers[3] = leftBorder; // 左边框
+        layers[4] = rightBorder; // 右边框
+        LayerDrawable layerDrawable = new LayerDrawable(layers);
+        // 设置每个 Drawable 的 insets 来确定边框的位置
+        if (top) {layerDrawable.setLayerInset(1, 0, 0, 0, 0);}
+        if (bottom) {layerDrawable.setLayerInset(2, 0, 0, 0, 0);}
+        if (left) {layerDrawable.setLayerInset(3, 0, 0, 0, 0);}
+        if (right) {layerDrawable.setLayerInset(4, 0, 0, 0, 0);}
+        return layerDrawable;
+    }
+
     /**
      * 重置当前值为默认值
      */
@@ -176,6 +238,8 @@ public class ModelField<T> implements Serializable {
     @JsonIgnore
     public View getView(Context context) {
         TextView btn = new TextView(context); // 创建 TextView 控件
+        LayerDrawable background = setBorder(context,false,false,true,false);
+        btn.setBackground(background); // 设置背景为带边框的 Drawable
         btn.setText(getName()); // 设置文本为字段名称
         btn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)); // 设置布局参数
         btn.setTextColor(ContextCompat.getColor(context, R.color.button)); // 设置文本颜色
