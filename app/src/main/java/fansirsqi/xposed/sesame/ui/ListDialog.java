@@ -9,8 +9,11 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+
+import org.json.JSONException;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
@@ -20,7 +23,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectOneModelField;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.AreaCode;
 import fansirsqi.xposed.sesame.entity.CooperateEntity;
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 
 import java.util.List;
@@ -54,7 +57,7 @@ public class ListDialog {
         show(c, title, selectModelField.getExpandValue(), selectModelField, false, listType);
     }
 
-    public static void show(Context c, CharSequence title, SelectModelField selectModelField) {
+    public static void show(Context c, CharSequence title, SelectModelField selectModelField) throws JSONException {
         show(c, title, selectModelField, ListDialog.ListType.CHECK);
     }
 
@@ -62,7 +65,7 @@ public class ListDialog {
         show(c, title, selectModelField, ListDialog.ListType.CHECK);
     }
 
-    public static void show(Context c, CharSequence title, SelectModelField selectModelField, ListType listType) {
+    public static void show(Context c, CharSequence title, SelectModelField selectModelField, ListType listType) throws JSONException {
         show(c, title, selectModelField.getExpandValue(), selectModelField, false, listType);
     }
 
@@ -70,11 +73,11 @@ public class ListDialog {
         show(c, title, selectModelField.getExpandValue(), selectModelField, true, listType);
     }
 
-    public static void show(Context c, CharSequence title, List<? extends IdAndName> bl, SelectModelFieldFunc selectModelFieldFunc, Boolean hasCount) {
+    public static void show(Context c, CharSequence title, List<? extends MapperEntity> bl, SelectModelFieldFunc selectModelFieldFunc, Boolean hasCount) {
         show(c, title, bl, selectModelFieldFunc, hasCount, ListType.CHECK);
     }
 
-    public static void show(Context c, CharSequence title, List<? extends IdAndName> bl, SelectModelFieldFunc selectModelFieldFunc, Boolean hasCount, ListType listType) {
+    public static void show(Context c, CharSequence title, List<? extends MapperEntity> bl, SelectModelFieldFunc selectModelFieldFunc, Boolean hasCount, ListType listType) {
         ListDialog.selectModelFieldFunc = selectModelFieldFunc;
         ListDialog.hasCount = hasCount;
         ListAdapter la = ListAdapter.getClear(c, listType);
@@ -122,17 +125,13 @@ public class ListDialog {
                 }
                 ListAdapter la = ListAdapter.get(v.getContext());
                 int index = -1;
-                switch (v.getId()) {
-                    case R.id.btn_find_last:
-                        // 下面Text要转String，不然判断equals会出问题
-                        index = la.findLast(searchText.getText().toString());
-                        break;
-
-                    case R.id.btn_find_next:
-                        // 同上
-                        index = la.findNext(searchText.getText().toString());
-                        break;
+                int id = v.getId();
+                if (id == R.id.btn_find_last) {
+                    index = la.findLast(searchText.getText().toString());
+                } else if (id == R.id.btn_find_next) {
+                    index = la.findNext(searchText.getText().toString());
                 }
+
                 if (index < 0) {
                     Toast.makeText(v.getContext(), "未搜到", Toast.LENGTH_SHORT).show();
                 } else {
@@ -146,14 +145,13 @@ public class ListDialog {
 
         @SuppressLint("NonConstantResourceId") View.OnClickListener batchBtnOnClickListener = v1 -> {
             ListAdapter la = ListAdapter.get(v1.getContext());
-            switch (v1.getId()) {
-                case R.id.btn_select_all:
-                    la.selectAll();
-                    break;
-                case R.id.btn_select_invert:
-                    la.SelectInvert();
-                    break;
+            int id = v1.getId();
+            if (id == R.id.btn_select_all) {
+                la.selectAll();
+            } else if (id == R.id.btn_select_invert) {
+                la.SelectInvert();
             }
+
         };
         btn_select_all.setOnClickListener(batchBtnOnClickListener);
         btn_select_invert.setOnClickListener(batchBtnOnClickListener);
@@ -166,7 +164,7 @@ public class ListDialog {
                     if (listType == ListType.SHOW) {
                         return;
                     }
-                    IdAndName curIdAndName = (IdAndName) p1.getAdapter().getItem(p3);
+                    MapperEntity curIdAndName = (MapperEntity) p1.getAdapter().getItem(p3);
                     ListAdapter.ViewHolder curViewHolder = (ListAdapter.ViewHolder) p2.getTag();
                     if (!hasCount) {
                         if (listType == ListType.RADIO) {
@@ -235,14 +233,14 @@ public class ListDialog {
                 });
         lv_list.setOnItemLongClickListener(
                 (p1, p2, p3, p4) -> {
-                    IdAndName curIdAndName = (IdAndName) p1.getAdapter().getItem(p3);
+                    MapperEntity curIdAndName = (MapperEntity) p1.getAdapter().getItem(p3);
                     if (curIdAndName instanceof CooperateEntity) {
                         try {
                             new AlertDialog.Builder(c)
                                     .setTitle("删除 " + curIdAndName.name)
                                     .setPositiveButton(c.getString(R.string.ok), (dialog, which) -> {
                                         if (which == DialogInterface.BUTTON_POSITIVE) {
-                                            CooperateMap.remove(curIdAndName.id);
+                                            CooperateMap.getInstance(CooperateMap.class).remove(curIdAndName.id);
                                             selectModelFieldFunc.remove(curIdAndName.id);
                                             ListAdapter.get(c).exitFind();
                                         }
