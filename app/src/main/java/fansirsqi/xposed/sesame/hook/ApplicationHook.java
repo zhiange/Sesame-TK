@@ -880,14 +880,50 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
   }
 
-  public static Object getMicroApplicationContext() {
-    if (microApplicationContextObject == null) {
-      return microApplicationContextObject =
-          XposedHelpers.callMethod(
-              XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.alipay.mobile.framework.AlipayApplication", classLoader), "getInstance"), "getMicroApplicationContext");
+//  public static Object getMicroApplicationContext() {
+//    if (microApplicationContextObject == null) {
+//      return microApplicationContextObject =
+//          XposedHelpers.callMethod(
+//              XposedHelpers.callStaticMethod(XposedHelpers.findClass("com.alipay.mobile.framework.AlipayApplication", classLoader), "getInstance"), "getMicroApplicationContext");
+//    }
+//    return microApplicationContextObject;
+//  }
+//  尝试使用更安全的方案获取MicroApplicationContext
+public static Object getMicroApplicationContext() {
+  if (microApplicationContextObject == null) {
+    try {
+      // 查找目标类
+      Class<?> alipayApplicationClass = XposedHelpers.findClass(
+              "com.alipay.mobile.framework.AlipayApplication", classLoader
+      );
+      if (alipayApplicationClass == null) {
+        Log.error("AlipayApplication class found: " + alipayApplicationClass);
+      }
+      Object alipayApplicationInstance = XposedHelpers.callStaticMethod(
+              alipayApplicationClass, "getInstance"
+      );
+      if (alipayApplicationInstance == null) {
+        Log.error("Failed to get AlipayApplication instance");
+        return null;
+      }
+
+      // 调用实例方法 getMicroApplicationContext
+      microApplicationContextObject = XposedHelpers.callMethod(
+              alipayApplicationInstance, "getMicroApplicationContext"
+      );
+      if (microApplicationContextObject != null) {
+        Log.error("Successfully retrieved MicroApplicationContext: " + microApplicationContextObject);
+      } else {
+        Log.error("MicroApplicationContext is null");
+      }
+    } catch (Throwable t) {
+      // 捕获异常并打印日志
+      Log.error("Error in getMicroApplicationContext: " + t.getMessage());
     }
-    return microApplicationContextObject;
   }
+  return microApplicationContextObject;
+}
+
 
   public static Object getServiceObject(String service) {
     try {
