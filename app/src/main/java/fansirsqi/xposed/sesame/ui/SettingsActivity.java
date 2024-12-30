@@ -5,9 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.*;
 import android.widget.*;
+
+import androidx.core.content.ContextCompat;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.*;
@@ -21,6 +22,7 @@ import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.io.FileInputStream;
@@ -63,8 +65,8 @@ public class SettingsActivity extends BaseActivity {
         Model.initAllModel();
         UserMap.setCurrentUserId(userId);
         UserMap.load(userId);
-        CooperateMap.load(userId);
-        ReserveIdMapUtil.load();
+        CooperateMap.getInstance(CooperateMap.class).load(userId);
+        ReserveaMap.load();
         BeachMap.load();
         Config.load(userId);
 
@@ -76,7 +78,7 @@ public class SettingsActivity extends BaseActivity {
         if (userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
-        setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
+        setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
         context = this;
         // 初始化 TabHost
         tabHost = findViewById(R.id.tab_settings);
@@ -174,7 +176,7 @@ public class SettingsActivity extends BaseActivity {
                             if (StringUtil.isEmpty(userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = Files.getUserConfigDirectory(userId);
+                                userConfigDirectoryFile = Files.getUserConfigDir(userId);
                             }
                             if (Files.delFile(userConfigDirectoryFile)) {
                                 ToastUtil.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
@@ -284,7 +286,7 @@ public class SettingsActivity extends BaseActivity {
             }
             if (!StringUtil.isEmpty(userId)) {
                 UserMap.save(userId);
-                CooperateMap.save(userId);
+                CooperateMap.getInstance(CooperateMap.class).save(userId);
             }
         } catch (Throwable th) {
             Log.printStackTrace(th);
