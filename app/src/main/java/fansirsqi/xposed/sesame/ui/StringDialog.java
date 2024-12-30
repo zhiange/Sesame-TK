@@ -195,7 +195,7 @@ public class StringDialog {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 button.setTextColor(ContextCompat.getColor(c, R.color.button)); // 自定义按钮颜色
             } else {
-                button.setTextColor(c.getResources().getColor(R.color.button)); // 自定义按钮颜色
+                button.setTextColor(ContextCompat.getColor(c,R.color.button)); // 自定义按钮颜色
             }
         }
     }
@@ -226,7 +226,7 @@ public class StringDialog {
         // 获取并设置确认按钮的颜色
         Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (button != null) {
-            button.setTextColor(c.getResources().getColor(R.color.button));
+            button.setTextColor(ContextCompat.getColor(c,R.color.button));
         }
         return alertDialog;
     }
