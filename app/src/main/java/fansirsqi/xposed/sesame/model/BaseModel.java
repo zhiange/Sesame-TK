@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.model;
 
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import lombok.Getter;
 import org.json.JSONArray;
@@ -134,8 +135,8 @@ public class BaseModel extends Model {
   /** 清理数据，在模块销毁时调用，清空 Reserve 和 Beach 数据。 */
   public static void destroyData() {
     try {
-      ReserveaMap.clear();
-      BeachMap.clear();
+      IdMapManager.getInstance(ReserveaMap.class).clear();
+      IdMapManager.getInstance(BeachMap.class).clear();
     } catch (Exception e) {
       Log.printStackTrace(e);
     }
@@ -176,13 +177,13 @@ public class BaseModel extends Model {
               String itemId = item.getString("itemId");
               String itemName = item.getString("itemName");
               int energy = item.getInt("energy");
-              ReserveaMap.add(itemId, itemName + "(" + energy + "g)");
+              IdMapManager.getInstance(ReserveaMap.class).add(itemId, itemName + "(" + energy + "g)");
             }
           }
         }
 
         // 将筛选结果保存到 ReserveIdMapUtil
-        ReserveaMap.save();
+        IdMapManager.getInstance(ReserveaMap.class).save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
         Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
@@ -191,12 +192,12 @@ public class BaseModel extends Model {
       // 捕获 JSON 解析错误并记录日志
       Log.runtime("JSON 解析错误：" + e.getMessage());
       Log.printStackTrace(e);
-      ReserveaMap.load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
+      IdMapManager.getInstance(ReserveaMap.class).load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
       Log.runtime("初始化保护地任务时出错：" + e.getMessage());
       Log.printStackTrace(e);
-      ReserveaMap.load(); // 加载备份的 ReserveIdMapUtil
+      IdMapManager.getInstance(ReserveaMap.class).load(); // 加载备份的 ReserveIdMapUtil
     }
   }
 
@@ -234,11 +235,11 @@ public class BaseModel extends Model {
             String templateCode = item.getString("templateCode");
             String cultivationName = item.getString("cultivationName");
             int energy = item.getInt("energy");
-            BeachMap.add(templateCode, cultivationName + "(" + energy + "g)");
+            IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
           }
         }
         // 将所有筛选结果保存到 BeachMap
-        BeachMap.save();
+        IdMapManager.getInstance(BeachMap.class).save();
       } else {
         // 若 resultCode 不为 SUCCESS，记录错误描述
         Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
@@ -247,12 +248,12 @@ public class BaseModel extends Model {
       // 记录 JSON 解析过程中的异常
       Log.runtime("JSON 解析错误：" + e.getMessage());
       Log.printStackTrace(e);
-      BeachMap.load(); // 若出现异常则加载保存的 BeachMap 备份
+      IdMapManager.getInstance(BeachMap.class).load(); // 若出现异常则加载保存的 BeachMap 备份
     } catch (Exception e) {
       // 捕获所有其他异常并记录
       Log.runtime("初始化沙滩任务时出错：" + e.getMessage());
       Log.printStackTrace(e);
-      BeachMap.load(); // 加载保存的 BeachMap 备份
+      IdMapManager.getInstance(BeachMap.class).load(); // 加载保存的 BeachMap 备份
     }
   }
 

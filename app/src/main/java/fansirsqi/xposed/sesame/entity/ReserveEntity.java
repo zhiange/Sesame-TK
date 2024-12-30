@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.entity;
 
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class ReserveEntity extends MapperEntity {
             synchronized (ReserveEntity.class) {
                 if (list == null) {
                     List<ReserveEntity> tempList = new ArrayList<>();
-                    Set<Map.Entry<String, String>> idSet = ReserveaMap.getMap().entrySet();
+                    Set<Map.Entry<String, String>> idSet = IdMapManager.getInstance(ReserveaMap.class).getMap().entrySet();
                     for (Map.Entry<String, String> entry : idSet) {
                         tempList.add(new ReserveEntity(entry.getKey(), entry.getValue()));
                     }

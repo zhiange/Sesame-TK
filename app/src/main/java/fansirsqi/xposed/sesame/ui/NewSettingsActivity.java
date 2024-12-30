@@ -37,6 +37,7 @@ import fansirsqi.xposed.sesame.ui.dto.ModelGroupDto;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
@@ -87,8 +88,8 @@ public class NewSettingsActivity extends BaseActivity {
         UserMap.setCurrentUserId(userId);
         UserMap.load(userId);
         CooperateMap.getInstance(CooperateMap.class).load(userId);
-        ReserveaMap.load();
-        BeachMap.load();
+        IdMapManager.getInstance(ReserveaMap.class).load();
+        IdMapManager.getInstance(BeachMap.class).load();
         Config.load(userId);
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_new_settings);

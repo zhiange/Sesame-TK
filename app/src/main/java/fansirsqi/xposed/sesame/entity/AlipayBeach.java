@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.entity;
 
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +35,7 @@ public class AlipayBeach extends MapperEntity {
             synchronized (AlipayBeach.class) {
                 if (list == null) {
                     List<AlipayBeach> tempList = new ArrayList<>();
-                    for (Map.Entry<String, String> entry : BeachMap.getMap().entrySet()) {
+                    for (Map.Entry<String, String> entry : IdMapManager.getInstance(BeachMap.class).getMap().entrySet()) {
                         tempList.add(new AlipayBeach(entry.getKey(), entry.getValue()));
                     }
                     list = Collections.unmodifiableList(tempList);
