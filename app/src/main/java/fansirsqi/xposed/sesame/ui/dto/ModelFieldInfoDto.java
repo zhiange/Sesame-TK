@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.ui.dto;
 
+import org.json.JSONException;
+
 import lombok.Data;
 import fansirsqi.xposed.sesame.model.ModelField;
 
@@ -43,6 +45,11 @@ public class ModelFieldInfoDto implements Serializable {
     private String configValue;
 
     /**
+     * 字段描述。
+     */
+    private String desc;
+
+    /**
      * 无参构造函数。
      */
     public ModelFieldInfoDto() {
@@ -53,7 +60,7 @@ public class ModelFieldInfoDto implements Serializable {
      * @param modelField ModelField对象
      * @return ModelFieldInfoDto对象
      */
-    public static ModelFieldInfoDto toInfoDto(ModelField<?> modelField) {
+    public static ModelFieldInfoDto toInfoDto(ModelField<?> modelField) throws JSONException {
         ModelFieldInfoDto dto = new ModelFieldInfoDto();
         dto.setCode(modelField.getCode());
         dto.setName(modelField.getName());
@@ -61,6 +68,7 @@ public class ModelFieldInfoDto implements Serializable {
         dto.setExpandKey(modelField.getExpandKey());
         dto.setExpandValue(modelField.getExpandValue());
         dto.setConfigValue(modelField.getConfigValue());
+        dto.setDesc(modelField.getDesc());
         return dto;
     }
 }
