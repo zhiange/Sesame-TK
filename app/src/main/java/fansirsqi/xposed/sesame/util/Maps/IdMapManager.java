@@ -99,6 +99,21 @@ public abstract class IdMapManager {
         }
     }
 
+    public synchronized void load() {
+        idMap.clear();
+        try {
+            File file = Files.getTargetFileofDir(Files.MAIN_DIR, thisFileName());
+            String body = Files.readFromFile(file);
+            if (!body.isEmpty()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
+                idMap.putAll(newMap);
+            }
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+    }
+
     /**
      * 将ID映射保存到文件。
      * @param userId 用户ID。
@@ -109,6 +124,18 @@ public abstract class IdMapManager {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(idMap);
             File file = Files.getTargetFileofUser(userId, thisFileName());
+            return Files.write2File(json, file);
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+            return false;
+        }
+    }
+
+    public synchronized boolean save() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(idMap);
+            File file = Files.getTargetFileofDir(Files.MAIN_DIR, thisFileName());
             return Files.write2File(json, file);
         } catch (Exception e) {
             Log.printStackTrace(e);
