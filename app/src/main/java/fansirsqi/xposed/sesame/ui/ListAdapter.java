@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.util.Log;
 
 import java.util.*;
@@ -21,7 +21,7 @@ public class ListAdapter extends BaseAdapter {
     private static ListAdapter adapter;
     private static ListDialog.ListType listType;
     private final Context context;  // 将 context 声明为 final
-    private List<? extends IdAndName> list;
+    private List<? extends MapperEntity> list;
     private SelectModelFieldFunc selectModelFieldFunc;
     private int findIndex = -1;
     private String findWord = null;
@@ -80,7 +80,7 @@ public class ListAdapter extends BaseAdapter {
      *
      * @param l 列表数据
      */
-    public void setBaseList(List<? extends IdAndName> l) {
+    public void setBaseList(List<? extends MapperEntity> l) {
         if (l != list) {
             exitFind();
         }
@@ -182,7 +182,7 @@ public class ListAdapter extends BaseAdapter {
      */
     public void selectAll() {
         selectModelFieldFunc.clear();
-        for (IdAndName item : list) {
+        for (MapperEntity item : list) {
             selectModelFieldFunc.add(item.id, 0);
         }
         notifyDataSetChanged();
@@ -192,7 +192,7 @@ public class ListAdapter extends BaseAdapter {
      * 反选列表中的所有项。
      */
     public void SelectInvert() {
-        for (IdAndName item : list) {
+        for (MapperEntity item : list) {
             if (!selectModelFieldFunc.contains(item.id)) {
                 selectModelFieldFunc.add(item.id, 0);
             } else {
@@ -235,7 +235,7 @@ public class ListAdapter extends BaseAdapter {
             vh = (ViewHolder) convertView.getTag();
         }
 
-        IdAndName item = list.get(position);
+        MapperEntity item = list.get(position);
         vh.tv.setText(item.name);
         vh.tv.setTextColor(findIndex == position ? Color.RED : Color.BLACK);
         vh.cb.setChecked(selectModelFieldFunc != null && selectModelFieldFunc.contains(item.id));
