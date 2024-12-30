@@ -1,12 +1,34 @@
 package fansirsqi.xposed.sesame.util;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import lombok.Data;
 
 import java.time.LocalDate;
 
+
 @Data
 public class StatisticsUtil {
+
+    @Data
+    public static class TimeStatistics {
+        int time;
+        int collected, helped, watered;
+
+        public TimeStatistics() {
+        }
+
+        TimeStatistics(int i) {
+            reset(i);
+        }
+
+        public void reset(int i) {
+            time = i;
+            collected = 0;
+            helped = 0;
+            watered = 0;
+        }
+    }
 
     private static final String TAG = StatisticsUtil.class.getSimpleName();
     public static final StatisticsUtil INSTANCE = new StatisticsUtil();
@@ -17,8 +39,9 @@ public class StatisticsUtil {
 
     /**
      * 增加指定数据类型的统计量
+     *
      * @param dt 数据类型（收集、帮助、浇水）
-     * @param i 增加的数量
+     * @param i  增加的数量
      */
     public static void addData(DataType dt, int i) {
         StatisticsUtil stat = INSTANCE;
@@ -43,6 +66,7 @@ public class StatisticsUtil {
 
     /**
      * 获取指定时间和数据类型的统计值
+     *
      * @param tt 时间类型（年、月、日）
      * @param dt 数据类型（时间、收集、帮助、浇水）
      * @return 统计值
@@ -50,39 +74,25 @@ public class StatisticsUtil {
     public static int getData(TimeType tt, DataType dt) {
         StatisticsUtil stat = INSTANCE;
         int data = 0;
-        TimeStatistics ts = null;
-        switch (tt) {
-            case YEAR:
-                ts = stat.year;
-                break;
-            case MONTH:
-                ts = stat.month;
-                break;
-            case DAY:
-                ts = stat.day;
-                break;
-        }
+        TimeStatistics ts = switch (tt) {
+            case YEAR -> stat.year;
+            case MONTH -> stat.month;
+            case DAY -> stat.day;
+        };
         if (ts != null) {
-            switch (dt) {
-                case TIME:
-                    data = ts.time;
-                    break;
-                case COLLECTED:
-                    data = ts.collected;
-                    break;
-                case HELPED:
-                    data = ts.helped;
-                    break;
-                case WATERED:
-                    data = ts.watered;
-                    break;
-            }
+            data = switch (dt) {
+                case TIME -> ts.time;
+                case COLLECTED -> ts.collected;
+                case HELPED -> ts.helped;
+                case WATERED -> ts.watered;
+            };
         }
         return data;
     }
 
     /**
      * 获取统计文本信息
+     *
      * @return 包含年、月、日统计信息的字符串
      */
     public static String getText() {
@@ -100,6 +110,7 @@ public class StatisticsUtil {
 
     /**
      * 加载统计数据
+     *
      * @return 统计实例
      */
     public static synchronized StatisticsUtil load() {
@@ -193,26 +204,6 @@ public class StatisticsUtil {
     }
 
 
-    @Data
-    public static class TimeStatistics {
-        int time;
-        int collected, helped, watered;
-
-        public TimeStatistics() {
-        }
-
-        TimeStatistics(int i) {
-            reset(i);
-        }
-
-        public void reset(int i) {
-            time = i;
-            collected = 0;
-            helped = 0;
-            watered = 0;
-        }
-    }
-
     public enum TimeType {
         YEAR, MONTH, DAY
     }
@@ -221,3 +212,5 @@ public class StatisticsUtil {
         TIME, COLLECTED, HELPED, WATERED
     }
 }
+
+
