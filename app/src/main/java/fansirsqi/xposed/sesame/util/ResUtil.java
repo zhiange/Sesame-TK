@@ -16,6 +16,20 @@ public class ResUtil {
         }
     }
 
+    public static Boolean checkResCode(String str) throws JSONException {
+        JSONObject jsonObj = new JSONObject(str);
+        return checkResCode(TAG, jsonObj);
+    }
+
+    public static Boolean checkResCode(String TAG, String str) throws JSONException {
+        JSONObject jsonObj = new JSONObject(str);
+        return checkResCode(TAG, jsonObj);
+    }
+
+    public static Boolean checkResCode(JSONObject jo) {
+        return checkResCode(TAG, jo);
+    }
+
     /**
      * 检查JSON对象中的响应码（resultCode），并根据其类型和值返回处理结果。
      *
@@ -31,74 +45,55 @@ public class ResUtil {
      */
     public static Boolean checkResCode(String TAG, JSONObject jo) {
         try {
-            // 尝试从JSON对象中获取resultCode字段
             Object resCode = jo.opt("resultCode");
             if (resCode == null) {
-                // 如果resultCode不存在，记录日志并返回false
                 Log.record(TAG + "checkResCode err: resultCode不存在");
                 return false;
             }
-
-            // 根据resultCode的类型进行处理
             if (resCode instanceof Integer) {
-                // 如果resultCode是整数类型，检查是否等于200
                 if ((Integer) resCode != 200) {
-                    // 如果不等于200，记录错误信息并返回false
                     recordError(TAG, jo, "resultMsg", "checkResCode Integer err");
                     return false;
                 }
                 return true;
             } else if (resCode instanceof String) {
-                // 如果resultCode是字符串类型，检查是否匹配"SUCCESS"或"100"（不区分大小写）
                 if (!((String) resCode).matches("(?i)SUCCESS|100")) {
-                    // 如果不匹配，记录错误信息并返回false
                     recordError(TAG, jo, "resultDesc", "checkResCode String err");
                     return false;
                 }
                 return true;
             }
-
-            // 如果resultCode类型既不是整数也不是字符串，记录日志并返回false
-            Log.record(TAG + "checkResCode Type fail: " + jo.toString());
+            Log.record(TAG + "checkResCode Type fail: " + jo);
             return false;
         } catch (Throwable t) {
-            // 捕获并记录异常信息
             Log.runtime(TAG, "checkResCode error: " + t.getMessage());
         }
-        // 如果发生异常，返回false
         return false;
     }
 
 
-    public static Boolean isSuccess(JSONObject jo) {
-        return isSuccess(TAG, jo);
+    public static Boolean checkSuccess(String str) throws JSONException {
+        JSONObject jo = new JSONObject(str);
+        return checkSuccess(TAG, jo);
     }
 
-    public static Boolean isSuccess(String tag, JSONObject jo) {
-        try {
-            if (!jo.optBoolean("success") && !jo.optBoolean("isSuccess")) {
-                if (jo.has("errorMsg")) {
-                    Log.error(tag, "errorMsg: " + jo.getString("errorMsg"));
-                } else if (jo.has("errorMessage")) {
-                    Log.error(tag, "errorMessage: " + jo.getString("errorMessage"));
-                } else if (jo.has("desc")) {
-                    Log.error(tag, "desc: " + jo.getString("desc"));
-                } else if (jo.has("resultDesc")) {
-                    Log.error(tag, "resultDesc: " + jo.getString("resultDesc"));
-                } else if (jo.has("resultView")) {
-                    Log.error(tag, "resultView: " + jo.getString("resultView"));
-                } else {
-                    Log.runtime(tag, jo.toString());
-                }
-                return false;
-            }
-            return true;
-        } catch (JSONException e) {
-            Log.error(TAG, "checkSuccess err:");
-            Log.printStackTrace(e);
+    public static Boolean checkSuccess(String tag, String str) throws JSONException {
+        JSONObject jo = new JSONObject(str);
+        return checkSuccess(tag, jo);
+    }
+
+    public static Boolean checkSuccess(JSONObject jo) {
+        return checkSuccess(TAG, jo);
+    }
+
+    public static Boolean checkSuccess(String tag, JSONObject jo) {
+        if (!jo.optBoolean("success") && !jo.optBoolean("isSuccess")) {
+            logErrorDetails(tag, jo);
+            return false;
         }
-        return false;
+        return true;
     }
+
 
     private static void recordError(String TAG, JSONObject jo, String key, String prefix) throws JSONException {
         if (jo.has(key)) {
@@ -107,6 +102,28 @@ public class ResUtil {
             Log.record(TAG + prefix + ": " + jo.getString("resultView"));
         } else {
             Log.record(TAG + prefix + ": " + jo);
+        }
+    }
+
+
+    private static void logErrorDetails(String tag, JSONObject jo) {
+        try {
+            if (jo.has("errorMsg")) {
+                Log.error(tag, "errorMsg: " + jo.getString("errorMsg"));
+            } else if (jo.has("errorMessage")) {
+                Log.error(tag, "errorMessage: " + jo.getString("errorMessage"));
+            } else if (jo.has("desc")) {
+                Log.error(tag, "desc: " + jo.getString("desc"));
+            } else if (jo.has("resultDesc")) {
+                Log.error(tag, "resultDesc: " + jo.getString("resultDesc"));
+            } else if (jo.has("resultView")) {
+                Log.error(tag, "resultView: " + jo.getString("resultView"));
+            } else {
+                Log.runtime(tag, jo.toString());
+            }
+        } catch (JSONException e) {
+            Log.error(tag, "logErrorDetails err:");
+            Log.printStackTrace(e);
         }
     }
 }
