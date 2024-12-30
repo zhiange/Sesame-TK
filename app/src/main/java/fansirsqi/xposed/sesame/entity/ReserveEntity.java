@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.ReserveIdMapUtil;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * 表示支付宝保留项的实体类，包含 ID 和名称。
  */
-public class ReserveEntity extends IdAndName {
+public class ReserveEntity extends MapperEntity {
     // 使用 volatile 关键字确保多线程环境下的可见性
     private static volatile List<ReserveEntity> list;
 
@@ -35,7 +35,7 @@ public class ReserveEntity extends IdAndName {
             synchronized (ReserveEntity.class) {
                 if (list == null) {
                     List<ReserveEntity> tempList = new ArrayList<>();
-                    Set<Map.Entry<String, String>> idSet = ReserveIdMapUtil.getMap().entrySet();
+                    Set<Map.Entry<String, String>> idSet = ReserveaMap.getMap().entrySet();
                     for (Map.Entry<String, String> entry : idSet) {
                         tempList.add(new ReserveEntity(entry.getKey(), entry.getValue()));
                     }
