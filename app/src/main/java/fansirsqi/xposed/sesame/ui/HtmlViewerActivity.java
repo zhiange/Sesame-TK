@@ -41,7 +41,7 @@ public class HtmlViewerActivity extends BaseActivity {
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
     setBaseSubtitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
     }else{
-    setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
+    setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
     }
     // 设置标题栏
     // 初始化 WebView 和进度条
