@@ -14,7 +14,7 @@ import fansirsqi.xposed.sesame.util.Log;
  * 区域代码类，继承自IdAndName。
  * 该类用于管理城市代码和城市名称。
  */
-public class AreaCode extends IdAndName {
+public class AreaCode extends MapperEntity {
     private static final String TAG = AreaCode.class.getSimpleName();
     private static List<AreaCode> list;
 
@@ -42,7 +42,6 @@ public class AreaCode extends IdAndName {
             JSONArray ja = parseCityCode(cityCode);
             list = new ArrayList<>();
 
-            // 将JSONArray中的数据转换为AreaCode对象并添加到列表中
             for (int i = 0; i < ja.length(); i++) {
                 try {
                     JSONObject jo = ja.getJSONObject(i);
@@ -67,13 +66,14 @@ public class AreaCode extends IdAndName {
             return new JSONArray(cityCode);
         } catch (JSONException e) {
             // 解析失败，使用默认城市代码
+            Log.runtime(TAG, "parseCityCode failed with error message: " + e.getMessage()+"\n Now use default cities.");
             JSONArray defaultCities = new JSONArray();
-            defaultCities.put(new JSONObject().put("cityCode", "320100").put("cityName", "南京市"));
-            defaultCities.put(new JSONObject().put("cityCode", "330100").put("cityName", "杭州市"));
             defaultCities.put(new JSONObject().put("cityCode", "350100").put("cityName", "福州市"));
-            defaultCities.put(new JSONObject().put("cityCode", "370100").put("cityName", "济南市"));
-            defaultCities.put(new JSONObject().put("cityCode", "430100").put("cityName", "长沙市"));
             defaultCities.put(new JSONObject().put("cityCode", "440100").put("cityName", "广州市"));
+            defaultCities.put(new JSONObject().put("cityCode", "330100").put("cityName", "杭州市"));
+            defaultCities.put(new JSONObject().put("cityCode", "370100").put("cityName", "济南市"));
+            defaultCities.put(new JSONObject().put("cityCode", "320100").put("cityName", "南京市"));
+            defaultCities.put(new JSONObject().put("cityCode", "430100").put("cityName", "长沙市"));
             return defaultCities;
         }
     }

@@ -17,7 +17,7 @@ import java.util.List;
  * @author Constanline
  * @since 2023/08/08
  */
-public class FriendWatch extends IdAndName {
+public class FriendWatch extends MapperEntity {
 
     // 日志标签
     private static final String TAG = FriendWatch.class.getSimpleName();
@@ -47,7 +47,7 @@ public class FriendWatch extends IdAndName {
      * @return 比较结果
      */
     @Override
-    public int compareTo(IdAndName o) {
+    public int compareTo(MapperEntity o) {
         FriendWatch another = (FriendWatch) o;
         if (this.weekGet > another.weekGet) {
             return -1;

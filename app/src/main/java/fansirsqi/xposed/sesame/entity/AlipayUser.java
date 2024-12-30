@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * 表示支付宝用户的实体类，包含 ID 和名称。
  */
-public class AlipayUser extends IdAndName {
+public class AlipayUser extends MapperEntity {
 
     /**
      * 构造方法，根据给定的 ID 和名称初始化用户对象。
