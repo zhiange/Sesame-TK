@@ -20,12 +20,12 @@
     <button id="tabsBtn" type="button" style="font-size: 18px;">GetTabs</button>
 </div>
 
-<!--<div style="text-align: center;margin-top: 80px;">
+<div style="text-align: center;margin-top: 80px;">
     <input id="allConfigTextIpt" type="text" style="font-size: 18px; width: 90%; text-align: center; line-height: 260%;">
 </div>
 <div style="text-align: center;margin-top: 20px;">
     <button id="allConfigBtn" type="button" style="font-size: 18px;">GetAllConfig</button>
-</div>-->
+</div>
 
 <div style="text-align: center;margin-top: 80px;">
     <input id="getModelByGroupTextIpt" type="text" style="font-size: 18px; width: 90%; text-align: center; line-height: 260%;">
@@ -116,9 +116,9 @@
             document.getElementById("tabsTextIpt").value = window.HOOK.getTabs();
         }
 
-        /*document.getElementById("allConfigBtn").onclick = async function () {
+        document.getElementById("allConfigBtn").onclick = async function () {
             document.getElementById("allConfigTextIpt").value = window.HOOK.getAllConfig();
-        }*/
+        }
 
         document.getElementById("getModelBtn").onclick = async function () {
             document.getElementById("getModelTextIpt").value = window.HOOK.getModel(document.getElementById("getModelSelectIpt").value);
