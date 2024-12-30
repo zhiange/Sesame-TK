@@ -2,7 +2,6 @@ package fansirsqi.xposed.sesame.model.modelFieldExt;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import androidx.core.content.ContextCompat;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.entity.IdAndName;
+import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.ui.ListDialog;
 
 import java.util.List;
@@ -29,9 +28,9 @@ public class SelectAndCountModelField extends ModelField<Map<String, Integer>> i
 
     private SelectListFunc selectListFunc;
 
-    private List<? extends IdAndName> expandValue;
+    private List<? extends MapperEntity> expandValue;
 
-    public SelectAndCountModelField(String code, String name, Map<String, Integer> value, List<? extends IdAndName> expandValue) {
+    public SelectAndCountModelField(String code, String name, Map<String, Integer> value, List<? extends MapperEntity> expandValue) {
         super(code, name, value);
         this.expandValue = expandValue;
     }
@@ -41,12 +40,23 @@ public class SelectAndCountModelField extends ModelField<Map<String, Integer>> i
         this.selectListFunc = selectListFunc;
     }
 
+    public SelectAndCountModelField(String code, String name, Map<String, Integer> value, List<? extends MapperEntity> expandValue, String desc) {
+        super(code, name, value, desc);
+        this.expandValue = expandValue;
+    }
+
+    public SelectAndCountModelField(String code, String name, Map<String, Integer> value, SelectListFunc selectListFunc, String desc) {
+        super(code, name, value, desc);
+        this.selectListFunc = selectListFunc;
+    }
+
+
     @Override
     public String getType() {
         return "SELECT_AND_COUNT";
     }
 
-    public List<? extends IdAndName> getExpandValue() {
+    public List<? extends MapperEntity> getExpandValue() {
         return selectListFunc == null ? expandValue : selectListFunc.getList();
     }
 
@@ -92,6 +102,6 @@ public class SelectAndCountModelField extends ModelField<Map<String, Integer>> i
     }
 
     public interface SelectListFunc {
-        List<? extends IdAndName> getList();
+        List<? extends MapperEntity> getList();
     }
 }
