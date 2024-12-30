@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.ui;
 
+import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,7 +12,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.*;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import org.json.JSONException;
+
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.*;
@@ -29,6 +37,7 @@ import fansirsqi.xposed.sesame.ui.dto.ModelGroupDto;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.io.FileInputStream;
@@ -77,8 +86,8 @@ public class NewSettingsActivity extends BaseActivity {
         Model.initAllModel();
         UserMap.setCurrentUserId(userId);
         UserMap.load(userId);
-        CooperateMap.load(userId);
-        ReserveIdMapUtil.load();
+        CooperateMap.getInstance(CooperateMap.class).load(userId);
+        ReserveaMap.load();
         BeachMap.load();
         Config.load(userId);
         LanguageUtil.setLocale(this);
@@ -86,7 +95,7 @@ public class NewSettingsActivity extends BaseActivity {
         if (userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
-        setBaseSubtitleTextColor(getResources().getColor(R.color.textColorPrimary));
+        setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
         context = this;
         webView = findViewById(R.id.webView);
         WebSettings settings = webView.getSettings();
@@ -170,15 +179,24 @@ public class NewSettingsActivity extends BaseActivity {
     private class WebViewCallback {
         @JavascriptInterface
         public String getTabs() {
-            return JsonUtil.toJsonString(tabList);
+            String result = JsonUtil.formatJson(tabList);
+            if(isApkInDebug()){
+                Log.runtime("NewSettingsActivity.getTabs: " + result);
+            }
+            return result;
         }
+
         @JavascriptInterface
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
         }
         @JavascriptInterface
         public String getGroup() {
-            return JsonUtil.toJsonString(groupList);
+            String result = JsonUtil.formatJson(groupList);
+            if(isApkInDebug()){
+                Log.runtime("NewSettingsActivity.getGroup: " + result);
+            }
+            return result;
         }
         @JavascriptInterface
         public String getModelByGroup(String groupCode) {
@@ -191,7 +209,11 @@ public class NewSettingsActivity extends BaseActivity {
                 }
                 modelDtoList.add(new ModelDto(modelConfig.getCode(), modelConfig.getName(), groupCode, modelFields));
             }
-            return JsonUtil.toJsonString(modelDtoList);
+            String result = JsonUtil.formatJson(modelDtoList);
+            if(isApkInDebug()){
+                Log.runtime("NewSettingsActivity.getModelByGroup: " + result);
+            }
+            return result;
         }
         @JavascriptInterface
         public String setModelByGroup(String groupCode, String modelsValue) {
@@ -224,7 +246,11 @@ public class NewSettingsActivity extends BaseActivity {
                 for (ModelField<?> modelField : modelFields.values()) {
                     list.add(ModelFieldShowDto.toShowDto(modelField));
                 }
-                return JsonUtil.toJsonString(list);
+                String result = JsonUtil.formatJson(list);
+                if(isApkInDebug()){
+                    Log.runtime("NewSettingsActivity.getModel: " + result);
+                }
+                return result;
             }
             return null;
         }
@@ -252,14 +278,17 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
-
         @JavascriptInterface
-        public String getField(String modelCode, String fieldCode) {
+        public String getField(String modelCode, String fieldCode) throws JSONException {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
             if (modelConfig != null) {
                 ModelField<?> modelField = modelConfig.getModelField(fieldCode);
                 if (modelField != null) {
-                    return JsonUtil.toJsonString(ModelFieldInfoDto.toInfoDto(modelField));
+                    String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField));
+                    if(isApkInDebug()){
+                        Log.runtime("NewSettingsActivity.getField: " + result);
+                    }
+                    return result;
                 }
             }
             return null;
@@ -321,7 +350,7 @@ public class NewSettingsActivity extends BaseActivity {
                             if (StringUtil.isEmpty(userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = Files.getUserConfigDirectory(userId);
+                                userConfigDirectoryFile = Files.getUserConfigDir(userId);
                             }
                             if (Files.delFile(userConfigDirectoryFile)) {
                                 Toast.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
@@ -431,7 +460,7 @@ public class NewSettingsActivity extends BaseActivity {
         }
         if (!StringUtil.isEmpty(userId)) {
             UserMap.save(userId);
-            CooperateMap.save(userId);
+            CooperateMap.getInstance(CooperateMap.class).save(userId);
         }
     }
 
