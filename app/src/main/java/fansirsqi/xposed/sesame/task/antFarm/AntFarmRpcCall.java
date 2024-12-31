@@ -480,4 +480,13 @@ public class AntFarmRpcCall {
         return ApplicationHook.requestString("com.alipay.antfarm.receiveFamilyAward", args);
     }
 
+    public static String assignFamilyMember(String assignAction,String beAssignUser){
+        return ApplicationHook.requestString("com.alipay.antfarm.assignFamilyMember",
+                "[{\"assignAction\":\""+assignAction+"\",\"beAssignUser\":\""+beAssignUser+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]");
+    }
+
+    public static String sendChat(String chatCardType,String receiverUserId){
+        return ApplicationHook.requestString("com.alipay.antfarm.sendChat",
+                "[{\"chatCardType\":\""+chatCardType+"\",\"receiverUserId\":\""+receiverUserId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]");
+    }
 }
