@@ -23,7 +23,7 @@
                 android:value="true" />
         <meta-data
                 android:name="xposeddescription"
-                android:value="芝麻粒·TK版 依旧归七" />
+                android:value="竹外一枝斜，想佳人，天寒日暮" />
         <meta-data
                 android:name="xposedminversion"
                 android:value="54" />
