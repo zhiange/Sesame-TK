@@ -2465,7 +2465,15 @@ public class AntFarm extends ModelTask {
             familyGroupId = jo.getString("groupId");
             int familyAwardNum = jo.getInt("familyAwardNum");
             boolean familySignTips = jo.getBoolean("familySignTips");
-
+            //顶梁柱
+            JSONObject assignFamilyMemberInfo = jo.getJSONObject("assignFamilyMemberInfo");
+            JSONArray animals = jo.getJSONArray("animals");
+            List<String> familyUserIds = new ArrayList<>();
+            for (int i = 0; i < animals.length(); i++) {
+                jo = animals.getJSONObject(i);
+                String userId = jo.getString("userId");
+                familyUserIds.add(userId);
+            }
             if (familySignTips && familyOptions.getValue().contains("familySign")) {
                 familySign();
             }
@@ -2473,6 +2481,15 @@ public class AntFarm extends ModelTask {
             if (familyAwardNum > 0 && familyOptions.getValue().contains("familyClaimReward")) {
                 familyClaimRewardList();
             }
+
+            //顶梁柱特权
+            if (!Objects.isNull(assignFamilyMemberInfo) && familyOptions.getValue().contains("assignRights")) {
+                JSONObject assignRights = assignFamilyMemberInfo.getJSONObject("assignRights");
+                if (Objects.equals(assignRights.getString("assignRightsOwner"), UserMap.getCurrentUid()) && Objects.equals(assignRights.getString("status"), "NOT_USED")) {
+                    assignFamilyMember(assignFamilyMemberInfo,familyUserIds);
+                }
+            }
+
         } catch (Throwable t) {
             Log.runtime(TAG, "family err:");
             Log.printStackTrace(TAG, t);
@@ -2564,6 +2581,31 @@ public class AntFarm extends ModelTask {
         }
     }
 
+    private void assignFamilyMember(JSONObject jsonObject,List<String> userIds) {
+        try {
+            userIds.remove(UserMap.getCurrentUid());
+            //随机选一个家庭成员
+            if(userIds.isEmpty()){
+                return;
+            }
+            String beAssignUser = userIds.get(RandomUtil.nextInt(0, userIds.size()-1));
+            //随机获取一个任务类型
+            JSONArray assignConfigList = jsonObject.getJSONArray("assignConfigList");
+            JSONObject assignConfig = assignConfigList.getJSONObject(RandomUtil.nextInt(0, assignConfigList.length()-1));
+            JSONObject jo = new JSONObject(AntFarmRpcCall.assignFamilyMember(assignConfig.getString("assignAction"),beAssignUser));
+            if ("SUCCESS".equals(jo.optString("memo"))) {
+                Log.farm("亲密家庭🏠提交任务[使用顶梁柱特权]");
+                ThreadUtil.sleep(500);
+                jo = new JSONObject(AntFarmRpcCall.sendChat(assignConfig.getString("chatCardType"),beAssignUser));
+                if ("SUCCESS".equals(jo.optString("memo"))) {
+                    ThreadUtil.sleep(500);
+                }
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "assignFamilyMember err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
     static class AntFarmFamilyOption extends MapperEntity {
 
         public AntFarmFamilyOption(String i, String n) {
@@ -2575,6 +2617,7 @@ public class AntFarm extends ModelTask {
             List<AntFarmFamilyOption> list = new ArrayList<>();
             list.add(new AntFarmFamilyOption("familySign", "每日签到"));
             list.add(new AntFarmFamilyOption("familyClaimReward", "领取奖励"));
+            list.add(new AntFarmFamilyOption("assignRights", "使用顶梁柱特权"));
             return list;
         }
     }
