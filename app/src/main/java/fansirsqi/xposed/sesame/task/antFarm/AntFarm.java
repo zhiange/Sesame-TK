@@ -65,6 +65,7 @@ public class AntFarm extends ModelTask {
         bizKeyList.add("JINGTAN_FEED_FISH");// 去鲸探喂鱼集福气
         bizKeyList.add("UC_gygzy");// 逛一逛UC浏览器
         bizKeyList.add("TAOBAO_renshenggyg");// 去淘宝人生逛一逛
+        bizKeyList.add("TOUTIAO_daoduan");// 去今日头条极速版逛一逛
         bizKeyList.add("SLEEP");// 让小鸡去睡觉
     }
 
