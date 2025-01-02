@@ -61,7 +61,6 @@ public class Log {
     }
 
     public static void system(String message) {
-        record(message);
         SYSTEM_LOGGER.info(TAG + "{}", message);
     }
 
@@ -70,7 +69,6 @@ public class Log {
     }
 
     public static void debug(String message) {
-        record(message);
         DEBUG_LOGGER.info("{}", message);
     }
 
