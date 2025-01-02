@@ -187,6 +187,7 @@ public class AntForest extends ModelTask {
     private BooleanModelField ecoLife;
 
     public static BooleanModelField ecoLifeOpen;
+    private BooleanModelField energyRainChance;
 
     /**
      * 加速器
@@ -236,6 +237,7 @@ public class AntForest extends ModelTask {
         modelFields.addField(energyRain = new BooleanModelField("energyRain", "能量雨", false));
         modelFields.addField(dontCollectList = new SelectModelField("dontCollectList", "不收能量列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(giveEnergyRainList = new SelectModelField("giveEnergyRainList", "赠送|能量雨", new LinkedHashSet<>(), AlipayUser::getList));
+        modelFields.addField(energyRainChance = new BooleanModelField("energyRainChance", "能量雨次卡 | 兑换使用", false));
         modelFields.addField(whoYouWantToGiveTo = new SelectModelField("whoYouWantToGiveTo", "赠送|道具", new LinkedHashSet<>(), AlipayUser::getList, "所有可赠送的道具将全部赠"));
         modelFields.addField(collectProp = new BooleanModelField("collectProp", "收集道具", false));
         modelFields.addField(collectWateringBubble = new BooleanModelField("collectWateringBubble", "收取金球|浇水", false));
@@ -414,6 +416,9 @@ public class AntForest extends ModelTask {
                 //能量雨
                 if (energyRain.getValue()) {
                     EnergyRain.energyRain();
+                    if(energyRainChance.getValue()){
+                        useEnergyRainChanceCard();
+                    }
                 }
                 if (receiveForestTaskAward.getValue()) {
                     receiveTaskAward();
@@ -2631,6 +2636,37 @@ public class AntForest extends ModelTask {
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "useBubbleBoostCard err:");
+            Log.printStackTrace(TAG, th);
+        }
+    }
+
+    private void useEnergyRainChanceCard(){
+        try {
+            if(StatusUtil.hasFlagToday("AntForest::useEnergyRainChanceCard")){
+                return;
+            }
+            // 背包查找 限时能量雨机会
+            JSONObject jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
+            // 活力值商店兑换
+            if (jo == null&&!StatusUtil.hasFlagToday("exchangePropShop::SK20241231005469")) {
+                if (exchangePropShop(findPropShop("SP20241231002189", "SP20241231002189"),  1)) {
+                    StatusUtil.setFlagToday("exchangePropShop::SK20241231005469");
+                    // 兑换成功后再次查找限时能量双击卡
+                    jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
+                }
+            }
+            if (jo == null) {
+                return;
+            }
+            // 使用 道具
+            if (usePropBag(jo)) {
+                Log.forest("限时能量雨机会🌧️");
+                StatusUtil.setFlagToday("AntForest::useEnergyRainChanceCard");
+                ThreadUtil.sleep(500);
+                EnergyRain.startEnergyRain();
+            }
+        } catch (Throwable th) {
+            Log.runtime(TAG, "useEnergyRainChanceCard err:");
             Log.printStackTrace(TAG, th);
         }
     }

@@ -16,7 +16,7 @@ import fansirsqi.xposed.sesame.util.ThreadUtil;
 public class EnergyRain {
 
     private static final String TAG = EnergyRain.class.getSimpleName();
-    private static void startEnergyRain() {
+    public static void startEnergyRain() {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.startEnergyRain());
             ThreadUtil.sleep(5000);
