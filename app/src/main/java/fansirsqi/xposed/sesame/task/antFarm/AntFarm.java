@@ -4,21 +4,41 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+
+import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
-import fansirsqi.xposed.sesame.model.modelFieldExt.*;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.AlipayUser;
-import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
-import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
+import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 public class AntFarm extends ModelTask {
     private static final String TAG = AntFarm.class.getSimpleName();
@@ -2151,7 +2171,7 @@ public class AntFarm extends ModelTask {
                             }
                             Log.farm("庄园小鸡🎁[开宝箱:获得" + StringUtil.collectionJoinString(",", awards) + "]");
                         } else {
-                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo.toString());
+                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo);
                         }
                     } catch (Throwable t) {
                         Log.printStackTrace(TAG, t);
@@ -2160,7 +2180,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
             } else {
-                Log.runtime(TAG, "queryGameList falsed result: " + jo.toString());
+                Log.runtime(TAG, "queryGameList falsed result: " + jo);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "queryChickenDiaryList err:");
@@ -2237,7 +2257,7 @@ public class AntFarm extends ModelTask {
                         Log.farm("庄园小鸡💞[换装:" + wholeSetName + "]");
                         StatusUtil.setOrnamentToday();
                     } else {
-                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson.toString());
+                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson);
                     }
                 }
             }
