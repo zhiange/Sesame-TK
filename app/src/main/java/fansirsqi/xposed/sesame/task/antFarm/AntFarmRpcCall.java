@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.task.antFarm;
 
+import org.json.JSONArray;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
@@ -488,5 +490,24 @@ public class AntFarmRpcCall {
     public static String sendChat(String chatCardType,String receiverUserId){
         return ApplicationHook.requestString("com.alipay.antfarm.sendChat",
                 "[{\"chatCardType\":\""+chatCardType+"\",\"receiverUserId\":\""+receiverUserId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]");
+    }
+
+    public static String deliverSubjectRecommend(JSONArray friendUserIdList) {
+        String args = "[{\"friendUserIds\":" + friendUserIdList + ",\"requestType\":\"NORMAL\",\"sceneCode\":\"ChickFamily\",\"source\":\"H5\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.deliverSubjectRecommend", args);
+    }
+
+    public static String deliverContentExpand(JSONArray friendUserIdList,String param) {
+        String args = "[{\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\", \"friendUserIds\":"+friendUserIdList+","+param+"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.DeliverContentExpand", args);
+    }
+
+    public static String deliverMsgSend(String groupId,JSONArray friendUserIdList,String content,String deliverId) {
+        String args = "[{\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\", \"friendUserIds\":"+friendUserIdList+",\"mode\":\"AI\",\"spaceType\":\"ChickFamily\",\"groupId\":\""+groupId+"\",\"content\":\""+content+"\",\"deliverId\":\""+deliverId+"\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.DeliverMsgSend", args);
+    }
+    public static String syncFamilyStatus(String groupId, String operType, String syncUserIds) {
+        String args = "[{\"groupId\":\"" + groupId + "\",\"operType\":\"" + operType + "\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"syncUserIds\":[\"" + syncUserIds + "\"]}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.syncFamilyStatus", args);
     }
 }

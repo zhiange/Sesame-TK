@@ -4,41 +4,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-
-import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
-import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
-import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
-import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
+import fansirsqi.xposed.sesame.model.modelFieldExt.*;
 import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.util.JsonUtil;
-import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
+import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
+import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-import fansirsqi.xposed.sesame.util.RandomUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
-import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
-import fansirsqi.xposed.sesame.util.TimeUtil;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.*;
 
 public class AntFarm extends ModelTask {
     private static final String TAG = AntFarm.class.getSimpleName();
@@ -85,6 +66,7 @@ public class AntFarm extends ModelTask {
         bizKeyList.add("JINGTAN_FEED_FISH");// 去鲸探喂鱼集福气
         bizKeyList.add("UC_gygzy");// 逛一逛UC浏览器
         bizKeyList.add("TAOBAO_renshenggyg");// 去淘宝人生逛一逛
+        bizKeyList.add("TOUTIAO_daoduan");// 去今日头条极速版逛一逛
         bizKeyList.add("SLEEP");// 让小鸡去睡觉
     }
 
@@ -2171,7 +2153,7 @@ public class AntFarm extends ModelTask {
                             }
                             Log.farm("庄园小鸡🎁[开宝箱:获得" + StringUtil.collectionJoinString(",", awards) + "]");
                         } else {
-                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo);
+                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo.toString());
                         }
                     } catch (Throwable t) {
                         Log.printStackTrace(TAG, t);
@@ -2180,7 +2162,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
             } else {
-                Log.runtime(TAG, "queryGameList falsed result: " + jo);
+                Log.runtime(TAG, "queryGameList falsed result: " + jo.toString());
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "queryChickenDiaryList err:");
@@ -2257,7 +2239,7 @@ public class AntFarm extends ModelTask {
                         Log.farm("庄园小鸡💞[换装:" + wholeSetName + "]");
                         StatusUtil.setOrnamentToday();
                     } else {
-                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson);
+                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson.toString());
                     }
                 }
             }
@@ -2510,6 +2492,11 @@ public class AntFarm extends ModelTask {
                 }
             }
 
+            //道早安
+            if (familyOptions.getValue().contains("deliverMsgSend")) {
+                deliverMsgSend(familyUserIds);
+            }
+
         } catch (Throwable t) {
             Log.runtime(TAG, "family err:");
             Log.printStackTrace(TAG, t);
@@ -2619,6 +2606,7 @@ public class AntFarm extends ModelTask {
                 jo = new JSONObject(AntFarmRpcCall.sendChat(assignConfig.getString("chatCardType"),beAssignUser));
                 if ("SUCCESS".equals(jo.optString("memo"))) {
                     ThreadUtil.sleep(500);
+                    syncFamilyStatusIntimacy(familyGroupId);
                 }
             }
         } catch (Throwable t) {
@@ -2626,6 +2614,67 @@ public class AntFarm extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
+    private void deliverMsgSend(List<String> friendUserIds){
+        try {
+            LocalTime currentTime = LocalTime.now();
+            //6-10点早安时间
+            final LocalTime START_TIME = LocalTime.of(6, 0); // 6:00 AM
+            final LocalTime END_TIME = LocalTime.of(10, 0);  // 10:00 AM
+            if (currentTime.isBefore(START_TIME)) {
+                return;
+            }
+            if (currentTime.isAfter(END_TIME)) {
+                return;
+            }
+            if(Objects.isNull(familyGroupId)){
+                return;
+            }
+            //先移除当前用户ID，否则下面接口报错
+            friendUserIds.remove(UserMap.getCurrentUid());
+            if(friendUserIds.isEmpty()){
+                return;
+            }
+            if(StatusUtil.hasFlagToday("antFarm::deliverMsgSend")){
+                return;
+            }
+            JSONArray userIds = new JSONArray();
+            for(String userId:friendUserIds){
+                userIds.put(userId);
+            }
+            String requestString = AntFarmRpcCall.deliverSubjectRecommend(userIds);
+            JSONObject jo = new JSONObject(requestString);
+            if(jo.optBoolean("success")){
+                ThreadUtil.sleep(500);
+                jo = new JSONObject(AntFarmRpcCall.deliverContentExpand(userIds,jo.toString().substring(1, jo.toString().length() - 1)));
+                if(jo.optBoolean("success")){
+                    ThreadUtil.sleep(500);
+                    String content = jo.getString("content");
+                    String deliverId = jo.getString("deliverId");
+                    jo = new JSONObject(AntFarmRpcCall.deliverMsgSend(familyGroupId,userIds,content,deliverId));
+                    if(jo.optBoolean("success")){
+                        Log.farm("亲密家庭🏠提交任务[道早安]");
+                        StatusUtil.setFlagToday("antFarm::deliverMsgSend");
+                        ThreadUtil.sleep(500);
+                        syncFamilyStatusIntimacy(familyGroupId);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "deliverMsgSend err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+    private void syncFamilyStatusIntimacy(String groupId) {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.syncFamilyStatus(groupId, "INTIMACY_VALUE", userId));
+            ResUtil.checkSuccess(TAG, jo);
+        } catch (Throwable t) {
+            Log.runtime(TAG, "syncFamilyStatus err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
     static class AntFarmFamilyOption extends MapperEntity {
 
         public AntFarmFamilyOption(String i, String n) {
@@ -2636,6 +2685,7 @@ public class AntFarm extends ModelTask {
         public static List<AntFarmFamilyOption> getAntFarmFamilyOptions() {
             List<AntFarmFamilyOption> list = new ArrayList<>();
             list.add(new AntFarmFamilyOption("familySign", "每日签到"));
+            list.add(new AntFarmFamilyOption("deliverMsgSend", "道早安"));
             list.add(new AntFarmFamilyOption("familyClaimReward", "领取奖励"));
             list.add(new AntFarmFamilyOption("assignRights", "使用顶梁柱特权"));
             return list;
