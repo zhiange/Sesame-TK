@@ -1,10 +1,10 @@
 package fansirsqi.xposed.sesame.util;
 
-import fansirsqi.xposed.sesame.BuildConfig;
-import fansirsqi.xposed.sesame.model.BaseModel;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fansirsqi.xposed.sesame.BuildConfig;
+import fansirsqi.xposed.sesame.model.BaseModel;
 
 /**
  * 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。
@@ -34,6 +34,12 @@ public class Log {
         ERROR_LOGGER = LoggerFactory.getLogger("error");
         CAPTURE_LOGGER = LoggerFactory.getLogger("capture");
     }
+    private static String truncateLogMessage(String message) {
+        if (message.length() > 16) {
+            return message.substring(0, 16) + "...";
+        }
+        return message;
+    }
 
     public static void runtime(String message) {
         RUNTIME_LOGGER.info(TAG + "{}", message);
@@ -51,13 +57,11 @@ public class Log {
     }
 
     public static void record(String TAG, String message) {
-        runtime(TAG, message);
-        if (BaseModel.getRecordLog().getValue()) {
-            RECORD_LOGGER.info(Log.TAG + "[{}],{}", TAG, message);
-        }
+        record("[" + TAG + "]: " + message);
     }
 
     public static void system(String message) {
+        record(message);
         SYSTEM_LOGGER.info(TAG + "{}", message);
     }
 
@@ -66,7 +70,8 @@ public class Log {
     }
 
     public static void debug(String message) {
-        DEBUG_LOGGER.info(TAG + "{}", message);
+        record(message);
+        DEBUG_LOGGER.info("{}", message);
     }
 
     public static void debug(String TAG, String message) {
@@ -74,6 +79,7 @@ public class Log {
     }
 
     public static void forest(String message) {
+        record(message);
         FOREST_LOGGER.info("{}", message);
     }
 
@@ -82,6 +88,7 @@ public class Log {
     }
 
     public static void farm(String message) {
+        record(message);
         FARM_LOGGER.info("{}", message);
     }
 
@@ -91,7 +98,8 @@ public class Log {
     }
 
     public static void other(String message) {
-        OTHER_LOGGER.info(TAG + "{}", message);
+        record(message);
+        OTHER_LOGGER.info("{}", message);
     }
 
     public static void other(String TAG, String message) {
@@ -99,6 +107,7 @@ public class Log {
     }
 
     public static void error(String message) {
+        runtime(message);
         ERROR_LOGGER.error(TAG + "{}", message);
     }
 
