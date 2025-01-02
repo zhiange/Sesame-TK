@@ -510,4 +510,8 @@ public class AntFarmRpcCall {
         String args = "[{\"groupId\":\"" + groupId + "\",\"operType\":\"" + operType + "\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"syncUserIds\":[\"" + syncUserIds + "\"]}]";
         return ApplicationHook.requestString("com.alipay.antfarm.syncFamilyStatus", args);
     }
+    public static String inviteFriendVisitFamily(JSONArray receiverUserId) {
+        String args = "[{\"bizType\":\"FAMILY_SHARE\",\"receiverUserId\":"+receiverUserId+",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.inviteFriendVisitFamily", args);
+    }
 }

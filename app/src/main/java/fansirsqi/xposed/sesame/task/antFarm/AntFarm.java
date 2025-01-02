@@ -163,6 +163,7 @@ public class AntFarm extends ModelTask {
     private ChoiceModelField getFeedType;
     private BooleanModelField family;
     private SelectModelField familyOptions;
+    private SelectModelField inviteFriendVisitFamily;
 
 
     @Override
@@ -211,6 +212,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(farmGameTime = new ListModelField.ListJoinCommaToStringModelField("farmGameTime", "小鸡游戏时间(范围)", farmGameTimeList));
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
+        modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
         return modelFields;
     }
 
@@ -2497,6 +2499,11 @@ public class AntFarm extends ModelTask {
                 deliverMsgSend(familyUserIds);
             }
 
+            //好友分享
+            if (familyOptions.getValue().contains("inviteFriendVisitFamily")) {
+                inviteFriendVisitFamily(familyUserIds);
+            }
+
         } catch (Throwable t) {
             Log.runtime(TAG, "family err:");
             Log.printStackTrace(TAG, t);
@@ -2675,6 +2682,37 @@ public class AntFarm extends ModelTask {
         }
     }
 
+    private void inviteFriendVisitFamily(List<String> friendUserIds){
+        try {
+            if (StatusUtil.hasFlagToday("antFarm::inviteFriendVisitFamily")) {
+                return;
+            }
+            Set<String> familyValue = inviteFriendVisitFamily.getValue();
+            if (familyValue.isEmpty()) {
+                return;
+            }
+            if (Objects.isNull(friendUserIds) || friendUserIds.isEmpty()) {
+                return;
+            }
+            JSONArray userIdArray = new JSONArray();
+            for (String u : familyValue) {
+                if (!friendUserIds.contains(u) && userIdArray.length() < 6) {
+                    userIdArray.put(u);
+                }
+            }
+            JSONObject jo = new JSONObject(AntFarmRpcCall.inviteFriendVisitFamily(userIdArray));
+            if (Objects.equals("SUCCESS",jo.getString("memo"))) {
+                Log.farm("亲密家庭🏠提交任务[分享好友]");
+                StatusUtil.setFlagToday("antFarm::inviteFriendVisitFamily");
+                ThreadUtil.sleep(500);
+                syncFamilyStatusIntimacy(familyGroupId);
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "inviteFriendVisitFamily err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
     static class AntFarmFamilyOption extends MapperEntity {
 
         public AntFarmFamilyOption(String i, String n) {
@@ -2687,6 +2725,7 @@ public class AntFarm extends ModelTask {
             list.add(new AntFarmFamilyOption("familySign", "每日签到"));
             list.add(new AntFarmFamilyOption("deliverMsgSend", "道早安"));
             list.add(new AntFarmFamilyOption("familyClaimReward", "领取奖励"));
+            list.add(new AntFarmFamilyOption("inviteFriendVisitFamily", "好友分享"));
             list.add(new AntFarmFamilyOption("assignRights", "使用顶梁柱特权"));
             return list;
         }
