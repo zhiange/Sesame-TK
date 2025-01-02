@@ -65,6 +65,8 @@ public class StatusUtil {
 
     // =======================other
     private Set<String> memberSignInList = new HashSet<>();
+
+    private final Set<String> flagList = new HashSet<>();
     /**
      * 口碑签到
      */
@@ -693,6 +695,17 @@ public class StatusUtil {
     public static void setStallDonateToday() {
         if (INSTANCE.canStallDonate) {
             INSTANCE.canStallDonate = false;
+            save();
+        }
+    }
+
+    public static Boolean hasFlagToday(String flag) {
+        return INSTANCE.flagList.contains(flag);
+    }
+
+    public static void setFlagToday(String flag) {
+        if (!hasFlagToday(flag)) {
+            INSTANCE.flagList.add(flag);
             save();
         }
     }
