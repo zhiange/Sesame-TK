@@ -140,7 +140,7 @@ public class EcoLife {
                     if ("photoguangpan".equals(actionId)) continue;
                     ThreadUtil.sleep(5000);
                     JSONObject jo = new JSONObject(AntForestRpcCall.ecolifeTick(actionId, dayPoint, source));
-                    if ("SUCCESS".equals(jo.getString("resultCode"))) {
+                    if (ResUtil.checkResCode(jo)) {
                         Log.forest("绿色打卡🍀[" + actionName + "]"); // 成功打卡日志
                     } else {
                         // 记录失败原因

@@ -1783,7 +1783,7 @@ public class AntFarm extends ModelTask {
     private void queryChickenDiary(String queryDayStr) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiary(queryDayStr));
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if (ResUtil.checkResCode(jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 JSONObject chickenDiary = data.getJSONObject("chickenDiary");
                 String diaryDateStr = chickenDiary.getString("diaryDateStr");
@@ -1828,7 +1828,7 @@ public class AntFarm extends ModelTask {
     private void queryChickenDiaryList() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList());
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if (ResUtil.checkResCode(jo)) {
                 JSONArray chickenDiaryBriefList = jo.getJSONObject("data").optJSONArray("chickenDiaryBriefList");
                 if (chickenDiaryBriefList != null && chickenDiaryBriefList.length() > 0) {
                     for (int i = 0; i < chickenDiaryBriefList.length(); i++) {

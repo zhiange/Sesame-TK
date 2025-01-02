@@ -87,7 +87,7 @@ public class AncientTree extends ModelTask {
     private static void ancientTreeProtect(String cityCode) {
         try {
             JSONObject jo = new JSONObject(AncientTreeRpcCall.homePage(cityCode));
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if (ResUtil.checkResCode(jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 if (!data.has("districtBriefInfoList")) {
                     return;
@@ -114,7 +114,7 @@ public class AncientTree extends ModelTask {
     private static void districtDetail(String districtCode) {
         try {
             JSONObject jo = new JSONObject(AncientTreeRpcCall.districtDetail(districtCode));
-            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+            if (ResUtil.checkResCode(jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 if (!data.has("ancientTreeList")) {
                     return;
@@ -135,7 +135,7 @@ public class AncientTree extends ModelTask {
                         continue;
                     String itemId = ancientTreeItem.getString("projectId");
                     JSONObject ancientTreeDetail = new JSONObject(AncientTreeRpcCall.projectDetail(itemId, cityCode));
-                    if ("SUCCESS".equals(ancientTreeDetail.getString("resultCode"))) {
+                    if (ResUtil.checkResCode(ancientTreeDetail)) {
                         data = ancientTreeDetail.getJSONObject("data");
                         if (data.getBoolean("canProtect")) {
                             int currentEnergy = data.getInt("currentEnergy");
@@ -151,7 +151,7 @@ public class AncientTree extends ModelTask {
                                 break;
                             ThreadUtil.sleep(200);
                             jo = new JSONObject(AncientTreeRpcCall.protect(activityId, projectId, cityCode));
-                            if ("SUCCESS".equals(jo.getString("resultCode"))) {
+                            if (ResUtil.checkResCode(jo)) {
                                 Log.forest("保护古树🎐[" + cityName + "-" + districtName
                                         + "]#" + age + "年" + name + ",消耗能量" + protectExpense + "g");
                             } else {

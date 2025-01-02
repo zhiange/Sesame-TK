@@ -122,7 +122,7 @@ public class AntMember extends ModelTask {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
         ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
-        if ("SUCCESS".equals(jo.getString("resultCode"))) {
+        if (ResUtil.checkResCode(jo)) {
           Log.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
           StatusUtil.memberSignInToday(UserMap.getCurrentUid());
         } else {
@@ -146,7 +146,7 @@ public class AntMember extends ModelTask {
       String s = AntMemberRpcCall.queryPointCert(page, pageSize);
       ThreadUtil.sleep(500);
       JSONObject jo = new JSONObject(s);
-      if ("SUCCESS".equals(jo.getString("resultCode"))) {
+      if (ResUtil.checkResCode(jo)) {
         boolean hasNextPage = jo.getBoolean("hasNextPage");
         JSONArray jaCertList = jo.getJSONArray("certList");
         for (int i = 0; i < jaCertList.length(); i++) {
@@ -156,7 +156,7 @@ public class AntMember extends ModelTask {
           int pointAmount = jo.getInt("pointAmount");
           s = AntMemberRpcCall.receivePointByUser(id);
           jo = new JSONObject(s);
-          if ("SUCCESS".equals(jo.getString("resultCode"))) {
+          if (ResUtil.checkResCode(jo)) {
             Log.other("领取奖励🎖️[" + bizTitle + "]#" + pointAmount + "积分");
           } else {
             Log.record(jo.getString("resultDesc"));
@@ -401,7 +401,7 @@ public class AntMember extends ModelTask {
       String str = AntMemberRpcCall.queryAllStatusTaskList();
       ThreadUtil.sleep(500);
       JSONObject jsonObject = new JSONObject(str);
-      if (!"SUCCESS".equals(jsonObject.getString("resultCode"))) {
+      if (!ResUtil.checkResCode(jsonObject)) {
         Log.runtime(TAG, "queryAllStatusTaskList err:" + jsonObject.getString("resultDesc"));
         return;
       }
@@ -631,7 +631,7 @@ public class AntMember extends ModelTask {
   private boolean applyAndExecuteTask(String name, Long id, String targetBusiness) throws JSONException {
     JSONObject jo = new JSONObject(AntMemberRpcCall.applyTask(name, id));
     ThreadUtil.sleep(300);
-    if (!"SUCCESS".equals(jo.getString("resultCode"))) {
+    if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "应用任务失败:" + jo.optString("resultDesc"));
       return false;
     }
@@ -642,7 +642,7 @@ public class AntMember extends ModelTask {
 
     jo = new JSONObject(AntMemberRpcCall.executeTask(bizParam, bizSubType));
     ThreadUtil.sleep(300);
-    if (!"SUCCESS".equals(jo.getString("resultCode"))) {
+    if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
       return false;
     }

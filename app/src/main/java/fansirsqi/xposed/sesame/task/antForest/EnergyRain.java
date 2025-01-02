@@ -45,7 +45,7 @@ public class EnergyRain {
         try {
             JSONObject joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
             ThreadUtil.sleep(3000);
-            if ("SUCCESS".equals(joEnergyRainHome.getString("resultCode"))) {
+            if (ResUtil.checkResCode(joEnergyRainHome)) {
                 if (joEnergyRainHome.getBoolean("canPlayToday")) {
                     startEnergyRain();
                 }
@@ -85,7 +85,7 @@ public class EnergyRain {
             }
             ThreadUtil.sleep(3000);
             joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
-            if ("SUCCESS".equals(joEnergyRainHome.getString("resultCode")) && joEnergyRainHome.getBoolean("canPlayToday")) {
+            if (ResUtil.checkResCode(joEnergyRainHome) && joEnergyRainHome.getBoolean("canPlayToday")) {
                 startEnergyRain();
             }
         } catch (Throwable th) {
