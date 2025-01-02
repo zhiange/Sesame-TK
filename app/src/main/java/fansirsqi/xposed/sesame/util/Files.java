@@ -27,7 +27,7 @@ public class Files {
     /**
      * 配置文件夹名称
      */
-    public static final String CONFIG_DIR_NAME = "sesame";
+    public static final String CONFIG_DIR_NAME = "sesame-TK";
 
     /**
      * 应用配置文件夹主路径

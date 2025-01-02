@@ -24,6 +24,7 @@ import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 
