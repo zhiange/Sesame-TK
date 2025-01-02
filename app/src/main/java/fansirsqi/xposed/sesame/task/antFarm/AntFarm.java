@@ -17,6 +17,7 @@ import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -2491,6 +2492,11 @@ public class AntFarm extends ModelTask {
                 }
             }
 
+            //道早安
+            if (familyOptions.getValue().contains("deliverMsgSend")) {
+                deliverMsgSend(familyUserIds);
+            }
+
         } catch (Throwable t) {
             Log.runtime(TAG, "family err:");
             Log.printStackTrace(TAG, t);
@@ -2600,6 +2606,7 @@ public class AntFarm extends ModelTask {
                 jo = new JSONObject(AntFarmRpcCall.sendChat(assignConfig.getString("chatCardType"),beAssignUser));
                 if ("SUCCESS".equals(jo.optString("memo"))) {
                     ThreadUtil.sleep(500);
+                    syncFamilyStatusIntimacy(familyGroupId);
                 }
             }
         } catch (Throwable t) {
@@ -2607,6 +2614,67 @@ public class AntFarm extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
+    private void deliverMsgSend(List<String> friendUserIds){
+        try {
+            LocalTime currentTime = LocalTime.now();
+            //6-10点早安时间
+            final LocalTime START_TIME = LocalTime.of(6, 0); // 6:00 AM
+            final LocalTime END_TIME = LocalTime.of(10, 0);  // 10:00 AM
+            if (currentTime.isBefore(START_TIME)) {
+                return;
+            }
+            if (currentTime.isAfter(END_TIME)) {
+                return;
+            }
+            if(Objects.isNull(familyGroupId)){
+                return;
+            }
+            //先移除当前用户ID，否则下面接口报错
+            friendUserIds.remove(UserMap.getCurrentUid());
+            if(friendUserIds.isEmpty()){
+                return;
+            }
+            if(StatusUtil.hasFlagToday("antFarm::deliverMsgSend")){
+                return;
+            }
+            JSONArray userIds = new JSONArray();
+            for(String userId:friendUserIds){
+                userIds.put(userId);
+            }
+            String requestString = AntFarmRpcCall.deliverSubjectRecommend(userIds);
+            JSONObject jo = new JSONObject(requestString);
+            if(jo.optBoolean("success")){
+                ThreadUtil.sleep(500);
+                jo = new JSONObject(AntFarmRpcCall.deliverContentExpand(userIds,jo.toString().substring(1, jo.toString().length() - 1)));
+                if(jo.optBoolean("success")){
+                    ThreadUtil.sleep(500);
+                    String content = jo.getString("content");
+                    String deliverId = jo.getString("deliverId");
+                    jo = new JSONObject(AntFarmRpcCall.deliverMsgSend(familyGroupId,userIds,content,deliverId));
+                    if(jo.optBoolean("success")){
+                        Log.farm("亲密家庭🏠提交任务[道早安]");
+                        StatusUtil.setFlagToday("antFarm::deliverMsgSend");
+                        ThreadUtil.sleep(500);
+                        syncFamilyStatusIntimacy(familyGroupId);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "deliverMsgSend err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+    private void syncFamilyStatusIntimacy(String groupId) {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.syncFamilyStatus(groupId, "INTIMACY_VALUE", userId));
+            ResUtil.checkSuccess(TAG, jo);
+        } catch (Throwable t) {
+            Log.runtime(TAG, "syncFamilyStatus err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
     static class AntFarmFamilyOption extends MapperEntity {
 
         public AntFarmFamilyOption(String i, String n) {
@@ -2617,6 +2685,7 @@ public class AntFarm extends ModelTask {
         public static List<AntFarmFamilyOption> getAntFarmFamilyOptions() {
             List<AntFarmFamilyOption> list = new ArrayList<>();
             list.add(new AntFarmFamilyOption("familySign", "每日签到"));
+            list.add(new AntFarmFamilyOption("deliverMsgSend", "道早安"));
             list.add(new AntFarmFamilyOption("familyClaimReward", "领取奖励"));
             list.add(new AntFarmFamilyOption("assignRights", "使用顶梁柱特权"));
             return list;
