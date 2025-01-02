@@ -100,7 +100,7 @@ public class HtmlViewerActivity extends BaseActivity {
       return;
     }
     // 设置默认的 WebView 参数
-    settings.setTextZoom(100);
+    settings.setTextZoom(90);
     settings.setUseWideViewPort(true);
   }
 
@@ -115,8 +115,8 @@ public class HtmlViewerActivity extends BaseActivity {
       settings.setTextZoom(85);
       settings.setUseWideViewPort(false);
     } else {
-      settings.setTextZoom(100);
-      settings.setUseWideViewPort(true);
+      settings.setTextZoom(85);//调整默认字体大小
+      settings.setUseWideViewPort(false);
     }
   }
 
