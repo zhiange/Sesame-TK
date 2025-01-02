@@ -345,6 +345,7 @@ public class AntForest extends ModelTask {
             Notify.setStatusTextExec();
             taskCount.set(0);
             selfId = UserMap.getCurrentUid();
+            usePropBeforeCollectEnergy(selfId);//try-one-try
             JSONObject selfHomeObj = collectSelfEnergy();
             try {
                 JSONObject friendsObject = new JSONObject(AntForestRpcCall.queryEnergyRanking());
@@ -755,7 +756,7 @@ public class AntForest extends ModelTask {
             long start = System.currentTimeMillis(); // 记录开始时间
             // 调用远程接口获取用户主页信息并转换为 JSONObject 对象
             userHomeObj = new JSONObject(AntForestRpcCall.queryHomePage());
-            updateSelfHomePage(userHomeObj);
+            updateSelfHomePage(userHomeObj);//顺便更新一些必要信息
             long end = System.currentTimeMillis(); // 记录结束时间
             // 获取服务器时间
             long serverTime = userHomeObj.getLong("now");
@@ -933,7 +934,7 @@ public class AntForest extends ModelTask {
                         if (checkIntervalInt + checkIntervalInt / 2 > produceTime - serverTime) {
                             if (!hasChildTask(AntForest.getEnergyTimerTid(userId, bubbleId))) {
                                 addChildTask(new EnergyTimerTask(userId, bubbleId, produceTime));
-                                Log.record("添加蹲点能量⏰[" + userName + "]在[" + TimeUtil.getCommonDate(produceTime) + "]执行");
+                                Log.record("添加蹲点⏰[" + userName + "]在[" + TimeUtil.getCommonDate(produceTime) + "]执行");
                             }
                         } else {
                             Log.runtime("用户[" + userName + "]能量成熟时间: " + TimeUtil.getCommonDate(produceTime));
