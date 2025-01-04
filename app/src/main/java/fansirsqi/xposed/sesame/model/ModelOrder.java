@@ -37,13 +37,13 @@ public class ModelOrder {
             AntMember.class,//会员
             AntStall.class,//蚂蚁新村
             GreenFinance.class,//绿色经营
-            AntBookRead.class,//读书
-            ConsumeGold.class,//消费金
-            OmegakoiTown.class,//小镇
+//            AntBookRead.class,//读书
+//            ConsumeGold.class,//消费金
+//            OmegakoiTown.class,//小镇
             AnswerAI.class,//AI答题
     };
 
-    private static final List<Class<Model>> readOnlyClazzList = Collections.unmodifiableList(Arrays.asList(array));
+    private static final List<Class<Model>> readOnlyClazzList = List.of(array);
 
     public static List<Class<Model>> getClazzList() {
         return readOnlyClazzList;
