@@ -261,20 +261,26 @@ public class NewSettingsActivity extends BaseActivity {
             if (modelConfig != null) {
                 try {
                     ModelFields modelFields = modelConfig.getFields();
-                    Map<String, ModelFieldShowDto> map = JsonUtil.parseObject(fieldsValue, new TypeReference<Map<String, ModelFieldShowDto>>() {
-                    });
-                    for (Map.Entry<String, ModelFieldShowDto> entry : map.entrySet()) {
-                        ModelFieldShowDto newModelField = entry.getValue();
-                        if (newModelField != null) {
-                            ModelField<?> modelField = modelFields.get(entry.getKey());
-                            if (modelField != null) {
-                                modelField.setConfigValue(newModelField.getConfigValue());
+                    Map<String, ModelFieldShowDto> map = JsonUtil.parseObject(fieldsValue,
+                            new TypeReference<Map<String, ModelFieldShowDto>>() {});
+                    if (map != null) {
+                        for (Map.Entry<String, ModelFieldShowDto> entry : map.entrySet()) {
+                            ModelFieldShowDto newModelField = entry.getValue();
+                            if (newModelField != null) {
+                                ModelField<?> modelField = modelFields.get(entry.getKey());
+                                if (modelField != null) {
+                                    String configValue = newModelField.getConfigValue();
+                                    if (configValue == null || configValue.trim().isEmpty()) {
+                                        continue;
+                                    }
+                                    modelField.setConfigValue(configValue);
+                                }
                             }
                         }
+                        return "SUCCESS";
                     }
-                    return "SUCCESS";
                 } catch (Exception e) {
-                    Log.printStackTrace(e);
+                    Log.printStackTrace("NewSettingsActivity", e);
                 }
             }
             return "FAILED";

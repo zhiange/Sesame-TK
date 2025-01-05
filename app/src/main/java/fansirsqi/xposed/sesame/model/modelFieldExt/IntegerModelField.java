@@ -85,7 +85,7 @@ public class IntegerModelField extends ModelField<Integer> {
     public void setConfigValue(String configValue) {
         Integer newValue;
         // 如果配置值为空，使用默认值
-        if (configValue == null) {
+        if (configValue == null || configValue.trim().isEmpty()) {
             newValue = defaultValue;
         } else {
             try {
@@ -184,7 +184,7 @@ public class IntegerModelField extends ModelField<Integer> {
          */
         @Override
         public void setConfigValue(String configValue) {
-            if (configValue == null) {
+            if (configValue == null || configValue.trim().isEmpty()) {
                 reset();  // 如果配置值为空，则重置字段
                 return;
             }
