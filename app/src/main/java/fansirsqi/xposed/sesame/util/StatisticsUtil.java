@@ -16,6 +16,7 @@ public class StatisticsUtil {
         int collected, helped, watered;
 
         public TimeStatistics() {
+            reset(0);
         }
 
         TimeStatistics(int i) {
@@ -116,33 +117,78 @@ public class StatisticsUtil {
     public static synchronized StatisticsUtil load() {
         java.io.File statisticsFile = Files.getStatisticsFile();
         try {
-            if (statisticsFile.exists()) {
+
+            if (INSTANCE == null) {
+                return new StatisticsUtil();
+            }
+
+            if (statisticsFile.exists() && statisticsFile.length() > 0) {
                 String json = Files.readFromFile(statisticsFile);
-                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.formatJson(INSTANCE);
-                if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "重新格式化 statistics.json");
-                    Log.system(TAG, "重新格式化 statistics.json");
-                    Files.write2File(formatted, statisticsFile);
+                if (!json.trim().isEmpty()) {
+                    try {
+                        JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+
+                        validateAndInitialize();
+
+                        String formatted = JsonUtil.formatJson(INSTANCE);
+                        if (formatted != null && !formatted.equals(json)) {
+                            Log.runtime(TAG, "重新格式化 statistics.json");
+                            Log.system(TAG, "重新格式化 statistics.json");
+                            Files.write2File(formatted, statisticsFile);
+                        }
+                    } catch (Exception e) {
+                        Log.printStackTrace(TAG, e);
+                        resetToDefault();
+                    }
+                } else {
+                    resetToDefault();
                 }
             } else {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
-                Log.runtime(TAG, "初始化 statistics.json");
-                Log.system(TAG, "初始化 statistics.json");
-                Files.write2File(JsonUtil.formatJson(INSTANCE), statisticsFile);
+                resetToDefault();
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.runtime(TAG, "统计文件格式有误，已重置统计文件");
             Log.system(TAG, "统计文件格式有误，已重置统计文件");
-            try {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
-                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
-            } catch (JsonMappingException e) {
-                Log.printStackTrace(TAG, e);
-            }
+            resetToDefault();
         }
         return INSTANCE;
+    }
+
+    /**
+     * 验证并初始化统计数据
+     * 确保年、月、日的统计数据都存在且有效
+     */
+    private static void validateAndInitialize() {
+        LocalDate now = LocalDate.now();
+        if (INSTANCE.year == null) INSTANCE.year = new TimeStatistics(now.getYear());
+        if (INSTANCE.month == null) INSTANCE.month = new TimeStatistics(now.getMonthValue());
+        if (INSTANCE.day == null) INSTANCE.day = new TimeStatistics(now.getDayOfMonth());
+
+        updateDay(now);
+    }
+
+
+    /**
+     * 重置统计数据为默认值
+     * 使用当前日期初始化新的统计实例
+     */
+    private static void resetToDefault() {
+        try {
+            StatisticsUtil newInstance = new StatisticsUtil();
+            LocalDate now = LocalDate.now();
+            newInstance.year = new TimeStatistics(now.getYear());
+            newInstance.month = new TimeStatistics(now.getMonthValue());
+            newInstance.day = new TimeStatistics(now.getDayOfMonth());
+
+            JsonUtil.copyMapper().updateValue(INSTANCE, newInstance);
+            Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
+
+            Log.runtime(TAG, "已重置为默认值");
+            Log.system(TAG, "已重置为默认值");
+        } catch (JsonMappingException e) {
+            Log.printStackTrace(TAG, e);
+        }
     }
 
     /**

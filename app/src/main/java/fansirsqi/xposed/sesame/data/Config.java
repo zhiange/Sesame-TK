@@ -187,22 +187,34 @@ public class Config {
             // 如果配置文件存在，加载内容
             if (configV2File.exists()) {
                 String json = Files.readFromFile(configV2File);
-                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.formatJson(INSTANCE);
-                if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "格式化配置: " + userName);
-                    Log.system(TAG, "格式化配置: " + userName);
-                    Files.write2File(formatted, configV2File);
+                if (StringUtil.isEmpty(json)) {
+                    Log.runtime(TAG, "配置文件内容为空，初始化新配置: " + userName);
+                    unload();
+                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
+                } else {
+                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                    String formatted = JsonUtil.formatJson(INSTANCE);
+                    if (formatted != null && !formatted.equals(json)) {
+                        Log.runtime(TAG, "格式化配置: " + userName);
+                        Log.system(TAG, "格式化配置: " + userName);
+                        Files.write2File(formatted, configV2File);
+                    }
                 }
             } else {
                 // 如果配置文件不存在，复制默认配置或初始化
                 java.io.File defaultConfigV2File = Files.getDefaultConfigV2File();
                 if (defaultConfigV2File.exists()) {
                     String json = Files.readFromFile(defaultConfigV2File);
-                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                    Log.runtime(TAG, "复制新配置: " + userName);
-                    Log.system(TAG, "复制新配置: " + userName);
-                    Files.write2File(json, configV2File);
+                    if (!StringUtil.isEmpty(json)) {
+                        JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                        Log.runtime(TAG, "复制新配置: " + userName);
+                        Log.system(TAG, "复制新配置: " + userName);
+                        Files.write2File(json, configV2File);
+                    } else {
+                        unload();
+                        Log.runtime(TAG, "默认配置为空，初始化新配置: " + userName);
+                        Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
+                    }
                 } else {
                     unload();
                     Log.runtime(TAG, "初始新配置: " + userName);
