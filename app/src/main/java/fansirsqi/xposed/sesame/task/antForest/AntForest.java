@@ -2057,6 +2057,10 @@ public class AntForest extends ModelTask {
             do {
                 // 查询道具列表
                 JSONObject propListJo = new JSONObject(AntForestRpcCall.queryPropList(true));
+                if (!propListJo.has("resultCode")) {
+                    Log.record("查询道具列表返回数据格式错误");
+                    return;
+                }
                 // 检查查询结果是否成功
                 if (ResUtil.checkResCode(propListJo)) {
                     // 获取道具列表
