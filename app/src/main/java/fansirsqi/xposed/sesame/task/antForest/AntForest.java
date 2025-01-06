@@ -165,10 +165,8 @@ public class AntForest extends ModelTask {
     private IntegerModelField exchangeEnergyDoubleClickCountLongTime;
     private BooleanModelField exchangeCollectHistoryAnimal7Days;
     private BooleanModelField exchangeCollectToFriendTimes7Days;
-    private BooleanModelField exchangeEnergyShield;
 
     private BooleanModelField vitalityExchange;
-    private SelectAndCountModelField vitalityExchangeList;
 
     private BooleanModelField userPatrol;
     private BooleanModelField collectGiftBox;
@@ -189,10 +187,6 @@ public class AntForest extends ModelTask {
     public static BooleanModelField ecoLifeOpen;
     private BooleanModelField energyRainChance;
 
-    /**
-     * 加速器
-     */
-    private BooleanModelField bubbleBoostType;
     /**
      * 加速器定时
      */
@@ -215,6 +209,7 @@ public class AntForest extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @SuppressWarnings("unused")
     public interface applyPropType {
         int CLOSE = 0;
         int ALL = 1;
@@ -1919,13 +1914,13 @@ public class AntForest extends ModelTask {
             }
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
-            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && shieldEndTime < System.currentTimeMillis();
+            boolean needShield = !shieldCard.getValue().equals(applyPropType.CLOSE) && shieldEndTime < System.currentTimeMillis();
             if (needDouble || needStealth) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();
                     if (needDouble) useDoubleCard(bagObject);
                     if (needStealth) useStealthCard(bagObject);
-                    if (needshield) useShieldCard(bagObject);
+                    if (needShield) useShieldCard(bagObject);
                 }
             }
         } catch (Exception e) {
@@ -2019,7 +2014,7 @@ public class AntForest extends ModelTask {
                     if (exchangeEnergyShield()) {
                         jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD");
                     }
-                } else {
+                } else if(shieldCard.getValue().equals(applyPropType.ALL)) {
                     jo = findPropBag(bagObject, "ENERGY_SHIELD"); // 尝试查找 普通保护罩，一般用不到
                 }
             }
@@ -2631,7 +2626,7 @@ public class AntForest extends ModelTask {
             if (jo == null) {
                 Privilege.youthPrivilege();
                 jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
-                if (jo == null) {
+                if (jo == null && bubbleBoostCard.getValue().equals(applyPropType.ALL)) {
                     jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
                 }
             }
