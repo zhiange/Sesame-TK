@@ -16,10 +16,13 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    //    版本号组成
-    def major = 0          // 主版本号
+    // to developer
+    //发版规则：alphafix->betafix 用于修复已知问题
+    //版本号格式：主版本号.次版本号.补丁版本号-(alpha->beta->release |debug) 用于开发者调试|依次递进
+    //github发布前务必确认当前版本号是否符合发版规则,以免造成困扰
+    def major = 1          // 主版本号
     def minor = 2          // 次版本号
-    def patch = 3          // 补丁版本号
+    def patch = 4          // 补丁版本号
     def buildTag = "beta" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
@@ -55,14 +58,14 @@ android {
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
     // 应用版本信息，用于展示在LSP
     if (buildTag == "alpha" || buildTag == "beta") {
-        _versionName = "${major}.${minor}.${patch}-${buildTag}.${buildTargetCode}"
+        _versionName = "${major}.${minor}.${patch}-${buildTag}"
     } else if (buildTag == "alphafix" || buildTag == "betafix") {
         buildTag = buildTag.replace("fix", "")
-        _versionName = "${major}.${minor}.${patch}-${buildTag}.fix.${buildTargetCode}"
+        _versionName = "${major}.${minor}.${patch}-${buildTag}.fix"
     } else if (buildTag == "debug") {
         _versionName = "${buildTargetCode}-${buildTag}"
     } else {
-        _versionName = "${major}.${minor}.${patch}-${buildTag}.${buildTargetCode}"
+        _versionName = "${major}.${minor}.${patch}-${buildTag}"
         buildTag = ""
     }
 
