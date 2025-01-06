@@ -836,7 +836,7 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private Boolean performDonation(String activityId, String activityName) throws JSONException {
+    private Boolean performDonation(String activityId, String activityName) {
         try {
             String s = AntFarmRpcCall.donation(activityId, 1);
             JSONObject donationResponse = new JSONObject(s);
@@ -1630,10 +1630,10 @@ public class AntFarm extends ModelTask {
 
     private void useFarmFood(JSONArray cuisineList) {
         try {
-            JSONObject jo = new JSONObject();
-            String cookbookId = null;
-            String cuisineId = null;
-            String name = null;
+            JSONObject jo;
+            String cookbookId;
+            String cuisineId;
+            String name;
             for (int i = 0; i < cuisineList.length(); i++) {
                 jo = cuisineList.getJSONObject(i);
                 if (jo.getInt("count") <= 0)
@@ -2136,7 +2136,7 @@ public class AntFarm extends ModelTask {
                         if (jo.optBoolean("success")) {
                             canUseTimes = jo.getInt("drawRightsTimes");
                             JSONArray gameCenterDrawAwardList = jo.getJSONArray("gameCenterDrawAwardList");
-                            ArrayList<String> awards = new ArrayList<String>();
+                            ArrayList<String> awards = new ArrayList<>();
                             for (int i = 0; i < gameCenterDrawAwardList.length(); i++) {
                                 JSONObject gameCenterDrawAward = gameCenterDrawAwardList.getJSONObject(i);
                                 int awardCount = gameCenterDrawAward.getInt("awardCount");
@@ -2145,7 +2145,7 @@ public class AntFarm extends ModelTask {
                             }
                             Log.farm("庄园小鸡🎁[开宝箱:获得" + StringUtil.collectionJoinString(",", awards) + "]");
                         } else {
-                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo.toString());
+                            Log.runtime(TAG, "drawGameCenterAward falsed result: " + jo);
                         }
                     } catch (Throwable t) {
                         Log.printStackTrace(TAG, t);
@@ -2154,7 +2154,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
             } else {
-                Log.runtime(TAG, "queryGameList falsed result: " + jo.toString());
+                Log.runtime(TAG, "queryGameList falsed result: " + jo);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "queryChickenDiaryList err:");
@@ -2231,7 +2231,7 @@ public class AntFarm extends ModelTask {
                         Log.farm("庄园小鸡💞[换装:" + wholeSetName + "]");
                         StatusUtil.setOrnamentToday();
                     } else {
-                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson.toString());
+                        Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson);
                     }
                 }
             }
