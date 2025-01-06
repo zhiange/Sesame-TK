@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.rpc.intervallimit; // 声明了接口所在的包
+package fansirsqi.xposed.sesame.hook.rpc.intervallimit; // 声明了接口所在的包
 
 // 定义了一个名为 IntervalLimit 的接口
 public interface IntervalLimit {

@@ -17,14 +17,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.json.JSONException;
 
-import lombok.Data;
-import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.util.JsonUtil;
-import fansirsqi.xposed.sesame.util.TypeUtil;
-
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Objects;
+
+import fansirsqi.xposed.sesame.R;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.TypeUtil;
+import lombok.Data;
 
 @Data
 public class ModelField<T> implements Serializable {
@@ -184,7 +184,7 @@ public class ModelField<T> implements Serializable {
     public LayerDrawable setBorder(Context context,boolean left,boolean right,boolean top,boolean bottom) {
         // 创建 Drawable 用于绘制上边框
         GradientDrawable topBorder = new GradientDrawable();
-        topBorder.setColor(ContextCompat.getColor(context, android.R.color.transparent));
+        topBorder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
         topBorder.setStroke(2, ContextCompat.getColor(context, R.color.colorPrimary)); // 设置边框颜色和宽度
         topBorder.setSize(ViewGroup.LayoutParams.MATCH_PARENT, 2); // 设置 Drawable 的大小
         topBorder.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM); // 设置绘制方向

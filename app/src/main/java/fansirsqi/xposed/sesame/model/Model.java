@@ -2,14 +2,22 @@ package fansirsqi.xposed.sesame.model;
 
 import android.os.Build;
 
-import fansirsqi.xposed.sesame.util.Log;
-import lombok.Getter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 
 public abstract class Model {
 
@@ -61,7 +69,8 @@ public abstract class Model {
      * @return 启用字段的名称
      */
     public String getEnableFieldName() {
-        return "开启" + getName();
+//        return "开启" + getName();
+        return "启用" ;
     }
 
     /**

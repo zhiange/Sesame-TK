@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.rpc.bridge;
+package fansirsqi.xposed.sesame.hook.rpc.bridge;
 
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 
