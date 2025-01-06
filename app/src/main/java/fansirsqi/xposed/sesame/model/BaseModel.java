@@ -123,6 +123,7 @@ public class BaseModel extends Model {
     new Thread(
             () -> {
               try {
+                ThreadUtil.sleep(RandomUtil.nextInt(4500,6000));
                 initReserve();
                 initBeach();
               } catch (Exception e) {
