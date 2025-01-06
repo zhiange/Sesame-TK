@@ -91,37 +91,36 @@ public class HtmlViewerActivity extends BaseActivity {
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
 
-        // 根据 intent 设置 WebView
-        if (intent != null) {
-            configureWebViewSettings(intent, settings);
-            uri = intent.getData();
-            if (uri != null) {
-                mWebView.loadUrl(uri.toString());
-            }
-            canClear = intent.getBooleanExtra("canClear", false);
-            return;
-        } else {
-            // 设置默认的 WebView 参数
-            settings.setTextZoom(90);
-            settings.setUseWideViewPort(true);
-        }
+    // 根据 intent 设置 WebView
+    if (intent != null) {
+      configureWebViewSettings(intent, settings);
+      uri = intent.getData();
+      if (uri != null) {
+        mWebView.loadUrl(uri.toString());
+      }
+      canClear = intent.getBooleanExtra("canClear", false);
+      return;
     }
+    // 设置默认的 WebView 参数
+    settings.setTextZoom(85);
+    settings.setUseWideViewPort(true);
+  }
 
-    /**
-     * 配置 WebView 的设置项
-     *
-     * @param intent   传递的 Intent
-     * @param settings WebView 的设置
-     */
-    private void configureWebViewSettings(Intent intent, WebSettings settings) {
-        if (intent.getBooleanExtra("nextLine", true)) {
-            settings.setTextZoom(85);
-            settings.setUseWideViewPort(false);
-        } else {
-            settings.setTextZoom(85);//调整默认字体大小
-            settings.setUseWideViewPort(false);
-        }
+  /**
+   * 配置 WebView 的设置项
+   *
+   * @param intent 传递的 Intent
+   * @param settings WebView 的设置
+   */
+  private void configureWebViewSettings(Intent intent, WebSettings settings) {
+    if (intent.getBooleanExtra("nextLine", true)) {
+      settings.setTextZoom(85);
+      settings.setUseWideViewPort(false);
+    } else {
+      settings.setTextZoom(85);
+      settings.setUseWideViewPort(true);
     }
+  }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
