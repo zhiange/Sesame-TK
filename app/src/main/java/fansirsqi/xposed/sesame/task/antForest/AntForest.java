@@ -28,7 +28,6 @@ import fansirsqi.xposed.sesame.entity.EcoLifeEntity;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
 import fansirsqi.xposed.sesame.entity.KVNode;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
-import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.hook.Toast;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
@@ -41,8 +40,9 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
-import fansirsqi.xposed.sesame.rpc.intervallimit.FixedOrRangeIntervalLimit;
-import fansirsqi.xposed.sesame.rpc.intervallimit.RpcIntervalLimit;
+import fansirsqi.xposed.sesame.hook.RequestManager;
+import fansirsqi.xposed.sesame.hook.rpc.intervallimit.FixedOrRangeIntervalLimit;
+import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
@@ -1157,7 +1157,7 @@ public class AntForest extends ModelTask {
                             startTime = System.currentTimeMillis();
                             collectEnergyLockLimit.setForce(startTime);
                         }
-                        ApplicationHook.requestObject(rpcEntity, 0, 0);
+                        RequestManager.requestObject(rpcEntity, 0, 0);
                         long spendTime = System.currentTimeMillis() - startTime;
                         if (balanceNetworkDelay.getValue()) {
                             delayTimeMath.nextInteger((int) (spendTime / 3));
@@ -1319,15 +1319,16 @@ public class AntForest extends ModelTask {
                 switch (propGroup) {
                     case "doubleClick": // 双击卡
                         doubleEndTime = userUsingProp.getLong("endTime");
-                        Log.other("双击卡剩余时间⏰：" + formatTimeDifference((doubleEndTime - System.currentTimeMillis())));
+                        Log.runtime("双击卡剩余时间⏰：" + formatTimeDifference(doubleEndTime - System.currentTimeMillis()));
                         break;
                     case "stealthCard": // 隐身卡
                         stealthEndTime = userUsingProp.getLong("endTime");
-                        Log.other("隐身卡剩余时间⏰️：" + formatTimeDifference((stealthEndTime - System.currentTimeMillis())));
+                        Log.runtime("隐身卡剩余时间⏰️：" + formatTimeDifference(stealthEndTime - System.currentTimeMillis()));
+
                         break;
                     case "shield": // 能量保护罩
                         shieldEndTime = userUsingProp.getLong("endTime");
-                        Log.other("保护罩剩余时间⏰：" + formatTimeDifference(shieldEndTime - System.currentTimeMillis()));
+                        Log.runtime("保护罩剩余时间⏰：" + formatTimeDifference(shieldEndTime - System.currentTimeMillis()));
                         break;
                     case "robExpandCard": // 不知道什么卡，偷袭卡？
                         String extInfo = userUsingProp.optString("extInfo");
@@ -1919,7 +1920,7 @@ public class AntForest extends ModelTask {
             }
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
-            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && shieldEndTime < System.currentTimeMillis();
+            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && shieldEndTime - System.currentTimeMillis()<3600;//调整保护罩剩余时间不超过一小时自动续命
             if (needDouble || needStealth) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();
