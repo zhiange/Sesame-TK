@@ -514,4 +514,17 @@ public class AntFarmRpcCall {
         String args = "[{\"bizType\":\"FAMILY_SHARE\",\"receiverUserId\":"+receiverUserId+",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
         return RequestManager.requestString("com.alipay.antfarm.inviteFriendVisitFamily", args);
     }
+    public static String familyEatTogether(String groupId,JSONArray friendUserIdList,JSONArray cuisines) {
+        String args = "[{\"cuisines\":" + cuisines + ",\"friendUserIds\":" + friendUserIdList + ",\"groupId\":\"" + groupId + "\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"spaceType\":\"ChickFamily\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.familyEatTogether", args);
+    }
+    public static String queryRecentFarmFood(int queryNum) {
+        String args = "[{\"queryNum\": "+queryNum+",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.queryRecentFarmFood", args);
+    }
+
+    public static String feedFriendAnimal(String friendFarmId,String groupId) {
+        String args = "[{\"friendFarmId\": \""+friendFarmId+"\",\"groupId\": \""+groupId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ChickFamily\",\"source\":\"H5\",\"spaceType\":\"ChickFamily\"}]";
+        return ApplicationHook.requestString("com.alipay.antfarm.feedFriendAnimal", args);
+    }
 }

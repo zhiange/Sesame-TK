@@ -165,10 +165,8 @@ public class AntForest extends ModelTask {
     private IntegerModelField exchangeEnergyDoubleClickCountLongTime;
     private BooleanModelField exchangeCollectHistoryAnimal7Days;
     private BooleanModelField exchangeCollectToFriendTimes7Days;
-    private BooleanModelField exchangeEnergyShield;
 
     private BooleanModelField vitalityExchange;
-    private SelectAndCountModelField vitalityExchangeList;
 
     private BooleanModelField userPatrol;
     private BooleanModelField collectGiftBox;
@@ -189,10 +187,6 @@ public class AntForest extends ModelTask {
     public static BooleanModelField ecoLifeOpen;
     private BooleanModelField energyRainChance;
 
-    /**
-     * 加速器
-     */
-    private BooleanModelField bubbleBoostType;
     /**
      * 加速器定时
      */
@@ -215,6 +209,7 @@ public class AntForest extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @SuppressWarnings("unused")
     public interface applyPropType {
         int CLOSE = 0;
         int ALL = 1;
@@ -1920,8 +1915,8 @@ public class AntForest extends ModelTask {
             }
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
-            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && shieldEndTime - System.currentTimeMillis()<3600;//调整保护罩剩余时间不超过一小时自动续命
-            if (needDouble || needStealth) {
+            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && ((shieldEndTime - System.currentTimeMillis())<3600);//调整保护罩剩余时间不超过一小时自动续命
+            if (needDouble || needStealth || needshield) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();
                     if (needDouble) useDoubleCard(bagObject);
