@@ -1,6 +1,6 @@
-package fansirsqi.xposed.sesame.rpc.debug;
+package fansirsqi.xposed.sesame.hook.rpc.debug;
 
-import fansirsqi.xposed.sesame.hook.ApplicationHook;
+import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
@@ -63,7 +63,7 @@ public class DebugRpc {
     }
 
     private String test(String fun, String data) {
-        return ApplicationHook.requestString(fun, data);
+        return RequestManager.requestString(fun, data);
     }
 
 

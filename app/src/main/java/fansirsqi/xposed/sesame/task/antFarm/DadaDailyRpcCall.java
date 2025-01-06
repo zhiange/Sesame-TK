@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.task.antFarm;
 
-import fansirsqi.xposed.sesame.hook.ApplicationHook;
+import fansirsqi.xposed.sesame.hook.RequestManager;
 
 /**
  * @author Constanline
@@ -9,12 +9,12 @@ import fansirsqi.xposed.sesame.hook.ApplicationHook;
 public class DadaDailyRpcCall {
 
     public static String home(String activityId) {
-        return ApplicationHook.requestString("com.alipay.reading.game.dadaDaily.home",
+        return RequestManager.requestString("com.alipay.reading.game.dadaDaily.home",
                 "[{\"activityId\":" + activityId + ",\"dadaVersion\":\"1.3.0\",\"version\":1}]");
     }
 
     public static String submit(String activityId, String answer, Long questionId) {
-        return ApplicationHook.requestString("com.alipay.reading.game.dadaDaily.submit",
+        return RequestManager.requestString("com.alipay.reading.game.dadaDaily.submit",
                 "[{\"activityId\":" + activityId + ",\"answer\":\"" + answer + "\",\"dadaVersion\":\"1.3.0\",\"questionId\":" +
                         questionId + ",\"version\":1}]");
     }

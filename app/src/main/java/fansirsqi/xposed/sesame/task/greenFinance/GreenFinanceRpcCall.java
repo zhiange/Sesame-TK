@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.task.greenFinance;
 
-import fansirsqi.xposed.sesame.hook.ApplicationHook;
+import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import org.json.JSONArray;
@@ -19,7 +19,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String taskQuery(String appletId) {
-    return ApplicationHook.requestString("com.alipay.loanpromoweb.promo.task.taskQuery", "[{\"appletId\":\"" + appletId + "\",\"completedBottom\":true}]");
+    return RequestManager.requestString("com.alipay.loanpromoweb.promo.task.taskQuery", "[{\"appletId\":\"" + appletId + "\",\"completedBottom\":true}]");
   }
 
   /**
@@ -31,12 +31,12 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String taskTrigger(String appletId, String stageCode, String taskCenId) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.loanpromoweb.promo.task.taskTrigger", "[{\"appletId\":\"" + appletId + "\",\"stageCode\":\"" + stageCode + "\",\"taskCenId\":\"" + taskCenId + "\"}]");
   }
 
   public static String signInTrigger(String sceneId) {
-    return ApplicationHook.requestString("com.alipay.loanpromoweb.promo.signin.trigger", "[{\"extInfo\":{},\"sceneId\":\"" + sceneId + "\"}]");
+    return RequestManager.requestString("com.alipay.loanpromoweb.promo.signin.trigger", "[{\"extInfo\":{},\"sceneId\":\"" + sceneId + "\"}]");
   }
 
   /**
@@ -45,7 +45,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String greenFinanceIndex() {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinancePageQueryService.indexV2", "[{\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\"}]");
   }
 
@@ -56,7 +56,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String batchSelfCollect(JSONArray bsnIds) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinancePointCollectService.batchSelfCollect",
         "[{\"bsnIds\":" + bsnIds + ",\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -68,7 +68,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String signInQuery(String sceneId) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.loanpromoweb.promo.signin.query", "[{\"cycleCount\":7,\"cycleType\":\"d\",\"extInfo\":{},\"needContinuous\":1,\"sceneId\":\"" + sceneId + "\"}]");
   }
 
@@ -79,7 +79,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryUserTickItem(String firstBehaviorType) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceTickService.queryUserTickItem",
         "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\"" + firstBehaviorType + "\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -92,7 +92,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String submitTick(String firstBehaviorType, String behaviorCode) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceTickService.submitTick",
         "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\""
             + firstBehaviorType
@@ -112,7 +112,7 @@ public class GreenFinanceRpcCall {
   public static String queryExpireMcaPoint(long day) {
     // {"ariverRpcTraceId":"client`ZWBWO+Zb5kQDAHgksDyLs/tHP11O+Xc_283027","result":{"expirePoint":{"amount":"6762.00","amountInt":"6762","cent":"676200"}},"resultView":"处理成功","success":true}
     // 十天后
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinancePageQueryService.queryExpireMcaPoint",
         "[{\"custType\":\"MERCHANT\",\"profitType\":\"MYBK_LOAN_DISCOUNT\",\"uid\":\""
             + UserMap.getCurrentUid()
@@ -127,7 +127,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryAllDonationProjectNew() {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceDonationService.queryAllDonationProjectNew",
         "[{\"custType\":\"MERCHANT\",\"subjectType\":\"ALL_DONATION\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -141,7 +141,7 @@ public class GreenFinanceRpcCall {
    */
   public static String donation(String projectId, String amount) {
     // {"ariverRpcTraceId":"client`ZWBWO+Zb5kQDAHgksDyLs/tHP11fNHg_230398","result":{"amount":200,"bsnId":"202406231073250005003700277823650280","certificateId":"MBKO1043330320","custType":"MERCHANT","donateElectricityRatio":2,"donateTime":1719088281085,"gmtCreate":1652176865000,"gmtModify":32487667200000,"outBizNo":"1719088280762","projectId":"CLEAN_ENERGY_00001","projectName":"朝阳县光伏发电项目","showFlag":"Y","targetAmount":1162,"uid":"2088302146583284"},"resultView":"处理成功","success":true}
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceDonationService.donation",
         "[{\"custType\":\"MERCHANT\",\"donationGold\":\""
             + amount
@@ -160,7 +160,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String consultProveTaskList() {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.consultProveTaskList",
         "[{\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -172,7 +172,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryPrizes(String campId) {
-    return ApplicationHook.requestString("com.alipay.loanpromoweb.promo.camp.queryPrizes", "[{\"campIds\":[\"" + campId + "\"]}]");
+    return RequestManager.requestString("com.alipay.loanpromoweb.promo.camp.queryPrizes", "[{\"campIds\":[\"" + campId + "\"]}]");
   }
 
   /**
@@ -182,7 +182,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String campTrigger(String campId) {
-    return ApplicationHook.requestString("com.alipay.loanpromoweb.promo.camp.trigger", "[{\"campId\":\"" + campId + "\"}]");
+    return RequestManager.requestString("com.alipay.loanpromoweb.promo.camp.trigger", "[{\"campId\":\"" + campId + "\"}]");
   }
 
   /**
@@ -193,7 +193,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String proveTask(String bizType, String imageUrl) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.proveTask",
         "[{\"bizType\":\"" + bizType + "\",\"custType\":\"MERCHANT\",\"imageUrl\":\"" + imageUrl + "\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -205,7 +205,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryProveTaskStatus(String taskId) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.queryProveTaskStatus",
         "[{\"taskId\":\"" + taskId + "\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
@@ -216,7 +216,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryRankingList(int startIndex) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinanceUserInteractionQueryService.queryRankingList",
         "[{\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"includeMe\":true,"
             + "\"onlyRealFriend\":true,\"pageLimit\":10,\"rankingScene\":\"FRIEND\","
@@ -233,7 +233,7 @@ public class GreenFinanceRpcCall {
    * @return 结果
    */
   public static String queryGuestIndexPoints(String guestId) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinanceUserInteractionQueryService.queryGuestIndexPoints",
         "[{\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"guestCustType\":\"MERCHANT\",\"guestUid\":\""
             + guestId
@@ -243,7 +243,7 @@ public class GreenFinanceRpcCall {
   }
 
   public static String batchSteal(JSONArray bsnIds, String collectedUid) {
-    return ApplicationHook.requestString(
+    return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinancePointCollectService.batchSteal",
         "[{\"bsnIds\":"
             + bsnIds

@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.rpc.intervallimit;
+package fansirsqi.xposed.sesame.hook.rpc.intervallimit;
 
 import lombok.Getter;
 import lombok.Setter;
