@@ -2613,7 +2613,7 @@ public class AntForest extends ModelTask {
             if (now > bubbleBoostTime) {
                 continue;
             }
-            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+            String bubbleBoostTaskId = "bubbleBoostTaskId|AS|" + bubbleBoostTime;
             if (!hasChildTask(bubbleBoostTaskId)) {
                 addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
                 Log.record("添加定时使用加速器🛌[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
