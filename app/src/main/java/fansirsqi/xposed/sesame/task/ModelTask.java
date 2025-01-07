@@ -2,20 +2,20 @@ package fansirsqi.xposed.sesame.task;
 
 import android.os.Build;
 
-import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
-import lombok.Getter;
-import fansirsqi.xposed.sesame.model.Model;
-import fansirsqi.xposed.sesame.model.ModelFields;
-import fansirsqi.xposed.sesame.model.ModelType;
-import fansirsqi.xposed.sesame.model.BaseModel;
-import fansirsqi.xposed.sesame.util.StringUtil;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import fansirsqi.xposed.sesame.model.BaseModel;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelType;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
+import lombok.Getter;
 
 public abstract class ModelTask extends Model {
 
@@ -260,9 +260,7 @@ public abstract class ModelTask extends Model {
         for (Model model : getModelArray()) {
             if (model != null && ModelType.TASK == model.getType()) {
                 if (((ModelTask) model).startTask(force)) {
-
                         ThreadUtil.sleep(750);
-
                 }
             }
         }

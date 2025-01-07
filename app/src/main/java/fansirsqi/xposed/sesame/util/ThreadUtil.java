@@ -37,11 +37,6 @@ public class ThreadUtil {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        } catch (Exception e) {
-            Log.runtime(TAG, "thread sleep err:");
-            Log.printStackTrace(TAG, e);
-        }finally {
-            Thread.currentThread().interrupt(); // 恢复中断状态
         }
     }
 

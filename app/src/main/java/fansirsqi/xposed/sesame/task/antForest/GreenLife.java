@@ -15,7 +15,7 @@ public class GreenLife {
             if (ResUtil.checkSuccess(TAG,jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 if (data.optBoolean("canSendEnergy", false)) {
-                    Thread.sleep(5000);
+                    Thread.sleep(800);
                     jo = new JSONObject(AntForestRpcCall.sendEnergyByAction(sourceType));
                     if (ResUtil.checkSuccess(TAG,jo)) {
                         data = jo.getJSONObject("data");
@@ -27,7 +27,7 @@ public class GreenLife {
                 }
             } else {
                 Log.runtime(TAG, jo.getJSONObject("data").getString("resultCode"));
-                Thread.sleep(5000);
+                Thread.sleep(800);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "sendEnergyByAction err:");

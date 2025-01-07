@@ -1319,7 +1319,6 @@ public class AntForest extends ModelTask {
                     case "stealthCard": // 隐身卡
                         stealthEndTime = userUsingProp.getLong("endTime");
                         Log.runtime("隐身卡剩余时间⏰️：" + formatTimeDifference(stealthEndTime - System.currentTimeMillis()));
-
                         break;
                     case "shield": // 能量保护罩
                         shieldEndTime = userUsingProp.getLong("endTime");
@@ -1536,7 +1535,6 @@ public class AntForest extends ModelTask {
      * @throws JSONException 如果解析JSON时发生错误
      */
     private void processTask(JSONObject forestSignVO) throws JSONException {
-        ThreadUtil.sleep(5000);
         String signId = forestSignVO.getString("signId");
         String currentSignKey = forestSignVO.getString("currentSignKey");
         JSONArray signRecords = forestSignVO.getJSONArray("signRecords");
@@ -2560,7 +2558,7 @@ public class AntForest extends ModelTask {
         }
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.queryVitalityStoreIndex());
-            ThreadUtil.sleep(5000);
+            ThreadUtil.sleep(800);
             if (!ResUtil.checkSuccess(jo)) {
                 Log.runtime(TAG, "请求活力值商店失败");
                 return false;

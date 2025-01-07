@@ -1948,7 +1948,7 @@ public class AntFarm extends ModelTask {
                     if (leftDrawTimes > 0) {
                         for (int ii = 0; ii < leftDrawTimes; ii++) {
                             jo = new JSONObject(AntFarmRpcCall.DrawPrize());
-                            ThreadUtil.sleep(1000);
+                            ThreadUtil.sleep(5000);
                             if (jo.optBoolean("success")) {
                                 String title = jo.getString("title");
                                 int prizeNum = jo.optInt("prizeNum", 0);
