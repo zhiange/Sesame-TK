@@ -5,32 +5,45 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.*;
-import android.widget.*;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TabHost;
+import android.widget.TabWidget;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
-
-import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.*;
-import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.AlipayUser;
-import fansirsqi.xposed.sesame.model.Model;
-import fansirsqi.xposed.sesame.model.ModelConfig;
-import fansirsqi.xposed.sesame.model.ModelField;
-import fansirsqi.xposed.sesame.model.ModelFields;
-import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.BeachMap;
-import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+
+import fansirsqi.xposed.sesame.R;
+import fansirsqi.xposed.sesame.data.Config;
+import fansirsqi.xposed.sesame.data.UIConfig;
+import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelConfig;
+import fansirsqi.xposed.sesame.model.ModelField;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.LanguageUtil;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import fansirsqi.xposed.sesame.util.ToastUtil;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -54,30 +67,30 @@ public class SettingsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 初始化用户信息
-        userId = null;
-        userName = null;
+        this.userId = null;
+        this.userName = null;
         Intent intent = getIntent();
         if (intent != null) {
-            userId = intent.getStringExtra("userId"); // 从 Intent 中获取用户 ID
-            userName = intent.getStringExtra("userName"); // 从 Intent 中获取用户名
+            this.userId = intent.getStringExtra("userId"); // 从 Intent 中获取用户 ID
+            this.userName = intent.getStringExtra("userName"); // 从 Intent 中获取用户名
         }
 
         // 初始化各种配置数据
         Model.initAllModel();
-        UserMap.setCurrentUserId(userId);
-        UserMap.load(userId);
-        CooperateMap.getInstance(CooperateMap.class).load(userId);
+        UserMap.setCurrentUserId(this.userId);
+        UserMap.load(this.userId);
+        CooperateMap.getInstance(CooperateMap.class).load(this.userId);
         IdMapManager.getInstance(ReserveaMap.class).load();
         IdMapManager.getInstance(BeachMap.class).load();
-        Config.load(userId);
+        Config.load(this.userId);
 
         // 设置语言和布局
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_settings);
 
         // 如果用户名不为空，将其显示在副标题中
-        if (userName != null) {
-            setBaseSubtitle(getString(R.string.settings) + ": " + userName);
+        if (this.userName != null) {
+            setBaseSubtitle(getString(R.string.settings) + ": " + this.userName);
         }
         setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
         context = this;
@@ -158,7 +171,7 @@ public class SettingsActivity extends BaseActivity {
                 Intent exportIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 exportIntent.setType("*/*");
-                exportIntent.putExtra(Intent.EXTRA_TITLE, "[" + userName + "]-config_v2.json");
+                exportIntent.putExtra(Intent.EXTRA_TITLE, "[" + this.userName + "]-config_v2.json");
                 startActivityForResult(exportIntent, EXPORT_REQUEST_CODE);
                 break;
             case 2: // 导入配置
@@ -174,10 +187,10 @@ public class SettingsActivity extends BaseActivity {
                         .setMessage("确认删除该配置？")
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
                             java.io.File userConfigDirectoryFile;
-                            if (StringUtil.isEmpty(userId)) {
+                            if (StringUtil.isEmpty(this.userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {
-                                userConfigDirectoryFile = Files.getUserConfigDir(userId);
+                                userConfigDirectoryFile = Files.getUserConfigDir(this.userId);
                             }
                             if (Files.delFile(userConfigDirectoryFile)) {
                                 ToastUtil.makeText(this, "配置删除成功", Toast.LENGTH_SHORT).show();
@@ -197,8 +210,8 @@ public class SettingsActivity extends BaseActivity {
                 UIConfig.INSTANCE.setNewUI(true);
                 if (UIConfig.save()) {
                     Intent intent = new Intent(this, NewSettingsActivity.class);
-                    intent.putExtra("userId", userId);
-                    intent.putExtra("userName", userName);
+                    intent.putExtra("userId", this.userId);
+                    intent.putExtra("userName", this.userName);
                     finish();
                     startActivity(intent);
                 } else {
@@ -221,10 +234,10 @@ public class SettingsActivity extends BaseActivity {
             if (uri != null) {
                 try {
                     java.io.File configV2File;
-                    if (StringUtil.isEmpty(userId)) {
+                    if (StringUtil.isEmpty(this.userId)) {
                         configV2File = Files.getDefaultConfigV2File();
                     } else {
-                        configV2File = Files.getConfigV2File(userId);
+                        configV2File = Files.getConfigV2File(this.userId);
                     }
                     FileInputStream inputStream = new FileInputStream(configV2File);
                     if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
@@ -243,18 +256,18 @@ public class SettingsActivity extends BaseActivity {
             if (uri != null) {
                 try {
                     java.io.File configV2File;
-                    if (StringUtil.isEmpty(userId)) {
+                    if (StringUtil.isEmpty(this.userId)) {
                         configV2File = Files.getDefaultConfigV2File();
                     } else {
-                        configV2File = Files.getConfigV2File(userId);
+                        configV2File = Files.getConfigV2File(this.userId);
                     }
                     FileOutputStream outputStream = new FileOutputStream(configV2File);
                     if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
                         ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
-                        if (!StringUtil.isEmpty(userId)) {
+                        if (!StringUtil.isEmpty(this.userId)) {
                             try {
                                 Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
-                                intent.putExtra("userId", userId);
+                                intent.putExtra("userId", this.userId);
                                 sendBroadcast(intent);
                             } catch (Throwable th) {
                                 Log.printStackTrace(th);
@@ -277,17 +290,17 @@ public class SettingsActivity extends BaseActivity {
     private void save() {
         // 保存当前用户的配置信息
         try {
-            if (Config.isModify(userId) && Config.save(userId, false)) {
+            if (Config.isModify(this.userId) && Config.save(this.userId, false)) {
                 ToastUtil.showToastWithDelay(this, "保存成功！", 100);
-                if (!StringUtil.isEmpty(userId)) {
+                if (!StringUtil.isEmpty(this.userId)) {
                     Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
-                    intent.putExtra("userId", userId);
+                    intent.putExtra("userId", this.userId);
                     sendBroadcast(intent);
                 }
             }
-            if (!StringUtil.isEmpty(userId)) {
-                UserMap.save(userId);
-                CooperateMap.getInstance(CooperateMap.class).save(userId);
+            if (!StringUtil.isEmpty(this.userId)) {
+                UserMap.save(this.userId);
+                CooperateMap.getInstance(CooperateMap.class).save(this.userId);
             }
         } catch (Throwable th) {
             Log.printStackTrace(th);
