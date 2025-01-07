@@ -125,16 +125,16 @@ public class Privilege {
             if (!"SUCCESS".equals(resultCode)) {
                 String resultDesc = resultJson.optString("resultDesc", "未知错误");
                 if (resultDesc.contains("不匹配")) {
-                    Log.forest(" 青春特权🧧 " + tag + "：" + resultDesc + "可能账户不符合条件");
+                    Log.forest("青春特权🧧" + tag + "：" + resultDesc + "可能账户不符合条件");
                 } else {
-                    Log.forest(" 青春特权🧧 " + tag + "：" + resultDesc);
+                    Log.forest("青春特权🧧" + tag + "：" + resultDesc);
                 }
                 return;
             }
 
             // 获取签到结果
             String resultDesc = resultJson.optString("resultDesc", "签到成功");
-            Log.forest(" 青春特权🧧 " + tag + "：" + resultDesc);
+            Log.forest("青春特权🧧" + tag + "：" + resultDesc);
 
             // 如果签到成功，设置今日已签到标记
             if ("SUCCESS".equals(resultCode)) {
