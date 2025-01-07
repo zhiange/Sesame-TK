@@ -720,11 +720,11 @@ public class AntForest extends ModelTask {
             medicalHealthFeeds();
         }
 
-        // 青春特权森林道具领取
+        //青春特权森林道具领取
         if (youthPrivilege.getValue()) {
             Privilege.youthPrivilege();
         }
-        // 青春特权每日签到红包
+        //青春特权每日签到红包
         if (dailyCheckIn.getValue()) {
             Privilege.studentSignInRedEnvelope();
         }
@@ -1997,7 +1997,7 @@ public class AntForest extends ModelTask {
     }
 
     /**
-     * 使用能量保护罩，一般是限时保护罩，打开 青春特权森林道具领取
+     * 使用能量保护罩，一般是限时保护罩，打开青春特权森林道具领取
      */
     private void useShieldCard(JSONObject bagObject) {
         try {

@@ -17,7 +17,7 @@ public class Privilege {
     public static final String TAG = Privilege.class.getSimpleName();
 
 
-    // 青春特权🌸领取
+    //青春特权🌸领取
     static boolean youthPrivilege() {
         try {
             if (!StatusUtil.canYouthPrivilegeToday()) return false;
@@ -79,7 +79,7 @@ public class Privilege {
     }
 
     /**
-     * 青春特权每日签到红包
+     *青春特权每日签到红包
      */
     static void studentSignInRedEnvelope() {
         try {
@@ -89,7 +89,7 @@ public class Privilege {
             final LocalTime END_TIME = LocalTime.of(10, 0);  // 10:00 AM
 
             if (currentTime.isBefore(START_TIME)) {
-                Log.forest(" 青春特权🧧5点前不执行签到");
+                Log.forest("青春特权🧧5点前不执行签到");
                 return;
             }
 
@@ -97,13 +97,13 @@ public class Privilege {
                 String tag = currentTime.isBefore(END_TIME) ? "double" : "single";
                 studentTaskHandle(tag);
             } else {
-                Log.record(" 青春特权🧧今日已完成签到");
+                Log.record("青春特权🧧今日已完成签到");
             }
 
         } catch (Exception e) {
             Log.runtime(TAG, "studentSignInRedEnvelope错误:");
             Log.printStackTrace(TAG, e);
-            Log.record(" 青春特权🧧执行异常：" + e.getMessage());
+            Log.record("青春特权🧧执行异常：" + e.getMessage());
         }
     }
 
@@ -114,7 +114,7 @@ public class Privilege {
         try {
             String result = AntForestRpcCall.studentCheckin();
             if (result == null || result.isEmpty()) {
-                Log.record(" 青春特权🧧签到失败：返回数据为空");
+                Log.record("青春特权🧧签到失败：返回数据为空");
                 return;
             }
 
@@ -144,11 +144,11 @@ public class Privilege {
         } catch (JSONException e) {
             Log.runtime(TAG, "studentTask JSON解析错误:");
             Log.printStackTrace(TAG, e);
-            Log.record(" 青春特权🧧签到异常：" + e.getMessage());
+            Log.record("青春特权🧧签到异常：" + e.getMessage());
         } catch (Exception e) {
             Log.runtime(TAG, "studentTask其他错误:");
             Log.printStackTrace(TAG, e);
-            Log.record(" 青春特权🧧签到异常：" + e.getMessage());
+            Log.record("青春特权🧧签到异常：" + e.getMessage());
         }
     }
 
@@ -158,13 +158,13 @@ public class Privilege {
     private static void studentTaskHandle(String tag) {
         try {
             if (!StatusUtil.canStudentTask()) {
-                Log.record(" 青春特权🧧今日已达上限");
+                Log.record("青春特权🧧今日已达上限");
                 return;
             }
 
             String response = AntForestRpcCall.studentQqueryCheckInModel();
             if (response == null || response.isEmpty()) {
-                Log.record(" 青春特权🧧查询失败：返回数据为空");
+                Log.record("青春特权🧧查询失败：返回数据为空");
                 return;
             }
 
@@ -175,7 +175,7 @@ public class Privilege {
                 String resultCode = responseJson.getString("resultCode");
                 if (!"SUCCESS".equals(resultCode)) {
                     String resultDesc = responseJson.optString("resultDesc", "未知错误");
-                    Log.record(" 青春特权🧧查询失败：" + resultDesc);
+                    Log.record("青春特权🧧查询失败：" + resultDesc);
                     return;
                 }
             }
@@ -183,19 +183,19 @@ public class Privilege {
             // 安全获取 studentCheckInInfo
             JSONObject studentCheckInInfo = responseJson.optJSONObject("studentCheckInInfo");
             if (studentCheckInInfo == null) {
-                Log.record(" 青春特权🧧查询失败：无签到信息");
+                Log.record("青春特权🧧查询失败：无签到信息");
                 return;
             }
 
             // 安全获取 action
             String action = studentCheckInInfo.optString("action", "");
             if (action.isEmpty()) {
-                Log.record(" 青春特权🧧查询失败：无操作信息");
+                Log.record("青春特权🧧查询失败：无操作信息");
                 return;
             }
 
             if ("DO_TASK".equals(action)) {
-                Log.record(" 青春特权🧧今日已签到");
+                Log.record("青春特权🧧今日已签到");
                 StatusUtil.setStudentTaskToday();
             } else {
                 studentTask(tag);
@@ -204,11 +204,11 @@ public class Privilege {
         } catch (JSONException e) {
             Log.runtime(TAG, "studentTaskHandle JSON解析错误:");
             Log.printStackTrace(TAG, e);
-            Log.record(" 青春特权🧧签到异常：" + e.getMessage());
+            Log.record("青春特权🧧签到异常：" + e.getMessage());
         } catch (Exception e) {
             Log.runtime(TAG, "studentTaskHandle其他错误:");
             Log.printStackTrace(TAG, e);
-            Log.record(" 青春特权🧧签到异常：" + e.getMessage());
+            Log.record("青春特权🧧签到异常：" + e.getMessage());
         }
     }
 
