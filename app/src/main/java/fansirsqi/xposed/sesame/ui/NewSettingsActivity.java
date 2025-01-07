@@ -10,7 +10,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.*;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -18,28 +22,6 @@ import androidx.core.content.ContextCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.json.JSONException;
-
-import fansirsqi.xposed.sesame.BuildConfig;
-import fansirsqi.xposed.sesame.R;
-import fansirsqi.xposed.sesame.data.*;
-import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.AlipayUser;
-import fansirsqi.xposed.sesame.model.Model;
-import fansirsqi.xposed.sesame.model.ModelConfig;
-import fansirsqi.xposed.sesame.model.ModelField;
-import fansirsqi.xposed.sesame.model.ModelFields;
-import fansirsqi.xposed.sesame.model.ModelGroup;
-import fansirsqi.xposed.sesame.ui.dto.ModelDto;
-import fansirsqi.xposed.sesame.ui.dto.ModelFieldInfoDto;
-import fansirsqi.xposed.sesame.ui.dto.ModelFieldShowDto;
-import fansirsqi.xposed.sesame.ui.dto.ModelGroupDto;
-import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.BeachMap;
-import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,6 +32,33 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import fansirsqi.xposed.sesame.BuildConfig;
+import fansirsqi.xposed.sesame.R;
+import fansirsqi.xposed.sesame.data.Config;
+import fansirsqi.xposed.sesame.data.UIConfig;
+import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.Model;
+import fansirsqi.xposed.sesame.model.ModelConfig;
+import fansirsqi.xposed.sesame.model.ModelField;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.model.ModelGroup;
+import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.ui.dto.ModelDto;
+import fansirsqi.xposed.sesame.ui.dto.ModelFieldInfoDto;
+import fansirsqi.xposed.sesame.ui.dto.ModelFieldShowDto;
+import fansirsqi.xposed.sesame.ui.dto.ModelGroupDto;
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.LanguageUtil;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.BeachMap;
+import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.StringUtil;
 
 public class NewSettingsActivity extends BaseActivity {
 
@@ -96,7 +105,7 @@ public class NewSettingsActivity extends BaseActivity {
         if (userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
-        setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
+        setBaseSubtitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
         context = this;
         webView = findViewById(R.id.webView);
         WebSettings settings = webView.getSettings();
@@ -152,6 +161,7 @@ public class NewSettingsActivity extends BaseActivity {
             groupList.add(new ModelGroupDto(modelGroup.getCode(), modelGroup.getName(), modelGroup.getIcon()));
         }
     }
+
     @Override
     public void onBackPressed() {
         if (webView.canGoBack()) {
@@ -161,6 +171,7 @@ public class NewSettingsActivity extends BaseActivity {
             save();
         }
     }
+
     public class WebAppInterface {
         @JavascriptInterface
         public void onBackPressed() {
@@ -172,16 +183,18 @@ public class NewSettingsActivity extends BaseActivity {
                 }
             });
         }
+
         @JavascriptInterface
         public void onExit() {
             runOnUiThread(NewSettingsActivity.this::finish);
         }
     }
+
     private class WebViewCallback {
         @JavascriptInterface
         public String getTabs() {
-            String result = JsonUtil.formatJson(tabList);
-            if(isApkInDebug()){
+            String result = JsonUtil.formatJson(tabList, false);
+            if (isApkInDebug()) {
                 Log.runtime("NewSettingsActivity.getTabs: " + result);
             }
             return result;
@@ -191,14 +204,16 @@ public class NewSettingsActivity extends BaseActivity {
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
         }
+
         @JavascriptInterface
         public String getGroup() {
-            String result = JsonUtil.formatJson(groupList);
-            if(isApkInDebug()){
+            String result = JsonUtil.formatJson(groupList, false);
+            if (isApkInDebug()) {
                 Log.runtime("NewSettingsActivity.getGroup: " + result);
             }
             return result;
         }
+
         @JavascriptInterface
         public String getModelByGroup(String groupCode) {
             Collection<ModelConfig> modelConfigCollection = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode)).values();
@@ -210,15 +225,17 @@ public class NewSettingsActivity extends BaseActivity {
                 }
                 modelDtoList.add(new ModelDto(modelConfig.getCode(), modelConfig.getName(), groupCode, modelFields));
             }
-            String result = JsonUtil.formatJson(modelDtoList);
-            if(isApkInDebug()){
+            String result = JsonUtil.formatJson(modelDtoList, false);
+            if (isApkInDebug()) {
                 Log.runtime("NewSettingsActivity.getModelByGroup: " + result);
             }
             return result;
         }
+
         @JavascriptInterface
         public String setModelByGroup(String groupCode, String modelsValue) {
-            List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {});
+            List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {
+            });
             Map<String, ModelConfig> modelConfigSet = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode));
             for (ModelDto modelDto : modelDtoList) {
                 ModelConfig modelConfig = modelConfigSet.get(modelDto.getModelCode());
@@ -238,6 +255,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "SUCCESS";
         }
+
         @JavascriptInterface
         public String getModel(String modelCode) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -247,14 +265,15 @@ public class NewSettingsActivity extends BaseActivity {
                 for (ModelField<?> modelField : modelFields.values()) {
                     list.add(ModelFieldShowDto.toShowDto(modelField));
                 }
-                String result = JsonUtil.formatJson(list);
-                if(isApkInDebug()){
+                String result = JsonUtil.formatJson(list, false);
+                if (isApkInDebug()) {
                     Log.runtime("NewSettingsActivity.getModel: " + result);
                 }
                 return result;
             }
             return null;
         }
+
         @JavascriptInterface
         public String setModel(String modelCode, String fieldsValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -262,7 +281,8 @@ public class NewSettingsActivity extends BaseActivity {
                 try {
                     ModelFields modelFields = modelConfig.getFields();
                     Map<String, ModelFieldShowDto> map = JsonUtil.parseObject(fieldsValue,
-                            new TypeReference<Map<String, ModelFieldShowDto>>() {});
+                            new TypeReference<Map<String, ModelFieldShowDto>>() {
+                            });
                     if (map != null) {
                         for (Map.Entry<String, ModelFieldShowDto> entry : map.entrySet()) {
                             ModelFieldShowDto newModelField = entry.getValue();
@@ -285,14 +305,15 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
+
         @JavascriptInterface
         public String getField(String modelCode, String fieldCode) throws JSONException {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
             if (modelConfig != null) {
                 ModelField<?> modelField = modelConfig.getModelField(fieldCode);
                 if (modelField != null) {
-                    String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField));
-                    if(isApkInDebug()){
+                    String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField), false);
+                    if (isApkInDebug()) {
                         Log.runtime("NewSettingsActivity.getField: " + result);
                     }
                     return result;
@@ -300,6 +321,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
+
         @JavascriptInterface
         public String setField(String modelCode, String fieldCode, String fieldValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -316,9 +338,10 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
+
         @JavascriptInterface
         public void Log(String log) {
-            Log.record("设置："+ log);
+            Log.record("设置：" + log);
         }
     }
 
@@ -331,6 +354,7 @@ public class NewSettingsActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至旧UI");
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,6 +22,7 @@ public class JsonUtil {
     private static final ObjectMapper MAPPER = new ObjectMapper(); // JSON对象映射器
     public static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance(); // 类型工厂
     public static final JsonFactory JSON_FACTORY = new JsonFactory(); // JSON工厂
+
     static {
         // 配置 ObjectMapper
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 忽略未知属性
@@ -38,10 +40,15 @@ public class JsonUtil {
      * 将对象转换为 JSON 字符串
      *
      * @param object 要转换的对象
+     * @param pretty 是否格式化 JSON 字符串
      * @return JSON 字符串
      */
-    public static String toJsonString(Object object) {
-        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+    public static String formatJson(Object object, boolean pretty) {
+        if (pretty) {
+            return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+        } else {
+            return execute(() -> MAPPER.writeValueAsString(object));
+        }
     }
 
 
@@ -69,8 +76,8 @@ public class JsonUtil {
      * 解析 JSON 字符串为指定类型的对象
      *
      * @param body JSON 字符串
-     * @param type  目标类型
-     * @param <T>   目标类型泛型
+     * @param type 目标类型
+     * @param <T>  目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(String body, Type type) {
@@ -82,7 +89,7 @@ public class JsonUtil {
      *
      * @param body     JSON 字符串
      * @param javaType 目标 JavaType
-     * @param <T>     目标类型泛型
+     * @param <T>      目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(String body, JavaType javaType) {
@@ -94,7 +101,7 @@ public class JsonUtil {
      *
      * @param body         JSON 字符串
      * @param valueTypeRef 目标类型引用
-     * @param <T>         目标类型泛型
+     * @param <T>          目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(String body, TypeReference<T> valueTypeRef) {
@@ -104,9 +111,9 @@ public class JsonUtil {
     /**
      * 解析 JSON 字符串为指定类型的对象
      *
-     * @param body JSON 字符串
+     * @param body  JSON 字符串
      * @param clazz 目标类
-     * @param <T> 目标类型泛型
+     * @param <T>   目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(String body, Class<T> clazz) {
@@ -118,7 +125,7 @@ public class JsonUtil {
      *
      * @param jsonParser JsonParser 实例
      * @param type       目标类型
-     * @param <T>       目标类型泛型
+     * @param <T>        目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(JsonParser jsonParser, Type type) {
@@ -130,7 +137,7 @@ public class JsonUtil {
      *
      * @param jsonParser JsonParser 实例
      * @param javaType   目标 JavaType
-     * @param <T>       目标类型泛型
+     * @param <T>        目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(JsonParser jsonParser, JavaType javaType) {
@@ -142,7 +149,7 @@ public class JsonUtil {
      *
      * @param jsonParser   JsonParser 实例
      * @param valueTypeRef 目标类型引用
-     * @param <T>         目标类型泛型
+     * @param <T>          目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(JsonParser jsonParser, TypeReference<T> valueTypeRef) {
@@ -154,7 +161,7 @@ public class JsonUtil {
      *
      * @param jsonParser JsonParser 实例
      * @param clazz      目标类
-     * @param <T>       目标类型泛型
+     * @param <T>        目标类型泛型
      * @return 解析后的对象
      */
     public static <T> T parseObject(JsonParser jsonParser, Class<T> clazz) {
@@ -166,7 +173,7 @@ public class JsonUtil {
      *
      * @param bean 源对象
      * @param type 目标类型
-     * @param <T> 目标类型泛型
+     * @param <T>  目标类型泛型
      * @return 转换后的对象
      */
     public static <T> T parseObject(Object bean, Type type) {
@@ -176,9 +183,9 @@ public class JsonUtil {
     /**
      * 将对象转换为指定类型的对象
      *
-     * @param bean    源对象
+     * @param bean     源对象
      * @param javaType 目标 JavaType
-     * @param <T>    目标类型泛型
+     * @param <T>      目标类型泛型
      * @return 转换后的对象
      */
     public static <T> T parseObject(Object bean, JavaType javaType) {
@@ -190,7 +197,7 @@ public class JsonUtil {
      *
      * @param bean         源对象
      * @param valueTypeRef 目标类型引用
-     * @param <T>         目标类型泛型
+     * @param <T>          目标类型泛型
      * @return 转换后的对象
      */
     public static <T> T parseObject(Object bean, TypeReference<T> valueTypeRef) {
@@ -200,8 +207,8 @@ public class JsonUtil {
     /**
      * 将对象转换为指定类型的对象
      *
-     * @param bean   源对象
-     * @param clazz  目标类
+     * @param bean  源对象
+     * @param clazz 目标类
      * @param <T>   目标类型泛型
      * @return 转换后的对象
      */
@@ -247,7 +254,8 @@ public class JsonUtil {
     public static List<Integer> parseIntegerList(String body, String field) {
         return execute(() -> {
             JsonNode node = MAPPER.readTree(body).get(field); // 获取字段节点
-            return node != null ? MAPPER.convertValue(node, new TypeReference<List<Integer>>() {}) : null; // 返回字段值列表
+            return node != null ? MAPPER.convertValue(node, new TypeReference<List<Integer>>() {
+            }) : null; // 返回字段值列表
         });
     }
 
