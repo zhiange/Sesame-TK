@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.hook;
 
+import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -65,7 +67,6 @@ import fansirsqi.xposed.sesame.util.StatisticsUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-import fansirsqi.xposed.sesame.util.ToastUtil;
 import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
@@ -162,7 +163,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             if (execAtTimeList != null) {
                 LocalDateTime lastExecDateTime = TimeUtil.getLocalDateTimeByTimeMillis(currentTime);
                 LocalDateTime nextExecDateTime = TimeUtil.getLocalDateTimeByTimeMillis(currentTime + checkInterval);
-
                 for (String execAtTime : execAtTimeList) {
                     if ("-1".equals(execAtTime)) return;
                     LocalDateTime execAtDateTime = TimeUtil.getLocalDateTimeByTimeStr(execAtTime);
@@ -171,7 +171,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         execDelayedHandler(ChronoUnit.MILLIS.between(lastExecDateTime, execAtDateTime));
                         return;
                     }
+                    Log.runtime("未设置定时执行：" + execAtTime);
                 }
+                Log.runtime("上次执行时间：" + lastExecDateTime.toString());
+                Log.runtime("下次执行时间：" + nextExecDateTime.toString());
             }
         } catch (Exception e) {
             Log.record("调度下一次执行失败：" + e.getMessage());
@@ -275,7 +278,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
+                                    if (isApkInDebug()) {
+                                        //
+                                    }
                                     try {
+                                        Log.record("应用版本：" + alipayVersion.getVersionString());
+                                        Log.record("模块版本：" + modelVersion);
+                                        Log.record(TAG, "开始执行");
                                         long currentTime = System.currentTimeMillis();
                                         if (lastExecTime + 2000 > currentTime) {
                                             Log.record("执行间隔较短，跳过执行");
@@ -582,7 +591,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     mainHandler.postDelayed(
                             () -> {
                                 if (!PermissionUtil.checkOrRequestAlarmPermissions(context)) {
-                                    ToastUtil.makeText(context, "请授予支付宝使用闹钟权限", android.widget.Toast.LENGTH_SHORT).show();
+                                    Toast.show("请授予支付宝使用闹钟权限");
                                 }
                             },
                             2000);
@@ -594,7 +603,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     mainHandler.postDelayed(
                             () -> {
                                 if (!PermissionUtil.checkOrRequestBatteryPermissions(context)) {
-                                    ToastUtil.makeText(context, "请授予支付宝始终在后台运行权限", android.widget.Toast.LENGTH_SHORT).show();
+                                    Toast.show("请授予支付宝始终在后台运行权限");
                                 }
                             },
                             2000);
@@ -793,7 +802,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     static void execDelayedHandler(long delayMillis) {
         // 使用主线程的Handler在指定延迟后执行一个Runnable任务，该任务启动主任务
         mainHandler.postDelayed(() -> mainTask.startTask(false), delayMillis);
-
         try {
             // 更新通知中的下次执行时间文本，显示为当前时间加上延迟时间
             Notify.updateNextExecText(System.currentTimeMillis() + delayMillis);
