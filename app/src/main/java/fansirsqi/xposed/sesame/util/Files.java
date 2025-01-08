@@ -460,22 +460,22 @@ public class Files {
         if (f.exists()) {
             if (!f.canWrite()) {
                 ToastUtil.showToast(f.getAbsoluteFile() + "没有写入权限！");
-                return false;
+                return true;
             }
             if (f.isDirectory()) {
                 // 删除目录并重新创建文件
                 if (!f.delete()) {
                     ToastUtil.showToast(f.getAbsoluteFile() + "无法删除目录！");
-                    return false;
+                    return true;
                 }
             }
         } else {
             if (!Objects.requireNonNull(f.getParentFile()).mkdirs() && !f.getParentFile().exists()) {
                 ToastUtil.showToast(f.getAbsoluteFile() + "无法创建目录！");
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -486,7 +486,7 @@ public class Files {
      * @return 写入是否成功
      */
     public static synchronized boolean write2File(String s, File f) {
-        if (!beforWrite(f)) return false;
+        if (beforWrite(f)) return false;
         try {
             try (FileWriter fw = new FileWriter(f, false)) {
                 fw.write(s);
@@ -500,7 +500,7 @@ public class Files {
     }
 
     public static synchronized boolean write2File(String s, File f,boolean isFormat) {
-        if (!beforWrite(f)) return false;
+        if (beforWrite(f)) return false;
         try {
             try (FileWriter fw = new FileWriter(f, false)) {
                 if (isFormat) s = JsonUtil.formatJson(s);
