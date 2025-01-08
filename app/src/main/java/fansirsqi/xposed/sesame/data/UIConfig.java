@@ -3,10 +3,10 @@ package fansirsqi.xposed.sesame.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import fansirsqi.xposed.sesame.util.Log;
-import lombok.Data;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
+import lombok.Data;
 
 /**
  * UI 配置类，用于管理应用的 UI 配置。
@@ -48,50 +48,43 @@ public class UIConfig {
             if (uiConfigFile.exists()) {
                 Log.runtime("加载UI配置");
                 String json = Files.readFromFile(uiConfigFile);
-                // 使用 Jackson 将读取的 JSON 数据更新到 INSTANCE 中
-                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-
-                // 如果格式化后的内容与原始内容不同，则进行格式化并保存
-                String formatted = JsonUtil.formatJson(INSTANCE);
-                if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "格式化UI配置");
-                    Log.system(TAG, "格式化UI配置");
-                    Files.write2File(formatted, uiConfigFile);
+                if (!json.trim().isEmpty()) {
+                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                    String formatted = JsonUtil.formatJson(INSTANCE);
+                    if (formatted != null && !formatted.equals(json)) {
+                        Log.runtime(TAG, "格式化UI配置");
+                        Files.write2File(formatted, uiConfigFile);
+                    }
+                } else {
+                    Log.runtime(TAG, "配置文件为空，使用默认配置");
+                    INSTANCE.setNewUI(true); // 重置属性为默认值
                 }
             } else {
-                unload();  // 如果文件不存在，卸载当前配置
-                Log.runtime(TAG, "初始UI配置");
-                Log.system(TAG, "初始UI配置");
-                // 保存默认配置到文件
+                Log.runtime(TAG, "配置文件不存在，初始化默认配置");
+                unload();
+                INSTANCE.setNewUI(true);
                 Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.runtime(TAG, "重置UI配置");
-            Log.system(TAG, "重置UI配置");
             try {
-                unload();  // 出现异常时卸载当前配置
-                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);  // 保存默认配置
+                unload();
+                INSTANCE.setNewUI(true);
+                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
             } catch (Exception e) {
                 Log.printStackTrace(TAG, e);
             }
         }
-        INSTANCE.setInit(true);  // 标记初始化完成
+        INSTANCE.setInit(true);
         return INSTANCE;
     }
 
-    /**
-     * 卸载当前 UI 配置，重置为默认配置
-     */
     public static synchronized void unload() {
         try {
-            // 使用 Jackson 将 INSTANCE 更新为新的默认 UIConfig 实例
             JsonUtil.copyMapper().updateValue(INSTANCE, new UIConfig());
         } catch (JsonMappingException e) {
             Log.printStackTrace(TAG, e);
         }
     }
-
-
-
 }
