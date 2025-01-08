@@ -2,15 +2,18 @@ package fansirsqi.xposed.sesame.util;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
-import lombok.Data;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.task.antForest.AntForest;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.task.antForest.AntForest;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import lombok.Data;
 
 @Data
 public class StatusUtil {
@@ -100,8 +103,9 @@ public class StatusUtil {
     public static boolean canStudentTask() {
         return INSTANCE.studentTask;
     }
+
     public static void setStudentTaskToday() {
-        if(INSTANCE.studentTask){
+        if (INSTANCE.studentTask) {
             INSTANCE.studentTask = false;
             save();
         }
@@ -124,7 +128,7 @@ public class StatusUtil {
     }
 
     public static void exchangeEnergyShield() {
-        
+
         if (!INSTANCE.exchangeEnergyShield) {
             INSTANCE.exchangeEnergyShield = true;
             save();
@@ -136,7 +140,7 @@ public class StatusUtil {
     }
 
     public static void exchangeCollectHistoryAnimal7Days() {
-        
+
         if (!INSTANCE.exchangeCollectHistoryAnimal7Days) {
             INSTANCE.exchangeCollectHistoryAnimal7Days = true;
             save();
@@ -148,7 +152,7 @@ public class StatusUtil {
     }
 
     public static void exchangeCollectToFriendTimes7Days() {
-        
+
         if (!INSTANCE.exchangeCollectToFriendTimes7Days) {
             INSTANCE.exchangeCollectToFriendTimes7Days = true;
             save();
@@ -160,7 +164,7 @@ public class StatusUtil {
     }
 
     public static void animalSleep() {
-        
+
         if (!INSTANCE.animalSleep) {
             INSTANCE.animalSleep = true;
             save();
@@ -208,7 +212,7 @@ public class StatusUtil {
     }
 
     public static void cooperateWaterToday(String uid, String coopId) {
-        
+
         String v = uid + "_" + coopId;
         if (!INSTANCE.cooperateWaterList.contains(v)) {
             INSTANCE.cooperateWaterList.add(v);
@@ -221,7 +225,7 @@ public class StatusUtil {
     }
 
     public static void ancientTreeToday(String cityCode) {
-        
+
         if (!INSTANCE.ancientTreeCityCodeList.contains(cityCode)) {
             INSTANCE.ancientTreeCityCodeList.add(cityCode);
             save();
@@ -233,7 +237,7 @@ public class StatusUtil {
     }
 
     public static void answerQuestionToday() {
-        
+
         if (!INSTANCE.answerQuestion) {
             INSTANCE.answerQuestion = true;
             save();
@@ -299,7 +303,7 @@ public class StatusUtil {
     }
 
     public static void memberSignInToday(String uid) {
-        
+
         if (!INSTANCE.memberSignInList.contains(uid)) {
             INSTANCE.memberSignInList.add(uid);
             save();
@@ -320,7 +324,7 @@ public class StatusUtil {
     }
 
     public static void donationEgg(String uid) {
-        
+
         if (!INSTANCE.donationEggList.contains(uid)) {
             INSTANCE.donationEggList.add(uid);
             save();
@@ -332,7 +336,7 @@ public class StatusUtil {
     }
 
     public static void spreadManureToday(String uid) {
-        
+
         if (!INSTANCE.spreadManureList.contains(uid)) {
             INSTANCE.spreadManureList.add(uid);
             save();
@@ -346,7 +350,7 @@ public class StatusUtil {
 
     public static void stallP2PHelpeToday(String uid) {
         uid = UserMap.getCurrentUid() + "-" + uid;
-        
+
         if (!INSTANCE.stallP2PHelpedList.contains(uid)) {
             INSTANCE.stallP2PHelpedList.add(uid);
             save();
@@ -366,7 +370,7 @@ public class StatusUtil {
      * 设置新村助力已到上限
      */
     public static void antStallAssistFriendToday() {
-        
+
         String uid = UserMap.getCurrentUid();
         if (!INSTANCE.antStallAssistFriend.contains(uid)) {
             INSTANCE.antStallAssistFriend.add(uid);
@@ -380,7 +384,7 @@ public class StatusUtil {
     }
 
     public static void antOrchardAssistFriendToday() {
-        
+
         String uid = UserMap.getCurrentUid();
         if (!INSTANCE.antOrchardAssistFriend.contains(uid)) {
             INSTANCE.antOrchardAssistFriend.add(uid);
@@ -393,7 +397,7 @@ public class StatusUtil {
     }
 
     public static void protectBubbleToday(String uid) {
-        
+
         if (!INSTANCE.protectBubbleList.contains(uid)) {
             INSTANCE.protectBubbleList.add(uid);
             save();
@@ -401,7 +405,7 @@ public class StatusUtil {
     }
 
     public static boolean canExchangeDoubleCardToday() {
-        
+
         if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
             return true;
         }
@@ -413,7 +417,7 @@ public class StatusUtil {
     }
 
     public static void exchangeDoubleCardToday(boolean isSuccess) {
-        
+
         if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
             INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
         }
@@ -431,7 +435,7 @@ public class StatusUtil {
     }
 
     public static boolean canExchangeDoubleCardTodayLongTime() {
-        
+
         if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
             return true;
         }
@@ -443,7 +447,7 @@ public class StatusUtil {
     }
 
     public static void exchangeDoubleCardTodayLongTime(boolean isSuccess) {
-        
+
         if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
             INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
         }
@@ -513,7 +517,7 @@ public class StatusUtil {
     }
 
     public static void donateCharityCoin() {
-        
+
         if (!INSTANCE.donateCharityCoin) {
             INSTANCE.donateCharityCoin = true;
             save();
@@ -525,7 +529,7 @@ public class StatusUtil {
     }
 
     public static void SyncStepToday(String uid) {
-        
+
         if (!INSTANCE.syncStepList.contains(uid)) {
             INSTANCE.syncStepList.add(uid);
             save();
@@ -537,7 +541,7 @@ public class StatusUtil {
     }
 
     public static void exchangeToday(String uid) {
-        
+
         if (!INSTANCE.exchangeList.contains(uid)) {
             INSTANCE.exchangeList.add(uid);
             save();
@@ -593,45 +597,79 @@ public class StatusUtil {
         save();
     }
 
+    /**
+     * 加载状态文件
+     *
+     * @return 状态对象
+     */
     public static synchronized StatusUtil load() {
         String currentUid = UserMap.getCurrentUid();
+        if (StringUtil.isEmpty(currentUid)) {
+            Log.runtime(TAG, "用户为空，状态加载失败");
+            throw new RuntimeException("用户为空，状态加载失败");
+        }
+
         try {
-            if (StringUtil.isEmpty(currentUid)) {
-                Log.runtime(TAG, "用户为空，状态加载失败");
-                throw new RuntimeException("用户为空，状态加载失败");
-            }
             java.io.File statusFile = Files.getStatusFile(currentUid);
             if (statusFile.exists()) {
+                Log.runtime(TAG, "加载 status.json");
                 String json = Files.readFromFile(statusFile);
-                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.formatJson(INSTANCE);
-                if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "重新格式化 status.json");
-                    Log.system(TAG, "重新格式化 status.json");
-                    Files.write2File(formatted, Files.getStatusFile(currentUid));
+                if (!json.trim().isEmpty()) {
+                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                    String formatted = JsonUtil.formatJson(INSTANCE);
+                    if (formatted != null && !formatted.equals(json)) {
+                        Log.runtime(TAG, "重新格式化 status.json");
+                        Files.write2File(formatted, statusFile);
+                    }
+                } else {
+                    Log.runtime(TAG, "配置文件为空，初始化默认配置");
+                    initializeDefaultConfig(statusFile);
                 }
             } else {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
-                Log.runtime(TAG, "初始化 status.json");
-                Log.system(TAG, "初始化 status.json");
-                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(currentUid));
+                Log.runtime(TAG, "配置文件不存在，初始化默认配置");
+                initializeDefaultConfig(statusFile);
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.runtime(TAG, "状态文件格式有误，已重置");
-            Log.system(TAG, "状态文件格式有误，已重置");
-            try {
-                JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
-                Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(currentUid));
-            } catch (JsonMappingException e) {
-                Log.printStackTrace(TAG, e);
-            }
+            resetAndSaveConfig();
         }
+
         if (INSTANCE.saveTime == null) {
             INSTANCE.saveTime = System.currentTimeMillis();
         }
         return INSTANCE;
     }
+
+    /**
+     * 初始化默认配置
+     *
+     * @param statusFile 状态文件
+     */
+    private static void initializeDefaultConfig(java.io.File statusFile) {
+        try {
+            JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
+            Log.runtime(TAG, "初始化 status.json");
+            Files.write2File(JsonUtil.formatJson(INSTANCE), statusFile);
+        } catch (JsonMappingException e) {
+            Log.printStackTrace(TAG, e);
+            throw new RuntimeException("初始化配置失败", e);
+        }
+    }
+
+    /**
+     * 重置配置并保存
+     */
+    private static void resetAndSaveConfig() {
+        try {
+            JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
+            Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(UserMap.getCurrentUid()));
+        } catch (JsonMappingException e) {
+            Log.printStackTrace(TAG, e);
+            throw new RuntimeException("重置配置失败", e);
+        }
+    }
+
 
     public static synchronized void unload() {
         try {
@@ -652,9 +690,9 @@ public class StatusUtil {
             throw new RuntimeException("用户为空，状态保存失败");
         }
         if (updateDay(nowDateTime)) {
-            Log.system(TAG, "重置 statistics.json");
+            Log.runtime(TAG, "重置 statistics.json");
         } else {
-            Log.system(TAG, "保存 status.json");
+            Log.runtime(TAG, "保存 status.json");
         }
         long lastSaveTime = INSTANCE.saveTime;
         try {
