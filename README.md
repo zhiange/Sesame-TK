@@ -1,9 +1,3 @@
-
-<center>
-
-# Sesame-TK
-
-
 ![Sesame-TK](https://socialify.git.ci/Fansirsqi/Sesame-TK/image?description=1&font=Source%20Code%20Pro&forks=1&issues=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FFansirsqi%2FSesame-TK%2Frefs%2Fheads%2Fmain%2Fapp%2Fsrc%2Fmain%2Fassets%2Fweb%2FSesame-TK-logo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Auto)
 
 
@@ -11,26 +5,27 @@
 [![Latest Release](https://img.shields.io/github/release/Fansirsqi/Sesame-TK?labelColor=fff&label=Releases&logo=gitlfs)](../../releases)
 [![All Releases Download](https://img.shields.io/github/downloads/Fansirsqi/Sesame-TK/total?labelColor=fff&label=Downloads&logo=codefresh)](../../releases)
 [![Telegram](https://img.shields.io/badge/Sesame--TK-nul?&logo=Telegram&label=Telegram-Channel&labelColor=fff&link=https%3A%2F%2Ft.me%2Ffansirsqi_xposed_sesame)](https://t.me/fansirsqi_xposed_sesame)
+[![墙内-云湖](https://img.shields.io/badge/%E4%BA%91%E6%B9%96-%E4%BA%A4%E6%B5%81%E7%BE%A4-nul?logo=icloud&logoColor=%236F4FD0&label=%E4%BA%91%E6%B9%96&labelColor=fff&color=%236F4FD0&link=https%3A%2F%2Fyhfx.jwznb.com%2Fshare%3Fkey%3DpEGmZ1gsdoBI%26ts%3D1734597564%20)](https://yhfx.jwznb.com/share?key=pEGmZ1gsdoBI&ts=1734597564)
 
+> 懒真人版本: [Sesame](https://github.com/LazyImmortal/Sesame) 
 
+## 💻本人不是专业的开发者，仅仅是一名热爱开源的爱好者
 
-## 本人不是专业的开发者，仅仅是一名热爱开源的爱好者，欢迎大家提出宝贵意见，共同完善此项目。
+### 📢欢迎大家提出宝贵意见，共同完善此项目
 
-</center>
+ > 墙内更新[戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
 
-代码的大部分内容是通过 `GPT-4o` 模型的辅助来完成的。
+🤖 代码的大部分内容是通过 `GPT-4o` 模型的辅助来完成的。
 
-`bug`请[提交issues](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
-功能建议请提交PR
+🐛 `BUG`和功能建议和请提交 [ISSUE](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
 
-有相关问题，我也可能不会修复,大家轻喷，因为我不是专业的开发者，我可能真的不会修复。
+🙁 相关问题，我也可能不会修复,大家轻喷，因为我不是专业的开发者，我可能真的不会修复。
 
-访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
+❓ 访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
 
-对了，我自己用的支付宝版本是`10.5.88.8000`
+☀️ 对了，我自己用的支付宝版本是`10.5.88.8000（忘了）`~`10.6.66.8000（1916）`
 
-
-如果你想自己编译，请fork本项目
+💊 如果你想自己编译，请fork本项目
 
 然后在仓库设置相关签名文件信息，使用GitHub Actions编译，下载编译好的APK文件，安装到手机上即可
 签名的生成以及转码请自行🔍解决 很简单滴~，你绝B可以
@@ -67,9 +62,6 @@
 
 ## [原仓库](https://github.com/TKaxv-7S/Sesame-TK) 已存档
 
-~~新版本可前往由 [@lazy-immortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/LazyImmortal/Sesame) 更新~~
-
-新版本可前往由 [@LazyImmortal](https://github.com/lazy-immortal) 维护的 [Sesame](https://github.com/LazyImmortal) 更新
 
 <h1>🚨 为了大家的资金安全与个人信息安全，墙裂建议</h1>
 <p>
