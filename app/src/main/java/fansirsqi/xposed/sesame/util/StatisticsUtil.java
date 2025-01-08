@@ -2,9 +2,10 @@ package fansirsqi.xposed.sesame.util;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import lombok.Data;
-
+import java.io.File;
 import java.time.LocalDate;
+
+import lombok.Data;
 
 
 @Data
@@ -115,7 +116,7 @@ public class StatisticsUtil {
      * @return 统计实例
      */
     public static synchronized StatisticsUtil load() {
-        java.io.File statisticsFile = Files.getStatisticsFile();
+        File statisticsFile = Files.getStatisticsFile();
         try {
 
             if (INSTANCE == null) {
