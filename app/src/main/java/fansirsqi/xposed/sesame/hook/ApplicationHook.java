@@ -1,7 +1,5 @@
 package fansirsqi.xposed.sesame.hook;
 
-import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -171,7 +169,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         execDelayedHandler(ChronoUnit.MILLIS.between(lastExecDateTime, execAtDateTime));
                         return;
                     }
-                    Log.runtime("未设置定时执行：" + execAtTime);
                 }
                 Log.runtime("上次执行时间：" + lastExecDateTime.toString());
                 Log.runtime("下次执行时间：" + nextExecDateTime.toString());
@@ -195,6 +192,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             if (hooked) return;
             classLoader = lpparam.classLoader;
             XposedHelpers.findAndHookMethod(
+                    //在支付宝应用启动时，拦截Application类的attach方法
+                    // 并在方法执行完毕后获取支付宝应用的版本信息，同时将获取到的Context对象存储起来以便后续使用
                     Application.class,
                     "attach",
                     Context.class,
@@ -276,42 +275,45 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 context = appService.getApplicationContext();
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
-                                ExecutorService executorService = Executors.newSingleThreadExecutor();
-                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
-                                    if (isApkInDebug()) {
-                                        //
-                                    }
-                                    try {
-                                        Log.record("应用版本：" + alipayVersion.getVersionString());
-                                        Log.record("模块版本：" + modelVersion);
-                                        Log.record(TAG, "开始执行");
-                                        long currentTime = System.currentTimeMillis();
-                                        if (lastExecTime + 2000 > currentTime) {
-                                            Log.record("执行间隔较短，跳过执行");
-                                            execDelayedHandler(BaseModel.getCheckInterval().getValue());
-                                            return;
-                                        }
-                                        updateDay();
-                                        String targetUid = getUserId();
-                                        String currentUid = UserMap.getCurrentUid();
-                                        if (targetUid == null || !targetUid.equals(currentUid)) {
-                                            Log.record("用户切换或为空，重新登录");
-                                            reLogin();
-                                            return;
-                                        }
-                                        lastExecTime = currentTime; // 更新最后执行时间
-                                        if (!executeCheckTask()) {
-                                            reLogin();
-                                            return;
-                                        }
-                                        TaskCommon.update();
-                                        ModelTask.startAllTask(false);
-                                        scheduleNextExecution(currentTime);
-                                    } catch (Exception e) {
-                                        Log.record(TAG, "执行异常:");
-                                        Log.printStackTrace(TAG, e);
-                                    }
-                                }));
+//                                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                                mainTask = BaseTask.newInstance("MAIN_TASK",
+                                        () -> {
+                                            if (!init) {
+                                                Log.record("跳过执行-未初始化");
+                                                return;
+                                            }
+
+                                            try {
+                                                Log.record("应用版本：" + alipayVersion.getVersionString());
+                                                Log.record("模块版本：" + modelVersion);
+                                                Log.record("开始执行");
+                                                long currentTime = System.currentTimeMillis();
+                                                if (lastExecTime + 2000 > currentTime) {
+                                                    Log.record("执行间隔较短，跳过执行");
+                                                    execDelayedHandler(BaseModel.getCheckInterval().getValue());
+                                                    return;
+                                                }
+                                                updateDay();
+                                                String targetUid = getUserId();
+                                                String currentUid = UserMap.getCurrentUid();
+                                                if (targetUid == null || !targetUid.equals(currentUid)) {
+                                                    Log.record("用户切换或为空，重新登录");
+                                                    reLogin();
+                                                    return;
+                                                }
+                                                lastExecTime = currentTime; // 更新最后执行时间
+                                                if (!executeCheckTask()) {
+                                                    reLogin();
+                                                    return;
+                                                }
+                                                TaskCommon.update();
+                                                ModelTask.startAllTask(false);
+                                                scheduleNextExecution(currentTime);
+                                            } catch (Exception e) {
+                                                Log.record(TAG, "执行异常:");
+                                                Log.printStackTrace(TAG, e);
+                                            }
+                                        });
                                 registerBroadcastReceiver(appService);
                                 StatisticsUtil.load();
                                 FriendWatch.load();
@@ -800,13 +802,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
      * @param delayMillis 延迟执行的毫秒数
      */
     static void execDelayedHandler(long delayMillis) {
-        // 使用主线程的Handler在指定延迟后执行一个Runnable任务，该任务启动主任务
         mainHandler.postDelayed(() -> mainTask.startTask(false), delayMillis);
         try {
-            // 更新通知中的下次执行时间文本，显示为当前时间加上延迟时间
             Notify.updateNextExecText(System.currentTimeMillis() + delayMillis);
         } catch (Exception e) {
-            // 如果更新通知文本时发生异常，捕获异常并打印堆栈跟踪
             Log.printStackTrace(e);
         }
     }
@@ -851,7 +850,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
 
 
-    @SuppressLint({"ScheduleExactAlarm", "ObsoleteSdkInt", "MissingPermission"})
+    @SuppressLint({"ScheduleExactAlarm"})
     private static Boolean setAlarmTask(long triggerAtMillis, PendingIntent operation) {
         try {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -914,7 +913,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     public static Object getMicroApplicationContext() {
         if (microApplicationContextObject == null) {
             try {
-                // 查找目标类
                 Class<?> alipayApplicationClass = XposedHelpers.findClass(
                         "com.alipay.mobile.framework.AlipayApplication", classLoader
                 );
@@ -924,13 +922,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (alipayApplicationInstance == null) {
                     return null;
                 }
-                // 调用实例方法 getMicroApplicationContext
                 microApplicationContextObject = XposedHelpers.callMethod(
                         alipayApplicationInstance, "getMicroApplicationContext"
                 );
 
             } catch (Throwable t) {
-                // 捕获异常并打印日志
                 Log.printStackTrace(t);
             }
         }
