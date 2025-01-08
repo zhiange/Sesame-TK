@@ -42,6 +42,7 @@ public class Log {
     }
 
     public static void runtime(String message) {
+        system(message);
         RUNTIME_LOGGER.info(TAG + "{}", message);
     }
 
