@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.model;
 
+import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,6 +149,9 @@ public class BaseModel extends Model {
     @Getter
     private static final BooleanModelField enableOnGoing = new BooleanModelField("enableOnGoing", "开启状态栏禁删", false);
 
+    @Getter
+    private static final BooleanModelField enableThreadPoolStartup = new BooleanModelField("enableThreadPoolStartup", "启用线程池启动", true);
+
     @Override
     public String getName() {
         return "基础⚙️";
@@ -165,6 +170,7 @@ public class BaseModel extends Model {
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
+        modelFields.addField(enableThreadPoolStartup);//启用线程池启动
         modelFields.addField(stayAwake);//是否保持唤醒状态
         modelFields.addField(checkInterval);//执行间隔时间
         modelFields.addField(execAtTimeList);//定时执行的时间点列表
@@ -175,7 +181,9 @@ public class BaseModel extends Model {
         modelFields.addField(waitWhenException);//异常发生时的等待时间
         modelFields.addField(errNotify);//异常通知开关
         modelFields.addField(newRpc);//是否启用新接口
-        modelFields.addField(debugMode);//是否开启抓包调试模式
+        if (isApkInDebug()) {
+            modelFields.addField(debugMode);//是否开启抓包调试模式
+        }
         modelFields.addField(batteryPerm);//是否申请支付宝的后台运行权限
         modelFields.addField(recordLog);//是否记录日志
         modelFields.addField(showToast);//是否显示气泡提示
@@ -192,6 +200,7 @@ public class BaseModel extends Model {
         new Thread(
                 () -> {
                     try {
+                        Log.runtime("初始化海洋，保护地数据中...");
                         ThreadUtil.sleep(RandomUtil.nextInt(4500, 6000));
                         initReserve();
                         initBeach();
@@ -207,6 +216,7 @@ public class BaseModel extends Model {
      */
     public static void destroyData() {
         try {
+            Log.runtime("清理海洋，保护地数据中...");
             IdMapManager.getInstance(ReserveaMap.class).clear();
             IdMapManager.getInstance(BeachMap.class).clear();
         } catch (Exception e) {
@@ -254,6 +264,7 @@ public class BaseModel extends Model {
                             IdMapManager.getInstance(ReserveaMap.class).add(itemId, itemName + "(" + energy + "g)");
                         }
                     }
+                    Log.runtime("初始化保护地任务成功。");
                 }
 
                 // 将筛选结果保存到 ReserveIdMapUtil
@@ -311,6 +322,7 @@ public class BaseModel extends Model {
                         int energy = item.getInt("energy");
                         IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
                     }
+                    Log.runtime("初始化沙滩数据成功。");
                 }
                 // 将所有筛选结果保存到 BeachMap
                 IdMapManager.getInstance(BeachMap.class).save();
