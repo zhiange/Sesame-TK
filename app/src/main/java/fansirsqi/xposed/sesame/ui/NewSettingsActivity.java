@@ -86,12 +86,11 @@ public class NewSettingsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         userId = null;
         userName = null;
-        //debug = true;
         Intent intent = getIntent();
         if (intent != null) {
             userId = intent.getStringExtra("userId");
             userName = intent.getStringExtra("userName");
-            debug = intent.getBooleanExtra("debug", debug);
+            debug = intent.getBooleanExtra("debug", isApkInDebug());
         }
         Model.initAllModel();
         UserMap.setCurrentUserId(userId);
@@ -145,7 +144,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
 
         });
-        if (debug) {
+        if (isApkInDebug()) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
         webView.addJavascriptInterface(new WebViewCallback(), "HOOK");
