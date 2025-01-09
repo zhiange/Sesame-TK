@@ -54,40 +54,31 @@ jobs:
         run: |
           ./gradlew assembleNormalRelease assembleCompatibleRelease -Pversion=${{ github.ref_name }}
 
-      - name: Sign APKs from multiple directories
-        id: sign_apks
-        uses: r0adkll/sign-android-release@v1
+      - name: Sign Normal APK
+        id: sign_normal_apk
+        uses: ilharp/sign-android-release@v1
         with:
-          releaseDirectory: |
-            app/build/outputs/apk/compatible/release:
-            app/build/outputs/apk/normal/release
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          releaseDir: app/build/outputs/apk/normal/release/
+          signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
+          keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Split Signed Files
-        id: split_files
-        uses: jungwinter/split@v1
+      - name: Sign Compatible APK
+        id: sign_compatible_apk
+        uses: ilharp/sign-android-release@v1
         with:
-          msg: ${{ steps.sign_apks.outputs.signedReleaseFiles }}
-          separator: ':'
+          releaseDir: app/build/outputs/apk/compatible/release/
+          signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
+          keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Upload to WebDAV
-        uses: bxb100/action-upload-webdav@v1
-        with:
-          webdav_address: ${{secrets.WEBDAV_URL}}
-          webdav_username: ${{secrets.WEBDAV_USERNAME}}
-          webdav_password: ${{secrets.WEBDAV_PASSWORD}}
-          webdav_upload_path: "/LanZou/Sesame-TK/"
-          files: |
-            ${{ steps.split_files.outputs._1 }}
-            ${{ steps.split_files.outputs._0 }}
 
       - name: Generate APKS Checksum
         run: |
-          sha256sum ${{ steps.split_files.outputs._1 }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
-          sha256sum ${{ steps.split_files.outputs._0 }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
+          sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
+          sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
 
 
       - name: Upload Assets to Source Release
@@ -95,8 +86,8 @@ jobs:
         with:
           nanme: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
           files: |
-            ${{ steps.split_files.outputs._1 }}
-            ${{ steps.split_files.outputs._0 }}
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
+            ${{ steps.sign_compatible_apk.outputs.signedFile }}
             CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
             CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
           tag_name: ${{ github.ref_name }}
@@ -104,7 +95,7 @@ jobs:
           append_body: true
           generate_release_notes: true
           body: |
-            > 墙内更新地址[戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+            > 墙内更新地址可能不及时..[戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
 
       - name: Sync Release to Target Repository
         uses: softprops/action-gh-release@v2
@@ -112,8 +103,8 @@ jobs:
           repository: Xposed-Modules-Repo/fansirsqi.xposed.sesame # 目标仓库的拥有者和仓库名称
           nanme: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
           files: |
-            ${{ steps.split_files.outputs._1 }}
-            ${{ steps.split_files.outputs._0 }}
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
+            ${{ steps.sign_compatible_apk.outputs.signedFile }}
             CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
             CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
           token: ${{ secrets.TARGET_REPO_PAT }}
