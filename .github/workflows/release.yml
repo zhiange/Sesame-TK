@@ -73,21 +73,16 @@ jobs:
           msg: ${{ steps.sign_apks.outputs.signedReleaseFiles }}
           separator: ':'
 
-      - name: Upload Normal APK to WebDAV
-        uses: uetchy/upload-to-webdav-action@v1
+      - name: Upload to WebDAV
+        uses: bxb100/action-upload-webdav@v1
         with:
-          url: ${{ secrets.WEBDAV_URL }}/LanZou/Sesame-TK/
-          username: ${{ secrets.WEBDAV_USERNAME }}
-          password: ${{ secrets.WEBDAV_PASSWORD }}
-          source: ${{ steps.split_files.outputs._1 }}
-
-      - name: Upload Compatible APK to WebDAV
-        uses: uetchy/upload-to-webdav-action@v1
-        with:
-          url: ${{ secrets.WEBDAV_URL }}/LanZou/Sesame-TK/
-          username: ${{ secrets.WEBDAV_USERNAME }}
-          password: ${{ secrets.WEBDAV_PASSWORD }}
-          source: ${{ steps.split_files.outputs._0 }}
+          webdav_address: ${{secrets.WEBDAV_URL}}
+          webdav_username: ${{secrets.WEBDAV_USERNAME}}
+          webdav_password: ${{secrets.WEBDAV_PASSWORD}}
+          webdav_upload_path: "/LanZou/Sesame-TK/"
+          files: |
+            ${{ steps.split_files.outputs._1 }}
+            ${{ steps.split_files.outputs._0 }}
 
       - name: Generate APKS Checksum
         run: |
