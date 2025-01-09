@@ -2136,7 +2136,6 @@ public class AntFarm extends ModelTask {
                 }
             } else {
                 Log.record(jo.getString("memo"));
-                Log.runtime(s);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "hireAnimal err:");
