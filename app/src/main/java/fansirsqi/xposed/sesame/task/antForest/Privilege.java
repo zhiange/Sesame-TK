@@ -60,9 +60,8 @@ public class Privilege {
             if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
                 String taskStatus = taskBaseInfo.getString("taskStatus");
                 if ("RECEIVED".equals(taskStatus)) {
-                    Log.other("青春特权🌸[" + taskName + "]已领取");
+                    Log.forest("青春特权🌸[" + taskName + "]已领取");
                 } else if ("FINISHED".equals(taskStatus)) {
-//                    Log.forest("青春特权🌸[" + taskName + "]尝试领取...");
                     String receiveResult = AntForestRpcCall.receiveTaskAwardV2(receiveParam);
                     JSONObject resultOfReceive = new JSONObject(receiveResult);
                     String resultDesc = resultOfReceive.getString("desc");
