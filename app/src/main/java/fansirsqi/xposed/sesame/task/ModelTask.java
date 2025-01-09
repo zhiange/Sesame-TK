@@ -65,6 +65,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 获取任务ID
+     *
      * @return 任务ID
      */
     public String getId() {
@@ -73,6 +74,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 获取任务类型
+     *
      * @return 任务类型为TASK
      */
     public ModelType getType() {
@@ -81,24 +83,28 @@ public abstract class ModelTask extends Model {
 
     /**
      * 获取任务名称
+     *
      * @return 任务名称
      */
     public abstract String getName();
 
     /**
      * 获取任务的字段
+     *
      * @return 任务字段
      */
     public abstract ModelFields getFields();
 
     /**
      * 检查任务是否可执行
+     *
      * @return Boolean值，表示是否通过检查
      */
     public abstract Boolean check();
 
     /**
      * 是否为同步任务
+     *
      * @return Boolean值，表示是否为同步任务
      */
     public Boolean isSync() {
@@ -112,6 +118,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 检查任务是否包含指定的子任务
+     *
      * @param childId 子任务ID
      * @return 是否包含该子任务
      */
@@ -121,6 +128,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 获取指定ID的子任务
+     *
      * @param childId 子任务ID
      * @return 子任务对象
      */
@@ -162,6 +170,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 移除指定ID的子任务
+     *
      * @param childId 子任务ID
      */
     public void removeChildTask(String childId) {
@@ -185,6 +194,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 获取当前任务的子任务数量
+     *
      * @return 子任务数量
      */
     public Integer countChildTask() {
@@ -193,6 +203,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 启动任务
+     *
      * @return 是否成功启动任务
      */
     public Boolean startTask() {
@@ -201,6 +212,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 启动任务
+     *
      * @param force 是否强制启动
      * @return 是否成功启动任务
      */
@@ -254,13 +266,14 @@ public abstract class ModelTask extends Model {
 
     /**
      * 启动所有任务
+     *
      * @param force 是否强制启动
      */
     public static void startAllTask(Boolean force) {
         for (Model model : getModelArray()) {
             if (model != null && ModelType.TASK == model.getType()) {
                 if (((ModelTask) model).startTask(force)) {
-                        ThreadUtil.sleep(750);
+                    ThreadUtil.sleep(750);
                 }
             }
         }
@@ -285,6 +298,7 @@ public abstract class ModelTask extends Model {
 
     /**
      * 创建一个新的子任务执行器
+     *
      * @return 子任务执行器
      */
     private ChildTaskExecutor newTimedTaskExecutor() {
@@ -366,6 +380,7 @@ public abstract class ModelTask extends Model {
 
         /**
          * 设置子任务的运行逻辑
+         *
          * @return 子任务的运行逻辑
          */
         public Runnable setRunnable() {
@@ -381,6 +396,7 @@ public abstract class ModelTask extends Model {
 
         /**
          * 设置取消任务的逻辑
+         *
          * @param cancelTask 取消任务的逻辑
          */
         protected void setCancelTask(CancelTask cancelTask) {
