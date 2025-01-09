@@ -10,7 +10,7 @@ import fansirsqi.xposed.sesame.model.BaseModel;
  * 日志工具类，负责初始化和管理各种类型的日志记录器，并提供日志输出方法。
  */
 public class Log {
-    private static final String TAG = "[" + BuildConfig.VERSION_CODE +BuildConfig.BUILD_NUMBER + "]";
+    private static final String TAG = "[" + BuildConfig.VERSION_CODE + BuildConfig.BUILD_NUMBER + "]";
 
     private static final Logger RUNTIME_LOGGER;
     private static final Logger SYSTEM_LOGGER;
@@ -34,11 +34,20 @@ public class Log {
         ERROR_LOGGER = LoggerFactory.getLogger("error");
         CAPTURE_LOGGER = LoggerFactory.getLogger("capture");
     }
+
     private static String truncateLogMessage(String message) {
         if (message.length() > 16) {
             return message.substring(0, 16) + "...";
         }
         return message;
+    }
+
+    public static void system(String message) {
+        SYSTEM_LOGGER.info(TAG + "{}", message);
+    }
+
+    public static void system(String TAG, String message) {
+        system("[" + TAG + "]: " + message);
     }
 
     public static void runtime(String message) {
@@ -61,22 +70,6 @@ public class Log {
         record("[" + TAG + "]: " + message);
     }
 
-    public static void system(String message) {
-        SYSTEM_LOGGER.info(TAG + "{}", message);
-    }
-
-    public static void system(String TAG, String message) {
-        system("[" + TAG + "]: " + message);
-    }
-
-    public static void debug(String message) {
-        DEBUG_LOGGER.info("{}", message);
-    }
-
-    public static void debug(String TAG, String message) {
-        debug("[" + TAG + "]: " + message);
-    }
-
     public static void forest(String message) {
         record(message);
         FOREST_LOGGER.info("{}", message);
@@ -91,7 +84,6 @@ public class Log {
         FARM_LOGGER.info("{}", message);
     }
 
-
     public static void farm(String TAG, String message) {
         farm("[" + TAG + "]: " + message);
     }
@@ -104,6 +96,17 @@ public class Log {
     public static void other(String TAG, String message) {
         other("[" + TAG + "]: " + message);
     }
+
+
+    public static void debug(String message) {
+        runtime(message);
+        DEBUG_LOGGER.info("{}", message);
+    }
+
+    public static void debug(String TAG, String message) {
+        debug("[" + TAG + "]: " + message);
+    }
+
 
     public static void error(String message) {
         runtime(message);
