@@ -100,7 +100,7 @@ public class Notify {
       long forestPauseTime = RuntimeInfo.getInstance().getLong(RuntimeInfo.RuntimeInfoKey.ForestPauseTime);
 
       if (forestPauseTime > System.currentTimeMillis()) {
-        status = "\uD83D\uDE08 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
+        status = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
       }
 
       titleText = status;
