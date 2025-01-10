@@ -118,19 +118,15 @@ public class StatisticsUtil {
     public static synchronized StatisticsUtil load() {
         File statisticsFile = Files.getStatisticsFile();
         try {
-
             if (INSTANCE == null) {
                 return new StatisticsUtil();
             }
-
             if (statisticsFile.exists() && statisticsFile.length() > 0) {
                 String json = Files.readFromFile(statisticsFile);
                 if (!json.trim().isEmpty()) {
                     try {
                         JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-
                         validateAndInitialize();
-
                         String formatted = JsonUtil.formatJson(INSTANCE);
                         if (formatted != null && !formatted.equals(json)) {
                             Log.runtime(TAG, "重新格式化 statistics.json");
@@ -165,7 +161,6 @@ public class StatisticsUtil {
         if (INSTANCE.year == null) INSTANCE.year = new TimeStatistics(now.getYear());
         if (INSTANCE.month == null) INSTANCE.month = new TimeStatistics(now.getMonthValue());
         if (INSTANCE.day == null) INSTANCE.day = new TimeStatistics(now.getDayOfMonth());
-
         updateDay(now);
     }
 
