@@ -20,7 +20,7 @@ public class EnergyRain {
     public static void startEnergyRain() {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.startEnergyRain());
-            ThreadUtil.sleep(800);
+            ThreadUtil.sleep(300);
             if (ResUtil.checkResCode(jo)) {
                 String token = jo.getString("token");
                 JSONArray bubbleEnergyList = jo.getJSONObject("difficultyInfo").getJSONArray("bubbleEnergyList");
@@ -34,7 +34,7 @@ public class EnergyRain {
                     Toast.show("收获了[" + sum + "g]能量[能量雨]");
                     Log.forest("收获能量雨🌧️[" + sum + "g]");
                 }
-                ThreadUtil.sleep(800);
+                ThreadUtil.sleep(300);
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "执行能量雨出错:");
@@ -46,7 +46,7 @@ public class EnergyRain {
 
         try {
             JSONObject joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
-            Thread.sleep(800);
+            Thread.sleep(300);
             if (ResUtil.checkResCode(joEnergyRainHome)) {
                 if (joEnergyRainHome.getBoolean("canPlayToday")) {
                     startEnergyRain();
@@ -54,7 +54,7 @@ public class EnergyRain {
                 if (joEnergyRainHome.getBoolean("canGrantStatus")) {
                     Log.record("有送能量雨的机会");
                     JSONObject joEnergyRainCanGrantList = new JSONObject(AntForestRpcCall.queryEnergyRainCanGrantList());
-                    Thread.sleep(800);
+                    Thread.sleep(300);
                     JSONArray grantInfos = joEnergyRainCanGrantList.getJSONArray("grantInfos");
                     Set<String> set = giveEnergyRainList.getValue();
                     String uid;
@@ -65,7 +65,7 @@ public class EnergyRain {
                             uid = grantInfo.getString("userId");
                             if (set.contains(uid)) {
                                 JSONObject rainJsonObj = new JSONObject(AntForestRpcCall.grantEnergyRainChance(uid));
-                                ThreadUtil.sleep(800);
+                                ThreadUtil.sleep(300);
                                 Log.record("尝试送能量雨给【" + UserMap.getMaskName(uid) + "】");
                                 granted = true;
                                 if (ResUtil.checkResCode(rainJsonObj)) {
@@ -84,7 +84,7 @@ public class EnergyRain {
                     }
                 }
             }
-            Thread.sleep(800);
+            Thread.sleep(300);
             joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
             if (ResUtil.checkResCode(joEnergyRainHome) && joEnergyRainHome.getBoolean("canPlayToday")) {
                 startEnergyRain();

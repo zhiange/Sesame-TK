@@ -97,7 +97,7 @@ public class EcoLife {
      * @return 是否成功开通绿色任务
      */
     public static boolean openEcoLife() throws JSONException {
-        ThreadUtil.sleep(800);
+        ThreadUtil.sleep(300);
         JSONObject jsonObject = new JSONObject(AntForestRpcCall.ecolifeOpenEcolife());
         if (!jsonObject.optBoolean("success")) {
             Log.runtime(TAG + ".ecoLife.openEcolife", jsonObject.optString("resultDesc"));
@@ -108,7 +108,7 @@ public class EcoLife {
             return false;
         }
         Log.forest("绿色任务🍀报告大人，开通成功(～￣▽￣)～可以愉快的玩耍了");
-        ThreadUtil.sleep(800);
+        ThreadUtil.sleep(300);
         return true;
     }
 
@@ -138,7 +138,7 @@ public class EcoLife {
                     String actionId = actionItem.getString("actionId");
                     String actionName = actionItem.getString("actionName");
                     if ("photoguangpan".equals(actionId)) continue;
-                    ThreadUtil.sleep(800);
+                    ThreadUtil.sleep(300);
                     JSONObject jo = new JSONObject(AntForestRpcCall.ecolifeTick(actionId, dayPoint, source));
                     if (ResUtil.checkResCode(jo)) {
                         Log.forest("绿色打卡🍀[" + actionName + "]"); // 成功打卡日志
@@ -147,7 +147,7 @@ public class EcoLife {
                         Log.error(TAG + jo.getString("resultDesc"));
                         Log.error(TAG + jo);
                     }
-                    ThreadUtil.sleep(800);
+                    ThreadUtil.sleep(300);
                 }
             }
         } catch (Throwable th) {
@@ -216,14 +216,14 @@ public class EcoLife {
                 Log.forest("光盘行动🍽️请先完成一次光盘打卡");
                 return;
             }
-            ThreadUtil.sleep(800);
+            ThreadUtil.sleep(300);
             str = AntForestRpcCall.ecolifeUploadDishImage("BEFORE_MEALS", photoGuangPanBeforeStr, 0.16571736, 0.07448776, 0.7597949, dayPoint);
             jo = new JSONObject(str);
             if (!jo.optBoolean("success")) {
                 Log.runtime(TAG + "上传餐前图片", jo.optString("resultDesc"));
                 return;
             }
-            ThreadUtil.sleep(800);
+            ThreadUtil.sleep(300);
             str = AntForestRpcCall.ecolifeUploadDishImage("AFTER_MEALS", photoGuangPanAfterStr, 0.00040030346, 0.99891376, 0.0006858421, dayPoint);
             jo = new JSONObject(str);
             if (!jo.optBoolean("success")) {
