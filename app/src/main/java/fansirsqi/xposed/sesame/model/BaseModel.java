@@ -76,6 +76,10 @@ public class BaseModel extends Model {
     private static final ListModelField.ListJoinCommaToStringModelField energyTime =
             new ListModelField.ListJoinCommaToStringModelField("energyTime", "只收能量时间(范围)", ListUtil.newArrayList("0700-0730"));
 
+    @Getter
+    private static final ListModelField.ListJoinCommaToStringModelField modelSleepTime =
+            new ListModelField.ListJoinCommaToStringModelField("modelSleepTime", "模块休眠时间(范围)", ListUtil.newArrayList("0100-0540"));
+
     /**
      * 定时任务模式选择
      */
@@ -173,6 +177,7 @@ public class BaseModel extends Model {
         modelFields.addField(enableThreadPoolStartup);//启用线程池启动
         modelFields.addField(stayAwake);//是否保持唤醒状态
         modelFields.addField(checkInterval);//执行间隔时间
+        modelFields.addField(modelSleepTime);//模块休眠时间范围
         modelFields.addField(execAtTimeList);//定时执行的时间点列表
         modelFields.addField(wakenAtTimeList);//定时唤醒的时间点列表
         modelFields.addField(energyTime);//能量收集的时间范围
