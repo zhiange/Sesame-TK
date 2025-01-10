@@ -32,7 +32,7 @@ public abstract class Model {
     private static final Map<Class<? extends Model>, Model> modelMap = new ConcurrentHashMap<>();
 
     // 存储所有Model类的列表，按ModelOrder顺序
-    private static final List<Class<Model>> modelClazzList = ModelOrder.getClazzList();
+    private static final List<Class<Model>> modelClazzList = ModelOrder.getReadOnlyClazzList();
 
     // 存储所有Model实例的数组
     @Getter

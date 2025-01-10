@@ -1,9 +1,11 @@
 package fansirsqi.xposed.sesame.model;
 
+import java.util.List;
+
 import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.task.ancientTree.AncientTree;
-import fansirsqi.xposed.sesame.task.antBookRead.AntBookRead;
 import fansirsqi.xposed.sesame.task.antCooperate.AntCooperate;
+import fansirsqi.xposed.sesame.task.antDodo.AntDodo;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm;
 import fansirsqi.xposed.sesame.task.antForest.AntForest;
 import fansirsqi.xposed.sesame.task.antMember.AntMember;
@@ -11,15 +13,9 @@ import fansirsqi.xposed.sesame.task.antOcean.AntOcean;
 import fansirsqi.xposed.sesame.task.antOrchard.AntOrchard;
 import fansirsqi.xposed.sesame.task.antSports.AntSports;
 import fansirsqi.xposed.sesame.task.antStall.AntStall;
-import fansirsqi.xposed.sesame.task.consumeGold.ConsumeGold;
 import fansirsqi.xposed.sesame.task.greenFinance.GreenFinance;
-import fansirsqi.xposed.sesame.task.omegakoiTown.OmegakoiTown;
 import fansirsqi.xposed.sesame.task.reserve.Reserve;
-import fansirsqi.xposed.sesame.task.antDodo.AntDodo;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import lombok.Getter;
 
 public class ModelOrder {
     @SuppressWarnings("unchecked")
@@ -43,10 +39,7 @@ public class ModelOrder {
             AnswerAI.class,//AI答题
     };
 
-    private static final List<Class<Model>> readOnlyClazzList = List.of(array);
+    @Getter private static final List<Class<Model>> readOnlyClazzList = List.of(array);
 
-    public static List<Class<Model>> getClazzList() {
-        return readOnlyClazzList;
-    }
 
 }
