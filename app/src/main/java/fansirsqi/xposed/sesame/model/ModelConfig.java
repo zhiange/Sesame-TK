@@ -1,10 +1,11 @@
 package fansirsqi.xposed.sesame.model;
 
-import lombok.Data;
-import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
+
+import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
+import lombok.Data;
 
 /**
  * 模型配置类，用于保存每个模型的配置信息。
@@ -13,6 +14,7 @@ import java.util.Map;
 @Data
 public final class ModelConfig implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // 模型的唯一标识符，通常是模型类名
