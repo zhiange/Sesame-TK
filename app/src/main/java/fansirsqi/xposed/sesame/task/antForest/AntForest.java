@@ -2650,7 +2650,7 @@ public class AntForest extends ModelTask {
             JSONObject jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
             // 活力值商店兑换
             if (jo == null && !StatusUtil.hasFlagToday("exchangePropShop::SK20241231005469")) {
-                if (exchangePropShop(findPropShop("SP20241231002189", "SP20241231002189"), 1, "能量雨兑换")) {
+                if (exchangePropShop(findPropShop("SP20241231002189", "SK20241231005469"), 1, "能量雨兑换")) {
                     StatusUtil.setFlagToday("exchangePropShop::SK20241231005469");
                     // 兑换成功后再次查找限时能量双击卡
                     jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
