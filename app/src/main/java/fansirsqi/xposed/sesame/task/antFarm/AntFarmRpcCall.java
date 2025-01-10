@@ -527,4 +527,20 @@ public class AntFarmRpcCall {
         String args = "[{\"friendFarmId\": \""+friendFarmId+"\",\"groupId\": \""+groupId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ChickFamily\",\"source\":\"H5\",\"spaceType\":\"ChickFamily\"}]";
         return RequestManager.requestString("com.alipay.antfarm.feedFriendAnimal", args);
     }
+
+    public static String queryFamilyDrawActivity() {
+        String args = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.queryFamilyDrawActivity", args);
+    }
+
+    public static String familyDraw() {
+        String args = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.familyDraw", args);
+    }
+
+    public static String familyBatchInviteP2P(JSONArray inviteP2PVOList) {
+        String args = "[{\"inviteP2PVOList\":"+inviteP2PVOList+",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM_FD_VISIT_20241216\",\"source\":\"antfarm\"}]";
+        return RequestManager.requestString("com.alipay.antiep.batchInviteP2P", args);
+    }
+
 }

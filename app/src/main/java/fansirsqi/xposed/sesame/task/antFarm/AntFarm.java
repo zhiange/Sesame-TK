@@ -185,6 +185,7 @@ public class AntFarm extends ModelTask {
     private BooleanModelField family;
     private SelectModelField familyOptions;
     private SelectModelField inviteFriendVisitFamily;
+    private SelectModelField familyBatchInviteP2P;
 
 
     @Override
@@ -234,6 +235,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
+        modelFields.addField(familyBatchInviteP2P = new SelectModelField("familyBatchInviteP2P", "家庭 | 串门送扭蛋列表", new LinkedHashSet<>(), AlipayUser::getList));
         return modelFields;
     }
 
@@ -2485,6 +2487,8 @@ public class AntFarm extends ModelTask {
             JSONObject assignFamilyMemberInfo = jo.getJSONObject("assignFamilyMemberInfo");
             //美食配置
             JSONObject eatTogetherConfig = jo.getJSONObject("eatTogetherConfig");
+            //扭蛋
+            JSONObject familyDrawInfo = jo.getJSONObject("familyDrawInfo");
             JSONArray familyInteractActions = jo.getJSONArray("familyInteractActions");
             JSONArray animals = jo.getJSONArray("animals");
             List<String> familyUserIds = new ArrayList<>();
@@ -2527,6 +2531,17 @@ public class AntFarm extends ModelTask {
             //好友分享
             if (familyOptions.getValue().contains("inviteFriendVisitFamily")) {
                 inviteFriendVisitFamily(familyUserIds);
+            }
+
+            boolean drawActivitySwitch = familyDrawInfo.getBoolean("drawActivitySwitch");
+            //串门送扭蛋
+            if (drawActivitySwitch&&familyOptions.getValue().contains("batchInviteP2P")) {
+                familyBatchInviteP2PTask(familyUserIds);
+            }
+
+            //开扭蛋
+            if (drawActivitySwitch&&familyOptions.getValue().contains("familyDrawInfo")) {
+                familyDrawTask();
             }
 
         } catch (Throwable t) {
@@ -2742,6 +2757,79 @@ public class AntFarm extends ModelTask {
         }
     }
 
+    private void familyBatchInviteP2PTask(List<String> friendUserIds){
+        try {
+            if (StatusUtil.hasFlagToday("antFarm::familyBatchInviteP2P")) {
+                return;
+            }
+            Set<String> familyValue = familyBatchInviteP2P.getValue();
+            if (familyValue.isEmpty()) {
+                return;
+            }
+            if (Objects.isNull(friendUserIds) || friendUserIds.isEmpty()) {
+                return;
+            }
+            JSONArray inviteP2PVOList = new JSONArray();
+            for (String u : familyValue) {
+                if (!friendUserIds.contains(u) && inviteP2PVOList.length() < 6) {
+                    JSONObject object = new JSONObject();
+                    object.put("beInvitedUserId",u);
+                    object.put("bizTraceId","");
+                    inviteP2PVOList.put(object);
+                }
+                if (inviteP2PVOList.length() >= 6) {
+                    break;
+                }
+            }
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList));
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
+                StatusUtil.setFlagToday("antFarm::familyBatchInviteP2P");
+                ThreadUtil.sleep(500);
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "familyBatchInviteP2PTask err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
+    private void familyDrawTask() {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.queryFamilyDrawActivity());
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                ThreadUtil.sleep(1000);
+                int drawTimes = jo.optInt("familyDrawTimes");
+                for (int i = 0; i < drawTimes; i++) {
+                    if (!familyDraw()) {
+                        return;
+                    }
+                    ThreadUtil.sleep(1500);
+                }
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "familyDrawTask err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
+    private Boolean familyDraw() {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyDraw());
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                JSONObject familyDrawPrize = jo.getJSONObject("familyDrawPrize");
+                String title = familyDrawPrize.optString("title");
+                String awardCount = familyDrawPrize.getString("awardCount");
+                int familyDrawTimes = jo.optInt("familyDrawTimes");
+                Log.farm("开扭蛋🎟️抽中[" + title + "]#["+awardCount+"]");
+                return familyDrawTimes != 0;
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "familyDraw err:");
+            Log.printStackTrace(TAG, t);
+        }
+        return false;
+    }
+
     private void familyEatTogether(JSONObject eatTogetherConfig, JSONArray familyInteractActions, List<String> friendUserIds) {
         try {
             boolean isEat = false;
@@ -2868,6 +2956,8 @@ public class AntFarm extends ModelTask {
             list.add(new AntFarmFamilyOption("familyClaimReward", "领取奖励"));
             list.add(new AntFarmFamilyOption("inviteFriendVisitFamily", "好友分享"));
             list.add(new AntFarmFamilyOption("assignRights", "使用顶梁柱特权"));
+            list.add(new AntFarmFamilyOption("familyDrawInfo", "开扭蛋"));
+            list.add(new AntFarmFamilyOption("batchInviteP2P", "串门送扭蛋"));
             return list;
         }
     }
