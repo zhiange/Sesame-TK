@@ -2,18 +2,22 @@ package fansirsqi.xposed.sesame.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import fansirsqi.xposed.sesame.model.ModelConfig;
-import fansirsqi.xposed.sesame.model.ModelField;
-import fansirsqi.xposed.sesame.model.ModelFields;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
-import lombok.Data;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.UserEntity;
-import fansirsqi.xposed.sesame.util.*;
-
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import fansirsqi.xposed.sesame.entity.UserEntity;
+import fansirsqi.xposed.sesame.model.ModelConfig;
+import fansirsqi.xposed.sesame.model.ModelField;
+import fansirsqi.xposed.sesame.model.ModelFields;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import lombok.Data;
 
 /**
  * 配置类，负责加载、保存、管理应用的配置数据。
@@ -136,28 +140,46 @@ public class Config {
      * 保存配置文件
      *
      * @param userId 用户 ID
-     * @param force 是否强制保存
+     * @param force  是否强制保存
      * @return 保存是否成功
      */
-    public static Boolean save(String userId, Boolean force) {
-        if (!force) {
-            if (!isModify(userId)) {
-                return true;
+    public static synchronized Boolean save(String userId, Boolean force) {
+        if (!force && !isModify(userId)) {
+            return true;
+        }
+        String json;
+        try {
+            json = JsonUtil.formatJson(INSTANCE);
+            if (json == null) {
+                throw new IllegalStateException("配置格式化失败，返回的 JSON 为空");
             }
+        } catch (Exception e) {
+            Log.printStackTrace(TAG, e);
+            Log.record("保存用户配置失败，格式化 JSON 时出错");
+            return false;
         }
-        String json = JsonUtil.formatJson(INSTANCE);
         boolean success;
+        try {
+            if (StringUtil.isEmpty(userId)) {
+                userId = "默认";
+                success = Files.setDefaultConfigV2File(json);
+            } else {
+                success = Files.setConfigV2File(userId, json);
+            }
+            if (!success) {
+                throw new IOException("配置文件保存失败");
+            }
+            String userName = StringUtil.isEmpty(userId) ? userId : UserMap.get(userId).getShowName();
+            Log.record("保存用户[" + userName + "]配置");
 
-        if (StringUtil.isEmpty(userId)) {
-            userId = "默认";
-            success = Files.setDefaultConfigV2File(json);
-        } else {
-            success = Files.setConfigV2File(userId, json);
+        } catch (Exception e) {
+            Log.printStackTrace(TAG, e);
+            Log.record("保存用户配置失败");
+            return false;
         }
-
-        Log.record("保存配置: " + userId);
-        return success;
+        return true;
     }
+
 
     /**
      * 加载配置文件
@@ -166,7 +188,7 @@ public class Config {
      * @return 加载后的 Config 实例
      */
     public static synchronized Config load(String userId) {
-        Log.runtime(TAG, "开始加载配置");
+        Log.runtime(TAG, "开始加载配置...");
         String userName = "";
         java.io.File configV2File = null;
         try {
@@ -182,9 +204,7 @@ public class Config {
                     userName = userEntity.getShowName();
                 }
             }
-            Log.record("加载配置: " + userName);
-
-            // 如果配置文件存在，加载内容
+            Log.record("载入用户[" + userName + "]配置");
             if (configV2File.exists()) {
                 String json = Files.readFromFile(configV2File);
                 if (StringUtil.isEmpty(json)) {
@@ -196,7 +216,6 @@ public class Config {
                     String formatted = JsonUtil.formatJson(INSTANCE);
                     if (formatted != null && !formatted.equals(json)) {
                         Log.runtime(TAG, "格式化配置: " + userName);
-                        Log.system(TAG, "格式化配置: " + userName);
                         Files.write2File(formatted, configV2File);
                     }
                 }
@@ -208,24 +227,21 @@ public class Config {
                     if (!StringUtil.isEmpty(json)) {
                         JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                         Log.runtime(TAG, "复制新配置: " + userName);
-                        Log.system(TAG, "复制新配置: " + userName);
                         Files.write2File(json, configV2File);
                     } else {
                         unload();
-                        Log.runtime(TAG, "默认配置为空，初始化新配置: " + userName);
+                        Log.runtime(TAG, "默认配置为空，重置配置: " + userName);
                         Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                     }
                 } else {
                     unload();
-                    Log.runtime(TAG, "初始新配置: " + userName);
-                    Log.system(TAG, "初始新配置: " + userName);
+                    Log.runtime(TAG, "重置配置: " + userName);
                     Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 }
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.runtime(TAG, "重置配置: " + userName);
-            Log.system(TAG, "重置配置: " + userName);
             try {
                 unload();
                 if (configV2File != null) {
@@ -236,7 +252,7 @@ public class Config {
             }
         }
         INSTANCE.setInit(true);
-        Log.runtime(TAG, "加载配置结束");
+        Log.runtime(TAG, "加载配置结束！");
         return INSTANCE;
     }
 
