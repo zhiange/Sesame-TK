@@ -4,7 +4,7 @@ import android.os.Build;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +23,15 @@ public abstract class ModelTask extends Model {
     private static final Map<ModelTask, Thread> MAIN_TASK_MAP = new ConcurrentHashMap<>();
 
     // 主任务线程池，线程池大小为模型数组长度，最大线程数无限制，空闲时间30秒
-    private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(getModelArray().length, Integer.MAX_VALUE, 30L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(
+            Math.max(1, getModelArray().length)// 核心线程数，至少为 1
+            , Math.min(Integer.MAX_VALUE, getModelArray().length * 2)// 最大线程数
+            , 30L// 空闲线程存活时间
+            , TimeUnit.SECONDS
+//            , new SynchronousQueue<>()
+            , new LinkedBlockingQueue<>(getModelArray().length * 2)// 队列容量
+            , new ThreadPoolExecutor.CallerRunsPolicy()
+    );
 
     // 存储子任务的映射
     private final Map<String, ChildModelTask> childTaskMap = new ConcurrentHashMap<>();
