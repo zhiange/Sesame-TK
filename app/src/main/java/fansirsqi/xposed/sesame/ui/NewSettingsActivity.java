@@ -69,7 +69,6 @@ public class NewSettingsActivity extends BaseActivity {
     private Context context;
     private String userId = null;
     private String userName = null;
-    private Boolean debug = false;
 
     private final List<ModelDto> tabList = new ArrayList<>();
 
@@ -90,7 +89,7 @@ public class NewSettingsActivity extends BaseActivity {
         if (intent != null) {
             userId = intent.getStringExtra("userId");
             userName = intent.getStringExtra("userName");
-            debug = intent.getBooleanExtra("debug", isApkInDebug());
+            intent.getBooleanExtra("debug", isApkInDebug());
         }
         Model.initAllModel();
         UserMap.setCurrentUserId(userId);
