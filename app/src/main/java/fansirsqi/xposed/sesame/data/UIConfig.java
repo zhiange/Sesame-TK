@@ -46,7 +46,6 @@ public static synchronized UIConfig load() {
     java.io.File uiConfigFile = Files.getUIConfigFile();
     try {
         if (uiConfigFile.exists()) {
-            Log.runtime(TAG, "加载UI配置");
             String json = Files.readFromFile(uiConfigFile);
             if (!json.trim().isEmpty()) {
                 JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
