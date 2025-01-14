@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 
 /**
@@ -91,7 +92,7 @@ public abstract class IdMapManager {
             String body = Files.readFromFile(file);
             if (!body.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
+                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {});
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
@@ -106,7 +107,7 @@ public abstract class IdMapManager {
             String body = Files.readFromFile(file);
             if (!body.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<Map<String, String>>() {});
+                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {});
                 idMap.putAll(newMap);
             }
         } catch (Exception e) {
@@ -122,7 +123,8 @@ public abstract class IdMapManager {
     public synchronized boolean save(String userId) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(idMap);
+            String json = JsonUtil.formatJson(idMap);
+//             json = objectMapper.writeValueAsString(idMap);
             File file = Files.getTargetFileofUser(userId, thisFileName());
             return Files.write2File(json, file);
         } catch (Exception e) {
@@ -134,7 +136,8 @@ public abstract class IdMapManager {
     public synchronized boolean save() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(idMap);
+            String json = JsonUtil.formatJson(idMap);
+//            String json = objectMapper.writeValueAsString(idMap);
             File file = Files.getTargetFileofDir(Files.MAIN_DIR, thisFileName());
             return Files.write2File(json, file);
         } catch (Exception e) {
