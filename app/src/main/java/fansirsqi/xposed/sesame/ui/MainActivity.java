@@ -93,6 +93,8 @@ public class MainActivity extends BaseActivity {
                         if (v.getId() == R.id.main_image) {
                             String data = "file://" + Files.getDebugLogFile().getAbsolutePath();
                             Intent it = new Intent(MainActivity.this, HtmlViewerActivity.class);
+                            it.putExtra("nextLine", false);
+                            it.putExtra("canClear", true);
                             it.setData(Uri.parse(data));
                             startActivity(it);
                             return true; // 表示事件已处理
@@ -173,32 +175,6 @@ public class MainActivity extends BaseActivity {
         oneWord.setText(str);
     }
 
-//    @Override
-//    public void onWindowFocusChanged(boolean hasFocus) {
-//        if (!hasPermissions) {
-//            if (!hasFocus) {
-//                isBackground = true;
-//                return;
-//            }
-//            isBackground = false;
-//            handler.post(
-//                    new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if (isBackground) {
-//                                return;
-//                            }
-//                            hasPermissions = PermissionUtil.checkOrRequestFilePermissions(MainActivity.this);
-//                            if (hasPermissions) {
-//                                onResume();
-//                                return;
-//                            }
-//                            ToastUtil.makeText(MainActivity.this, "未获取文件读写权限", Toast.LENGTH_SHORT).show();
-//                            handler.postDelayed(this, 2000);
-//                        }
-//                    });
-//        }
-//    }
 
     @Override
     protected void onResume() {
@@ -213,7 +189,7 @@ public class MainActivity extends BaseActivity {
                     Log.printStackTrace(th);
                 }
             }
-            try {
+            try {//打开设置前需要确认设置了哪个UI
                 UIConfig.load();
             } catch (Exception e) {
                 Log.printStackTrace(e);
@@ -368,10 +344,11 @@ public class MainActivity extends BaseActivity {
             case 7:
                 String captureData = "file://";
                 captureData += Files.getCaptureLogFile().getAbsolutePath();
-                Intent debugIt = new Intent(this, HtmlViewerActivity.class);
-                debugIt.setData(Uri.parse(captureData));
-                debugIt.putExtra("canClear", true);
-                startActivity(debugIt);
+                Intent captureIt = new Intent(this, HtmlViewerActivity.class);
+                captureIt.putExtra("nextLine", false);
+                captureIt.putExtra("canClear", true);
+                captureIt.setData(Uri.parse(captureData));
+                startActivity(captureIt);
                 break;
             case 8:
                 // 扩展功能
@@ -410,7 +387,6 @@ public class MainActivity extends BaseActivity {
                         ThreadUtil.sleep(1000);
                         if (!selected.get()) {
                             goSettingActivity(length - 1);
-
                             // 在主线程中关闭对话框
                             runOnUiThread(
                                     () -> {
@@ -432,7 +408,7 @@ public class MainActivity extends BaseActivity {
     private void goSettingActivity(int index) {
         UserEntity userEntity = userEntityArray[index];
 
-        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class; // 调整为由UIConfig决定启动哪个Activity,暂时不启用新UI，配置森林无法保存，
+        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class;
         // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
         // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
 
@@ -445,7 +421,6 @@ public class MainActivity extends BaseActivity {
         } else {
             intent.putExtra("userName", userNameArray[index]);
         }
-
         startActivity(intent);
     }
 
