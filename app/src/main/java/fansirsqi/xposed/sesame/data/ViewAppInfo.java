@@ -67,7 +67,6 @@ public final class ViewAppInfo {
       return;
     }
     try {
-      // 如果上下文为空，则默认运行类型为禁用
       if (context == null) {
         runType = RunType.DISABLE;
         return;
@@ -76,10 +75,8 @@ public final class ViewAppInfo {
       Uri uri = Uri.parse("content://me.weishu.exposed.CP/");
       Bundle result = null;
       try {
-        // 调用 content provider 来检查是否激活
         result = contentResolver.call(uri, "active", null, null);
       } catch (RuntimeException e) {
-        // 如果 TaiChi 被杀死，尝试启动相关活动来恢复
         try {
           Intent intent = new Intent("me.weishu.exp.ACTION_ACTIVE");
           intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -90,21 +87,16 @@ public final class ViewAppInfo {
         }
       }
       if (result == null) {
-        // 如果调用返回结果为空，再次尝试调用
         result = contentResolver.call(uri, "active", null, null);
       }
-
-      // 如果结果为空，说明应用未激活，设置运行类型为禁用
       if (result == null) {
         runType = RunType.DISABLE;
         return;
       }
-      // 如果激活状态为 true，设置运行类型为模型
       if (result.getBoolean("active", false)) {
         runType = RunType.MODEL;
         return;
       }
-      // 否则，设置为禁用
       runType = RunType.DISABLE;
     } catch (Throwable ignored) {
     }
