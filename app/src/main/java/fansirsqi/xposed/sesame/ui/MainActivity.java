@@ -434,7 +434,7 @@ public class MainActivity extends BaseActivity {
                 setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
                 break;
             case PACKAGE:
-                setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorGreen));
+                setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
                 break;
         }
     }
