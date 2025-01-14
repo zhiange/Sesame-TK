@@ -154,7 +154,7 @@ public class BaseModel extends Model {
     private static final BooleanModelField enableOnGoing = new BooleanModelField("enableOnGoing", "开启状态栏禁删", false);
 
     @Getter
-    private static final BooleanModelField enableThreadPoolStartup = new BooleanModelField("enableThreadPoolStartup", "启用线程池启动", true);
+    private static final BooleanModelField enableThreadPoolStartup = new BooleanModelField("enableThreadPoolStartup", "启用线程池启动", false);
 
     @Override
     public String getName() {
@@ -205,7 +205,7 @@ public class BaseModel extends Model {
         new Thread(
                 () -> {
                     try {
-                        Log.runtime("初始化海洋，保护地数据中...");
+                        Log.runtime("🍼初始化海洋，保护地数据");
                         ThreadUtil.sleep(RandomUtil.nextInt(4500, 6000));
                         initReserve();
                         initBeach();
@@ -221,9 +221,10 @@ public class BaseModel extends Model {
      */
     public static void destroyData() {
         try {
-            Log.runtime("清理海洋，保护地数据中...");
+            Log.runtime("🧹清理海洋，保护地数据");
             IdMapManager.getInstance(ReserveaMap.class).clear();
             IdMapManager.getInstance(BeachMap.class).clear();
+            //其他也可以清理清理
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
