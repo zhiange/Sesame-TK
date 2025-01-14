@@ -1,7 +1,6 @@
 package fansirsqi.xposed.sesame.task;
 
 import fansirsqi.xposed.sesame.model.BaseModel;
-import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 /**
