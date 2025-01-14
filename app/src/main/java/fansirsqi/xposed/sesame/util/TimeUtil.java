@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.WeekFields;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,8 +17,64 @@ import java.util.Locale;
  */
 public class TimeUtil {
 
+
     // 使用新的 DateTimeFormatter 进行日期格式化
     public static final ThreadLocal<DateTimeFormatter> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+
+
+    public static Calendar getTodayCalendarByTimeStr(String timeStr) {
+        return getCalendarByTimeStr((Long) null, timeStr);
+    }
+
+    public static Calendar getCalendarByTimeMillis(Long timeMillis) {
+        Calendar timeCalendar = Calendar.getInstance();
+        if (timeMillis != null) {
+            timeCalendar.setTimeInMillis(timeMillis);
+        }
+        return timeCalendar;
+    }
+
+    public static Calendar getCalendarByTimeStr(Calendar timeCalendar, String timeStr) {
+        try {
+            int length = timeStr.length();
+            switch (length) {
+                case 6:
+                    timeCalendar.set(Calendar.SECOND, Integer.parseInt(timeStr.substring(4)));
+                    timeCalendar.set(Calendar.MINUTE, Integer.parseInt(timeStr.substring(2, 4)));
+                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
+                    break;
+                case 4:
+                    timeCalendar.set(Calendar.SECOND, 0);
+                    timeCalendar.set(Calendar.MINUTE, Integer.parseInt(timeStr.substring(2, 4)));
+                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
+                    break;
+                case 2:
+                    timeCalendar.set(Calendar.SECOND, 0);
+                    timeCalendar.set(Calendar.MINUTE, 0);
+                    timeCalendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeStr.substring(0, 2)));
+                    break;
+                default:
+                    return null;
+            }
+            timeCalendar.set(Calendar.MILLISECOND, 0);
+            return timeCalendar;
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+        return null;
+    }
+
+    public static Calendar getCalendarByTimeStr(Long timeMillis, String timeStr) {
+        try {
+            Calendar timeCalendar = getCalendarByTimeMillis(timeMillis);
+            return getCalendarByTimeStr(timeCalendar, timeStr);
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+        return null;
+    }
+
+
 
     /**
      * 将日期字符串转换为时间戳。
