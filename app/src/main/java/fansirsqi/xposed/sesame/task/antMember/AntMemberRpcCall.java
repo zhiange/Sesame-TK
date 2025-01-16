@@ -38,9 +38,25 @@ public class AntMemberRpcCall {
                 "[{\"autoSignIn\":true,\"invitorUserId\":\"\",\"sceneCode\":\"QUERY\"}]");
     }
 
+    /* 商家开门打卡任务 */
+    public static String signIn(String activityNo) {
+        return RequestManager.requestString("alipay.merchant.kmdk.signIn",
+                "[{\"activityNo\":\"" + activityNo + "\"}]");
+    }
+
+    public static String signUp(String activityNo) {
+        return RequestManager.requestString("alipay.merchant.kmdk.signUp",
+                "[{\"activityNo\":\"" + activityNo + "\"}]");
+    }
+
     /* 商家服务 */
     public static String transcodeCheck() {
         return RequestManager.requestString("alipay.mrchservbase.mrchbusiness.sign.transcode.check",
+                "[{}]");
+    }
+
+    public static String merchantSign() {
+        return RequestManager.requestString("alipay.mrchservbase.mrchpoint.sqyj.homepage.signin.v1",
                 "[{}]");
     }
 
@@ -55,23 +71,13 @@ public class AntMemberRpcCall {
     }
 
     public static String taskListQuery() {
-        return RequestManager.requestString("alipay.mrchservbase.zcj.taskList.query",
-                "[{\"compId\":\"ZCJ_TASK_LIST\",\"params\":{\"activityCode\":\"ZCJ\",\"clientVersion\":\"10.3.36\",\"extInfo\":{},\"platform\":\"Android\",\"underTakeTaskCode\":\"\"}}]");
+        return RequestManager.requestString("alipay.mrchservbase.task.more.query",
+                "[{\"paramMap\":{\"platform\":\"Android\"},\"taskItemCode\":\"\"}]");
     }
 
     public static String queryActivity() {
         return RequestManager.requestString("alipay.merchant.kmdk.query.activity",
                 "[{\"scene\":\"activityCenter\"}]");
-    }
-
-    public static String signIn(String activityNo) {
-        return RequestManager.requestString("alipay.merchant.kmdk.signIn",
-                "[{\"activityNo\":\"" + activityNo + "\"}]");
-    }
-
-    public static String signUp(String activityNo) {
-        return RequestManager.requestString("alipay.merchant.kmdk.signUp",
-                "[{\"activityNo\":\"" + activityNo + "\"}]");
     }
 
     /* 商家服务任务 */
