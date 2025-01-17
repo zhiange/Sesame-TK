@@ -322,19 +322,19 @@ public class AntForest extends ModelTask {
     @Override
     public void boot(ClassLoader classLoader) {
         super.boot(classLoader);
-        FixedOrRangeIntervalLimit queryIntervalLimit = new FixedOrRangeIntervalLimit(queryInterval.getValue(), 50, 10000);//限制查询间隔
+        FixedOrRangeIntervalLimit queryIntervalLimit = new FixedOrRangeIntervalLimit(queryInterval.getValue(), 200, 10000);//限制查询间隔
         RpcIntervalLimit.addIntervalLimit("alipay.antforest.forest.h5.queryHomePage", queryIntervalLimit);
         RpcIntervalLimit.addIntervalLimit("alipay.antforest.forest.h5.queryFriendHomePage", queryIntervalLimit);
-        RpcIntervalLimit.addIntervalLimit("alipay.antmember.forest.h5.collectEnergy", 50);
-        RpcIntervalLimit.addIntervalLimit("alipay.antmember.forest.h5.queryEnergyRanking", 100);
+        RpcIntervalLimit.addIntervalLimit("alipay.antmember.forest.h5.collectEnergy", 200);
+        RpcIntervalLimit.addIntervalLimit("alipay.antmember.forest.h5.queryEnergyRanking", 200);
         RpcIntervalLimit.addIntervalLimit("alipay.antforest.forest.h5.fillUserRobFlag", 500);
         tryCountInt = tryCount.getValue();
         retryIntervalInt = retryInterval.getValue();
         advanceTimeInt = advanceTime.getValue();
         checkIntervalInt = BaseModel.getCheckInterval().getValue();
         dontCollectMap = dontCollectList.getValue();
-        collectIntervalEntity = new FixedOrRangeIntervalLimit(collectInterval.getValue(), 50, 10000);//收取间隔
-        doubleCollectIntervalEntity = new FixedOrRangeIntervalLimit(doubleCollectInterval.getValue(), 100, 5000);//双击间隔
+        collectIntervalEntity = new FixedOrRangeIntervalLimit(collectInterval.getValue(), 200, 10000);//收取间隔
+        doubleCollectIntervalEntity = new FixedOrRangeIntervalLimit(doubleCollectInterval.getValue(), 200, 5000);//双击间隔
         delayTimeMath.clear();
         AntForestRpcCall.init();
     }
@@ -421,7 +421,7 @@ public class AntForest extends ModelTask {
                 if (canConsumeAnimalProp && consumeAnimalProp.getValue()) {
                     queryAndConsumeAnimal();
                 } else {
-                    String _msg = "🐼 已经有动物伙伴在巡护森林~";
+                    String _msg = "已经有动物伙伴在巡护森林~";
                     Log.record(_msg);
                     Toast.show(_msg);
                 }
@@ -457,7 +457,6 @@ public class AntForest extends ModelTask {
                 giveProp();
 
                 handleVitalityExchange();
-                Log.record("执行结束-蚂蚁" + getName());
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "AntForest.run err:");
@@ -580,6 +579,7 @@ public class AntForest extends ModelTask {
                 if (ResUtil.checkResCode(response)) {
                     String str = "领取道具🎭[" + propName + "]";
                     Log.forest(str);
+                    Toast.show(str);
                 } else {
                     Log.record("领取道具🎭[" + propName + "]失败:" + jo.getString("resultDesc"));
                     Log.runtime(jo.toString());
@@ -1177,7 +1177,7 @@ public class AntForest extends ModelTask {
                             }
                             if (collected > 0) {
                                 FriendWatch.friendWatch(userId, collected);
-                                String str = "一键收取🎈[" + UserMap.getMaskName(userId) + "]#" + collected + "g";
+                                String str = "一键收取⚡️[" + UserMap.getMaskName(userId) + "]#" + collected + "g";
                                 if (needDouble) {
                                     Log.forest(str + "耗时[" + spendTime + "]ms[双击]");
                                     Toast.show(str + "[双击]");
@@ -1201,7 +1201,7 @@ public class AntForest extends ModelTask {
                             collected += bubble.getInt("collectedEnergy");
                             FriendWatch.friendWatch(userId, collected);
                             if (collected > 0) {
-                                String str = "收取能量🎈[" + UserMap.getMaskName(userId) + "]#" + collected + "g";
+                                String str = "收取" + collected + "g" + UserMap.getMaskName(userId) + "]";
                                 if (needDouble) {
                                     Log.forest(str + "耗时[" + spendTime + "]ms[双击]");
                                     Toast.show(str + "[双击]");
@@ -2344,7 +2344,7 @@ public class AntForest extends ModelTask {
                     JSONObject combineResponse = new JSONObject(AntForestRpcCall.combineAnimalPiece(id, piecePropIds.toString()));
                     resultCode = combineResponse.optString("resultCode");
                     if ("SUCCESS".equals(resultCode)) {
-                        Log.forest("成功合成动物💡: [" + name + "]");
+                        Log.forest("成功合成动物💡 [" + name + "]");
                         animalId = id;
                         ThreadUtil.sleep(100); // 等待一段时间再查询
                         continue;
@@ -2418,18 +2418,20 @@ public class AntForest extends ModelTask {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(propJsonObj.getJSONArray("propIdList").getString(0), propJsonObj.getString("propType")));
             if (ResUtil.checkSuccess(jo)) {
-                String toolName = propJsonObj.getJSONObject("propConfigVO").getString("propName");
+                String propName = propJsonObj.getJSONObject("propConfigVO").getString("propName");
                 String tag;
-                if (toolName.contains("保护")) {
+                if (propName.contains("保护")) {
                     tag = "🛡️";
-                } else if (toolName.contains("双击")) {
+                } else if (propName.contains("双击")) {
                     tag = "👥";
-                } else if (toolName.contains("加速")) {
+                } else if (propName.contains("加速")) {
                     tag = "🌪";
+                } else if (propName.contains("雨")) {
+                    tag = "🌧️";
                 } else {
                     tag = "🥳";
                 }
-                Log.forest("使用道具" + tag + "[" + toolName + "]");
+                Log.forest("使用道具" + tag + "[" + propName + "]");
                 return true;
             } else {
                 Log.record(jo.getString("resultDesc"));
@@ -2508,13 +2510,16 @@ public class AntForest extends ModelTask {
                 // 活力值兑换道具
                 jo = new JSONObject(AntForestRpcCall.exchangeBenefit(skuJsonObj.getString("spuId"), skuJsonObj.getString("skuId")));
                 if (ResUtil.checkResCode(jo)) {
-                    Log.forest("活力兑换🎐[" + skuJsonObj.getString("skuName") + "]#第" + exchangedCount + "次");
+                    String t = "活力兑换🎐[" + skuJsonObj.getString("skuName") + "]#第" + exchangedCount + "次";
+                    Log.forest(t);
+//                    Toast.show(t);
                     return true;
                 } else {
                     Log.record(jo.getString("resultDesc"));
                     Log.runtime(jo.toString());
                     return false;
                 }
+
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "exchangePropShop err:");
@@ -2566,7 +2571,6 @@ public class AntForest extends ModelTask {
                 }
             }
             if (jo != null && usePropBag(jo)) {
-                Log.forest("使用道具加速器️");
                 collectSelfEnergy();
             }
         } catch (Throwable th) {
