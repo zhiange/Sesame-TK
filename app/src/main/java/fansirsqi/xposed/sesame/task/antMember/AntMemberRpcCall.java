@@ -184,9 +184,47 @@ public class AntMemberRpcCall {
     }
 
     /**
+     * 芝麻信用首页
+     */
+    public static String queryHome() {
+        return RequestManager.requestString("com.antgroup.zmxy.zmcustprod.biz.rpc.home.api.HomeV7RpcManager.queryHome",
+                "[{\"invokeSource\":\"zmHome\",\"miniZmGrayInside\":\"\",\"version\":\"week\"}]");
+    }
+
+    /**
+     * 获取芝麻信用任务列表
+     */
+    public static String queryAvailableSesameTask() {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.creditaccumulate.CreditAccumulateStrategyRpcManager.queryListV3", "[{}]");
+    }
+
+    /**
+     * 芝麻信用领取任务
+     */
+    public static String joinSesameTask(String taskTemplateId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.promise.PromiseRpcManager.joinActivity",
+                "[{\"chInfo\":\"seasameList\",\"joinFromOuter\":false,\"templateId\":\"" + taskTemplateId + "\"}]");
+    }
+
+    /**
+     * 芝麻信用获取任务回调
+     */
+    public static String feedBackSesameTask(String taskTemplateId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.creditaccumulate.CreditAccumulateStrategyRpcManager.taskFeedback",
+                "[{\"actionType\":\"TO_COMPLETE\",\"templateId\":\"" + taskTemplateId + "\"}]",
+                "zmmemberop", "taskFeedback", "CreditAccumulateStrategyRpcManager");
+    }
+
+    /**
+     * 芝麻信用完成任务
+     */
+    public static String finishSesameTask(String recordId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.promise.PromiseRpcManager.pushActivity",
+                "[{\"recordId\":\""+recordId+"\"}]");
+    }
+
+    /**
      * 查询可收取的芝麻粒
-     *
-     * @return 结果
      */
     public static String queryCreditFeedback() {
         return RequestManager.requestString(
@@ -195,20 +233,17 @@ public class AntMemberRpcCall {
     }
 
     /**
-     * 芝麻信用首页
-     *
-     * @return 结果
+     * 一键收取芝麻粒
      */
-    public static String queryHome() {
-        return RequestManager.requestString("com.antgroup.zmxy.zmcustprod.biz.rpc.home.api.HomeV6RpcManager.queryHome",
-                "[{\"miniZmGrayInside\":\"\"}]");
+    public static String collectAllCreditFeedback() {
+        return RequestManager.requestString(
+                "com.antgroup.zmxy.zmcustprod.biz.rpc.home.creditaccumulate.api.CreditAccumulateRpcManager.collectCreditFeedback",
+                "[{\"collectAll\":true,\"status\":\"UNCLAIMED\"}]");
     }
 
     /**
      * 收取芝麻粒
-     *
      * @param creditFeedbackId creditFeedbackId
-     * @return 结果
      */
     public static String collectCreditFeedback(String creditFeedbackId) {
         return RequestManager.requestString(
