@@ -8,6 +8,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.*;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +28,7 @@ public class AntMember extends ModelTask {
   }
 
   private BooleanModelField memberSign;
+  private BooleanModelField memberTask;
   private BooleanModelField collectSesame;
   private BooleanModelField collectSecurityFund;
   private BooleanModelField promiseSportsRoute;
@@ -43,6 +45,7 @@ public class AntMember extends ModelTask {
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
     modelFields.addField(memberSign = new BooleanModelField("memberSign", "会员签到", false));
+    modelFields.addField(memberTask = new BooleanModelField("memberTask", "会员任务", false));
     modelFields.addField(collectSesame = new BooleanModelField("collectSesame", "芝麻粒领取", false));
     modelFields.addField(collectSecurityFund = new BooleanModelField("collectSecurityFund", "芝麻粒坚持攒保障金(可开启持续做)", false));
     modelFields.addField(promiseSportsRoute = new BooleanModelField("promiseSportsRoute", "芝麻粒坚持锻炼，走运动路线(只自动加入任务)", false));
@@ -67,7 +70,10 @@ public class AntMember extends ModelTask {
     try {
       Log.record("执行开始-" + getName());
       if (memberSign.getValue()) {
-        memberSign();
+        doMemberSign();
+      }
+      if (memberTask.getValue()) {
+        doAllMemberAvailableTask();
       }
       if (collectSesame.getValue()) {
         collectSesame();
@@ -120,7 +126,10 @@ public class AntMember extends ModelTask {
     }
   }
 
-  private void memberSign() {
+  /**
+   * 会员签到
+   */
+  private void doMemberSign() {
     try {
       if (StatusUtil.canMemberSignInToday(UserMap.getCurrentUid())) {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
@@ -134,17 +143,44 @@ public class AntMember extends ModelTask {
           Log.runtime(s);
         }
       }
-
       queryPointCert(1, 8);
-
-      signPageTaskList();
-
-      queryAllStatusTaskList();
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
     }
   }
 
+  /**
+   * 会员任务-逛一逛
+   */
+  private void doAllMemberAvailableTask() {
+    try {
+      String str = AntMemberRpcCall.queryAllStatusTaskList();
+      ThreadUtil.sleep(500);
+      JSONObject jsonObject = new JSONObject(str);
+      if (!ResUtil.checkResCode(jsonObject)) {
+        Log.runtime(TAG, "doAllMemberAvailableTask err:" + jsonObject.getString("resultDesc"));
+        return;
+      }
+      if (!jsonObject.has("availableTaskList")) {
+        return;
+      }
+      JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
+      for (int j = 0; j < taskList.length(); j++) {
+        ThreadUtil.sleep(16000);
+        JSONObject task = taskList.getJSONObject(j);
+        processTask(task);
+      }
+    } catch (Throwable t) {
+      Log.runtime(TAG, "doAllMemberAvailableTask err:");
+      Log.printStackTrace(TAG, t);
+    }
+  }
+
+  /**
+   * 会员积分收取
+   * @param page 第几页
+   * @param pageSize 每页数据条数
+   */
   private static void queryPointCert(int page, int pageSize) {
     try {
       String s = AntMemberRpcCall.queryPointCert(page, pageSize);
@@ -253,8 +289,8 @@ public class AntMember extends ModelTask {
     try {
       String s = AntMemberRpcCall.merchantSign();
       JSONObject jo = new JSONObject(s);
-      if (!ResUtil.checkResCode(jo)) {
-        Log.runtime(TAG, "doMerchantSign err:" + jo.getString("resultDesc"));
+      if (!jo.optBoolean("success")) {
+        Log.runtime(TAG, "doMerchantSign err:" + s);
         return;
       }
       jo = jo.getJSONObject("data");
@@ -399,54 +435,32 @@ public class AntMember extends ModelTask {
     }
   }
 
-  /** 做任务赚积分 */
-  private void signPageTaskList() {
-    try {
-      do {
-        String s = AntMemberRpcCall.signPageTaskList();
-        ThreadUtil.sleep(500);
-        JSONObject jo = new JSONObject(s);
-        boolean doubleCheck = false;
-        if (!ResUtil.checkResCode(TAG, jo) || !jo.has("categoryTaskList")) return;
-        JSONArray categoryTaskList = jo.getJSONArray("categoryTaskList");
-        for (int i = 0; i < categoryTaskList.length(); i++) {
-          jo = categoryTaskList.getJSONObject(i);
-          if (!"BROWSE".equals(jo.getString("type"))) {
-            continue;
-          }
-          JSONArray taskList = jo.getJSONArray("taskList");
-          doubleCheck = doTask(taskList);
-        }
-        if (doubleCheck) continue;
-        break;
-      } while (true);
-    } catch (Throwable t) {
-      Log.runtime(TAG, "signPageTaskList err:");
-      Log.printStackTrace(TAG, t);
-    }
-  }
-
-  /** 查询所有状态任务列表 */
-  private void queryAllStatusTaskList() {
-    try {
-      String str = AntMemberRpcCall.queryAllStatusTaskList();
-      ThreadUtil.sleep(500);
-      JSONObject jsonObject = new JSONObject(str);
-      if (!ResUtil.checkResCode(jsonObject)) {
-        Log.runtime(TAG, "queryAllStatusTaskList err:" + jsonObject.getString("resultDesc"));
-        return;
-      }
-      if (!jsonObject.has("availableTaskList")) {
-        return;
-      }
-      if (doTask(jsonObject.getJSONArray("availableTaskList"))) {
-        queryAllStatusTaskList();
-      }
-    } catch (Throwable t) {
-      Log.runtime(TAG, "queryAllStatusTaskList err:");
-      Log.printStackTrace(TAG, t);
-    }
-  }
+//  /** 做任务赚积分 */
+//  private void signPageTaskList() {
+//    try {
+//      do {
+//        String s = AntMemberRpcCall.signPageTaskList();
+//        ThreadUtil.sleep(500);
+//        JSONObject jo = new JSONObject(s);
+//        boolean doubleCheck = false;
+//        if (!ResUtil.checkResCode(TAG, jo) || !jo.has("categoryTaskList")) return;
+//        JSONArray categoryTaskList = jo.getJSONArray("categoryTaskList");
+//        for (int i = 0; i < categoryTaskList.length(); i++) {
+//          jo = categoryTaskList.getJSONObject(i);
+//          if (!"BROWSE".equals(jo.getString("type"))) {
+//            continue;
+//          }
+//          JSONArray taskList = jo.getJSONArray("taskList");
+//          doubleCheck = doTask(taskList);
+//        }
+//        if (doubleCheck) continue;
+//        break;
+//      } while (true);
+//    } catch (Throwable t) {
+//      Log.runtime(TAG, "signPageTaskList err:");
+//      Log.printStackTrace(TAG, t);
+//    }
+//  }
 
   private void collectSecurityFund() {
     try {
@@ -588,96 +602,31 @@ public class AntMember extends ModelTask {
   }
 
   /**
-   * 执行浏览任务列表中的任务。
-   *
-   * <p>该方法将遍历任务列表，并对每个任务执行相应的操作。如果任务为混合类型（hybrid），将根据周期内已完成的任务数和目标任务数来计算需要执行的任务次数。 对于每个任务，将尝试应用任务并执行任务，如果成功则记录日志并可能设置doubleCheck标志为true，表示需要再次检查。 如果在执行过程中遇到错误，将记录错误信息。
-   *
-   * @param taskList 任务列表
-   * @return 如果需要再次检查任务，则返回true；否则返回false
-   */
-  private boolean doTask(JSONArray taskList) {
-    boolean doubleCheck = false;
-    try {
-      for (int j = 0; j < taskList.length(); j++) {
-        JSONObject task = taskList.getJSONObject(j);
-        if (!processTask(task)) {
-          continue;
-        }
-        doubleCheck = true;
-      }
-    } catch (Throwable t) {
-      Log.runtime(TAG, "执行任务列表时发生错误:");
-      Log.printStackTrace(TAG, t);
-    }
-    return doubleCheck;
-  }
-
-  /**
-   * 处理单个任务。
-   *
-   * <p>该方法处理单个任务，包括检查任务类型，计算需要执行的任务次数，并尝试应用和执行任务。
-   *
+   * 执行会员任务 类型1
    * @param task 单个任务对象
    * @return 如果任务处理成功，则返回true；否则返回false
    */
-  private boolean processTask(JSONObject task) throws JSONException {
-    boolean hybrid = task.getBoolean("hybrid");
-    int periodCurrentCount = 0;
-    int periodTargetCount = 0;
-    if (hybrid) {
-      JSONObject extInfo = task.getJSONObject("extInfo");
-      periodCurrentCount = Integer.parseInt(extInfo.getString("PERIOD_CURRENT_COUNT"));
-      periodTargetCount = Integer.parseInt(extInfo.getString("PERIOD_TARGET_COUNT"));
-    }
-    int count = periodTargetCount > periodCurrentCount ? periodTargetCount - periodCurrentCount : 0;
-    if (count <= 0) {
-      return false;
-    }
+  private void processTask(JSONObject task) throws JSONException {
     JSONObject taskConfigInfo = task.getJSONObject("taskConfigInfo");
     String name = taskConfigInfo.getString("name");
     Long id = taskConfigInfo.getLong("id");
     String awardParamPoint = taskConfigInfo.getJSONObject("awardParam").getString("awardParamPoint");
     String targetBusiness = taskConfigInfo.getJSONArray("targetBusiness").getString(0);
-
-    for (int k = 0; k < count; k++) {
-      if (!applyAndExecuteTask(name, id, targetBusiness)) {
-        continue;
-      }
-      String ex = "(" + (periodCurrentCount + k + 1) + "/" + periodTargetCount + ")";
-      Log.other("会员任务Done! 🎖️[" + name + ex + "] #获得积分:" + awardParamPoint);
-    }
-    return true;
-  }
-
-  /**
-   * 应用并执行任务。
-   *
-   * <p>该方法尝试应用任务，然后执行任务。如果任务执行成功，则记录相应的日志。
-   *
-   * @param name 任务名称
-   * @param id 任务ID
-   * @param targetBusiness 目标业务信息
-   * @return 如果任务执行成功，则返回true；否则返回false
-   */
-  private boolean applyAndExecuteTask(String name, Long id, String targetBusiness) throws JSONException {
-    JSONObject jo = new JSONObject(AntMemberRpcCall.applyTask(name, id));
-    ThreadUtil.sleep(300);
-    if (!ResUtil.checkResCode(jo)) {
-      Log.runtime(TAG, "应用任务失败:" + jo.optString("resultDesc"));
-      return false;
-    }
-
     String[] targetBusinessArray = targetBusiness.split("#");
-    String bizParam = targetBusinessArray.length > 2 ? targetBusinessArray[2] : targetBusinessArray[1];
-    String bizSubType = targetBusinessArray.length > 2 ? targetBusinessArray[1] : targetBusinessArray[0];
-
-    jo = new JSONObject(AntMemberRpcCall.executeTask(bizParam, bizSubType));
-    ThreadUtil.sleep(300);
+    if (targetBusinessArray.length < 3) {
+      Log.runtime(TAG, "processTask target param err:" + Arrays.toString(targetBusinessArray));
+      return;
+    }
+    String bizType = targetBusinessArray[0];
+    String bizSubType = targetBusinessArray[1];
+    String bizParam = targetBusinessArray[2];
+    String str = AntMemberRpcCall.executeTask(bizParam, bizSubType, bizType, id);
+    ThreadUtil.sleep(500);
+    JSONObject jo = new JSONObject(str);
     if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
-      return false;
     }
-    return true;
+    Log.other("会员任务Done! 🎖️[" + name + "] #获得积分:" + awardParamPoint);
   }
 
   public void kbMember() {
