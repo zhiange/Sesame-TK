@@ -253,8 +253,8 @@ public class AntMember extends ModelTask {
     try {
       String s = AntMemberRpcCall.merchantSign();
       JSONObject jo = new JSONObject(s);
-      if (!ResUtil.checkResCode(jo)) {
-        Log.runtime(TAG, "doMerchantSign err:" + jo.getString("resultDesc"));
+      if (!jo.optBoolean("success")) {
+        Log.runtime(TAG, "doMerchantSign err:" + s);
         return;
       }
       jo = jo.getJSONObject("data");
