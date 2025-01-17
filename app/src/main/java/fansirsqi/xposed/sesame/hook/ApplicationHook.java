@@ -17,10 +17,13 @@ import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -58,6 +61,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.util.ClassUtil;
+import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
@@ -133,9 +137,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         ApplicationHook.offline = offline;
     }
 
-    static volatile Boolean initWithThead = null;
-
     private volatile long lastExecTime = 0; // 添加为类成员变量
+
 
     /**
      * 执行检查方法
@@ -310,88 +313,41 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 context = appService.getApplicationContext();
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
-                                String targetUid = getUserId();
-                                initWithThead = BaseModel.getEnableThreadPoolStartup().getValue();//此处无法在这里加载用户配置，暂未找到解决方案
-                                if (initWithThead == null) {
-                                    Log.record("️跳过执行,未载入用户配置");
-                                    return;
-                                } else if (initWithThead) {
-                                    Log.record(TAG, "⚡️开启线程池启动优化");
-                                    ExecutorService executorService = Executors.newSingleThreadExecutor();
-                                    mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
-                                        try {
-                                            if (!init) {
-                                                Log.record("️⚡️跳过执行-未初始化");
-                                                return;
-                                            }
-                                            Log.record("⚡️应用版本：" + alipayVersion.getVersionString());
-                                            Log.record("⚡️模块版本：" + modelVersion);
-                                            Log.record("⚡️开始执行");
-                                            long currentTime = System.currentTimeMillis();
-                                            if (lastExecTime + 2000 > currentTime) {
-                                                Log.record("⚡️执行间隔较短，跳过执行");
-                                                execDelayedHandler(BaseModel.getCheckInterval().getValue());
-                                                return;
-                                            }
-                                            String currentUid = UserMap.getCurrentUid();
-                                            if (targetUid == null || !targetUid.equals(currentUid)) {
-                                                Log.record("⚡️用户切换或为空，重新登录");
-                                                reLogin();
-                                                return;
-                                            }
-                                            lastExecTime = currentTime; // 更新最后执行时间
-                                            if (executeCheckTask(lastExecTime)) {
-                                                reLogin();
-                                                return;
-                                            }
-                                            TaskCommon.update();
-                                            ModelTask.startAllTask(false);
-                                            scheduleNextExecution(lastExecTime);
-                                        } catch (Exception e) {
-                                            Log.record(TAG, "⚡️执行异常");
-                                            Log.printStackTrace(TAG, e);
+
+                                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
+                                    try {
+                                        if (!init) {
+                                            Log.record("️跳过执行-未初始化");
+                                            return;
                                         }
-                                    }));
-
-
-                                } else {
-                                    Log.runtime(TAG, "默认启动方式");
-                                    mainTask = BaseTask.newInstance("MAIN_TASK",
-                                            () -> {
-                                                try {
-                                                    if (!init) {
-                                                        Log.record("跳过执行-未初始化");
-                                                        return;
-                                                    }
-                                                    Log.record("应用版本：" + alipayVersion.getVersionString());
-                                                    Log.record("模块版本：" + modelVersion);
-                                                    Log.record("开始执行");
-                                                    long currentTime = System.currentTimeMillis();
-                                                    if (lastExecTime + 2000 > currentTime) {
-                                                        Log.record("执行间隔较短，跳过执行");
-                                                        execDelayedHandler(BaseModel.getCheckInterval().getValue());
-                                                        return;
-                                                    }
-                                                    String currentUid = UserMap.getCurrentUid();
-                                                    if (targetUid == null || !targetUid.equals(currentUid)) {
-                                                        Log.record("用户切换或为空，重新登录");
-                                                        reLogin();
-                                                        return;
-                                                    }
-                                                    lastExecTime = currentTime; // 更新最后执行时间
-                                                    if (executeCheckTask(lastExecTime)) {
-                                                        reLogin();
-                                                        return;
-                                                    }
-                                                    TaskCommon.update();
-                                                    ModelTask.startAllTask(false);
-                                                    scheduleNextExecution(lastExecTime);
-                                                } catch (Exception e) {
-                                                    Log.record(TAG, "执行异常:");
-                                                    Log.printStackTrace(TAG, e);
-                                                }
-                                            });
-                                }
+                                        Log.record("开始执行");
+                                        long currentTime = System.currentTimeMillis();
+                                        if (lastExecTime + 2000 > currentTime) {
+                                            Log.record("执行间隔较短，跳过执行");
+                                            execDelayedHandler(BaseModel.getCheckInterval().getValue());
+                                            return;
+                                        }
+                                        String currentUid = UserMap.getCurrentUid();
+                                        String targetUid = getUserId();
+                                        if (targetUid == null || !targetUid.equals(currentUid)) {
+                                            Log.record("用户切换或为空，重新登录");
+                                            reLogin();
+                                            return;
+                                        }
+                                        lastExecTime = currentTime; // 更新最后执行时间
+                                        if (executeCheckTask(lastExecTime)) {
+                                            reLogin();
+                                            return;
+                                        }
+                                        TaskCommon.update();
+                                        ModelTask.startAllTask(false);
+                                        scheduleNextExecution(lastExecTime);
+                                    } catch (Exception e) {
+                                        Log.record(TAG, "执行异常");
+                                        Log.printStackTrace(TAG, e);
+                                    }
+                                }));
                                 registerBroadcastReceiver(appService);
                                 StatisticsUtil.load();
                                 FriendWatch.load();
@@ -558,7 +514,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Model.initAllModel();
                 String startMsg = "芝麻粒-TK 开始加载";
                 Log.record(startMsg);
-                Log.record("模块版本：" + modelVersion);
+                Log.record("⚙️模块版本：" + modelVersion);
+                Log.record("📦应用版本：" + alipayVersion.getVersionString());
                 Config.load(userId);
                 // ！！所有权限申请应该放在加载配置之后
                 //闹钟权限申请
@@ -607,6 +564,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 }
                 rpcBridge.load();
                 rpcVersion = rpcBridge.getVersion();
+
+
                 if (BaseModel.getNewRpc().getValue() && BaseModel.getDebugMode().getValue()) {
                     try {
                         rpcRequestUnhook = XposedHelpers.findAndHookMethod(
@@ -617,7 +576,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 , new XC_MethodHook() {
                                     @SuppressLint("WakelockTimeout")
                                     @Override
-                                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                    protected void beforeHookedMethod(MethodHookParam param) {
                                         Object[] args = param.args;
                                         Object object = args[15];
                                         Object[] recordArray = new Object[4];
@@ -629,13 +588,30 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                                     @SuppressLint("WakelockTimeout")
                                     @Override
-                                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                                    protected void afterHookedMethod(MethodHookParam param) {
                                         Object object = param.args[15];
                                         Object[] recordArray = rpcHookMap.remove(object);
                                         if (recordArray != null) {
-                                            Log.capture("记录\n时间: " + recordArray[0] + "\n方法: " + recordArray[1] + "\n参数: " + recordArray[2] + "\n数据: " + recordArray[3] + "\n");
+                                            Map<String, Object> HookResponse = new HashMap<>();
+                                            HookResponse.put("TimeStamp", recordArray[0]);
+                                            HookResponse.put("Method", recordArray[1]);
+                                            HookResponse.put("Params", recordArray[2]);
+                                            String rawData = String.valueOf(recordArray[3]);
+                                            try {
+                                                JSONObject jsonData = new JSONObject(rawData.replace("\\\"", "\"").replace("\\\\", "\\"));
+                                                HookResponse.put("Data", jsonData.toString());
+                                            } catch (Exception e) {
+                                                HookResponse.put("Data", rawData);
+                                            }
+                                            if (BaseModel.getSendHookData().getValue()) {
+                                                HookSender.sendHookData(HookResponse);
+                                            }
+                                            String logMessage = JsonUtil.formatJson(HookResponse, false);
+                                            if (logMessage != null && !logMessage.isEmpty()) {
+                                                Log.capture(logMessage);
+                                            }
                                         } else {
-                                            Log.capture("删除记录ID: " + object.hashCode());
+                                            Log.capture("delete record ID: " + object.hashCode());
                                         }
                                     }
 
