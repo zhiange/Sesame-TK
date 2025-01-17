@@ -1,7 +1,5 @@
 package fansirsqi.xposed.sesame.model;
 
-import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +8,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
+import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.task.antOcean.AntOceanRpcCall;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.ListUtil;
@@ -154,7 +153,10 @@ public class BaseModel extends Model {
     private static final BooleanModelField enableOnGoing = new BooleanModelField("enableOnGoing", "开启状态栏禁删", false);
 
     @Getter
-    private static final BooleanModelField enableThreadPoolStartup = new BooleanModelField("enableThreadPoolStartup", "启用线程池启动", false);
+    private static final BooleanModelField sendHookData = new BooleanModelField("sendHookData", "启用Hook数据转发", false);
+
+    @Getter
+    static final StringModelField sendHookDataUrl = new StringModelField("sendHookDataUrl", "Hook数据转发地址", "http://127.0.0.1:9527/hook");
 
     @Override
     public String getName() {
@@ -174,7 +176,6 @@ public class BaseModel extends Model {
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
-        modelFields.addField(enableThreadPoolStartup);//启用线程池启动
         modelFields.addField(stayAwake);//是否保持唤醒状态
         modelFields.addField(checkInterval);//执行间隔时间
         modelFields.addField(modelSleepTime);//模块休眠时间范围
@@ -186,9 +187,9 @@ public class BaseModel extends Model {
         modelFields.addField(waitWhenException);//异常发生时的等待时间
         modelFields.addField(errNotify);//异常通知开关
         modelFields.addField(newRpc);//是否启用新接口
-        if (isApkInDebug()) {
-            modelFields.addField(debugMode);//是否开启抓包调试模式
-        }
+        modelFields.addField(debugMode);//是否开启抓包调试模式
+        modelFields.addField(sendHookData);//启用Hook数据转发
+        modelFields.addField(sendHookDataUrl);//Hook数据转发地址
         modelFields.addField(batteryPerm);//是否申请支付宝的后台运行权限
         modelFields.addField(recordLog);//是否记录日志
         modelFields.addField(showToast);//是否显示气泡提示
