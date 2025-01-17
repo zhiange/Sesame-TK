@@ -44,17 +44,15 @@ import fansirsqi.xposed.sesame.util.ToastUtil;
 
 public class MainActivity extends BaseActivity {
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
+//    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private boolean hasPermissions = false;
-
-    private boolean isBackground = false;
 
     private boolean isClick = false;
 
     private TextView tvStatistics;
 
-    private Handler viewHandler;
+    private final Handler viewHandler = new Handler(Looper.getMainLooper());
 
     private Runnable titleRunner;
 
@@ -84,7 +82,7 @@ public class MainActivity extends BaseActivity {
         // 获取并设置一言句子
         ViewAppInfo.checkRunType();
         updateSubTitle(ViewAppInfo.getRunType());
-        viewHandler = new Handler(Looper.getMainLooper());
+//        viewHandler = new Handler(Looper.getMainLooper());
         titleRunner = () -> updateSubTitle(RunType.DISABLE);
         if (mainImage != null) {
             mainImage.setOnLongClickListener(
@@ -361,9 +359,8 @@ public class MainActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void selectSettingUid() {
+    public void selectSettingUid() {
         AtomicBoolean selected = new AtomicBoolean(false);
-
         AlertDialog dialog =
                 StringDialog.showSelectionDialog(
                         this,
@@ -408,7 +405,9 @@ public class MainActivity extends BaseActivity {
     private void goSettingActivity(int index) {
         UserEntity userEntity = userEntityArray[index];
 
+//        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? DemoSettingActivity.class : SettingsActivity.class;
         Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class;
+
         // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
         // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
 
