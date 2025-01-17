@@ -17,21 +17,20 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.json.JSONException;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
@@ -58,6 +57,7 @@ import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
 public class NewSettingsActivity extends BaseActivity {
@@ -65,6 +65,10 @@ public class NewSettingsActivity extends BaseActivity {
     private static final Integer EXPORT_REQUEST_CODE = 1;
 
     private static final Integer IMPORT_REQUEST_CODE = 2;
+
+    private ActivityResultLauncher<Intent> exportLauncher;
+    private ActivityResultLauncher<Intent> importLauncher;
+
     private WebView webView;
     private Context context;
     private String userId = null;
@@ -83,6 +87,7 @@ public class NewSettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = this;
         userId = null;
         userName = null;
         Intent intent = getIntent();
@@ -100,6 +105,41 @@ public class NewSettingsActivity extends BaseActivity {
         Config.load(userId);
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_new_settings);
+
+        //处理返回键
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    save();
+                    finish();
+                }
+            }
+        });
+
+        // 初始化导出逻辑
+        exportLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        PortUtil.handleExport(this, result.getData().getData(), userId);
+                    }
+                }
+        );
+
+        // 初始化导入逻辑
+        importLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        PortUtil.handleImport(this, result.getData().getData(), userId);
+                    }
+                }
+        );
+
+
         if (userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
@@ -160,15 +200,16 @@ public class NewSettingsActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
-            save();
-        }
-    }
+
+//    @Override
+//    public void onBackPressed() {
+//        if (webView.canGoBack()) {
+//            webView.goBack();
+//        } else {
+//            super.onBackPressed();
+//            save();
+//        }
+//    }
 
     public class WebAppInterface {
         @JavascriptInterface
@@ -361,15 +402,18 @@ public class NewSettingsActivity extends BaseActivity {
                 exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 exportIntent.setType("*/*");
                 exportIntent.putExtra(Intent.EXTRA_TITLE, "[" + userName + "]-config_v2.json");
-                startActivityForResult(exportIntent, EXPORT_REQUEST_CODE);
+//                startActivityForResult(exportIntent, EXPORT_REQUEST_CODE);
+                exportLauncher.launch(exportIntent);
                 break;
             case 2:
                 Intent importIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 importIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 importIntent.setType("*/*");
                 importIntent.putExtra(Intent.EXTRA_TITLE, "config_v2.json");
-                startActivityForResult(importIntent, IMPORT_REQUEST_CODE);
+//                startActivityForResult(importIntent, IMPORT_REQUEST_CODE);
+                importLauncher.launch(importIntent);
                 break;
+
             case 3:
                 new AlertDialog.Builder(context)
                         .setTitle("警告")
@@ -411,68 +455,69 @@ public class NewSettingsActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) {
-            return;
-        }
-        if (requestCode == EXPORT_REQUEST_CODE) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    java.io.File configV2File;
-                    if (StringUtil.isEmpty(userId)) {
-                        configV2File = Files.getDefaultConfigV2File();
-                    } else {
-                        configV2File = Files.getConfigV2File(userId);
-                    }
-                    FileInputStream inputStream = new FileInputStream(configV2File);
-                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
-                        Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Log.printStackTrace(e);
-                    Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else if (requestCode == IMPORT_REQUEST_CODE) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    java.io.File configV2File;
-                    if (StringUtil.isEmpty(userId)) {
-                        configV2File = Files.getDefaultConfigV2File();
-                    } else {
-                        configV2File = Files.getConfigV2File(userId);
-                    }
-                    FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
-                        Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
-                        if (!StringUtil.isEmpty(userId)) {
-                            try {
-                                Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
-                                intent.putExtra("userId", userId);
-                                sendBroadcast(intent);
-                            } catch (Throwable th) {
-                                Log.printStackTrace(th);
-                            }
-                        }
-                        Intent intent = getIntent();
-                        finish();
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Log.printStackTrace(e);
-                    Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode != RESULT_OK) {
+//            return;
+//        }
+//        if (requestCode == EXPORT_REQUEST_CODE) {
+//            Uri uri = data.getData();
+//            if (uri != null) {
+//                try {
+//                    java.io.File configV2File;
+//                    if (StringUtil.isEmpty(userId)) {
+//                        configV2File = Files.getDefaultConfigV2File();
+//                    } else {
+//                        configV2File = Files.getConfigV2File(userId);
+//                    }
+//                    FileInputStream inputStream = new FileInputStream(configV2File);
+//                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
+//                        Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
+//                    } else {
+//                        Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+//                    }
+//                } catch (IOException e) {
+//                    Log.printStackTrace(e);
+//                    Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        } else if (requestCode == IMPORT_REQUEST_CODE) {
+//            Uri uri = data.getData();
+//            if (uri != null) {
+//                try {
+//                    java.io.File configV2File;
+//                    if (StringUtil.isEmpty(userId)) {
+//                        configV2File = Files.getDefaultConfigV2File();
+//                    } else {
+//                        configV2File = Files.getConfigV2File(userId);
+//                    }
+//                    FileOutputStream outputStream = new FileOutputStream(configV2File);
+//                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
+//                        Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
+//                        if (!StringUtil.isEmpty(userId)) {
+//                            try {
+//                                Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
+//                                intent.putExtra("userId", userId);
+//                                sendBroadcast(intent);
+//                            } catch (Throwable th) {
+//                                Log.printStackTrace(th);
+//                            }
+//                        }
+//                        Intent intent = getIntent();
+//                        finish();
+//                        startActivity(intent);
+//                    } else {
+//                        Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+//                    }
+//                } catch (IOException e) {
+//                    Log.printStackTrace(e);
+//                    Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        }
+//    }
 
     private void save() {
         if (Config.isModify(userId) && Config.save(userId, false)) {

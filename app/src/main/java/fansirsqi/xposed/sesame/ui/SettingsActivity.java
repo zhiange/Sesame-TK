@@ -3,7 +3,6 @@ package fansirsqi.xposed.sesame.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
@@ -16,13 +15,12 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
@@ -42,6 +40,7 @@ import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
 
@@ -49,6 +48,8 @@ public class SettingsActivity extends BaseActivity {
 
     private static final Integer EXPORT_REQUEST_CODE = 1; // 导出配置请求码
     private static final Integer IMPORT_REQUEST_CODE = 2; // 导入配置请求码
+    private ActivityResultLauncher<Intent> exportLauncher;
+    private ActivityResultLauncher<Intent> importLauncher;
 
     private Context context; // 上下文对象
     private Boolean isDraw = false; // 标记是否已调整 Tab 的宽度
@@ -88,11 +89,41 @@ public class SettingsActivity extends BaseActivity {
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_settings);
 
+        //处理返回键
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                save();
+                finish();
+            }
+        });
+
+        // 初始化导出逻辑
+        exportLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        PortUtil.handleExport(this, result.getData().getData(), userId);
+                    }
+                }
+        );
+
+        // 初始化导入逻辑
+        importLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        PortUtil.handleImport(this, result.getData().getData(), userId);
+                    }
+                }
+        );
+
+
         // 如果用户名不为空，将其显示在副标题中
         if (this.userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + this.userName);
         }
-        setBaseSubtitleTextColor(ContextCompat.getColor(this,R.color.textColorPrimary));
+        setBaseSubtitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
         context = this;
         // 初始化 TabHost
         tabHost = findViewById(R.id.tab_settings);
@@ -130,11 +161,11 @@ public class SettingsActivity extends BaseActivity {
         tabHost.setCurrentTab(0); // 设置默认选项卡
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        save(); // 返回时保存配置
-    }
+//    @Override
+//    public void onBackPressed() {
+//        super.onBackPressed();
+//        save(); // 返回时保存配置
+//    }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -172,14 +203,16 @@ public class SettingsActivity extends BaseActivity {
                 exportIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 exportIntent.setType("*/*");
                 exportIntent.putExtra(Intent.EXTRA_TITLE, "[" + this.userName + "]-config_v2.json");
-                startActivityForResult(exportIntent, EXPORT_REQUEST_CODE);
+//                startActivityForResult(exportIntent, EXPORT_REQUEST_CODE);
+                exportLauncher.launch(exportIntent);
                 break;
             case 2: // 导入配置
                 Intent importIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 importIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 importIntent.setType("*/*");
                 importIntent.putExtra(Intent.EXTRA_TITLE, "config_v2.json");
-                startActivityForResult(importIntent, IMPORT_REQUEST_CODE);
+//                startActivityForResult(importIntent, IMPORT_REQUEST_CODE);
+                importLauncher.launch(importIntent);
                 break;
             case 3: // 删除配置
                 new AlertDialog.Builder(context)
@@ -222,73 +255,72 @@ public class SettingsActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) {
-            return;
-        }
-        if (requestCode == EXPORT_REQUEST_CODE) {
-            // 处理导出逻辑
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    java.io.File configV2File;
-                    if (StringUtil.isEmpty(this.userId)) {
-                        configV2File = Files.getDefaultConfigV2File();
-                    } else {
-                        configV2File = Files.getConfigV2File(this.userId);
-                    }
-                    FileInputStream inputStream = new FileInputStream(configV2File);
-                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
-                        ToastUtil.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Log.printStackTrace(e);
-                    ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else if (requestCode == IMPORT_REQUEST_CODE) {
-            // 处理导入逻辑
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    java.io.File configV2File;
-                    if (StringUtil.isEmpty(this.userId)) {
-                        configV2File = Files.getDefaultConfigV2File();
-                    } else {
-                        configV2File = Files.getConfigV2File(this.userId);
-                    }
-                    FileOutputStream outputStream = new FileOutputStream(configV2File);
-                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
-                        ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
-                        if (!StringUtil.isEmpty(this.userId)) {
-                            try {
-                                Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
-                                intent.putExtra("userId", this.userId);
-                                sendBroadcast(intent);
-                            } catch (Throwable th) {
-                                Log.printStackTrace(th);
-                            }
-                        }
-                        Intent intent = getIntent();
-                        finish();
-                        startActivity(intent);
-                    } else {
-                        ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Log.printStackTrace(e);
-                    ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode != RESULT_OK) {
+//            return;
+//        }
+//        if (requestCode == EXPORT_REQUEST_CODE) {
+//            // 处理导出逻辑
+//            Uri uri = data.getData();
+//            if (uri != null) {
+//                try {
+//                    java.io.File configV2File;
+//                    if (StringUtil.isEmpty(this.userId)) {
+//                        configV2File = Files.getDefaultConfigV2File();
+//                    } else {
+//                        configV2File = Files.getConfigV2File(this.userId);
+//                    }
+//                    FileInputStream inputStream = new FileInputStream(configV2File);
+//                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
+//                        ToastUtil.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
+//                    } else {
+//                        ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+//                    }
+//                } catch (IOException e) {
+//                    Log.printStackTrace(e);
+//                    ToastUtil.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        } else if (requestCode == IMPORT_REQUEST_CODE) {
+//            // 处理导入逻辑
+//            Uri uri = data.getData();
+//            if (uri != null) {
+//                try {
+//                    java.io.File configV2File;
+//                    if (StringUtil.isEmpty(this.userId)) {
+//                        configV2File = Files.getDefaultConfigV2File();
+//                    } else {
+//                        configV2File = Files.getConfigV2File(this.userId);
+//                    }
+//                    FileOutputStream outputStream = new FileOutputStream(configV2File);
+//                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
+//                        ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
+//                        if (!StringUtil.isEmpty(this.userId)) {
+//                            try {
+//                                Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
+//                                intent.putExtra("userId", this.userId);
+//                                sendBroadcast(intent);
+//                            } catch (Throwable th) {
+//                                Log.printStackTrace(th);
+//                            }
+//                        }
+//                        Intent intent = getIntent();
+//                        finish();
+//                        startActivity(intent);
+//                    } else {
+//                        ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+//                    }
+//                } catch (IOException e) {
+//                    Log.printStackTrace(e);
+//                    ToastUtil.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        }
+//    }
 
     private void save() {
-        // 保存当前用户的配置信息
         try {
             if (Config.isModify(this.userId) && Config.save(this.userId, false)) {
                 ToastUtil.showToastWithDelay(this, "保存成功！", 100);

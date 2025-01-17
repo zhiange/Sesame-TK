@@ -70,7 +70,7 @@ public class ToastUtil {
     /**
      * 创建自定义 Toast
      *
-     * @param message 显示的消息
+     * @param message  显示的消息
      * @param duration 显示时长
      * @return Toast 对象
      */
@@ -81,8 +81,8 @@ public class ToastUtil {
     /**
      * 创建自定义 Toast
      *
-     * @param context 上下文
-     * @param message 显示的消息
+     * @param context  上下文
+     * @param message  显示的消息
      * @param duration 显示时长
      * @return Toast 对象
      */
@@ -109,6 +109,12 @@ public class ToastUtil {
     public static void showToastWithDelay(Context context, String message, int delayMillis) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             makeText(context, message, Toast.LENGTH_SHORT).show();
+        }, delayMillis);
+    }
+
+    public static void showToastWithDelay(String message, int delayMillis) {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            makeText(message, Toast.LENGTH_SHORT).show();
         }, delayMillis);
     }
 
