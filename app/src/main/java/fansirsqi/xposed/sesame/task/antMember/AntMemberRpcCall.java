@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 public class AntMemberRpcCall {
 
@@ -121,14 +122,16 @@ public class AntMemberRpcCall {
                         + taskConfigId + "}]");
     }
 
-    public static String executeTask(String bizParam, String bizSubType) {
+    public static String executeTask(String bizParam, String bizSubType, String bizType, Long taskConfigId) {
         return RequestManager.requestString("alipay.antmember.biz.rpc.membertask.h5.executeTask",
-                "[{\"bizOutNo\":\"" + (System.currentTimeMillis() - 16000L) + "\",\"bizParam\":\""
-                        + bizParam + "\",\"bizSubType\":\"" + bizSubType + "\",\"bizType\":\"BROWSE\"}]");
+                "[{\"bizOutNo\":\"" + TimeUtil.getFormatDate().replaceAll("-", "") +
+                        "\",\"bizParam\":\"" + bizParam + "\",\"bizSubType\":\"" + bizSubType + "\",\"bizType\":\"" + bizType +
+                        "\",\"sourcePassMap\":{\"innerSource\":\"\",\"source\":\"myTab\",\"unid\":\"\"}" +
+                        ",\"syncProcess\":true,\"taskConfigId\":\"" + taskConfigId + "\"}]");
     }
 
     public static String queryAllStatusTaskList() {
-        return RequestManager.requestString("alipay.antmember.biz.rpc.membertask.h5.signPageTaskList",
+        return RequestManager.requestString("alipay.antmember.biz.rpc.membertask.h5.queryAllStatusTaskList",
                 "[{\"sourceBusiness\":\"signInAd\",\"sourcePassMap\":{\"innerSource\":\"\",\"source\":\"myTab\",\"unid\":\"\"}}]");
     }
 
