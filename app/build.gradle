@@ -98,7 +98,7 @@ android {
         compatible {
             dimension "default" // 兼容产品风味
             ext.applicationType = "Compatible"
-            minSdk 26    // 支持较老的 Android 版本
+            minSdk 21    // 支持较老的 Android 版本
             targetSdk 27
         }
     }
