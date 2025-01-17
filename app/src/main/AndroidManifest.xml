@@ -58,6 +58,10 @@
                 android:resizeableActivity="true"
                  />
         <activity
+            android:name="fansirsqi.xposed.sesame.ui.DemoSettingActivity"
+            android:resizeableActivity="true"
+            />
+        <activity
                 android:name="fansirsqi.xposed.sesame.ui.SettingsActivity"
                 android:resizeableActivity="true"
                  />
