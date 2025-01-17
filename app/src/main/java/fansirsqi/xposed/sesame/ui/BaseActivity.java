@@ -18,7 +18,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 初始化应用信息
         ViewAppInfo.init(getApplicationContext());
     }
 
@@ -37,56 +36,32 @@ public class BaseActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    /**
-     * 获取基础标题，默认从 ViewAppInfo 中获取应用标题。
-     *
-     * @return 基础标题字符串
-     */
+
     public String getBaseTitle() {
         return ViewAppInfo.getAppTitle();
     }
 
-    /**
-     * 获取基础副标题，默认返回 null。
-     *
-     * @return 基础副标题字符串或 null
-     */
+
     public String getBaseSubtitle() {
         return null;
     }
 
-    /**
-     * 设置基础标题。
-     *
-     * @param title 需要设置的标题
-     */
+
     public void setBaseTitle(String title) {
         toolbar.setTitle(title);
     }
 
-    /**
-     * 设置基础副标题。
-     *
-     * @param subTitle 需要设置的副标题
-     */
+
     public void setBaseSubtitle(String subTitle) {
         toolbar.setSubtitle(subTitle);
     }
 
-    /**
-     * 设置基础标题的文本颜色。
-     *
-     * @param color 颜色值
-     */
+
     public void setBaseTitleTextColor(int color) {
         toolbar.setTitleTextColor(color);
     }
 
-    /**
-     * 设置基础副标题的文本颜色。
-     *
-     * @param color 颜色值
-     */
+
     public void setBaseSubtitleTextColor(int color) {
         toolbar.setSubtitleTextColor(color);
     }
