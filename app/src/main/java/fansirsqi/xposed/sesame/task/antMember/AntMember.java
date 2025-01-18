@@ -32,8 +32,6 @@ public class AntMember extends ModelTask {
   private BooleanModelField collectSesame;
   private BooleanModelField collectSesameWithOneClick;
   private BooleanModelField sesameTask;
-  private BooleanModelField promiseSportsRoute;
-  private BooleanModelField enableKb;
   private BooleanModelField collectInsuredGold;
   private BooleanModelField enableGoldTicket;
   private BooleanModelField enableGameCenter;
@@ -48,19 +46,15 @@ public class AntMember extends ModelTask {
     ModelFields modelFields = new ModelFields();
     modelFields.addField(memberSign = new BooleanModelField("memberSign", "会员签到", false));
     modelFields.addField(memberTask = new BooleanModelField("memberTask", "会员任务", false));
-    modelFields.addField(collectSesame = new BooleanModelField("collectSesame", "芝麻粒领取", false));
-    modelFields.addField(collectSecurityFund = new BooleanModelField("collectSecurityFund", "芝麻粒坚持攒保障金(可开启持续做)", false));
-    modelFields.addField(promiseSportsRoute = new BooleanModelField("promiseSportsRoute", "芝麻粒坚持锻炼，走运动路线(只自动加入任务)", false));
     modelFields.addField(sesameTask = new BooleanModelField("sesameTask", "芝麻信用|芝麻粒信用任务", false));
     modelFields.addField(collectSesame = new BooleanModelField("collectSesame", "芝麻信用|芝麻粒领取", false));
     modelFields.addField(collectSesameWithOneClick = new BooleanModelField("collectSesameWithOneClick", "芝麻信用|芝麻粒领取使用一键收取", false));
-    modelFields.addField(enableKb = new BooleanModelField("enableKb", "口碑签到", false));
     modelFields.addField(collectInsuredGold = new BooleanModelField("collectInsuredGold", "蚂蚁保|保障金领取", false));
     modelFields.addField(enableGoldTicket = new BooleanModelField("enableGoldTicket", "黄金票签到", false));
     modelFields.addField(enableGameCenter = new BooleanModelField("enableGameCenter", "游戏中心签到", false));
-    modelFields.addField(merchantSign = new BooleanModelField("merchantSign", "商家服务签到", false));
-    modelFields.addField(merchantKmdk = new BooleanModelField("merchantKmdk", "商家服务开门打卡", false));
-    modelFields.addField(merchantMoreTask = new BooleanModelField("merchantMoreTask", "商家服务积分任务", false));
+    modelFields.addField(merchantSign = new BooleanModelField("merchantSign", "商家服务|签到", false));
+    modelFields.addField(merchantKmdk = new BooleanModelField("merchantKmdk", "商家服务|开门打卡", false));
+    modelFields.addField(merchantMoreTask = new BooleanModelField("merchantMoreTask", "商家服务|积分任务", false));
     modelFields.addField(beanSignIn = new BooleanModelField("beanSignIn", "安心豆签到", false));
     modelFields.addField(beanExchangeBubbleBoost = new BooleanModelField("beanExchangeBubbleBoost", "安心豆兑换时光加速器", false));
     return modelFields;
@@ -147,7 +141,7 @@ public class AntMember extends ModelTask {
         ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         if (ResUtil.checkResCode(jo)) {
-          Log.other("每日签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
+          Log.other("会员签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
           StatusUtil.memberSignInToday(UserMap.getCurrentUid());
         } else {
           Log.record(jo.getString("resultDesc"));
@@ -208,7 +202,7 @@ public class AntMember extends ModelTask {
           s = AntMemberRpcCall.receivePointByUser(id);
           jo = new JSONObject(s);
           if (ResUtil.checkResCode(jo)) {
-            Log.other("领取奖励🎖️[" + bizTitle + "]#" + pointAmount + "积分");
+            Log.other("会员积分🎖️[" + bizTitle + "]#" + pointAmount + "积分");
           } else {
             Log.record(jo.getString("resultDesc"));
             Log.runtime(s);
@@ -241,7 +235,7 @@ public class AntMember extends ModelTask {
       }
       JSONObject entrance = jo.getJSONObject("entrance");
       if (!entrance.optBoolean("openApp")) {
-        Log.other("芝麻信用💳|未开通芝麻信用");
+        Log.other("芝麻信用💳[未开通芝麻信用]");
         return false;
       }
       return true;
@@ -303,13 +297,13 @@ public class AntMember extends ModelTask {
         ThreadUtil.sleep(500);
         responseObj = new JSONObject(s);
         if (!responseObj.optBoolean("success")) {
-          Log.error("芝麻信用💳|领取任务失败: " + s);
+          Log.error("芝麻信用💳[领取任务" + taskTitle + "失败]#" + s);
           continue;
         }
         recordId = responseObj.getJSONObject("data").getString("recordId");
       } else {
         if (!task.has("recordId")) {
-          Log.error("芝麻信用💳|积分任务未获取到recordId: " + task);
+          Log.error("芝麻信用💳[任务" + taskTitle + "未获取到recordId]#" + task);
           continue;
         }
         recordId = task.getString("recordId");
@@ -318,7 +312,7 @@ public class AntMember extends ModelTask {
       ThreadUtil.sleep(16000);
       responseObj = new JSONObject(s);
       if (!responseObj.optBoolean("success")) {
-        Log.error("芝麻信用💳|任务回调失败: " + s);
+        Log.error("芝麻信用💳[任务" + taskTitle + "回调失败]#" + s);
         continue;
       }
       // 无法自动完成的任务只领取，不操作完成，否则会报错
@@ -332,10 +326,10 @@ public class AntMember extends ModelTask {
       ThreadUtil.sleep(4000);
       responseObj = new JSONObject(s);
       if (!responseObj.optBoolean("success")) {
-        Log.error("芝麻信用💳|任务完成失败: " + s);
+        Log.error("芝麻信用💳[任务" + taskTitle + "完成失败]#" + s);
         continue;
       }
-      Log.other("芝麻信用|完成任务[" + taskTitle + "(" + (completedNum + 1) + "/" + needCompleteNum + "天)]");
+      Log.other("芝麻信用💳[" + taskTitle + "]#(" + (completedNum + 1) + "/" + needCompleteNum + "天)");
     }
   }
 
@@ -377,7 +371,7 @@ public class AntMember extends ModelTask {
             continue;
           }
         }
-        Log.other("芝麻信用💳|芝麻粒" + (withOneClick ? "一键" : "") + "收取🙇🏻‍♂️[" + title + "]#" + potentialSize + "粒");
+        Log.other("芝麻信用💳[" + title + "]#" + potentialSize + "粒" + (withOneClick ? "(一键收取)" : ""));
       }
     } catch (Throwable t) {
       Log.printStackTrace(TAG + ".collectSesame", t);
@@ -396,7 +390,7 @@ public class AntMember extends ModelTask {
           String activityNo = jo.getString("activityNo");
           JSONObject joSignIn = new JSONObject(AntMemberRpcCall.signIn(activityNo));
           if (joSignIn.optBoolean("success")) {
-            Log.other("商家服务🕴🏻[开门打卡签到成功]");
+            Log.other("商家服务🏬[开门打卡签到成功]");
           } else {
             Log.record(joSignIn.getString("errorMsg"));
             Log.runtime(joSignIn.toString());
@@ -424,14 +418,13 @@ public class AntMember extends ModelTask {
             break;
           }
           if ("SIGN_UP".equals(jo.getString("signUpStatus"))) {
-            Log.record("开门打卡今日已报名！");
             break;
           }
           if ("UN_SIGN_UP".equals(jo.getString("signUpStatus"))) {
             String activityPeriodName = jo.getString("activityPeriodName");
             JSONObject joSignUp = new JSONObject(AntMemberRpcCall.signUp(activityNo));
             if (joSignUp.optBoolean("success")) {
-              Log.other("商家服务🕴🏻[" + activityPeriodName + "开门打卡报名]");
+              Log.other("商家服务🏬[" + activityPeriodName + "开门打卡报名]");
               return;
             } else {
               Log.record(joSignUp.getString("errorMsg"));
@@ -465,7 +458,7 @@ public class AntMember extends ModelTask {
       String signResult = jo.getString("signInResult");
       String reward = jo.getString("todayReward");
       if ("SUCCESS".equals(signResult)) {
-        Log.other("商家服务🕴🏻[签到成功]#获得积分" + reward);
+        Log.other("商家服务🏬[每日签到]#获得积分" + reward);
       } else {
         Log.record(s);
         Log.runtime(s);
@@ -498,7 +491,7 @@ public class AntMember extends ModelTask {
             if (task.has("pointBallId")) {
               jo = new JSONObject(AntMemberRpcCall.ballReceive(task.getString("pointBallId")));
               if (jo.optBoolean("success")) {
-                Log.other("商家服务🕴🏻[" + title + "]#" + reward);
+                Log.other("商家服务🏬[" + title + "]#领取积分" + reward);
               }
             }
           } else if ("PROCESSING".equals(taskStatus) || "UNRECEIVED".equals(taskStatus)) {
@@ -506,7 +499,7 @@ public class AntMember extends ModelTask {
               JSONObject bizExtMap = task.getJSONObject("extendLog").getJSONObject("bizExtMap");
               jo = new JSONObject(AntMemberRpcCall.taskFinish(bizExtMap.getString("bizId")));
               if (jo.optBoolean("success")) {
-                Log.other("商家服务🕴🏻[" + title + "]#" + reward);
+                Log.other("商家服务🏬[" + title + "]#领取积分" + reward);
               }
               doubleCheck = true;
             } else {
@@ -591,7 +584,7 @@ public class AntMember extends ModelTask {
           ThreadUtil.sleep(16000);
           jo = new JSONObject(AntMemberRpcCall.produce(actionCode));
           if (jo.optBoolean("success")) {
-            Log.other("商家任务完成🕴🏻[" + title + "]");
+            Log.other("商家服务🏬[完成任务" + title + "]");
           }
         }
       } else {
@@ -671,7 +664,7 @@ public class AntMember extends ModelTask {
     if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
     }
-    Log.other("会员任务Done! 🎖️[" + name + "] #获得积分:" + awardParamPoint);
+    Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
   }
 
   public void kbMember() {
