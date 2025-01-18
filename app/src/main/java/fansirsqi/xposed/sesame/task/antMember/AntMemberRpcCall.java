@@ -82,7 +82,6 @@ public class AntMemberRpcCall {
     }
 
     /* 商家服务任务 */
-
     public static String taskFinish(String bizId) {
         return RequestManager.requestString("com.alipay.adtask.biz.mobilegw.service.task.finish",
                 "[{\"bizId\":\"" + bizId + "\"}]");
@@ -251,6 +250,30 @@ public class AntMemberRpcCall {
                 "[{\"collectAll\":false,\"creditFeedbackId\":\"" + creditFeedbackId + "\",\"status\":\"UNCLAIMED\"}]");
     }
 
+    /**
+     * 获取保障金信息
+     */
+    public static String queryInsuredHome () {
+        return RequestManager.requestString("com.alipay.insplatformbff.insgift.accountService.queryAccountForPlat",
+                "[{\"includePolicy\":true,\"specialChannel\":\"wealth_entry\"}]");
+    }
+
+    /**
+     * 获取所有可领取的保障金
+     */
+    public static String queryAvailableCollectInsuredGold() {
+        return RequestManager.requestString("com.alipay.insgiftbff.insgiftMain.queryMultiSceneWaitToGainList",
+                "[{\"entrance\":\"wealth_entry\",\"eventToWaitParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"helpChildParamDTO\":{\"giftProdCode\":\"GIFT_HEALTH_GOLD_CHILD\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"priorityChannelParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"signInParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]}}]",
+                "insgiftbff", "queryMultiSceneWaitToGainList", "insgiftMain");
+    }
+
+    /**
+     * 领取保障金
+     */
+    public static String collectInsuredGold(JSONObject goldBallObj) {
+        return RequestManager.requestString("com.alipay.insgiftbff.insgiftMain.gainMyAndFamilySumInsured",
+                goldBallObj.toString(), "insgiftbff", "gainMyAndFamilySumInsured", "insgiftMain");
+    }
     /**
      * 查询生活记录
      *

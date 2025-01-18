@@ -30,11 +30,11 @@ public class AntMember extends ModelTask {
   private BooleanModelField memberSign;
   private BooleanModelField memberTask;
   private BooleanModelField collectSesame;
-  private BooleanModelField collectSecurityFund;
   private BooleanModelField collectSesameWithOneClick;
   private BooleanModelField sesameTask;
   private BooleanModelField promiseSportsRoute;
   private BooleanModelField enableKb;
+  private BooleanModelField collectInsuredGold;
   private BooleanModelField enableGoldTicket;
   private BooleanModelField enableGameCenter;
   private BooleanModelField merchantSign;
@@ -55,6 +55,7 @@ public class AntMember extends ModelTask {
     modelFields.addField(collectSesame = new BooleanModelField("collectSesame", "芝麻信用|芝麻粒领取", false));
     modelFields.addField(collectSesameWithOneClick = new BooleanModelField("collectSesameWithOneClick", "芝麻信用|芝麻粒领取使用一键收取", false));
     modelFields.addField(enableKb = new BooleanModelField("enableKb", "口碑签到", false));
+    modelFields.addField(collectInsuredGold = new BooleanModelField("collectInsuredGold", "蚂蚁保|保障金领取", false));
     modelFields.addField(enableGoldTicket = new BooleanModelField("enableGoldTicket", "黄金票签到", false));
     modelFields.addField(enableGameCenter = new BooleanModelField("enableGameCenter", "游戏中心签到", false));
     modelFields.addField(merchantSign = new BooleanModelField("merchantSign", "商家服务签到", false));
@@ -88,8 +89,8 @@ public class AntMember extends ModelTask {
           collectSesame(collectSesameWithOneClick.getValue());
         }
       }
-      if (collectSecurityFund.getValue()) {
-        collectSecurityFund();
+      if (collectInsuredGold.getValue()) {
+        collectInsuredGold();
       }
       if (enableKb.getValue()) {
         kbMember();
@@ -602,169 +603,46 @@ public class AntMember extends ModelTask {
     }
   }
 
-//  /** 做任务赚积分 */
-//  private void signPageTaskList() {
-//    try {
-//      do {
-//        String s = AntMemberRpcCall.signPageTaskList();
-//        ThreadUtil.sleep(500);
-//        JSONObject jo = new JSONObject(s);
-//        boolean doubleCheck = false;
-//        if (!ResUtil.checkResCode(TAG, jo) || !jo.has("categoryTaskList")) return;
-//        JSONArray categoryTaskList = jo.getJSONArray("categoryTaskList");
-//        for (int i = 0; i < categoryTaskList.length(); i++) {
-//          jo = categoryTaskList.getJSONObject(i);
-//          if (!"BROWSE".equals(jo.getString("type"))) {
-//            continue;
-//          }
-//          JSONArray taskList = jo.getJSONArray("taskList");
-//          doubleCheck = doTask(taskList);
-//        }
-//        if (doubleCheck) continue;
-//        break;
-//      } while (true);
-//    } catch (Throwable t) {
-//      Log.runtime(TAG, "signPageTaskList err:");
-//      Log.printStackTrace(TAG, t);
-//    }
-//  }
-
-  private void collectSecurityFund() {
+  /**
+   * 保障金领取
+   */
+  private void collectInsuredGold() {
     try {
-      // 模拟从生活记录->明细->任务->明细（两次，不知原因）
-      String str = AntMemberRpcCall.promiseQueryHome();
-      JSONObject jsonObject = new JSONObject(str);
-      if (!jsonObject.optBoolean("success")) {
-        Log.runtime(TAG + ".doPromise.promiseQueryHome", jsonObject.optString("errorMsg"));
+      String s = AntMemberRpcCall.queryAvailableCollectInsuredGold();
+      ThreadUtil.sleep(200);
+      JSONObject jo = new JSONObject(s);
+      if (!jo.optBoolean("success")) {
+        Log.other(TAG + ".collectInsuredGold.queryInsuredHome", "保障金🏥[响应失败]#" + s);
         return;
       }
-      JSONArray jsonArray = (JSONArray) JsonUtil.getValueByPathObject(jsonObject, "data.processingPromises");
-      if (jsonArray == null) {
-        return;
-      }
-      boolean isSportsRoute = true;
-      for (int i = 0; i < jsonArray.length(); i++) {
-        jsonObject = jsonArray.getJSONObject(i);
-        String recordId = jsonObject.getString("recordId");
-        // 如果当天任务做完后就结束了，则可以再继续一次，缩短任务时间。
-        boolean isRepeat = jsonObject.getInt("totalNums") - jsonObject.getInt("finishNums") == 1;
-        String promiseName = jsonObject.getString("promiseName");
-        if ("坚持攒保障金".equals(promiseName) && collectSecurityFund.getValue()) {
-          promiseQueryDetail(recordId);
-          securityFund(isRepeat, recordId);
-          promiseQueryDetail(recordId);
-          promiseQueryDetail(recordId);
+      jo = jo.getJSONObject("data");
+      JSONObject signInBall = jo.getJSONObject("signInDTO");
+      JSONArray otherBallList = jo.getJSONArray("eventToWaitDTOList");
+      if (1 == signInBall.getInt("sendFlowStatus") && 1 == signInBall.getInt("sendType")) {
+        s = AntMemberRpcCall.collectInsuredGold(signInBall);
+        ThreadUtil.sleep(2000);
+        jo = new JSONObject(s);
+        if (!jo.optBoolean("success")) {
+          Log.other(TAG + ".collectInsuredGold.collectInsuredGold", "保障金🏥[响应失败]#" + s);
+          return;
         }
-        if ("坚持锻炼，走运动路线".equals(promiseName)) {
-          // 已经加入了，运动会自动行走，暂不做处理
-          isSportsRoute = false;
-        }
+        String gainGold = jo.getJSONObject("data").getString("gainSumInsuredYuan");
+        Log.other("保障金🏥[领取保证金]#+" + gainGold + "元");
       }
-      if (isSportsRoute && promiseSportsRoute.getValue()) {
-        promiseSportsRoute();
+      for (int i = 0; i <otherBallList.length(); i++) {
+        JSONObject anotherBall = otherBallList.getJSONObject(i);
+        s = AntMemberRpcCall.collectInsuredGold(anotherBall);
+        ThreadUtil.sleep(2000);
+        jo = new JSONObject(s);
+        if (!jo.optBoolean("success")) {
+          Log.other(TAG + ".collectInsuredGold.collectInsuredGold", "保障金🏥[响应失败]#" + s);
+          return;
+        }
+        String gainGold = jo.getJSONObject("data").getJSONObject("gainSumInsuredDTO").getString("gainSumInsuredYuan");
+        Log.other("保障金🏥[领取保证金]+" + gainGold + "元");
       }
     } catch (Throwable t) {
-      Log.runtime(TAG, "doPromise err:");
-      Log.printStackTrace(TAG, t);
-    }
-  }
-
-  private void promiseSportsRoute() {
-    try {
-      String str =
-          AntMemberRpcCall.promiseJoin(
-              "{\"autoRenewStatus\":false,\"dataSourceRule\":{\"selectValue\":\"alipay_sports\"},"
-                  + "\"joinFromOuter\":false,\"joinGuarantyRule\":{\"joinGuarantyRuleType\":\"POINT\",\"selectValue\":\"1\"},"
-                  + "\"joinRule\":{\"joinRuleType\":\"DYNAMIC_DAY\",\"selectValue\":\"7\"},\"periodTargetRule\":{\"periodTargetRuleType\":\"CAL_COUNT\",\"selectValue\":\"3\"},"
-                  + "\"templateId\":\"go_alipay_sports_route\"}");
-      JSONObject jsonObject = new JSONObject(str);
-      if (!jsonObject.optBoolean("success")) {
-        Log.runtime(TAG + ".doPromise.promiseJoin", jsonObject.optString("errorMsg"));
-        return;
-      }
-      Log.other("生活记录👟已加入[" + JsonUtil.getValueByPath(jsonObject, "data.promiseName") + "]" + JsonUtil.getValueByPath(jsonObject, "data.dynamicContent.subTitle"));
-    } catch (Throwable t) {
-      Log.runtime(TAG, "promiseSportsRoute err:");
-      Log.printStackTrace(TAG, t);
-    }
-  }
-
-  /**
-   * 保障金
-   *
-   * @param isRepeat 是否领取一个后先查询，再继续领取
-   * @param recordId recordId
-   */
-  private void securityFund(boolean isRepeat, String recordId) {
-    try {
-      String str = AntMemberRpcCall.queryMultiSceneWaitToGainList();
-      JSONObject jsonObject = new JSONObject(str);
-      if (!jsonObject.optBoolean("success")) {
-        Log.runtime(TAG + ".securityFund.queryMultiSceneWaitToGainList", jsonObject.optString("errorMsg"));
-        return;
-      }
-      jsonObject = jsonObject.getJSONObject("data");
-      // 使用 keys() 方法获取所有键
-      Iterator<String> keys = jsonObject.keys();
-      // 遍历所有键
-      while (keys.hasNext()) {
-        String key = keys.next();
-        // 获取键对应的值
-        Object propertyValue = jsonObject.get(key);
-        if (propertyValue instanceof JSONArray) {
-          // 如eventToWaitDTOList、helpChildSumInsuredDTOList
-          JSONArray jsonArray = ((JSONArray) propertyValue);
-          for (int i = 0; i < jsonArray.length(); i++) {
-            isRepeat = gainMyAndFamilySumInsured(jsonArray.getJSONObject(i), isRepeat, recordId);
-          }
-        } else if (propertyValue instanceof JSONObject) {
-          // 如signInDTO、priorityChannelDTO
-          JSONObject jo = ((JSONObject) propertyValue);
-          if (jo.length() == 0) {
-            continue;
-          }
-          isRepeat = gainMyAndFamilySumInsured(jo, isRepeat, recordId);
-        }
-      }
-    } catch (Throwable t) {
-      Log.runtime(TAG, "securityFund err:");
-      Log.printStackTrace(TAG, t);
-    }
-  }
-
-  /**
-   * 领取保障金
-   *
-   * @param jsonObject 保障金jsonObject
-   * @param isRepeat 是否需要刷新明细
-   * @param recordId 明细recordId
-   * @return 是否已刷新明细
-   * @throws JSONException JSONException
-   */
-  private boolean gainMyAndFamilySumInsured(JSONObject jsonObject, boolean isRepeat, String recordId) throws JSONException {
-    JSONObject jo = new JSONObject(AntMemberRpcCall.gainMyAndFamilySumInsured(jsonObject));
-    if (!jo.optBoolean("success")) {
-      Log.runtime(TAG + ".gainMyAndFamilySumInsured", jo.optString("errorMsg"));
-      return true;
-    }
-    Log.other("生活记录💰领取保障金[" + JsonUtil.getValueByPath(jo, "data.gainSumInsuredDTO.gainSumInsuredYuan") + "]" + "元");
-    if (isRepeat) {
-      promiseQueryDetail(recordId);
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * 查询持续做明细任务
-   *
-   * @param recordId recordId
-   * @throws JSONException JSONException
-   */
-  private void promiseQueryDetail(String recordId) throws JSONException {
-    JSONObject jo = new JSONObject(AntMemberRpcCall.promiseQueryDetail(recordId));
-    if (!jo.optBoolean("success")) {
-      Log.runtime(TAG + ".promiseQueryDetail", jo.optString("errorMsg"));
+      Log.printStackTrace(TAG + ".collectInsuredGold", t);
     }
   }
 
