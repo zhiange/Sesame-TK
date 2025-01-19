@@ -60,6 +60,8 @@ public abstract class Model {
 
     public abstract ModelGroup getGroup();
 
+    public abstract String getIcon();
+
     public abstract ModelFields getFields();
 
     public void prepare() {}
