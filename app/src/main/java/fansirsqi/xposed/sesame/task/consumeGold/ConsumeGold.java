@@ -24,6 +24,10 @@ public class ConsumeGold extends ModelTask {
     }
 
     @Override
+    public String getIcon() {
+        return "ConsumeGold.svg";
+    }
+    @Override
     public ModelFields getFields() {
         return new ModelFields();
     }

@@ -27,6 +27,11 @@ public class AntMember extends ModelTask {
     return ModelGroup.MEMBER;
   }
 
+  @Override
+  public String getIcon() {
+    return "AntMember.png";
+  }
+
   private BooleanModelField memberSign;
   private BooleanModelField memberTask;
   private BooleanModelField collectSesame;
