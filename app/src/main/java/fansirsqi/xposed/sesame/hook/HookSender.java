@@ -29,7 +29,23 @@ public class HookSender {
 
     public static void sendHookData(Map<String, Object> hookResponse) {
         try {
-            JSONObject jsonObject = new JSONObject(hookResponse);
+            JSONObject jsonObject = new JSONObject();
+            for (Map.Entry<String, Object> entry : hookResponse.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value instanceof String stringValue) {
+                    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
+//                        Log.debug("Converting " + key + " to JSONObject");
+                        jsonObject.put(key, new JSONObject(stringValue));
+                    } else {
+//                        Log.debug("Not Converting " + key + " to JSONObject");
+                        jsonObject.put(key, value);
+                    }
+                } else {
+                    jsonObject.put(key, value);
+                }
+            }
+
             RequestBody body = RequestBody.create(jsonObject.toString(), JSON_MEDIA_TYPE);
 
             Request request = new Request.Builder()
@@ -56,4 +72,6 @@ public class HookSender {
             Log.error("Failed to send hook data: " + e.getMessage());
         }
     }
+
+
 }
