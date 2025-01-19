@@ -601,17 +601,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             HookResponse.put("TimeStamp", recordArray[0]);
                                             HookResponse.put("Method", recordArray[1]);
                                             HookResponse.put("Params", recordArray[2]);
-//                                            HookResponse.put("Data", recordArray[3]);
-                                            try {
-                                                JSONObject jsonData = new JSONObject(rawData.replace("\\", ""));
-                                                HookResponse.put("Data", jsonData.toString());
-                                            } catch (Exception e) {
-                                                HookResponse.put("Data", rawData);
-                                            }
+                                            HookResponse.put("Data", recordArray[3]);
                                             if (BaseModel.getSendHookData().getValue()) {
                                                 HookSender.sendHookData(HookResponse);
                                             }
-                                            String logMessage = TimeStamp + "\n" + Method + "\n" + Params + "\n" + rawData.replace("\\", "") + "\n";
+                                            String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData.replace("\\", "") + "\n<========================\n";
                                             if (!logMessage.trim().isEmpty()) {
                                                 Log.capture(logMessage);
                                             }
