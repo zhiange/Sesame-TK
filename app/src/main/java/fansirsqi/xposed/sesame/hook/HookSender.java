@@ -2,6 +2,7 @@ package fansirsqi.xposed.sesame.hook;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -34,11 +35,12 @@ public class HookSender {
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 if (value instanceof String stringValue) {
-                    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
-//                        Log.debug("Converting " + key + " to JSONObject");
-                        jsonObject.put(key, new JSONObject(stringValue));
-                    } else {
-//                        Log.debug("Not Converting " + key + " to JSONObject");
+                    try {
+                        JSONObject valueAsJson = new JSONObject(stringValue);
+                        Log.debug("Converting " + key + " to JSONObject");
+                        jsonObject.put(key, valueAsJson);
+                    } catch (JSONException e) {
+                        Log.debug("Not Converting " + key + " to JSONObject");
                         jsonObject.put(key, value);
                     }
                 } else {
@@ -72,6 +74,7 @@ public class HookSender {
             Log.error("Failed to send hook data: " + e.getMessage());
         }
     }
+
 
 
 }
