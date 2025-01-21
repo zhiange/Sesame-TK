@@ -7,12 +7,16 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import lombok.Getter;
 
 public class Notify {
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper()); // 主线程 Handler
+
     @SuppressLint("StaticFieldLeak")
     public static Context context;
     private static final int NOTIFICATION_ID = 99;
@@ -111,7 +115,7 @@ public class Notify {
 
             titleText = status;
             lastNoticeTime = System.currentTimeMillis();
-            sendText();
+            mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -124,12 +128,21 @@ public class Notify {
      */
     public static void updateNextExecText(long nextExecTime) {
         try {
+            boolean refresh = false;
             if (nextExecTime != -1) {
                 nextExecTimeCache = nextExecTime;
             }
+            if (BaseModel.getEnableProgress().getValue()) {
+                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
+                refresh = true;
+            }
             if (ModelTask.isAllTaskFinished()) {
                 titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
-                sendText();
+                builder.setProgress(0, 0, false);
+                refresh = true;
+            }
+            if (refresh) {
+                mainHandler.post(Notify::sendText);
             }
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -145,7 +158,7 @@ public class Notify {
         try {
             contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n🌾 " + content;
             lastNoticeTime = System.currentTimeMillis();
-            sendText();
+            mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -155,6 +168,10 @@ public class Notify {
      * 设置状态文本为执行中。
      */
     public static void setStatusTextExec() {
+        Log.debug("进度更新[施工中]: " + ModelTask.completedTaskPercentage());
+        if (BaseModel.getEnableProgress().getValue()) {
+            builder.setProgress(100, 0, false);
+        }
         updateStatusText("⚙️ 芝麻粒正在施工中...");
     }
 

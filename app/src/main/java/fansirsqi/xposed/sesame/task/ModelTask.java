@@ -454,6 +454,13 @@ public abstract class ModelTask extends Model {
         return MAIN_TASK_FINISHED_LIST.size() == getModelArray().length;
     }
 
+    /**
+     * 获取总任务执行进度 100%
+     */
+    public static int completedTaskPercentage() {
+        return MAIN_TASK_FINISHED_LIST.size() * 100 / getModelArray().length;
+    }
+
     public interface CancelTask {
 
         void cancel();
