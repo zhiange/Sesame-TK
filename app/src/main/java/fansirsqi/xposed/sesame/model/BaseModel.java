@@ -141,6 +141,12 @@ public class BaseModel extends Model {
     @Getter
     private static final BooleanModelField enableOnGoing = new BooleanModelField("enableOnGoing", "开启状态栏禁删", false);
 
+    /**
+     * 是否开启任务运行进度显示
+     */
+    @Getter
+    private static final BooleanModelField enableProgress = new BooleanModelField("enableProgress", "开启任务运行进度显示", false);
+
     @Getter
     private static final BooleanModelField sendHookData = new BooleanModelField("sendHookData", "启用Hook数据转发", false);
 
@@ -188,6 +194,7 @@ public class BaseModel extends Model {
         modelFields.addField(recordLog);//是否记录日志
         modelFields.addField(showToast);//是否显示气泡提示
         modelFields.addField(enableOnGoing);//是否开启状态栏禁删
+        modelFields.addField(enableProgress);//是否开启任务运行进度显示
         modelFields.addField(languageSimplifiedChinese);//是否只显示中文并设置时区
         modelFields.addField(toastOffsetY);//气泡提示的纵向偏移量
         return modelFields;
