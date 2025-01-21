@@ -202,7 +202,7 @@ public class AntForest extends ModelTask {
             "🍎", "🍌", "🍇", "🍊", "🍋", "🍓", "🍈", "🍉", "🍒", "🍑", "🍍", "🥥", "🥝", "🍅", "🍆",
             "🥦", "🥦", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞"
     ));
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Override
     public String getName() {
@@ -488,15 +488,15 @@ public class AntForest extends ModelTask {
                         count = taskCount.get();
                     }
                     if (count > 0) {
-                        Log.record("执行超时-蚂蚁森林");
+                        Log.forest("执行超时-蚂蚁森林");
                     } else if (count == 0) {
-                        Log.record("执行结束-蚂蚁森林");
+                        Log.forest("执行结束-蚂蚁森林");
                     } else {
-                        Log.record("执行完成-蚂蚁森林");
+                        Log.forest("执行完成-蚂蚁森林");
                     }
                 }
             } catch (InterruptedException ie) {
-                Log.runtime(TAG, "执行中断-蚂蚁森林");
+                Log.forest(TAG, "执行中断-蚂蚁森林");
             }
             StatisticsUtil.save();
             FriendWatch.save();
