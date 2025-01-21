@@ -2,7 +2,10 @@ package fansirsqi.xposed.sesame.task;
 
 import android.os.Build;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,6 +25,9 @@ public abstract class ModelTask extends Model {
 
     // 存储所有主任务与线程的映射
     private static final Map<ModelTask, Thread> MAIN_TASK_MAP = new ConcurrentHashMap<>();
+
+    // 存储当次执行中已完成的任务
+    private static final List<Integer> MAIN_TASK_FINISHED_LIST = Collections.synchronizedList(new Vector<>());
 
     // 主任务线程池，线程池大小为模型数组长度，最大线程数无限制，空闲时间30秒
     private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(
@@ -51,12 +57,12 @@ public abstract class ModelTask extends Model {
             }
             MAIN_TASK_MAP.put(task, Thread.currentThread());
             try {
-                Notify.setStatusTextExec();
                 task.run();
             } catch (Exception e) {
                 Log.printStackTrace(e);
             } finally {
                 MAIN_TASK_MAP.remove(task);
+                MAIN_TASK_FINISHED_LIST.add(task.hashCode());
                 Notify.updateNextExecText(-1);
             }
         }
@@ -266,6 +272,7 @@ public abstract class ModelTask extends Model {
         childTaskMap.clear();
         MAIN_THREAD_POOL.remove(mainRunnable);
         MAIN_TASK_MAP.remove(this);
+        MAIN_TASK_FINISHED_LIST.add(this.hashCode());
     }
 
     /**
@@ -281,10 +288,20 @@ public abstract class ModelTask extends Model {
      * @param force 是否强制启动
      */
     public static void startAllTask(Boolean force) {
+        MAIN_TASK_FINISHED_LIST.clear();
         for (Model model : getModelArray()) {
-            if (model != null && ModelType.TASK == model.getType()) {
-                if (((ModelTask) model).startTask(force)) {
-                    ThreadUtil.sleep(750);
+            if (model != null) {
+                if (ModelType.TASK == model.getType()) {
+                    if (((ModelTask) model).startTask(force)) {
+                        ThreadUtil.sleep(750);
+                    } else {
+                        MAIN_TASK_FINISHED_LIST.add(model.hashCode());
+                        Notify.updateNextExecText(-1);
+                    }
+                } else {
+                    // normal模块直接标记已完成
+                    MAIN_TASK_FINISHED_LIST.add(model.hashCode());
+                    Notify.updateNextExecText(-1);
                 }
             }
         }
@@ -434,7 +451,7 @@ public abstract class ModelTask extends Model {
      * 返回是否还有未结束的任务
      */
     public static boolean isAllTaskFinished() {
-        return MAIN_TASK_MAP.isEmpty();
+        return MAIN_TASK_FINISHED_LIST.size() == getModelArray().length;
     }
 
     public interface CancelTask {

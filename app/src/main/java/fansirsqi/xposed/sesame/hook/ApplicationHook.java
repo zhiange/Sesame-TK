@@ -643,7 +643,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Log.printStackTrace(TAG, t);
                     }
                 }
-                Notify.start(service);
                 Model.bootAllModel(classLoader);
                 StatusUtil.load();
                 updateDay();
@@ -709,6 +708,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
 
     static void execHandler() {
+        Log.debug("execHandler");
+        Notify.setStatusTextExec();
         mainTask.startTask(false);
     }
 
