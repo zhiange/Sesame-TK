@@ -2,13 +2,16 @@ package fansirsqi.xposed.sesame.entity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 /**
  * 表示好友能量监视器的实体类，提供能量收集的统计和管理功能。
