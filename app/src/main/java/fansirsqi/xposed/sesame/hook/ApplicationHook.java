@@ -538,9 +538,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             },
                             2000);
                 }
+                Notify.start(service);
                 if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
                     Log.record("芝麻粒已禁用");
                     Toast.show("芝麻粒已禁用");
+                    Notify.updateStatusText("🚫芝麻粒已禁用");
                     return false;
                 }
                 // 保持唤醒锁，防止设备休眠
