@@ -3,10 +3,12 @@ package fansirsqi.xposed.sesame.util;
 import android.annotation.SuppressLint;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * 时间工具类。 提供了一系列方法来处理时间相关的操作，包括时间范围检查、时间比较、日期格式化等。
@@ -193,6 +195,7 @@ public class TimeUtil {
 
     /**
      * 获取指定时间的周数
+     *
      * @param dateTime 时间
      * @return 当前年的第几周
      */
@@ -206,7 +209,8 @@ public class TimeUtil {
 
     /**
      * 比较第一个日历的天数小于第二个日历的天数
-     * @param firstCalendar 第一个日历
+     *
+     * @param firstCalendar  第一个日历
      * @param secondCalendar 第二个日历
      * @return Boolean 如果小于，则为true，否则为false
      */
@@ -218,7 +222,8 @@ public class TimeUtil {
 
     /**
      * 比较第一个时间戳的天数是否小于第二个时间戳的天数
-     * @param firstTimestamp 第一个时间戳
+     *
+     * @param firstTimestamp  第一个时间戳
      * @param secondTimestamp 第二个时间戳
      * @return Boolean 如果小于，则为true，否则为false
      */
@@ -230,6 +235,7 @@ public class TimeUtil {
 
     /**
      * 通过时间戳比较传入的时间戳的天数是否小于当前时间戳的天数
+     *
      * @param timestamp 时间戳
      * @return Boolean 如果小于当前时间戳所计算的天数，则为true，否则为false
      */
@@ -239,7 +245,8 @@ public class TimeUtil {
 
     /**
      * 判断两个日历对象是否为同一天
-     * @param firstCalendar 第一个日历对象
+     *
+     * @param firstCalendar  第一个日历对象
      * @param secondCalendar 第二个日历对象
      * @return 两个日历对象是否为同一天
      */
@@ -250,7 +257,8 @@ public class TimeUtil {
 
     /**
      * 判断两个时间戳是否为同一天
-     * @param firstTimestamp 第一个时间戳
+     *
+     * @param firstTimestamp  第一个时间戳
      * @param secondTimestamp 第二个时间戳
      * @return 两个时间戳是否为同一天
      */
@@ -262,6 +270,7 @@ public class TimeUtil {
 
     /**
      * 判断日历对象是否为今天
+     *
      * @param calendar 日历对象
      * @return 日历对象是否为今天
      */
@@ -271,6 +280,7 @@ public class TimeUtil {
 
     /**
      * 判断时间戳是否为今天
+     *
      * @param timestamp 时间戳
      * @return 时间戳是否为今天
      */
@@ -286,5 +296,74 @@ public class TimeUtil {
     @SuppressLint("SimpleDateFormat")
     public static String getCommonDate(Long timestamp) {
         return getCommonDateFormat().format(timestamp);
+    }
+
+
+    public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        }
+
+    };
+
+    public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        }
+
+    };
+
+    public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault());
+        }
+
+    };
+
+    public static long timeToStamp(String timers) {
+        Date d = new Date();
+        long timeStemp;
+        try {
+            SimpleDateFormat simpleDateFormat = OTHER_DATE_TIME_FORMAT_THREAD_LOCAL.get();
+            if (simpleDateFormat == null) {
+                simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault());
+            }
+            Date newD = simpleDateFormat.parse(timers);
+            if (newD != null) {
+                d = newD;
+            }
+        } catch (ParseException ignored) {
+        }
+        timeStemp = d.getTime();
+        return timeStemp;
+    }
+
+    public static String getFormatDateTime() {
+        SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
+        if (simpleDateFormat == null) {
+            simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        }
+        return simpleDateFormat.format(new Date());
+    }
+
+    public static String getFormatDate() {
+        return getFormatDateTime().split(" ")[0];
+    }
+
+    public static String getFormatTime() {
+        return getFormatDateTime().split(" ")[1];
+    }
+
+    public static String getFormatTime(int offset, String format) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, offset);
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(calendar.getTime());
     }
 }
