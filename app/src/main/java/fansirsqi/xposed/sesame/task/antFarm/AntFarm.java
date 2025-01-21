@@ -191,6 +191,7 @@ public class AntFarm extends ModelTask {
     private SelectModelField familyOptions;
     private SelectModelField inviteFriendVisitFamily;
     private SelectModelField familyBatchInviteP2P;
+    private StringModelField giftFamilyDrawFragment;
 
 
     @Override
@@ -241,6 +242,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(familyBatchInviteP2P = new SelectModelField("familyBatchInviteP2P", "家庭 | 串门送扭蛋列表", new LinkedHashSet<>(), AlipayUser::getList));
+        modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         return modelFields;
     }
 
@@ -2825,6 +2827,11 @@ public class AntFarm extends ModelTask {
             if (ResUtil.checkSuccess(TAG, jo)) {
                 ThreadUtil.sleep(1000);
                 int drawTimes = jo.optInt("familyDrawTimes");
+                //碎片个数
+                int giftNum = jo.optInt("mengliFragmentCount");
+                if (giftNum >= 20 && !Objects.isNull(giftFamilyDrawFragment.getValue())) {
+                    giftFamilyDrawFragment(giftFamilyDrawFragment.getValue(), giftNum);
+                }
                 for (int i = 0; i < drawTimes; i++) {
                     if (!familyDraw()) {
                         return;
@@ -2838,6 +2845,17 @@ public class AntFarm extends ModelTask {
         }
     }
 
+    private void giftFamilyDrawFragment(String giftUserId, int giftNum) {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.giftFamilyDrawFragment(giftUserId,giftNum));
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                Log.farm("亲密家庭🏠赠送扭蛋碎片#" + giftNum + "个#"+giftUserId);
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "giftFamilyDrawFragment err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
     private JSONArray familyDrawListFarmTask() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawListFarmTask());

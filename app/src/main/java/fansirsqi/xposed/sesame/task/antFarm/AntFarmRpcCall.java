@@ -556,5 +556,9 @@ public class AntFarmRpcCall {
         return RequestManager.requestString("com.alipay.antfarm.listFarmTask", args);
     }
 
+    public static String giftFamilyDrawFragment(String giftUserId,int giftNum) {
+        String args = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"giftNum\":"+giftNum+",\"giftUserId\":\""+giftUserId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.giftFamilyDrawFragment", args);
+    }
 
 }
