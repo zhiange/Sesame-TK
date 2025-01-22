@@ -163,6 +163,7 @@ public class AntMember extends ModelTask {
 
   /**
    * 会员任务-逛一逛
+   * 单次执行 1
    */
   private void doAllMemberAvailableTask() {
     try {
@@ -170,18 +171,19 @@ public class AntMember extends ModelTask {
       ThreadUtil.sleep(500);
       JSONObject jsonObject = new JSONObject(str);
       if (!ResUtil.checkResCode(jsonObject)) {
-        Log.runtime(TAG, "doAllMemberAvailableTask err:" + jsonObject.getString("resultDesc"));
+        Log.error(TAG + ".doAllMemberAvailableTask", "会员任务响应失败: " + jsonObject.getString("resultDesc"));
         return;
       }
       if (!jsonObject.has("availableTaskList")) {
         return;
       }
       JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
-      for (int j = 0; j < taskList.length(); j++) {
-        ThreadUtil.sleep(16000);
-        JSONObject task = taskList.getJSONObject(j);
-        processTask(task);
+      if (taskList.length() == 0) {
+        return;
       }
+      JSONObject task = taskList.getJSONObject(0);
+      ThreadUtil.sleep(16000);
+      processTask(task);
     } catch (Throwable t) {
       Log.runtime(TAG, "doAllMemberAvailableTask err:");
       Log.printStackTrace(TAG, t);
@@ -209,7 +211,7 @@ public class AntMember extends ModelTask {
           s = AntMemberRpcCall.receivePointByUser(id);
           jo = new JSONObject(s);
           if (ResUtil.checkResCode(jo)) {
-            Log.other("会员积分🎖️[" + bizTitle + "]#" + pointAmount + "积分");
+            Log.other("会员积分🎖️[领取" + bizTitle + "]#" + pointAmount + "积分");
           } else {
             Log.record(jo.getString("resultDesc"));
             Log.runtime(s);
@@ -649,7 +651,6 @@ public class AntMember extends ModelTask {
   /**
    * 执行会员任务 类型1
    * @param task 单个任务对象
-   * @return 如果任务处理成功，则返回true；否则返回false
    */
   private void processTask(JSONObject task) throws JSONException {
     JSONObject taskConfigInfo = task.getJSONObject("taskConfigInfo");
@@ -670,6 +671,7 @@ public class AntMember extends ModelTask {
     JSONObject jo = new JSONObject(str);
     if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
+      return;
     }
     Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
   }
