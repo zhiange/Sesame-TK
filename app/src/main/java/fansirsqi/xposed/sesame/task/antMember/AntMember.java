@@ -292,7 +292,7 @@ public class AntMember extends ModelTask {
       String taskTemplateId = task.getString("templateId");
       String taskTitle = task.getString("title");
       int needCompleteNum = task.getInt("needCompleteNum");
-      int completedNum = task.getInt("completedNum");
+      int completedNum = task.has("completedNum") ? task.getInt("completedNum") : 0;
       String s;
       String recordId;
       JSONObject responseObj;
