@@ -271,6 +271,7 @@ public class AntMember extends ModelTask {
       }
       JSONObject taskObj = jo.getJSONObject("data");
       if (taskObj.has("dailyTaskListVO")) {
+        joinAndFinishSesameTask(taskObj.getJSONObject("dailyTaskListVO").getJSONArray("waitCompleteTaskVOS"));
         joinAndFinishSesameTask(taskObj.getJSONObject("dailyTaskListVO").getJSONArray("waitJoinTaskVOS"));
       }
       if (taskObj.has("toCompleteVOS")) {
