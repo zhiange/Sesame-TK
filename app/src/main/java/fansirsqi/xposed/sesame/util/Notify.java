@@ -12,7 +12,6 @@ import android.os.Looper;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
-import lombok.Getter;
 
 public class Notify {
     private static final Handler mainHandler = new Handler(Looper.getMainLooper()); // 主线程 Handler
@@ -153,6 +152,22 @@ public class Notify {
      */
     public static void setStatusTextExec() {
         updateStatusText("⚙️ 芝麻粒正在施工中...");
+    }
+
+    /**
+     * 设置状态文本为已禁用
+     */
+    public static void setStatusTextDisabled() {
+        try {
+            builder.setContentTitle("🚫 芝麻粒已禁用");
+            if (!StringUtil.isEmpty(contentText)) {
+                builder.setContentText(contentText);
+            }
+            builder.setProgress(0, 0, false);
+            mNotifyManager.notify(NOTIFICATION_ID, builder.build());
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
     }
 
     /**

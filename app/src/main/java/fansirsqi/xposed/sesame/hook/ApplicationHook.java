@@ -542,7 +542,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
                     Log.record("芝麻粒已禁用");
                     Toast.show("芝麻粒已禁用");
-                    Notify.updateStatusText("🚫芝麻粒已禁用");
+                    Notify.setStatusTextDisabled();
                     return false;
                 }
                 // 保持唤醒锁，防止设备休眠
@@ -708,8 +708,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     }
 
     static void execHandler() {
-        Log.debug("execHandler");
-        Notify.setStatusTextExec();
         mainTask.startTask(false);
     }
 

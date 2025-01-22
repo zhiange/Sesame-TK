@@ -287,6 +287,7 @@ public abstract class ModelTask extends Model {
      * @param force 是否强制启动
      */
     public static void startAllTask(Boolean force) {
+        Notify.setStatusTextExec();
         MAIN_TASK_FINISHED_LIST.clear();
         for (Model model : getModelArray()) {
             if (model != null) {
