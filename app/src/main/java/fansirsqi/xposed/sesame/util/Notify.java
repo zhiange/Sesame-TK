@@ -124,22 +124,11 @@ public class Notify {
      */
     public static void updateNextExecText(long nextExecTime) {
         try {
-            boolean refresh = false;
             if (nextExecTime != -1) {
                 nextExecTimeCache = nextExecTime;
             }
-            if (BaseModel.getEnableProgress().getValue()) {
-                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
-                refresh = true;
-            }
-            if (ModelTask.isAllTaskFinished()) {
-                titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
-                builder.setProgress(0, 0, false);
-                refresh = true;
-            }
-            if (refresh) {
-                mainHandler.post(Notify::sendText);
-            }
+            titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
+            mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -163,10 +152,6 @@ public class Notify {
      * 设置状态文本为执行中。
      */
     public static void setStatusTextExec() {
-        Log.debug("进度更新[施工中]: " + ModelTask.completedTaskPercentage());
-        if (BaseModel.getEnableProgress().getValue()) {
-            builder.setProgress(100, 0, false);
-        }
         updateStatusText("⚙️ 芝麻粒正在施工中...");
     }
 
@@ -178,6 +163,11 @@ public class Notify {
             builder.setContentTitle(titleText);
             if (!StringUtil.isEmpty(contentText)) {
                 builder.setContentText(contentText);
+            }
+            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
+            } else {
+                builder.setProgress(0, 0, false);
             }
             mNotifyManager.notify(NOTIFICATION_ID, builder.build());
         } catch (Exception e) {

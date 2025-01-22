@@ -272,7 +272,6 @@ public abstract class ModelTask extends Model {
         childTaskMap.clear();
         MAIN_THREAD_POOL.remove(mainRunnable);
         MAIN_TASK_MAP.remove(this);
-        MAIN_TASK_FINISHED_LIST.add(this.hashCode());
     }
 
     /**
