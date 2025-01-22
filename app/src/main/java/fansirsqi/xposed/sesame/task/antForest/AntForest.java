@@ -1558,7 +1558,7 @@ public class AntForest extends ModelTask {
         if (!StatusUtil.canVitalityExchangeToday(skuId, 1)) {
             return false;
         }
-        return Vitality.VitalityExchange(spuId, skuId, "隐身卡");
+        return Vitality.VitalityExchange(spuId, skuId, "保护罩");
     }
 
     /**
