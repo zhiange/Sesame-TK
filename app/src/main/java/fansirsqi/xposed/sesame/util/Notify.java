@@ -23,9 +23,6 @@ public class Notify {
     private static final String CHANNEL_ID = "fansirsqi.xposed.sesame.ANTFOREST_NOTIFY_CHANNEL";
     private static NotificationManager mNotifyManager;
     private static Notification.Builder builder;
-
-    @Getter
-    private static volatile long lastNoticeTime = 0;
     private static long nextExecTimeCache = 0;
     private static String titleText = "";
     private static String contentText = "";
@@ -114,7 +111,6 @@ public class Notify {
             }
 
             titleText = status;
-            lastNoticeTime = System.currentTimeMillis();
             mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -157,7 +153,6 @@ public class Notify {
     public static void updateLastExecText(String content) {
         try {
             contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n🌾 " + content;
-            lastNoticeTime = System.currentTimeMillis();
             mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
