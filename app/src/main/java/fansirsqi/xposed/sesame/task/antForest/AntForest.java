@@ -2246,6 +2246,9 @@ public class AntForest extends ModelTask {
     private JSONObject findPropBag(JSONObject bagObject, String propType) {
         JSONObject prop = null;
         try {
+            if(Objects.isNull(bagObject)){
+                return prop;
+            }
             // 遍历背包查找道具
             JSONArray forestPropVOList = bagObject.getJSONArray("forestPropVOList");
             for (int i = 0; i < forestPropVOList.length(); i++) {
