@@ -498,7 +498,7 @@ public class AntForest extends ModelTask {
                 Log.forest(TAG, "执行中断-蚂蚁森林");
             }
             StatisticsUtil.save();
-            FriendWatch.save();
+            FriendWatch.save(selfId);
             String str_totalCollected = "收:" + totalCollected + "g 帮:" + totalHelpCollected + "g 浇:" + totalWatered + "g";
             Notify.updateLastExecText(str_totalCollected);
         }
