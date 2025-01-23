@@ -8,6 +8,11 @@ jobs:
   check-target-branch:
     runs-on: ubuntu-latest
 
+    # 设置权限
+    permissions:
+      pull-requests: write
+      issues: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
