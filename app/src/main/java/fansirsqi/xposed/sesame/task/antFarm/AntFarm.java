@@ -1829,9 +1829,9 @@ public class AntFarm extends ModelTask {
                                 doubleCheck = true;
                             }
                         }
-                        if (chouchouleReceiveFarmTaskAward(taskId)) {
-                            doubleCheck = true;
-                        }
+//                        if (chouchouleReceiveFarmTaskAward(taskId)) { //这个任务会报错，暂时不用
+//                            doubleCheck = true;
+//                        }
                         if ("TODO".equals(taskStatus) && !"DONATION".equals(taskitem.optString("innerAction"))) {
                             if (chouchouleDoFarmTask(taskId, title, additionalRightsTimes)) {
                                 doubleCheck = true;
