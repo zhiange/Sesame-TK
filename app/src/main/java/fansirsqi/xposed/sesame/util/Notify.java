@@ -92,6 +92,8 @@ public class Notify {
             builder
                     .setSmallIcon(android.R.drawable.sym_def_app_icon)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                    .setContentTitle(titleText)
+                    .setContentText(contentText)
                     .setSubText("芝麻粒")
                     .setAutoCancel(false)
                     .setContentIntent(pi);
