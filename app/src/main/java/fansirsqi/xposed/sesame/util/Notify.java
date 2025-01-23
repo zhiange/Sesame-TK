@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.util;
+
 import android.annotation.SuppressLint;
 import android.app.*;
 import android.content.Context;
@@ -8,11 +9,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
 
 import lombok.Getter;
+
 public class Notify {
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -71,9 +74,6 @@ public class Notify {
     @SuppressLint("ObsoleteSdkInt")
     @Getter
     private static volatile long lastNoticeTime = 0;
-    private static long nextExecTimeCache = 0;
-    private static String titleText = "";
-    private static String contentText = "";
 
     public static void start(Context context) {
         try {
@@ -124,6 +124,7 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
+
     /**
      * 停止通知。 移除通知并停止前台服务。
      */
@@ -146,6 +147,7 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
+
     /**
      * 更新通知文本。 更新通知的标题和内容文本，并发送通知。
      *
@@ -165,11 +167,12 @@ public class Notify {
             }
 
             titleText = status;
-            mainHandler.post(()->sendText(true));
+            mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
     }
+
     /**
      * 更新下一次执行时间的文本。
      *
@@ -188,11 +191,12 @@ public class Notify {
             if (ModelTask.isAllTaskFinished()) {
                 titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
             }
-            mainHandler.post(()->sendText(false));
+            mainHandler.post(() -> sendText(false));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
     }
+
     /**
      * 强制刷新通知，全部任务结束后调用
      */
@@ -205,7 +209,7 @@ public class Notify {
         if (ModelTask.isAllTaskFinished()) {
             titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
         }
-        mainHandler.post(()->sendText(true));
+        mainHandler.post(() -> sendText(true));
     }
 
     /**
@@ -216,7 +220,7 @@ public class Notify {
     public static void updateLastExecText(String content) {
         try {
             contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n🌾 " + content;
-            mainHandler.post(()->sendText(false));
+            mainHandler.post(() -> sendText(false));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -238,7 +242,7 @@ public class Notify {
             }
             titleText = "⚙️ 芝麻粒正在施工中...";
             builder.setContentTitle(titleText);
-            mainHandler.post(()->sendText(true));
+            mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -254,17 +258,20 @@ public class Notify {
                 builder.setContentText(contentText);
             }
             builder.setProgress(0, 0, false);
-            mainHandler.post(()->sendText(true));
+            mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
+    }
 
     public static void setStatusTextExec(String content) {
-        updateStatusText("⚙️ "+ content + " 施工中...");
+        updateStatusText("⚙️ " + content + " 施工中...");
 
     }
+
     /**
      * 发送文本更新。 更新通知的内容文本，并重新发送通知。
+     *
      * @param force 是否强制刷新
      */
     private static void sendText(Boolean force) {
@@ -285,6 +292,7 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
+
     @SuppressLint("ObsoleteSdkInt")
     public static void sendNewNotification(Context context, String title, String content, int newNotificationId) {
         try {
