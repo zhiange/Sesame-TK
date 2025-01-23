@@ -233,7 +233,8 @@ public class MainActivity extends BaseActivity {
             selectSettingUid();
             return;
         } else if (id == R.id.btn_friend_watch) {
-            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+            String userId = UserMap.getCurrentUid();
+            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
             return;
         }
         Intent it = new Intent(this, HtmlViewerActivity.class);
