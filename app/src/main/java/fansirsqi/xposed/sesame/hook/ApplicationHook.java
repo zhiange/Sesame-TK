@@ -540,8 +540,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             },
                             2000);
                 }
+                Notify.start(service);
                 if (!Objects.requireNonNull(Model.getModel(BaseModel.class)).getEnableField().getValue()) {
-                    Notify.start(service);
                     Log.record("芝麻粒已禁用");
                     Toast.show("芝麻粒已禁用");
                     Notify.setStatusTextDisabled();

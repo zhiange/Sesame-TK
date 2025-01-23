@@ -148,7 +148,11 @@ public class Notify {
             if (forestPauseTime > System.currentTimeMillis()) {
                 status = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
             }
-
+            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
+            } else {
+                builder.setProgress(0, 0, false);
+            }
             titleText = status;
             mainHandler.post(Notify::sendText);
         } catch (Exception e) {
@@ -166,7 +170,14 @@ public class Notify {
             if (nextExecTime != -1) {
                 nextExecTimeCache = nextExecTime;
             }
-            titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
+            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
+            } else {
+                builder.setProgress(0, 0, false);
+            }
+            if (ModelTask.isAllTaskFinished()) {
+                titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
+            }
             mainHandler.post(Notify::sendText);
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -219,9 +230,7 @@ public class Notify {
             if (!StringUtil.isEmpty(contentText)) {
                 builder.setContentText(contentText);
             }
-            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
-                builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
-            } else {
+            if (!BaseModel.getEnableProgress().getValue()) {
                 builder.setProgress(0, 0, false);
             }
             mNotifyManager.notify(NOTIFICATION_ID, builder.build());
