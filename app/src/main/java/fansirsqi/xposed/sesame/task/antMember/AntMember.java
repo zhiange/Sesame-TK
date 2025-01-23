@@ -176,12 +176,10 @@ public class AntMember extends ModelTask {
         return;
       }
       JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
-      if (taskList.length() == 0) {
-        return;
+      for (int j = 0; j < taskList.length(); j++) {
+        JSONObject task = taskList.getJSONObject(j);
+        processTask(task);
       }
-      JSONObject task = taskList.getJSONObject(0);
-      ThreadUtil.sleep(16000);
-      processTask(task);
     } catch (Throwable t) {
       Log.runtime(TAG, "doAllMemberAvailableTask err:");
       Log.printStackTrace(TAG, t);
@@ -667,7 +665,7 @@ public class AntMember extends ModelTask {
   private void processTask(JSONObject task) throws JSONException {
     JSONObject taskConfigInfo = task.getJSONObject("taskConfigInfo");
     String name = taskConfigInfo.getString("name");
-    Long id = taskConfigInfo.getLong("id");
+    long id = taskConfigInfo.getLong("id");
     String awardParamPoint = taskConfigInfo.getJSONObject("awardParam").getString("awardParamPoint");
     String targetBusiness = taskConfigInfo.getJSONArray("targetBusiness").getString(0);
     String[] targetBusinessArray = targetBusiness.split("#");
@@ -678,14 +676,45 @@ public class AntMember extends ModelTask {
     String bizType = targetBusinessArray[0];
     String bizSubType = targetBusinessArray[1];
     String bizParam = targetBusinessArray[2];
+    ThreadUtil.sleep(16000);
     String str = AntMemberRpcCall.executeTask(bizParam, bizSubType, bizType, id);
-    ThreadUtil.sleep(500);
     JSONObject jo = new JSONObject(str);
     if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
       return;
     }
-    Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
+    if (checkMemberTaskFinished(id)) {
+      Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
+    }
+  }
+
+  /**
+   * 查询指定会员任务是否完成
+   * @param taskId 任务id
+   */
+  private boolean checkMemberTaskFinished(long taskId) {
+    try {
+      String str = AntMemberRpcCall.queryAllStatusTaskList();
+      ThreadUtil.sleep(500);
+      JSONObject jsonObject = new JSONObject(str);
+      if (!ResUtil.checkResCode(jsonObject)) {
+        Log.error(TAG + ".checkMemberTaskFinished", "会员任务响应失败: " + jsonObject.getString("resultDesc"));
+      }
+      if (!jsonObject.has("availableTaskList")) {
+        return true;
+      }
+      JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
+      for (int i = 0; i < taskList.length(); i++) {
+        JSONObject taskConfigInfo = taskList.getJSONObject(i).getJSONObject("taskConfigInfo");
+        long id = taskConfigInfo.getLong("id");
+        if (taskId == id) {
+          return false;
+        }
+      }
+      return true;
+    } catch (JSONException e) {
+      return false;
+    }
   }
 
   public void kbMember() {
