@@ -37,10 +37,8 @@ public class HookSender {
                 if (v instanceof String stringValue) {
                     try {
                         JSONObject valueAsJson = new JSONObject(stringValue);
-                        Log.debug("Converting " + k + " to JSONObject");
                         jo.put(k, valueAsJson);
                     } catch (JSONException e) {
-                        Log.debug("Not Converting " + k + " to JSONObject");
                         jo.put(k, v);
                     }
                 } else {
