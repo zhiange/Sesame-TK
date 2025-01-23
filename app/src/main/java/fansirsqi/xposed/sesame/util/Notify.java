@@ -14,7 +14,7 @@ import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
 
 public class Notify {
-    private static final Handler mainHandler = new Handler(Looper.getMainLooper()); // 主线程 Handler
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @SuppressLint("StaticFieldLeak")
     public static Context context;
@@ -23,6 +23,7 @@ public class Notify {
     private static final String CHANNEL_ID = "fansirsqi.xposed.sesame.ANTFOREST_NOTIFY_CHANNEL";
     private static NotificationManager mNotifyManager;
     private static Notification.Builder builder;
+    private static long lastUpdateTime = 0;
     private static long nextExecTimeCache = 0;
     private static String titleText = "";
     private static String contentText = "";
@@ -66,12 +67,14 @@ public class Notify {
         }
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     public static void start(Context context) {
         try {
             Notify.context = context;
             Notify.stop();
             titleText = "🚀 启动中";
             contentText = "🔔 暂无消息";
+            lastUpdateTime = System.currentTimeMillis();
             mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Intent it = new Intent(Intent.ACTION_VIEW);
             it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
@@ -146,7 +149,6 @@ public class Notify {
     public static void updateStatusText(String status) {
         try {
             long forestPauseTime = RuntimeInfo.getInstance().getLong(RuntimeInfo.RuntimeInfoKey.ForestPauseTime);
-
             if (forestPauseTime > System.currentTimeMillis()) {
                 status = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
             }
@@ -156,7 +158,7 @@ public class Notify {
                 builder.setProgress(0, 0, false);
             }
             titleText = status;
-            mainHandler.post(Notify::sendText);
+            mainHandler.post(()->sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -180,10 +182,25 @@ public class Notify {
             if (ModelTask.isAllTaskFinished()) {
                 titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
             }
-            mainHandler.post(Notify::sendText);
+            mainHandler.post(()->sendText(false));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
+    }
+
+    /**
+     * 强制刷新通知，全部任务结束后调用
+     */
+    public static void forceUpdateText() {
+        if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+            builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
+        } else {
+            builder.setProgress(0, 0, false);
+        }
+        if (ModelTask.isAllTaskFinished()) {
+            titleText = nextExecTimeCache > 0 ? "⏰ 下次执行 " + TimeUtil.getTimeStr(nextExecTimeCache) : "";
+        }
+        mainHandler.post(()->sendText(true));
     }
 
     /**
@@ -194,7 +211,7 @@ public class Notify {
     public static void updateLastExecText(String content) {
         try {
             contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n🌾 " + content;
-            mainHandler.post(Notify::sendText);
+            mainHandler.post(()->sendText(false));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -204,7 +221,21 @@ public class Notify {
      * 设置状态文本为执行中。
      */
     public static void setStatusTextExec() {
-        updateStatusText("⚙️ 芝麻粒正在施工中...");
+        try {
+            long forestPauseTime = RuntimeInfo.getInstance().getLong(RuntimeInfo.RuntimeInfoKey.ForestPauseTime);
+
+            if (forestPauseTime > System.currentTimeMillis()) {
+                titleText = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
+            }
+            if (BaseModel.getEnableProgress().getValue()) {
+                builder.setProgress(100, 0, false);
+            }
+            titleText = "⚙️ 芝麻粒正在施工中...";
+            builder.setContentTitle(titleText);
+            mainHandler.post(()->sendText(true));
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
     }
 
     /**
@@ -217,7 +248,7 @@ public class Notify {
                 builder.setContentText(contentText);
             }
             builder.setProgress(0, 0, false);
-            mNotifyManager.notify(NOTIFICATION_ID, builder.build());
+            mainHandler.post(()->sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -225,9 +256,14 @@ public class Notify {
 
     /**
      * 发送文本更新。 更新通知的内容文本，并重新发送通知。
+     * @param force 是否强制刷新
      */
-    private static void sendText() {
+    private static void sendText(Boolean force) {
         try {
+            if (!force && System.currentTimeMillis() - lastUpdateTime < 500) {
+                return;
+            }
+            lastUpdateTime = System.currentTimeMillis();
             builder.setContentTitle(titleText);
             if (!StringUtil.isEmpty(contentText)) {
                 builder.setContentText(contentText);

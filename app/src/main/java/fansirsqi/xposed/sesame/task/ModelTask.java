@@ -291,7 +291,7 @@ public abstract class ModelTask extends Model {
         new Thread(() -> {
             try {
                 taskCompletionLatch.await(); // 等待所有任务完成
-                Notify.updateNextExecText(-1);
+                Notify.forceUpdateText();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -465,6 +465,9 @@ public abstract class ModelTask extends Model {
      * 获取总任务执行进度 100%
      */
     public static int completedTaskPercentage() {
+        if (taskCompletionLatch == null) {
+            return 100;
+        }
         int totalTaskCount = getModelArray().length;
         return (int) ((totalTaskCount - taskCompletionLatch.getCount()) * 100 / totalTaskCount);
     }
