@@ -91,7 +91,7 @@ public class AntFarm extends ModelTask {
 
     @Override
     public String getName() {
-        return "庄园🏞";
+        return "庄园";
     }
 
     @Override
@@ -1985,6 +1985,7 @@ public class AntFarm extends ModelTask {
     private Boolean chouchouleDoFarmTask(String bizKey, String name, int times) {
         try {
             for (int i = 0; i < times; i++) {
+                ThreadUtil.sleep(15000L);
                 String s = AntFarmRpcCall.chouchouleDoFarmTask(bizKey);
                 JSONObject jo = new JSONObject(s);
                 if (jo.optBoolean("success", false)) {
@@ -2003,8 +2004,7 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.chouchouleReceiveFarmTaskAward(taskId);
             JSONObject jo = new JSONObject(s);
-            // Log.other("庄园小鸡🧾️[完成:心愿金" + name + "]" + amount);
-            return jo.optBoolean("success", false);
+            return ResUtil.checkResCode(TAG, jo);
         } catch (Throwable t) {
             Log.runtime(TAG, "chouchouleReceiveFarmTaskAward err:");
             Log.printStackTrace(TAG, t);

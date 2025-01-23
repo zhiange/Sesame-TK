@@ -37,7 +37,7 @@ public class AntOcean extends ModelTask {
 
     @Override
     public String getName() {
-        return "海洋🌊";
+        return "海洋";
     }
 
     @Override

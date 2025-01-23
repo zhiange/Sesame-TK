@@ -17,7 +17,7 @@ public class AntBookRead extends ModelTask {
 
     @Override
     public String getName() {
-        return "读书听书📚";
+        return "读书听书";
     }
 
     @Override

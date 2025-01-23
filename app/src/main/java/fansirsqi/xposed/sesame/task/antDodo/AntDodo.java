@@ -27,7 +27,7 @@ public class AntDodo extends ModelTask {
 
     @Override
     public String getName() {
-        return "神奇物种🐼";
+        return "神奇物种";
     }
 
     @Override

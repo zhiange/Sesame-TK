@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.task.AnswerAI;
 
+import java.util.List;
+
 import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -7,15 +9,13 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.util.Log;
 
-import java.util.List;
-
 public class AnswerAI extends Model {
 
     private static final String TAG = AnswerAI.class.getSimpleName();
 
     @Override
     public String getName() {
-        return "AI答题🤖";
+        return "AI答题";
     }
 
     @Override

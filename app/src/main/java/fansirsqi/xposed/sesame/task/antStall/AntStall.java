@@ -71,7 +71,7 @@ public class AntStall extends ModelTask {
 
     @Override
     public String getName() {
-        return "新村🏵";
+        return "新村";
     }
 
     @Override

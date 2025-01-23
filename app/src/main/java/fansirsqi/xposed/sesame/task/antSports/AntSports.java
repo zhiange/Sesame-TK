@@ -58,7 +58,7 @@ public class AntSports extends ModelTask {
 
     @Override
     public String getName() {
-        return "运动🏅";
+        return "运动";
     }
 
     @Override

@@ -18,7 +18,7 @@ public class OmegakoiTown extends ModelTask {
 
     @Override
     public String getName() {
-        return "小镇🏕";
+        return "小镇";
     }
 
     @Override

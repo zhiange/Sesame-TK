@@ -46,7 +46,7 @@ public class AntOrchard extends ModelTask {
 
   @Override
   public String getName() {
-    return "农场🌾";
+    return "农场";
   }
 
   @Override

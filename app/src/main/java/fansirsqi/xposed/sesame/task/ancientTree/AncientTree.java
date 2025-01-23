@@ -26,7 +26,7 @@ public class AncientTree extends ModelTask {
 
     @Override
     public String getName() {
-        return "古树🌳";
+        return "古树";
     }
 
     @Override

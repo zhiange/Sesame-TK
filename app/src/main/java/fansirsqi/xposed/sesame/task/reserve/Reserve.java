@@ -24,7 +24,7 @@ public class Reserve extends ModelTask {
 
     @Override
     public String getName() {
-        return "保护地🌏";
+        return "保护地";
     }
 
     @Override

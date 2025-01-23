@@ -23,7 +23,7 @@ public class ConsumeGold extends ModelTask {
 
     @Override
     public String getName() {
-        return "消费金💰";
+        return "消费金";
     }
 
     @Override

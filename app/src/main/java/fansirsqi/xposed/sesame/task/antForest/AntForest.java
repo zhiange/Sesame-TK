@@ -207,7 +207,7 @@ public class AntForest extends ModelTask {
 
     @Override
     public String getName() {
-        return "森林🌳";
+        return "森林";
     }
 
     @Override

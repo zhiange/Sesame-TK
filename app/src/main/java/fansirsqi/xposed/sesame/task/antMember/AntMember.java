@@ -24,7 +24,7 @@ public class AntMember extends ModelTask {
 
   @Override
   public String getName() {
-    return "会员🏆";
+    return "会员";
   }
 
   @Override
