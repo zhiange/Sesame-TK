@@ -2,28 +2,46 @@ name: PR Branch Check
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
 jobs:
   check-target-branch:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Check target branch
-        id: check-branch
+      - name: Get PR target branch
+        id: get-pr-target-branch
         run: |
-          if [ "${{ github.event.pull_request.base.ref }}" != "develop" ]; then
-            echo "PR is not targeting 'develop' branch. Closing PR."
-            echo "::set-output name=should_close::true"
-          else
-            echo "PR is targeting 'develop' branch. All good."
-            echo "::set-output name=should_close::false"
-          fi
+          TARGET_BRANCH=$(jq --raw-output .pull_request.base.ref "$GITHUB_EVENT_PATH")
+          echo "Target branch: $TARGET_BRANCH"
+          echo "::set-output name=target_branch::$TARGET_BRANCH"
 
-      - name: Close PR if not targeting develop
-        if: steps.check-branch.outputs.should_close == 'true'
-        uses: superbrothers/close-pull-request@v3
+      - name: Close PR if target branch is main
+        if: steps.get-pr-target-branch.outputs.target_branch == 'main'
+        uses: actions/github-script@v6
         with:
-          comment: "请推送到 `develop` 分支。当前 PR 的目标分支不正确，已关闭。"
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            if (pr.base.ref === 'main') {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                state: 'closed',
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: 'This PR is targeting the `main` branch. PRs targeting `main` are not allowed. Please target a different branch.',
+              });
+            }
