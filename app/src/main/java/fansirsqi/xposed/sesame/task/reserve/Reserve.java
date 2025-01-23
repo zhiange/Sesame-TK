@@ -1,12 +1,9 @@
 package fansirsqi.xposed.sesame.task.reserve;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import fansirsqi.xposed.sesame.entity.ReserveEntity;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -18,38 +15,30 @@ import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 public class Reserve extends ModelTask {
     private static final String TAG = Reserve.class.getSimpleName();
-
     @Override
     public String getName() {
         return "保护地";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.FOREST;
     }
-
     @Override
     public String getIcon() {
         return "Reserve.png";
     }
-
     private SelectAndCountModelField reserveList;
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
         modelFields.addField(reserveList = new SelectAndCountModelField("reserveList", "保护地列表", new LinkedHashMap<>(), ReserveEntity::getList));
         return modelFields;
     }
-
     public Boolean check() {
         return !TaskCommon.IS_ENERGY_TIME;
     }
-
     public void run() {
         try {
             Log.other("开始保护地任务");
@@ -61,7 +50,6 @@ public class Reserve extends ModelTask {
             Log.other("保护地任务");
         }
     }
-
     private void animalReserve() {
         try {
             Log.record("开始执行-" + getName());
@@ -107,7 +95,6 @@ public class Reserve extends ModelTask {
             Log.record("结束执行-" + getName());
         }
     }
-
     private boolean queryTreeForExchange(String projectId) {
         try {
             String s = ReserveRpcCall.queryTreeForExchange(projectId);
@@ -137,7 +124,6 @@ public class Reserve extends ModelTask {
         }
         return false;
     }
-
     private void exchangeTree(String projectId, String itemName, int count) {
         int appliedTimes = 0;
         try {
@@ -179,5 +165,4 @@ public class Reserve extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
 }

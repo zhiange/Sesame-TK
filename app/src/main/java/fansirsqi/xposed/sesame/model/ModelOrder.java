@@ -1,9 +1,7 @@
 package fansirsqi.xposed.sesame.model;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.task.ancientTree.AncientTree;
 import fansirsqi.xposed.sesame.task.antCooperate.AntCooperate;
@@ -19,9 +17,7 @@ import fansirsqi.xposed.sesame.task.consumeGold.ConsumeGold;
 import fansirsqi.xposed.sesame.task.greenFinance.GreenFinance;
 import fansirsqi.xposed.sesame.task.reserve.Reserve;
 import lombok.Getter;
-
 public class ModelOrder {
-
     @SuppressWarnings("unchecked")
     private static final Class<Model>[] array = new Class[]{
             BaseModel.class,//基础设置
@@ -42,13 +38,8 @@ public class ModelOrder {
 //            OmegakoiTown.class,//小镇
             AnswerAI.class,//AI答题
     };
-
-
     @Getter private  static final List<Class<? extends Model>> clazzList = new ArrayList<>();
-
     static {
         Collections.addAll(clazzList, array);
     }
-
-
 }

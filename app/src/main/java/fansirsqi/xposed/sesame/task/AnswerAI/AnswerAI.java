@@ -1,39 +1,28 @@
 package fansirsqi.xposed.sesame.task.AnswerAI;
-
 import java.util.List;
-
 import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.util.Log;
-
 public class AnswerAI extends Model {
-
     private static final String TAG = AnswerAI.class.getSimpleName();
-
     @Override
     public String getName() {
         return "AI答题";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.OTHER;
     }
-
     @Override
     public String getIcon() {
         return "AnswerAI.svg";
     }
-
     private static AnswerAIInterface answerAIInterface = AnswerAIInterface.getInstance();
-
     private final BooleanModelField useGeminiAI = new BooleanModelField("useGeminiAI", "GeminiAI | 使用答题", false);
-
     private final StringModelField setGeminiAIToken = new StringModelField("useGeminiAIToken", "GeminiAI | 设置令牌", "");
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -41,14 +30,12 @@ public class AnswerAI extends Model {
         modelFields.addField(setGeminiAIToken);
         return modelFields;
     }
-
     @Override
     public void boot(ClassLoader classLoader) {
         if (useGeminiAI.getValue()) {
             answerAIInterface = new GenAI(setGeminiAIToken.getValue());
         }
     }
-
     /**
      * 获取AI回答结果
      *
@@ -63,7 +50,6 @@ public class AnswerAI extends Model {
         }
         return "";
     }
-
     /**
      * 获取答案
      *
@@ -79,5 +65,4 @@ public class AnswerAI extends Model {
         }
         return "";
     }
-
 }

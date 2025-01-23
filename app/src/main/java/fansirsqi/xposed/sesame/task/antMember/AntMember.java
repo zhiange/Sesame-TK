@@ -1,11 +1,8 @@
 package fansirsqi.xposed.sesame.task.antMember;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Arrays;
-
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -18,25 +15,20 @@ import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 public class AntMember extends ModelTask {
   private static final String TAG = AntMember.class.getSimpleName();
-
   @Override
   public String getName() {
     return "会员";
   }
-
   @Override
   public ModelGroup getGroup() {
     return ModelGroup.MEMBER;
   }
-
   @Override
   public String getIcon() {
     return "AntMember.png";
   }
-
   private BooleanModelField memberSign;
   private BooleanModelField memberTask;
   private BooleanModelField collectSesame;
@@ -50,7 +42,6 @@ public class AntMember extends ModelTask {
   private BooleanModelField merchantMoreTask;
   private BooleanModelField beanSignIn;
   private BooleanModelField beanExchangeBubbleBoost;
-
   @Override
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
@@ -69,12 +60,10 @@ public class AntMember extends ModelTask {
     modelFields.addField(beanExchangeBubbleBoost = new BooleanModelField("beanExchangeBubbleBoost", "安心豆兑换时光加速器", false));
     return modelFields;
   }
-
   @Override
   public Boolean check() {
     return !TaskCommon.IS_ENERGY_TIME;
   }
-
   @Override
   public void run() {
     try {
@@ -137,7 +126,6 @@ public class AntMember extends ModelTask {
       Log.other("执行结束-" + getName());
     }
   }
-
   /**
    * 会员签到
    */
@@ -160,7 +148,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 会员任务-逛一逛
    */
@@ -187,7 +174,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 会员积分收取
    * @param page 第几页
@@ -227,7 +213,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 检查是否满足运行芝麻信用任务的条件
    * @return bool
@@ -251,7 +236,6 @@ public class AntMember extends ModelTask {
       return false;
     }
   }
-
   /**
    * 芝麻信用任务
    */
@@ -278,7 +262,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".doAllAvailableSesameTask", t);
     }
   }
-
   /**
    * 芝麻信用-领取并完成任务
    * @param taskList 任务列表
@@ -339,7 +322,6 @@ public class AntMember extends ModelTask {
       Log.other("芝麻信用💳[" + taskTitle + "]#(" + (completedNum + 1) + "/" + needCompleteNum + "天)");
     }
   }
-
   /**
    * 芝麻粒收取
    * @param withOneClick 启用一键收取
@@ -384,7 +366,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".collectSesame", t);
     }
   }
-
   /**
    * 商家开门打卡签到
    */
@@ -411,7 +392,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家开门打卡报名
    */
@@ -449,7 +429,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家积分签到
    */
@@ -475,7 +454,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家积分任务
    */
@@ -573,7 +551,6 @@ public class AntMember extends ModelTask {
       }
     }
   }
-
   /**
    * 完成商家积分任务
    * @param taskCode 任务代码
@@ -602,7 +579,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 保障金领取
    */
@@ -645,7 +621,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".collectInsuredGold", t);
     }
   }
-
   /**
    * 执行会员任务 类型1
    * @param task 单个任务对象
@@ -673,7 +648,6 @@ public class AntMember extends ModelTask {
     }
     Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
   }
-
   public void kbMember() {
     try {
       if (!StatusUtil.canKbSignInToday()) {
@@ -695,7 +669,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void goldTicket() {
     try {
       // 签到
@@ -706,7 +679,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /** 收取黄金票 */
   private void goldBillCollect(String signInfo) {
     try {
@@ -731,7 +703,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, th);
     }
   }
-
   private void enableGameCenter() {
     try {
       try {
@@ -784,7 +755,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void beanSignIn() {
     try {
       JSONObject jo = new JSONObject(AntMemberRpcCall.querySignInProcess("AP16242232", "INS_BLUE_BEAN_SIGN"));
@@ -801,13 +771,11 @@ public class AntMember extends ModelTask {
           Log.runtime(jo.toString());
         }
       }
-
     } catch (Throwable t) {
       Log.runtime(TAG, "beanSignIn err:");
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void beanExchangeBubbleBoost() {
     try {
       JSONObject jo = new JSONObject(AntMemberRpcCall.queryUserAccountInfo("INS_BLUE_BEAN"));

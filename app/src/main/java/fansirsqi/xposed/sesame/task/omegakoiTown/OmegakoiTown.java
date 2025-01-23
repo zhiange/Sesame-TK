@@ -1,46 +1,35 @@
 package fansirsqi.xposed.sesame.task.omegakoiTown;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
-
 public class OmegakoiTown extends ModelTask {
     private static final String TAG = OmegakoiTown.class.getSimpleName();
-
     @Override
     public String getName() {
         return "小镇";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.OTHER;
     }
-
-
     @Override
     public ModelFields getFields() {
         return new ModelFields();
     }
-
     @Override
     public String getIcon() {
         return "OmegakoiTown.png";
     }
-
     public enum RewardType {
         gold, diamond, dyestuff, rubber, glass, certificate, shipping, tpuPhoneCaseCertificate,
         glassPhoneCaseCertificate, canvasBagCertificate, notebookCertificate, box, paper, cotton;
-
         public static final CharSequence[] rewardNames = {
                 "金币", "钻石", "颜料", "橡胶",
                 "玻璃", "合格证", "包邮券", "TPU手机壳合格证",
@@ -50,7 +39,6 @@ public class OmegakoiTown extends ModelTask {
             return rewardNames[ordinal()];
         }
     }
-
     public enum HouseType {
         houseTrainStation("火车站"),
         houseStop("停车场"),
@@ -118,13 +106,9 @@ public class OmegakoiTown extends ModelTask {
         houseAuctionHouse("拍卖行"),
         houseCatHouse("喵小馆"),
         houseStarPickingPavilion("神秘研究所");
-
         HouseType(String name) {
         }
-
     }
-
-
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME) {
             return false;
@@ -132,7 +116,6 @@ public class OmegakoiTown extends ModelTask {
         long executeTime = RuntimeInfo.getInstance().getLong("omegakoiTown", 0);
         return System.currentTimeMillis() - executeTime >= 21600000;
     }
-
     public void run() {
         try {
             Log.other("开始执行-" + getName());
@@ -147,7 +130,6 @@ public class OmegakoiTown extends ModelTask {
             Log.other("结束执行-" + getName());
         }
     }
-
     private void getUserTasks() {
         try {
             String s = OmegakoiTownRpcCall.getUserTasks();
@@ -187,7 +169,6 @@ public class OmegakoiTown extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void getSignInStatus() {
         try {
             String s = OmegakoiTownRpcCall.getSignInStatus();
@@ -208,7 +189,6 @@ public class OmegakoiTown extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void houseProduct() {
         try {
             String s = OmegakoiTownRpcCall.houseProduct();
@@ -234,7 +214,6 @@ public class OmegakoiTown extends ModelTask {
                             String itemId = jo.getJSONObject("result").getJSONArray("rewards").getJSONObject(0)
                                     .getString("itemId");
                             RewardType rewardType = RewardType.valueOf(itemId);
-
                             NumberFormat numberFormat = NumberFormat.getNumberInstance();
                             ((DecimalFormat) numberFormat).applyPattern("#.00");
                             String formattedAmount = numberFormat.format(amount);
@@ -252,5 +231,4 @@ public class OmegakoiTown extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
 }
