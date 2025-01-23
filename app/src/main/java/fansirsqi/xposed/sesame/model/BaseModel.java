@@ -124,7 +124,7 @@ public class BaseModel extends Model {
     static final StringModelField sendHookDataUrl = new StringModelField("sendHookDataUrl", "Hook数据转发地址", "http://127.0.0.1:9527/hook");
     @Override
     public String getName() {
-        return "基础⚙️";
+        return "基础";
     }
     @Override
     public ModelGroup getGroup() {
