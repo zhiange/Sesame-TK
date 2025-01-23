@@ -19,12 +19,52 @@ public class Notify {
     @SuppressLint("StaticFieldLeak")
     public static Context context;
     private static final int NOTIFICATION_ID = 99;
+    private static final int ERROR_NOTIFICATION_ID = 98;
     private static final String CHANNEL_ID = "fansirsqi.xposed.sesame.ANTFOREST_NOTIFY_CHANNEL";
     private static NotificationManager mNotifyManager;
     private static Notification.Builder builder;
     private static long nextExecTimeCache = 0;
     private static String titleText = "";
     private static String contentText = "";
+
+    @SuppressLint("ObsoleteSdkInt")
+    public static void sendErrorNotification(String title, String content) {
+        try {
+            if (context == null) {
+                return;
+            }
+            mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
+                mNotifyManager.createNotificationChannel(notificationChannel);
+                builder = new Notification.Builder(context, CHANNEL_ID);
+            } else {
+                //安卓8.0以下
+                builder = new Notification.Builder(context).setPriority(Notification.PRIORITY_LOW);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                builder.setCategory(Notification.CATEGORY_ERROR);
+            builder
+                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .setSubText("芝麻粒")
+                    .setAutoCancel(true);
+            Notification mNotification = builder.build();
+            if (context instanceof Service) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    mNotifyManager.notify(NOTIFICATION_ID, mNotification);
+                } else {
+                    ((Service) context).startForeground(NOTIFICATION_ID, mNotification);
+                }
+            } else {
+                mNotifyManager.notify(NOTIFICATION_ID, mNotification);
+            }
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+    }
 
     public static void start(Context context) {
         try {
