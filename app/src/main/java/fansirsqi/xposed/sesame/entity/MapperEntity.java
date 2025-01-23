@@ -1,14 +1,20 @@
 package fansirsqi.xposed.sesame.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import fansirsqi.xposed.sesame.util.HanziToPinyin;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import fansirsqi.xposed.sesame.util.HanziToPinyin;
+import lombok.Data;
+
 /**
  * 抽象基类，表示具有 ID 和名称的实体对象。
  * 提供按拼音排序的能力。
  */
+@Data
 public abstract class MapperEntity implements Comparable<MapperEntity> {
-    public String name; // 实体名称
+     public String name; // 实体名称
     public String id; // 实体 ID
     // 拼音缓存，用于提升多次比较时的性能
     private ArrayList<String> pinyin;
