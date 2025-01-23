@@ -1,15 +1,12 @@
 package fansirsqi.xposed.sesame.entity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
@@ -17,7 +14,6 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
-
 /**
  * 表示好友能量监视器的实体类，提供能量收集的统计和管理功能。
  * 该类是线程安全的，适用于多线程环境。
@@ -28,18 +24,14 @@ import lombok.Setter;
 @Setter
 @Getter
 public class FriendWatch extends MapperEntity {
-
     // 日志标签
     private static final String TAG = FriendWatch.class.getSimpleName();
-
     // 用于存储好友能量数据的 Map
     private static final Map<String, FriendWatch> friendWatchMap = new HashMap<>();
-
     // Getter 和 Setter 方法
     private String startTime; // 开始统计时间
     private int allGet; // 总收集能量
     private int weekGet; // 本周收集能量
-
     /**
      * 构造方法，初始化好友监视器对象。
      *
@@ -50,7 +42,6 @@ public class FriendWatch extends MapperEntity {
         this.id = id;
         this.name = name;
     }
-
     /**
      * 比较两个好友的周收能量，用于排序。
      *
@@ -67,7 +58,6 @@ public class FriendWatch extends MapperEntity {
         }
         return super.compareTo(o);
     }
-
     /**
      * 更新好友的能量收集数据。
      *
@@ -90,7 +80,6 @@ public class FriendWatch extends MapperEntity {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 保存好友能量数据到文件。
      */
@@ -99,13 +88,13 @@ public class FriendWatch extends MapperEntity {
             if (userId == null) return;
             JSONObject joFriendWatch = new JSONObject(friendWatchMap);
             String formattedJson = JsonUtil.formatJson(joFriendWatch);
+            Log.debug(TAG, "friendWatch save: " + formattedJson);
             Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
             Log.printStackTrace(TAG, e);
         }
     }
-
     /**
      * 更新每日统计数据，如果需要更新周数据则进行重置。
      */
@@ -129,7 +118,6 @@ public class FriendWatch extends MapperEntity {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 加载好友能量数据。
      *
@@ -158,14 +146,12 @@ public class FriendWatch extends MapperEntity {
         }
         return false;
     }
-
     /**
      * 卸载好友能量数据，清空内存中的缓存。
      */
     public static synchronized void unload() {
         friendWatchMap.clear();
     }
-
     /**
      * 判断是否需要更新所有数据（周一重置）。
      *
@@ -182,7 +168,6 @@ public class FriendWatch extends MapperEntity {
         return cLast.get(Calendar.DAY_OF_YEAR) != cNow.get(Calendar.DAY_OF_YEAR) &&
                 cNow.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY;
     }
-
     /**
      * 获取好友能量列表，用于展示。
      *
@@ -191,5 +176,4 @@ public class FriendWatch extends MapperEntity {
     public static List<FriendWatch> getList() {
         return new ArrayList<>(friendWatchMap.values());
     }
-
 }

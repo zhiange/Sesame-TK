@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.util;
-
 import android.annotation.SuppressLint;
 import android.app.*;
 import android.content.Context;
@@ -13,6 +12,7 @@ import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
 
+import lombok.Getter;
 public class Notify {
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -23,6 +23,7 @@ public class Notify {
     private static final String CHANNEL_ID = "fansirsqi.xposed.sesame.ANTFOREST_NOTIFY_CHANNEL";
     private static NotificationManager mNotifyManager;
     private static Notification.Builder builder;
+
     private static long lastUpdateTime = 0;
     private static long nextExecTimeCache = 0;
     private static String titleText = "";
@@ -68,6 +69,12 @@ public class Notify {
     }
 
     @SuppressLint("ObsoleteSdkInt")
+    @Getter
+    private static volatile long lastNoticeTime = 0;
+    private static long nextExecTimeCache = 0;
+    private static String titleText = "";
+    private static String contentText = "";
+
     public static void start(Context context) {
         try {
             Notify.context = context;
@@ -117,7 +124,6 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 停止通知。 移除通知并停止前台服务。
      */
@@ -140,7 +146,6 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 更新通知文本。 更新通知的标题和内容文本，并发送通知。
      *
@@ -152,18 +157,19 @@ public class Notify {
             if (forestPauseTime > System.currentTimeMillis()) {
                 status = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
             }
+
             if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
                 builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
             } else {
                 builder.setProgress(0, 0, false);
             }
+
             titleText = status;
             mainHandler.post(()->sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 更新下一次执行时间的文本。
      *
@@ -187,7 +193,6 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 强制刷新通知，全部任务结束后调用
      */
@@ -216,6 +221,7 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
+
 
     /**
      * 设置状态文本为执行中。
@@ -252,8 +258,11 @@ public class Notify {
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
-    }
 
+    public static void setStatusTextExec(String content) {
+        updateStatusText("⚙️ "+ content + " 施工中...");
+
+    }
     /**
      * 发送文本更新。 更新通知的内容文本，并重新发送通知。
      * @param force 是否强制刷新
@@ -276,7 +285,6 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
-
     @SuppressLint("ObsoleteSdkInt")
     public static void sendNewNotification(Context context, String title, String content, int newNotificationId) {
         try {
@@ -316,5 +324,4 @@ public class Notify {
             Log.printStackTrace(e);
         }
     }
-
 }
