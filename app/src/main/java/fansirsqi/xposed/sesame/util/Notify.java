@@ -151,11 +151,10 @@ public class Notify {
         }
     }
 
-    /**
-     * 设置状态文本为执行中。
-     */
-    public static void setStatusTextExec() {
-        updateStatusText("⚙️ 芝麻粒正在施工中...");
+
+
+    public static void setStatusTextExec(String content) {
+        updateStatusText("⚙️ "+ content + " 施工中...");
     }
 
     /**

@@ -51,7 +51,7 @@ public abstract class ModelTask extends Model {
             }
             MAIN_TASK_MAP.put(task, Thread.currentThread());
             try {
-                Notify.setStatusTextExec();
+                Notify.setStatusTextExec(task.getName());
                 task.run();
             } catch (Exception e) {
                 Log.printStackTrace(e);
