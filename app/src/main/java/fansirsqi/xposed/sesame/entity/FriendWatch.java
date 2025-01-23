@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
@@ -62,9 +63,14 @@ public class FriendWatch extends MapperEntity {
 
     public static synchronized void save(String userId) {
         try {
+            String notformat = joFriendWatch.toString();
             String formattedJson = JsonUtil.formatJson(joFriendWatch);
-            Log.debug(TAG, "friendWatch save: " + formattedJson);
-            Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
+            Log.debug(TAG, "friendWatch save: " + formattedJson + " " + notformat);
+            if (Objects.equals(formattedJson, "{}")) {
+                Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
+            } else {
+                Files.write2File(notformat, Files.getFriendWatchFile(userId));
+            }
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
             Log.printStackTrace(TAG, e);
