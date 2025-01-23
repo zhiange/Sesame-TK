@@ -99,6 +99,7 @@ public class FriendWatch extends MapperEntity {
             if (userId == null) return;
             JSONObject joFriendWatch = new JSONObject(friendWatchMap);
             String formattedJson = JsonUtil.formatJson(joFriendWatch);
+            Log.debug(TAG, "friendWatch save: " + formattedJson);
             Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
