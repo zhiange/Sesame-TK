@@ -499,9 +499,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             },
                             2000);
                 }
+                Notify.start(service);
                 if (!Objects.requireNonNull(Model.getModel(BaseModel.class)).getEnableField().getValue()) {
                     Log.record("芝麻粒已禁用");
                     Toast.show("芝麻粒已禁用");
+                    Notify.setStatusTextDisabled();
                     return false;
                 }
                 // 保持唤醒锁，防止设备休眠
@@ -595,7 +597,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Log.printStackTrace(TAG, t);
                     }
                 }
-                Notify.start(service);
                 Model.bootAllModel(classLoader);
                 StatusUtil.load();
                 updateDay(userId);
