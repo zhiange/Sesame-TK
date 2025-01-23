@@ -3,9 +3,7 @@ package fansirsqi.xposed.sesame.task.antMember;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Arrays;
-
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -295,14 +293,18 @@ public class AntMember extends ModelTask {
       String taskTemplateId = task.getString("templateId");
       String taskTitle = task.getString("title");
       int needCompleteNum = task.getInt("needCompleteNum");
-      int completedNum = task.has("completedNum") ? task.getInt("completedNum") : 0;
+      int completedNum = task.optInt("completedNum", 0);
       String s;
       String recordId;
       JSONObject responseObj;
+      if (task.getString("actionUrl").contains("jumpAction")) {
+        // 跳转APP任务 依赖跳转的APP发送请求鉴别任务完成 仅靠hook支付宝无法完成
+        continue;
+      }
       if (!task.has("todayFinish")) {
         // 领取任务
         s = AntMemberRpcCall.joinSesameTask(taskTemplateId);
-        ThreadUtil.sleep(500);
+        ThreadUtil.sleep(200);
         responseObj = new JSONObject(s);
         if (!responseObj.optBoolean("success")) {
           Log.other(TAG, "芝麻信用💳[领取任务" + taskTitle + "失败]#" + s);
@@ -319,10 +321,10 @@ public class AntMember extends ModelTask {
         recordId = task.getString("recordId");
       }
       s = AntMemberRpcCall.feedBackSesameTask(taskTemplateId);
-      ThreadUtil.sleep(1000);
+      ThreadUtil.sleep(200);
       responseObj = new JSONObject(s);
       if (!responseObj.optBoolean("success")) {
-        Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "回调失败]#" + s);
+        Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "回调失败]#" + responseObj.getString("errorMessage"));
         Log.error(TAG + ".joinAndFinishSesameTask.feedBackSesameTask", "芝麻信用💳[任务" + taskTitle + "回调失败]#" + s);
         continue;
       }
@@ -333,9 +335,11 @@ public class AntMember extends ModelTask {
         case "xianyonghoufu_new": // 体验先用后付
           continue;
       }
-      if (task.has("jumpToPushModel") && task.getBoolean("jumpToPushModel")) {
+      // 是否为浏览15s任务
+      boolean assistiveTouch = task.getJSONObject("strategyRule").optBoolean("assistiveTouch");
+      if (task.optBoolean("jumpToPushModel") || assistiveTouch) {
         s = AntMemberRpcCall.finishSesameTask(recordId);
-        ThreadUtil.sleep(4000);
+        ThreadUtil.sleep(16000);
         responseObj = new JSONObject(s);
         if (!responseObj.optBoolean("success")) {
           Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "完成失败]#" + s);
