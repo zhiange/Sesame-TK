@@ -2,6 +2,7 @@ package fansirsqi.xposed.sesame.task;
 import android.os.Build;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,10 @@ import lombok.Getter;
 public abstract class ModelTask extends Model {
     // 存储所有主任务与线程的映射
     private static final Map<ModelTask, Thread> MAIN_TASK_MAP = new ConcurrentHashMap<>();
+
+    // 线程同步计数
+    private static CountDownLatch taskCompletionLatch;
+
     // 主任务线程池，线程池大小为模型数组长度，最大线程数无限制，空闲时间30秒
     private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(
             Math.max(1, getModelArray().length)// 核心线程数，至少为 1
@@ -46,6 +51,7 @@ public abstract class ModelTask extends Model {
                 Log.printStackTrace(e);
             } finally {
                 MAIN_TASK_MAP.remove(task);
+                taskCompletionLatch.countDown();
                 Notify.updateNextExecText(-1);
             }
         }
@@ -210,6 +216,7 @@ public abstract class ModelTask extends Model {
             if (isEnable() && check()) {
                 if (isSync()) {
                     mainRunnable.run();
+                    taskCompletionLatch.countDown();
                 } else {
                     MAIN_THREAD_POOL.execute(mainRunnable);
                 }
@@ -250,10 +257,30 @@ public abstract class ModelTask extends Model {
      * @param force 是否强制启动
      */
     public static void startAllTask(Boolean force) {
+        Notify.setStatusTextExec();
+        taskCompletionLatch = new CountDownLatch(getModelArray().length);
+        // 启动一个线程等待所有任务完成
+        new Thread(() -> {
+            try {
+                taskCompletionLatch.await(); // 等待所有任务完成
+                Notify.forceUpdateText();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
         for (Model model : getModelArray()) {
-            if (model != null && ModelType.TASK == model.getType()) {
-                if (((ModelTask) model).startTask(force)) {
-                    ThreadUtil.sleep(750);
+            if (model != null) {
+                if (ModelType.TASK == model.getType()) {
+                    if (((ModelTask) model).startTask(force)) {
+                        ThreadUtil.sleep(750);
+                    } else {
+                        taskCompletionLatch.countDown();
+                        Notify.updateNextExecText(-1);
+                    }
+                } else {
+                    // normal模块直接标记已完成
+                    taskCompletionLatch.countDown();
+                    Notify.updateNextExecText(-1);
                 }
             }
         }
@@ -380,7 +407,18 @@ public abstract class ModelTask extends Model {
      * 返回是否还有未结束的任务
      */
     public static boolean isAllTaskFinished() {
-        return MAIN_TASK_MAP.isEmpty();
+        return taskCompletionLatch == null || taskCompletionLatch.getCount() == 0;
+    }
+
+    /**
+     * 获取总任务执行进度 100%
+     */
+    public static int completedTaskPercentage() {
+        if (taskCompletionLatch == null) {
+            return 100;
+        }
+        int totalTaskCount = getModelArray().length;
+        return (int) ((totalTaskCount - taskCompletionLatch.getCount()) * 100 / totalTaskCount);
     }
     public interface CancelTask {
         void cancel();
