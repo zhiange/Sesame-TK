@@ -2924,8 +2924,13 @@ public class AntFarm extends ModelTask {
             if (Objects.isNull(periodItemList) || periodItemList.length() <= 0) {
                 return;
             }
-            if (Objects.isNull(familyInteractActions) || familyInteractActions.length() <= 0) {
-                return;
+            if (!Objects.isNull(familyInteractActions) && familyInteractActions.length() > 0) {
+                for (int i = 0; i < familyInteractActions.length(); i++) {
+                    JSONObject familyInteractAction = familyInteractActions.getJSONObject(i);
+                    if ("EatTogether".equals(familyInteractAction.optString("familyInteractType"))) {
+                        return;
+                    }
+                }
             }
             String periodName = "";
             Calendar currentTime = Calendar.getInstance();
@@ -2948,17 +2953,6 @@ public class AntFarm extends ModelTask {
                 if (currentTime.after(startTime) && currentTime.before(endTime)) {
                     periodName = periodItem.optString("periodName");
                     isEat = true;
-                    break;
-                }
-            }
-            if (!isEat) {
-                return;
-            }
-
-            for (int i = 0; i < familyInteractActions.length(); i++) {
-                JSONObject familyInteractAction = familyInteractActions.getJSONObject(i);
-                if ("EatTogether".equals(familyInteractAction.optString("familyInteractType"))) {
-                    isEat = false;
                     break;
                 }
             }
