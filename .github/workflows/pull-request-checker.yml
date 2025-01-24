@@ -11,4 +11,4 @@ jobs:
         run: |
           gh pr close --comment "This pull request cannot be merged into the main branch. Please create a new pull request targeting the develop branch instead." ${{ github.event.pull_request.number }}
         env:
-          GH_TOKEN: ${{ secrets.TARGET_REPO_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
