@@ -1,10 +1,7 @@
 package fansirsqi.xposed.sesame.hook.rpc.bridge;
-
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -14,29 +11,20 @@ import fansirsqi.xposed.sesame.util.General;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.RandomUtil;
-
 /**
  * 新版rpc接口，支持最低支付宝版本v10.3.96.8100 记录rpc抓包，支持最低支付宝版本v10.3.96.8100
  */
 public class NewRpcBridge implements RpcBridge {
-
     private static final String TAG = NewRpcBridge.class.getSimpleName();
-
     private ClassLoader loader;
-
     private Object newRpcInstance;
-
     private Method parseObjectMethod;
-
     private Class<?>[] bridgeCallbackClazzArray;
-
     private Method newRpcCallMethod;
-
     @Override
     public RpcVersion getVersion() {
         return RpcVersion.NEW;
     }
-
     @Override
     public void load() throws Exception {
         loader = ApplicationHook.getClassLoader();
@@ -93,7 +81,6 @@ public class NewRpcBridge implements RpcBridge {
             throw e;
         }
     }
-
     @Override
     public void unload() {
         newRpcCallMethod = null;
@@ -102,7 +89,6 @@ public class NewRpcBridge implements RpcBridge {
         newRpcInstance = null;
         loader = null;
     }
-
     public String requestString(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         RpcEntity resRpcEntity = requestObject(rpcEntity, tryCount, retryInterval);
         if (resRpcEntity != null) {
@@ -110,7 +96,6 @@ public class NewRpcBridge implements RpcBridge {
         }
         return null;
     }
-
     @Override
     public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         if (ApplicationHook.isOffline()) {
@@ -124,7 +109,16 @@ public class NewRpcBridge implements RpcBridge {
                     RpcIntervalLimit.enterIntervalLimit(rpcEntity.getRequestMethod());
                     newRpcCallMethod.invoke(
                             newRpcInstance, rpcEntity.getRequestMethod(), false, false, "json", parseObjectMethod.invoke(null, rpcEntity.getRpcFullRequestData()), "", null, true, false, 0, false, "", null, null, null, Proxy.newProxyInstance(loader, bridgeCallbackClazzArray, (proxy, innerMethod, args) -> {
-                                if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
+                                if ("equals".equals(innerMethod.getName())) {
+                                    return proxy == args[0];
+                                }
+                                if ("hashCode".equals(innerMethod.getName())) {
+                                    return System.identityHashCode(proxy);
+                                }
+                                if ("toString".equals(innerMethod.getName())) {
+                                    return "Proxy for " + bridgeCallbackClazzArray[0].getName();
+                                }
+                                if (args != null && args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
                                     try {
                                         Object obj = args[0];
                                         rpcEntity.setResponseObject(obj, (String) XposedHelpers.callMethod(obj, "toJSONString"));
