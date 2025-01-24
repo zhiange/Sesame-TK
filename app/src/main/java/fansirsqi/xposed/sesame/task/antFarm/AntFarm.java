@@ -175,7 +175,6 @@ public class AntFarm extends ModelTask {
     private BooleanModelField family;
     private SelectModelField familyOptions;
     private SelectModelField inviteFriendVisitFamily;
-    private SelectModelField familyBatchInviteP2P;
     private StringModelField giftFamilyDrawFragment;
     @Override
     public ModelFields getFields() {
@@ -224,7 +223,6 @@ public class AntFarm extends ModelTask {
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
-        modelFields.addField(familyBatchInviteP2P = new SelectModelField("familyBatchInviteP2P", "家庭 | 串门送扭蛋列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         return modelFields;
     }
@@ -2601,32 +2599,35 @@ public class AntFarm extends ModelTask {
             if (StatusUtil.hasFlagToday("antFarm::familyBatchInviteP2P")) {
                 return;
             }
-            Set<String> familyValue = familyBatchInviteP2P.getValue();
-            if (familyValue.isEmpty()) {
-                return;
-            }
             if (Objects.isNull(friendUserIds) || friendUserIds.isEmpty()) {
                 return;
             }
             String activityId = familyDrawInfo.optString("activityId");
             String sceneCode = "ANTFARM_FD_VISIT_" + activityId;
-            JSONArray inviteP2PVOList = new JSONArray();
-            for (String u : familyValue) {
-                if (!friendUserIds.contains(u) && inviteP2PVOList.length() < 6) {
-                    JSONObject object = new JSONObject();
-                    object.put("beInvitedUserId", u);
-                    object.put("bizTraceId", "");
-                    inviteP2PVOList.put(object);
-                }
-                if (inviteP2PVOList.length() >= 6) {
-                    break;
-                }
-            }
-            JSONObject jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyShareP2PPanelInfo(sceneCode));
             if (ResUtil.checkSuccess(TAG, jo)) {
-                Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
-                StatusUtil.setFlagToday("antFarm::familyBatchInviteP2P");
-                ThreadUtil.sleep(500);
+                JSONArray p2PFriendVOList = jo.getJSONArray("p2PFriendVOList");
+                if (Objects.isNull(p2PFriendVOList) || p2PFriendVOList.length() <= 0) {
+                    return;
+                }
+                JSONArray inviteP2PVOList = new JSONArray();
+                for (int i = 0; i < p2PFriendVOList.length(); i++) {
+                    if (inviteP2PVOList.length() < 6) {
+                        JSONObject object = new JSONObject();
+                        object.put("beInvitedUserId", p2PFriendVOList.getJSONObject(i).getString("userId"));
+                        object.put("bizTraceId", "");
+                        inviteP2PVOList.put(object);
+                    }
+                    if (inviteP2PVOList.length() >= 6) {
+                        break;
+                    }
+                }
+                jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
+                if (ResUtil.checkSuccess(TAG, jo)) {
+                    Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
+                    StatusUtil.setFlagToday("antFarm::familyBatchInviteP2P");
+                    ThreadUtil.sleep(500);
+                }
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "familyBatchInviteP2PTask err:");

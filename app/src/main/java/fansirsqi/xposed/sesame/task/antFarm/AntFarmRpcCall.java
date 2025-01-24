@@ -1,5 +1,8 @@
 package fansirsqi.xposed.sesame.task.antFarm;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
@@ -471,6 +474,18 @@ public class AntFarmRpcCall {
         String args = "[{\"awardType\":\"FAMILY_DRAW_TIME\",\"bizType\":\"ANTFARM_GAME_CENTER\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"taskId\":\"" + taskId + "\",\"taskSceneCode\":\"ANTFARM_FAMILY_DRAW_TASK\"}]";
         return RequestManager.requestString("com.alipay.antfarm.receiveFarmTaskAward", args);
     }
+
+    /**
+     * 扭蛋任务查询好友列表
+     */
+    public static String familyShareP2PPanelInfo(String sceneCode) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("requestType","RPC");
+        jo.put("source","antfarm");
+        jo.put("sceneCode",sceneCode);
+        return RequestManager.requestString("com.alipay.antiep.shareP2PPanelInfo", new JSONArray().put(jo).toString());
+    }
+
     /**
      * 扭蛋任务列表
      */
