@@ -1,0 +1,12 @@
+name: Pull Request Checker
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  close-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PR
+        run: |
+          gh pr close --comment "This pull request cannot be merged into the main branch. Please create a new pull request targeting the develop branch instead." ${{ github.event.pull_request.number }}
