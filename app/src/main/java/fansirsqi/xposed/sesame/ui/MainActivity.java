@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.ui;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,11 +17,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -36,6 +40,7 @@ import fansirsqi.xposed.sesame.util.PermissionUtil;
 import fansirsqi.xposed.sesame.util.StatisticsUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
+
 public class MainActivity extends BaseActivity {
     private boolean hasPermissions = false;
     private boolean isClick = false;
@@ -44,6 +49,8 @@ public class MainActivity extends BaseActivity {
     private Runnable titleRunner;
     private String[] userNameArray = {"默认"};
     private UserEntity[] userEntityArray = {null};
+    private String userId = null;
+
     @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +73,7 @@ public class MainActivity extends BaseActivity {
         updateSubTitle(ViewAppInfo.getRunType());
 //        viewHandler = new Handler(Looper.getMainLooper());
         titleRunner = () -> updateSubTitle(RunType.DISABLE);
+        userId = UserMap.getCurrentUid();
         if (mainImage != null) {
             mainImage.setOnLongClickListener(
                     v -> {
@@ -103,11 +111,13 @@ public class MainActivity extends BaseActivity {
                                                     public void onSuccess(String result) {
                                                         runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
                                                     }
+
                                                     @Override
                                                     public void onFailure(String error) {
                                                         runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
                                                     }
                                                 });
+                                        Log.debug("Now User Id: " + userId);
                                         Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
                                         ThreadUtil.sleep(200); // 别急，等一会儿再说
                                         isClick = false;
@@ -138,6 +148,7 @@ public class MainActivity extends BaseActivity {
                     public void onSuccess(String result) {
                         runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
                     }
+
                     @Override
                     public void onFailure(String error) {
                         runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
@@ -147,9 +158,11 @@ public class MainActivity extends BaseActivity {
         buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget()); // 编译日期信息
         StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
     }
+
     private void updateOneWord(String str, TextView oneWord) {
         oneWord.setText(str);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -207,6 +220,7 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
+
     @SuppressLint("NonConstantResourceId")
     public void onClick(View v) {
         if (v.getId() == R.id.main_image) {
@@ -233,7 +247,7 @@ public class MainActivity extends BaseActivity {
             selectSettingUid();
             return;
         } else if (id == R.id.btn_friend_watch) {
-            String userId = UserMap.getCurrentUid();
+
             ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
             return;
         }
@@ -241,6 +255,7 @@ public class MainActivity extends BaseActivity {
         it.setData(Uri.parse(data));
         startActivity(it);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         PackageManager packageManager = getPackageManager();
@@ -263,6 +278,7 @@ public class MainActivity extends BaseActivity {
         }
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -332,6 +348,7 @@ public class MainActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     public void selectSettingUid() {
         AtomicBoolean selected = new AtomicBoolean(false);
         AlertDialog dialog =
@@ -368,6 +385,7 @@ public class MainActivity extends BaseActivity {
                     .start();
         }
     }
+
     /**
      * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
      *
@@ -389,6 +407,7 @@ public class MainActivity extends BaseActivity {
         }
         startActivity(intent);
     }
+
     private void updateSubTitle(RunType runType) {
         setBaseTitle(ViewAppInfo.getAppTitle() + "[" + runType.getName() + "]");
         switch (runType) {
