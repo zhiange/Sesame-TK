@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.ui;
 
+import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -22,8 +24,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
@@ -272,6 +276,9 @@ public class MainActivity extends BaseActivity {
             menu.add(0, 7, 7, R.string.view_capture);
             menu.add(0, 8, 8, R.string.extend);
             menu.add(0, 9, 9, R.string.settings);
+            if (isApkInDebug()) {
+                menu.add(0, 10, 10, "Demo Setting UI");
+            }
         } catch (Exception e) {
             Log.printStackTrace(e);
             ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -345,46 +352,53 @@ public class MainActivity extends BaseActivity {
             case 9:
                 selectSettingUid();
                 break;
+            case 10:
+                Intent it = new Intent(this, DemoSettingActivity.class);
+                it.putExtra("userName", userNameArray[0]);
+                startActivity(it);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void selectSettingUid() {
-        AtomicBoolean selected = new AtomicBoolean(false);
-        AlertDialog dialog =
-                StringDialog.showSelectionDialog(
-                        this,
-                        "请选择配置",
-                        userNameArray,
-                        (dialog1, which) -> {
-                            selected.set(true);
-                            dialog1.dismiss();
-                            goSettingActivity(which);
-                        },
-                        "返回",
-                        dialog1 -> {
-                            selected.set(true);
-                            dialog1.dismiss();
-                        });
-        int length = userNameArray.length;
-        if (length > 0 && length < 3) {
-            new Thread(
-                    () -> {
-                        ThreadUtil.sleep(1000);
-                        if (!selected.get()) {
+public void selectSettingUid() {
+    final CountDownLatch latch = new CountDownLatch(1);
+    AlertDialog dialog = StringDialog.showSelectionDialog(
+            this,
+            "请选择配置",
+            userNameArray,
+            (dialog1, which) -> {
+                goSettingActivity(which);
+                dialog1.dismiss();
+                latch.countDown();
+            },
+            "返回",
+            dialog1 -> {
+                dialog1.dismiss();
+                latch.countDown();
+            });
+
+    int length = userNameArray.length;
+    Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
+    if (length > 0&& length < 3) {
+        // 定义超时时间（单位：毫秒）
+        final long timeoutMillis = 800;
+        new Thread(() -> {
+            try {
+                if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                    runOnUiThread(() -> {
+                        if (dialog.isShowing()) {
                             goSettingActivity(length - 1);
-                            // 在主线程中关闭对话框
-                            runOnUiThread(
-                                    () -> {
-                                        if (dialog.isShowing()) {
-                                            dialog.dismiss();
-                                        }
-                                    });
+                            dialog.dismiss();
                         }
-                    })
-                    .start();
-        }
+                    });
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
+}
+
 
     /**
      * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
@@ -393,12 +407,8 @@ public class MainActivity extends BaseActivity {
      */
     private void goSettingActivity(int index) {
         UserEntity userEntity = userEntityArray[index];
-//        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? DemoSettingActivity.class : SettingsActivity.class;
-        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class;
-        // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
-        // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
+        Class<?> targetActivity = UIConfig.INSTANCE.getTargetActivityClass();
         Intent intent = new Intent(this, targetActivity);
-        // 设置意图的额外信息：用户 ID 和显示名称
         if (userEntity != null) {
             intent.putExtra("userId", userEntity.getUserId());
             intent.putExtra("userName", userEntity.getShowName());
