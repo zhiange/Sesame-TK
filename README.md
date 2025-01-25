@@ -101,7 +101,7 @@
 
 ### 版本特点 By [@TKaxv-7S](https://github.com/TKaxv-7S)
 
-1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/Fansirsqi/Sesame-TK/wiki/%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)或如下图所示，非常欢迎大家提[PR](https://github.com/TKaxv-7S/Sesame-TK/pulls)
+1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/Fansirsqi/Sesame-TK/wiki/%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)或如下图所示，非常欢迎大家提[PR](https://github.com/Fansirsqi/Sesame-TK/pulls)
    ![Sesame-TK开发指南](https://github.com/TKaxv-7S/Sesame-TK/assets/22593101/4d8451fe-2b7f-4f19-9439-b0afbf683510)
 2. 重构 **森林收能量代码**，大幅提升能量多的账号收取效率
 3. 重构 配置模块，**所有配置需要重新配置**，新配置文件名称为**config_v2.json**，旧配置文件未删除，可作参考
