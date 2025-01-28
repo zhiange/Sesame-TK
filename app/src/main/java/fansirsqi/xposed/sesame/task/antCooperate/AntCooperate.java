@@ -49,8 +49,10 @@ public class AntCooperate extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.other("执行开始-" + getName());
+            Log.forest("执行开始-" + getName());
             if (cooperateWater.getValue()) {
+                Log.runtime(TAG, "浇水列表配置: " + cooperateWaterList.getValue());
+                Log.runtime(TAG, "浇水总量限制列表配置: " + cooperateWaterTotalLimitList.getValue());
                 String s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 if (s == null) {
                     ThreadUtil.sleep(RandomUtil.delay());
@@ -58,6 +60,7 @@ public class AntCooperate extends ModelTask {
                 }
                 JSONObject jo = new JSONObject(s);
                 if (ResUtil.checkResCode(jo)) {
+                    Log.runtime(TAG, "获取合种列表成功");
                     int userCurrentEnergy = jo.getInt("userCurrentEnergy");
                     JSONArray ja = jo.getJSONArray("cooperatePlants");
                     for (int i = 0; i < ja.length(); i++) {
@@ -69,9 +72,10 @@ public class AntCooperate extends ModelTask {
                         }
                         String name = jo.getString("name");
                         int waterDayLimit = jo.getInt("waterDayLimit");
-                        Log.debug(TAG, "合种[" + name + "]:" + cooperationId + ", 限额:" + waterDayLimit);
+                        Log.runtime(TAG, "合种[" + name + "]:" + cooperationId + ", 限额:" + waterDayLimit);
                         CooperateMap.getInstance(CooperateMap.class).add(cooperationId, name);
                         if (!StatusUtil.canCooperateWaterToday(UserId, cooperationId)) {
+                            Log.runtime(TAG, "今天已经浇过水了，跳过合种[" + name + "]");
                             continue;
                         }
                         Integer num = cooperateWaterList.getValue().get(cooperationId);
@@ -88,20 +92,26 @@ public class AntCooperate extends ModelTask {
                             }
                             if (num > 0) {
                                 cooperateWater(cooperationId, num, name);
+                            } else {
+                                Log.runtime(TAG, "浇水数量为0，跳过合种[" + name + "]");
                             }
+                        } else {
+                            Log.runtime(TAG, "浇水列表中没有配置合种[" + name + "]");
                         }
                     }
                 } else {
                     Log.error(TAG, "获取合种列表失败:");
                     Log.runtime(TAG + "获取合种列表失败:", jo.getString("resultDesc"));
                 }
+            } else {
+                Log.runtime(TAG, "合种浇水功能未开启");
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
             CooperateMap.getInstance(CooperateMap.class).save(UserId);
-            Log.other("执行结束-" + getName());
+            Log.forest("执行结束-" + getName());
         }
     }
     private static void cooperateWater(String coopId, int count, String name) {
@@ -112,7 +122,7 @@ public class AntCooperate extends ModelTask {
                 Log.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
                 StatusUtil.cooperateWaterToday(UserId, coopId);
             } else {
-                Log.runtime(TAG, jo.getString("resultDesc"));
+                Log.runtime(TAG, "浇水失败[" + name + "]: " + jo.getString("resultDesc"));
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "cooperateWater err:");
@@ -132,9 +142,11 @@ public class AntCooperate extends ModelTask {
                     String userId = joItem.getString("userId");
                     if (userId.equals(AntCooperate.UserId)) {
                         int energySummation = joItem.optInt("energySummation", 0);
-                        if (num > limitNum - energySummation) {
-                            num = limitNum - energySummation;
-                            break;
+                        int adjustedNum = limitNum - energySummation;
+                        Log.runtime(TAG, "当前用户[" + userId + "]的累计浇水能量: " + energySummation);
+                        Log.runtime(TAG, "调整后的浇水数量[" + coopId + "]: " + adjustedNum);
+                        if (num > adjustedNum) {
+                            num = adjustedNum;
                         }
                     }
                 }
@@ -143,6 +155,6 @@ public class AntCooperate extends ModelTask {
             Log.runtime(TAG, "calculatedWaterNum err:");
             Log.printStackTrace(TAG, t);
         }
-        return num;
+        return Math.max(num, 0); // 确保浇水数量不为负数
     }
 }
