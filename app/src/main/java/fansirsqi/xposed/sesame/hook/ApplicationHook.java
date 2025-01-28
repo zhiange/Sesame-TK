@@ -562,7 +562,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                                 HookSender.sendHookData(HookResponse);
                                             }
                                             String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData.replace("\\", "") + "\n<========================\n";
-                                            if (!logMessage.trim().isEmpty()) {
+                                            if (!logMessage.trim().isEmpty() && !rawData.equals("null")) {
                                                 Log.capture(logMessage);
                                             }
                                         } else {
