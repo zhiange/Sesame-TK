@@ -1,9 +1,12 @@
 package fansirsqi.xposed.sesame.data;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
@@ -15,6 +18,7 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import lombok.Data;
+
 /**
  * 配置类，负责加载、保存、管理应用的配置数据。
  */
@@ -28,6 +32,7 @@ public class Config {
     private boolean init;
     // 存储模型字段的映射
     private final Map<String, ModelFields> modelFieldsMap = new ConcurrentHashMap<>();
+
     /**
      * 设置新的模型字段配置
      *
@@ -71,6 +76,7 @@ public class Config {
             modelFieldsMap.put(modelCode, newModelFields);
         }
     }
+
     /**
      * 检查是否存在指定的模型字段
      *
@@ -80,6 +86,7 @@ public class Config {
     public Boolean hasModelFields(String modelCode) {
         return modelFieldsMap.containsKey(modelCode);
     }
+
     /**
      * 检查指定模型字段是否存在
      *
@@ -94,6 +101,7 @@ public class Config {
         }
         return modelFields.containsKey(fieldCode);
     }
+
     /**
      * 判断配置文件是否已修改
      *
@@ -117,6 +125,7 @@ public class Config {
         }
         return true;
     }
+
     /**
      * 保存配置文件
      *
@@ -150,7 +159,13 @@ public class Config {
             if (!success) {
                 throw new IOException("配置文件保存失败");
             }
-            String userName = StringUtil.isEmpty(userId) ? userId : UserMap.get(userId).getShowName();
+            String userName;
+            if (StringUtil.isEmpty(userId)) {
+                userName = "默认用户";
+            } else {
+                UserEntity userEntity = UserMap.get(userId);
+                userName = userEntity != null ? userEntity.getShowName() : "未知用户";
+            }
             Log.record("保存用户[" + userName + "]配置");
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
@@ -159,6 +174,7 @@ public class Config {
         }
         return true;
     }
+
     /**
      * 加载配置文件
      *
@@ -233,6 +249,7 @@ public class Config {
         Log.runtime(TAG, "加载配置结束！");
         return INSTANCE;
     }
+
     /**
      * 卸载当前配置
      */
