@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.data;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Log;
@@ -48,7 +50,8 @@ public final class ViewAppInfo {
             appBuildNumber = String.valueOf(BuildConfig.VERSION_CODE);
             // 设置标题栏-应用名称
 //      appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.BUILD_TAG;
-            appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.VERSION_NAME;
+//            appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.VERSION_NAME;
+            appTitle = context.getString(R.string.app_name) ;
             // 设置构建目标信息
             appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME + " ⏰";
             // 设置版本号
