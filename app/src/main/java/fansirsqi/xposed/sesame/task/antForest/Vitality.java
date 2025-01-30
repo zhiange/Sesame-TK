@@ -123,7 +123,7 @@ public class Vitality {
                 ExchangeStatus Status = ExchangeStatus.valueOf(itemStatus);
                 if (Status.name().equals(itemStatus) || Status.name().equals(itemStatus) || Status.name().equals(itemStatus)) {
                     Log.record("活力兑换💱[" + skuName + "]停止:" + Status.name());
-                    if (ExchangeStatus.ExceedLimit.name().equals(itemStatus)) {
+                    if (ExchangeStatus.REACH_LIMIT.name().equals(itemStatus)) {
                         StatusUtil.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
                         Log.forest("活力兑换💱[" + skuName + "]已达上限,停止兑换！");
                     }
