@@ -49,7 +49,6 @@ public class chouChouLe {
                                 doubleCheck = true;
                             }
                         }
-                        ThreadUtil.sleep(3000L); // 所有等待3秒
                     }
                 } else {
                     Log.record(TAG, "抽抽乐任务列表获取失败: " + jo.getString("memo"));
@@ -72,7 +71,7 @@ public class chouChouLe {
                 String activityId = drawActivityInfo.optString("activityId", "null");
                 for (int ii = 0; ii < leftDrawTimes; ii++) {
                     JSONObject drawPrizeObj = new JSONObject(!activityId.equals("null") ? AntFarmRpcCall.DrawPrize(activityId) : AntFarmRpcCall.DrawPrize());
-                    ThreadUtil.sleep(3000L);
+                    ThreadUtil.sleep(2000L);
                     if (drawPrizeObj.optBoolean("success")) {
                         String title = drawPrizeObj.getString("title");
                         int prizeNum = drawPrizeObj.optInt("prizeNum", 0);
@@ -103,11 +102,8 @@ public class chouChouLe {
                 JSONObject jo = new JSONObject(s);
                 if (jo.optBoolean("success", false)) {
                     Log.farm("完成抽抽乐🧾️[任务: " + name + "]" + (i + 1) + "/" + times);
-                    if (receiveFarmTaskAward(bizKey)) {
-                        Log.farm("领取抽抽乐机会奖励🎁");
-                    } else {
-                        Log.farm("领取抽抽乐机会奖励失败");
-                    }
+                    ThreadUtil.sleep(1000L);
+                    receiveFarmTaskAward(bizKey);
                     return true;
                 }
             }
