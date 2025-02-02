@@ -1,14 +1,14 @@
 package fansirsqi.xposed.sesame.model;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.util.Log;
@@ -19,11 +19,9 @@ public abstract class Model {
     private static final Map<ModelGroup, Map<String, ModelConfig>> groupModelConfigMap = new LinkedHashMap<>();
     private static final Map<Class<? extends Model>, Model> modelMap = new ConcurrentHashMap<>();
     private static final List<Class<? extends Model>> modelClazzList = ModelOrder.getClazzList();
-    @Getter
-    private static final Model[] modelArray = new Model[modelClazzList.size()];
-    private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
-    @Getter
-    public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
+    @Getter private static final Model[] modelArray = new Model[modelClazzList.size()];
+//    private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
+//    @Getter public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
     private final BooleanModelField enableField;
     public final BooleanModelField getEnableField() {
         return enableField;
