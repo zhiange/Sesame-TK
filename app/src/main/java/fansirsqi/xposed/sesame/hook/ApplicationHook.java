@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import androidx.annotation.NonNull;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -81,10 +80,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     static AlipayVersion alipayVersion = new AlipayVersion("");
     @Getter
     private static volatile boolean hooked = false;
-    static volatile boolean init = false;
+    private static volatile boolean init = false;
     static volatile Calendar dayCalendar;
-    @Getter
-    static LocalDate dayDate;
     @Getter
     static volatile boolean offline = false;
     @Getter
@@ -282,6 +279,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             Log.record("️跳过执行-未初始化");
                                             return;
                                         }
+                                        if (!Config.isLoaded()) {
+                                            Log.record("️跳过执行-用户模块配置未加载");
+                                            return;
+                                        }
                                         Log.record("开始执行");
                                         long currentTime = System.currentTimeMillis();
                                         if (lastExecTime + 2000 > currentTime) {
@@ -474,7 +475,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.record(startMsg);
                 Log.record("⚙️模块版本：" + modelVersion);
                 Log.record("📦应用版本：" + alipayVersion.getVersionString());
-                Config.load(userId);
+                if (!Config.load(userId)) {
+                    Log.record("用户模块配置加载失败");
+                    Toast.show("用户模块配置加载失败");
+                    return false;
+                }
                 // ！！所有权限申请应该放在加载配置之后
                 //闹钟权限申请
                 if (!PermissionUtil.checkAlarmPermissions()) {

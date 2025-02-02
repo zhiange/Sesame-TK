@@ -24,6 +24,7 @@ import lombok.Data;
  */
 @Data
 public class Config {
+    private static boolean isLoaded = false;
     private static final String TAG = Config.class.getSimpleName();
     // 单例实例
     public static final Config INSTANCE = new Config();
@@ -108,7 +109,7 @@ public class Config {
      * @param userId 用户 ID
      * @return 是否已修改
      */
-    public static Boolean isModify(String userId) {
+    public static Boolean isModify(String userId)  {
         String json = null;
         java.io.File configV2File;
         if (StringUtil.isEmpty(userId)) {
@@ -175,16 +176,21 @@ public class Config {
         return true;
     }
 
+    public static boolean isLoaded() {
+        return isLoaded;
+    }
+
     /**
      * 加载配置文件
      *
      * @param userId 用户 ID
-     * @return 加载后的 Config 实例
+     * @return 配置是否成功加载
      */
-    public static synchronized Config load(String userId) {
+    public static synchronized boolean load(String userId) {
         Log.runtime(TAG, "开始加载配置...");
         String userName = "";
         java.io.File configV2File = null;
+
         try {
             if (StringUtil.isEmpty(userId)) {
                 configV2File = Files.getDefaultConfigV2File();
@@ -233,6 +239,10 @@ public class Config {
                     Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 }
             }
+            INSTANCE.setInit(true);
+            isLoaded = true;
+            Log.runtime(TAG, "加载配置结束！");
+            return true;
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.runtime(TAG, "重置配置: " + userName);
@@ -244,10 +254,9 @@ public class Config {
             } catch (Exception e) {
                 Log.printStackTrace(TAG, t);
             }
+            isLoaded = false;
+            return false;
         }
-        INSTANCE.setInit(true);
-        Log.runtime(TAG, "加载配置结束！");
-        return INSTANCE;
     }
 
     /**

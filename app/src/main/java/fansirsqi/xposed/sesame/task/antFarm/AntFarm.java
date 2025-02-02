@@ -410,6 +410,7 @@ public class AntFarm extends ModelTask {
         try {
             String sleepTimeStr = sleepTime.getValue();
             if ("-1".equals(sleepTimeStr)) {
+                Log.runtime("当前已关闭小鸡睡觉");
                 return;
             }
             Calendar now = TimeUtil.getNow();
