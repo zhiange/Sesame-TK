@@ -80,26 +80,30 @@ public abstract class Model {
         }
     }
     public static synchronized void initAllModel() {
-        destroyAllModel();
-        for (int i = 0, len = modelClazzList.size(); i < len; i++) {
-            Class<? extends Model> modelClazz = modelClazzList.get(i);
-            try {
-                // 使用getDeclaredConstructor().newInstance()代替newInstance()
-                Model model = modelClazz.getDeclaredConstructor().newInstance();
-                ModelConfig modelConfig = new ModelConfig(model);
-                modelArray[i] = model;
-                modelMap.put(modelClazz, model);
-                String modelCode = modelConfig.getCode();
-                modelConfigMap.put(modelCode, modelConfig);
-                ModelGroup group = modelConfig.getGroup();
-                Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.computeIfAbsent(group, k -> new LinkedHashMap<>());
-                modelConfigMap.put(modelCode, modelConfig);
-            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
-                     InvocationTargetException e) {
-                Log.printStackTrace(e);
+    destroyAllModel();
+    for (int i = 0, len = modelClazzList.size(); i < len; i++) {
+        Class<? extends Model> modelClazz = modelClazzList.get(i);
+        try {
+            Model model = modelClazz.getDeclaredConstructor().newInstance();
+            ModelConfig modelConfig = new ModelConfig(model);
+            modelArray[i] = model;
+            modelMap.put(modelClazz, model);
+            String modelCode = modelConfig.getCode();
+            modelConfigMap.put(modelCode, modelConfig);
+            ModelGroup group = modelConfig.getGroup();
+            Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.get(group);
+            if (modelConfigMap == null) {
+                modelConfigMap = new LinkedHashMap<>();
+                groupModelConfigMap.put(group, modelConfigMap);
             }
+            modelConfigMap.put(modelCode, modelConfig);
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                 InvocationTargetException e) {
+            Log.printStackTrace(e);
         }
     }
+}
+
     public static synchronized void bootAllModel(ClassLoader classLoader) {
         for (Model model : modelArray) {
             try {
