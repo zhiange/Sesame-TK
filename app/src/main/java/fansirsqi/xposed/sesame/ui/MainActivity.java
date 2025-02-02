@@ -251,8 +251,9 @@ public class MainActivity extends BaseActivity {
             selectSettingUid();
             return;
         } else if (id == R.id.btn_friend_watch) {
+            selectFriendWatchUid();
+//            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
 
-            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
             return;
         }
         Intent it = new Intent(this, HtmlViewerActivity.class);
@@ -360,44 +361,92 @@ public class MainActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-public void selectSettingUid() {
-    final CountDownLatch latch = new CountDownLatch(1);
-    AlertDialog dialog = StringDialog.showSelectionDialog(
-            this,
-            "请选择配置",
-            userNameArray,
-            (dialog1, which) -> {
-                goSettingActivity(which);
-                dialog1.dismiss();
-                latch.countDown();
-            },
-            "返回",
-            dialog1 -> {
-                dialog1.dismiss();
-                latch.countDown();
-            });
+    public void selectSettingUid() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AlertDialog dialog = StringDialog.showSelectionDialog(
+                this,
+                "请选择配置",
+                userNameArray,
+                (dialog1, which) -> {
+                    goSettingActivity(which);
+                    dialog1.dismiss();
+                    latch.countDown();
+                },
+                "返回",
+                dialog1 -> {
+                    dialog1.dismiss();
+                    latch.countDown();
+                });
 
-    int length = userNameArray.length;
-    Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
-    if (length > 0&& length < 3) {
-        // 定义超时时间（单位：毫秒）
-        final long timeoutMillis = 800;
-        new Thread(() -> {
-            try {
-                if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
-                    runOnUiThread(() -> {
-                        if (dialog.isShowing()) {
-                            goSettingActivity(length - 1);
-                            dialog.dismiss();
-                        }
-                    });
+        int length = userNameArray.length;
+        Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
+        if (length > 0 && length < 3) {
+            // 定义超时时间（单位：毫秒）
+            final long timeoutMillis = 800;
+            new Thread(() -> {
+                try {
+                    if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                        runOnUiThread(() -> {
+                            if (dialog.isShowing()) {
+                                goSettingActivity(length - 1);
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
+            }).start();
+        }
     }
-}
+
+    public void selectFriendWatchUid() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AlertDialog dialog = StringDialog.showSelectionDialog(
+                this,
+                "请选择配置",
+                userNameArray,
+                (dialog1, which) -> {
+                    goFrinedWatch(which);
+                    dialog1.dismiss();
+                    latch.countDown();
+                },
+                "返回",
+                dialog1 -> {
+                    dialog1.dismiss();
+                    latch.countDown();
+                });
+
+        int length = userNameArray.length;
+        Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
+        if (length > 0 && length < 3) {
+            // 定义超时时间（单位：毫秒）
+            final long timeoutMillis = 800;
+            new Thread(() -> {
+                try {
+                    if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                        runOnUiThread(() -> {
+                            if (dialog.isShowing()) {
+                                goFrinedWatch(length - 1);
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
+    }
+
+    private void goFrinedWatch(int index) {
+        UserEntity userEntity = userEntityArray[index];
+        if (userEntity != null) {
+            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userEntity.getUserId()), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+        } else {
+            ToastUtil.makeText(this, "请先选择有效用户", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 
     /**
