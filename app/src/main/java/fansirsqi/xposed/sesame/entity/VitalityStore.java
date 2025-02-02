@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
+import lombok.Getter;
+
 /**
  * @author Byseven
  * @date 2025/1/20
@@ -22,6 +24,8 @@ public class VitalityStore extends MapperEntity {
         }
         return list;
     }
+
+    @Getter
     public enum ExchangeStatus {
         NO_ENOUGH_POINT("活力值不足"),
         NO_ENOUGH_STOCK("库存量不足"),
@@ -36,8 +40,5 @@ public class VitalityStore extends MapperEntity {
             this.nickName = nickName;
         }
 
-        public String getNickName() {
-            return nickName;
-        }
     }
 }
