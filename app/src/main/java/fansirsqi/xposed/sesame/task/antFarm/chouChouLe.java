@@ -37,15 +37,16 @@ public class chouChouLe {
                         int rightsTimes = taskItem.optInt("rightsTimes", 0); // 已执行次数
                         int rightsTimesLimit = taskItem.optInt("rightsTimesLimit", 0); // 总次数
                         int additionalRightsTimes = rightsTimesLimit - rightsTimes;
+                        Log.farm("抽抽乐🧾️[任务: " + title + "]" + " 状态: " + taskStatus + " 已执行: " + rightsTimes + "/" + rightsTimesLimit + " 剩余: " + additionalRightsTimes);
                         if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                             if (receiveFarmTaskAward(taskId)) {
                                 doubleCheck = true;
                             }
                             if (rightsTimes < rightsTimesLimit) {
-                                performFarmTask(taskId, title, additionalRightsTimes);
+                                performFarmTask(taskId, title);
                             }
                         } else if (TaskStatus.TODO.name().equals(taskStatus)) {
-                            if (performFarmTask(taskId, title, additionalRightsTimes)) {
+                            if (performFarmTask(taskId, title)) {
                                 doubleCheck = true;
                             }
                         }
@@ -91,22 +92,19 @@ public class chouChouLe {
      *
      * @param bizKey 业务ID
      * @param name   任务名称
-     * @param times  可执行次数
      * @return 是否成功执行
      */
-    private boolean performFarmTask(String bizKey, String name, int times) {
+    private boolean performFarmTask(String bizKey, String name) {
         try {
-            for (int i = 0; i < times; i++) {
                 ThreadUtil.sleep(15000L); // 所有等待15秒
                 String s = AntFarmRpcCall.chouchouleDoFarmTask(bizKey);
                 JSONObject jo = new JSONObject(s);
                 if (jo.optBoolean("success", false)) {
-                    Log.farm("完成抽抽乐🧾️[任务: " + name + "]" + (i + 1) + "/" + times);
+                    Log.farm("完成抽抽乐🧾️[任务: " + name + "]");
                     ThreadUtil.sleep(1000L);
                     receiveFarmTaskAward(bizKey);
                     return true;
                 }
-            }
         } catch (Throwable t) {
             handleException("performFarmTask err:", t);
         }
