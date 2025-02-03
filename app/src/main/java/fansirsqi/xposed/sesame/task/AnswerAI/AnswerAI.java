@@ -13,7 +13,7 @@ public class AnswerAI extends Model {
     private static final String TAG = AnswerAI.class.getSimpleName();
     private static final String AI_LOG_PREFIX = "AI🧠答题，问题：[";
     private static final String NORMAL_LOG_PREFIX = "开始答题，问题：[";
-    private static final String QUESTION_LOG_FORMAT = "题目[%s]#选项:\n%s";
+    private static final String QUESTION_LOG_FORMAT = "题目📒[%s]#选项:%s";
     private static final String AI_ANSWER_LOG_FORMAT = "AI回答🧠[%s]";
     private static final String NORMAL_ANSWER_LOG_FORMAT = "普通回答🤖[%s]";
 
@@ -48,7 +48,7 @@ public class AnswerAI extends Model {
         };
     }
 
-    private final ChoiceModelField aiType = new ChoiceModelField("useGeminiAI", "AI类型", AIType.TONGYI, AIType.nickNames);
+    private static final ChoiceModelField aiType = new ChoiceModelField("useGeminiAI", "AI类型", AIType.TONGYI, AIType.nickNames);
     private final StringModelField tongYiToken = new StringModelField("tongYiToken", "qwen-turbo | 设置令牌", "");
     private final StringModelField GeminiToken = new StringModelField("GeminiAIToken", "gemini-1.5-flash | 设置令牌", "");
     private final StringModelField DeepSeekToken = new StringModelField("DeepSeekToken", "DeepSeek-R1 | 设置令牌", "");
@@ -85,17 +85,18 @@ public class AnswerAI extends Model {
     // 封装日志记录方法
     private static void logQuestion(String text) {
         String logPrefix = enable ? AI_LOG_PREFIX : NORMAL_LOG_PREFIX;
-        Log.record(logPrefix + text + "]");
+        Log.other(logPrefix + text + "]");
     }
 
     // 封装AI回答日志记录方法
     private static void logAIAnswer(String answer) {
-        Log.record(String.format(AI_ANSWER_LOG_FORMAT, answer));
+        String aiTypeName = AIType.nickNames[aiType.getValue()];
+        Log.other(String.format(AI_ANSWER_LOG_FORMAT+"#AI类型:%s", aiTypeName, answer));
     }
 
     // 封装普通回答日志记录方法
     private static void logNormalAnswer(String answer) {
-        Log.record(String.format(NORMAL_ANSWER_LOG_FORMAT, answer));
+        Log.other(String.format(NORMAL_ANSWER_LOG_FORMAT, answer));
     }
 
     /**
@@ -119,7 +120,7 @@ public class AnswerAI extends Model {
     public static String getAnswer(String text, List<String> answerList) {
         String answerStr = "";
         try {
-            Log.record(String.format(QUESTION_LOG_FORMAT, text, answerList));
+            Log.other(String.format(QUESTION_LOG_FORMAT, text, answerList));
             if (enable) {
                 Integer answer = answerAIInterface.getAnswer(text, answerList);
                 if (answer != null && answer >= 0 && answer < answerList.size()) {
