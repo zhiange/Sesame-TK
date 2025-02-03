@@ -1078,33 +1078,49 @@ public class AntFarm extends ModelTask {
         }
     }
     private void sign(JSONObject signList) {
-        try {
-            JSONArray jaFarmsignList = signList.getJSONArray("signList");
-            boolean signed = true;
-            int awardCount = 0;
-            for (int i = 0; i < jaFarmsignList.length(); i++) {
-                JSONObject jo = jaFarmsignList.getJSONObject(i);
-                if (TimeUtil.getDateStr().equals(jo.getString("signKey"))) {
-                    signed = jo.getBoolean("signed");
-                    awardCount = jo.getInt("awardCount");
-                    break;
-                }
+    try {
+        JSONArray jaFarmsignList = signList.getJSONArray("signList");
+        JSONObject joSignItem = null;
+
+        for (int i = 0; i < jaFarmsignList.length(); i++) {
+            JSONObject jo = jaFarmsignList.getJSONObject(i);
+            if (TimeUtil.getDateStr().equals(jo.getString("signKey"))) {
+                joSignItem = jo;
+                break;
             }
-            if (!signed) {
-                JSONObject joSign = new JSONObject(AntFarmRpcCall.sign());
-                if ("SUCCESS".equals(joSign.getString("memo"))) {
-                    Log.farm("庄园签到📅获得饲料" + awardCount + "g");
-                } else {
-                    Log.runtime(TAG, joSign.toString());
-                }
-            } else {
-                Log.record("庄园今日已签到");
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "Farmsign err:");
-            Log.printStackTrace(TAG, t);
         }
+
+        if (joSignItem == null) {
+            Log.record("未找到今日签到信息");
+            return;
+        }
+
+        boolean signed = joSignItem.getBoolean("signed");
+        int awardCount = joSignItem.getInt("awardCount");
+
+        if (!signed) {
+            String signResponse = AntFarmRpcCall.sign();
+            JSONObject joSign = new JSONObject(signResponse);
+            String memo = joSign.getString("memo");
+
+            if ("SUCCESS".equals(memo)) {
+                Log.farm("庄园签到📅获得饲料" + awardCount + "g");
+            } else {
+                Log.record("签到失败：" + memo);
+                Log.runtime(TAG, signResponse);
+            }
+        } else {
+            Log.record("庄园今日已签到得奖励"+ awardCount + "g");
+        }
+    } catch (JSONException e) {
+        Log.record("JSON解析错误：" + e.getMessage());
+        Log.printStackTrace(TAG, e);
+    } catch (Exception e) {
+        Log.record("其他错误：" + e.getMessage());
+        Log.printStackTrace(TAG, e);
     }
+}
+
     private Boolean feedAnimal(String farmId) {
         try {
             if (foodStock < 180) {
