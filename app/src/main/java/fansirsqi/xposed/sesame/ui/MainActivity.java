@@ -404,7 +404,7 @@ public class MainActivity extends BaseActivity {
         final CountDownLatch latch = new CountDownLatch(1);
         AlertDialog dialog = StringDialog.showSelectionDialog(
                 this,
-                "请选择配置",
+                "请选择有效账户",
                 userNameArray,
                 (dialog1, which) -> {
                     goFrinedWatch(which);
