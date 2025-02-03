@@ -2,6 +2,7 @@ package fansirsqi.xposed.sesame.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class Config {
     public static final Config INSTANCE = new Config();
     // 是否初始化标志
     @JsonIgnore
-    private boolean init;
+    private volatile boolean init;
     // 存储模型字段的映射
     private final Map<String, ModelFields> modelFieldsMap = new ConcurrentHashMap<>();
 
@@ -187,9 +188,9 @@ public class Config {
      * @return 配置是否成功加载
      */
     public static synchronized boolean load(String userId) {
-        Log.runtime(TAG, "开始加载配置...");
+        Log.record(TAG, "开始加载配置...");
         String userName = "";
-        java.io.File configV2File = null;
+        File configV2File = null;
 
         try {
             if (StringUtil.isEmpty(userId)) {
@@ -208,44 +209,46 @@ public class Config {
             if (configV2File.exists()) {
                 String json = Files.readFromFile(configV2File);
                 if (StringUtil.isEmpty(json)) {
-                    Log.runtime(TAG, "配置文件内容为空，初始化新配置: " + userName);
+                    Log.record(TAG, "配置文件内容为空，初始化新配置: " + userName);
                     unload();
                     Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 } else {
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                     String formatted = JsonUtil.formatJson(INSTANCE);
                     if (formatted != null && !formatted.equals(json)) {
-                        Log.runtime(TAG, "格式化配置: " + userName);
+                        Log.record(TAG, "格式化配置: " + userName);
                         Files.write2File(formatted, configV2File);
                     }
                 }
-            } else {
+            }
+            else {
                 // 如果配置文件不存在，复制默认配置或初始化
                 java.io.File defaultConfigV2File = Files.getDefaultConfigV2File();
                 if (defaultConfigV2File.exists()) {
                     String json = Files.readFromFile(defaultConfigV2File);
                     if (!StringUtil.isEmpty(json)) {
                         JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                        Log.runtime(TAG, "复制新配置: " + userName);
+                        Log.record(TAG, "复制新配置: " + userName);
                         Files.write2File(json, configV2File);
                     } else {
                         unload();
-                        Log.runtime(TAG, "默认配置为空，重置配置: " + userName);
+                        Log.record(TAG, "默认配置为空，重置配置: " + userName);
                         Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                     }
                 } else {
                     unload();
-                    Log.runtime(TAG, "重置配置: " + userName);
+                    Log.record(TAG, "重置配置: " + userName);
                     Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
                 }
             }
             INSTANCE.setInit(true);
             isLoaded = true;
-            Log.runtime(TAG, "加载配置结束！");
+
+            Log.record(TAG, "加载配置结束！");
             return true;
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
-            Log.runtime(TAG, "重置配置: " + userName);
+            Log.record(TAG, "重置配置: " + userName);
             try {
                 unload();
                 if (configV2File != null) {
