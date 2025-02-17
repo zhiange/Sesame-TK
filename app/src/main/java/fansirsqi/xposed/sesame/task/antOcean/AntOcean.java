@@ -517,6 +517,9 @@ public class AntOcean extends ModelTask {
             } else if (taskTitle.startsWith("随机任务：") || taskTitle.startsWith("绿色任务：")) {
                 String sceneCode = task.getString("sceneCode");
                 String taskType = task.getString("taskType");
+                if(Objects.equals(taskType,"mokuai_senlin_hy")){
+                    return;
+                }
                 int rightsTimes = task.optInt("rightsTimes", 1);
                 int rightsTimesLimit = task.optInt("rightsTimesLimit", 1);
                 int times = rightsTimesLimit - rightsTimes;
