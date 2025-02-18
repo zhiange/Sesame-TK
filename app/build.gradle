@@ -19,7 +19,7 @@ android {
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
     def patch = 5          // 补丁版本号
-    def buildTag = "beta.4" // 构建标签 (alpha, beta, release, 等)
+    def buildTag = "beta.5" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -137,6 +137,7 @@ android {
 
 // 依赖项配置
 dependencies {
+
     //noinspection GradleDependency
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10'
     implementation 'org.slf4j:slf4j-api:2.0.7'
