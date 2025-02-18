@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,7 +28,8 @@ public class TongyiAI implements AnswerAIInterface {
 
     private static final String URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
     private static final String CONTENT_TYPE = "application/json";
-    private static final String MODEL_NAME = "qwen-turbo";
+    @Getter
+    private String modelName = "qwen-turbo";
     private static final String JSON_PATH = "choices.[0].message.content";
     private final String token;
 
@@ -61,7 +63,7 @@ public class TongyiAI implements AnswerAIInterface {
             JSONArray messageArray = new JSONArray();
             messageArray.put(contentObject);
             JSONObject bodyObject = new JSONObject();
-            bodyObject.put("model", MODEL_NAME);
+            bodyObject.put("model", this.modelName);
             bodyObject.put("messages", messageArray);
             RequestBody body = RequestBody.create(bodyObject.toString(), MediaType.parse(CONTENT_TYPE));
             Request request = new Request.Builder()
@@ -90,6 +92,13 @@ public class TongyiAI implements AnswerAIInterface {
             }
         }
         return result;
+    }
+
+
+    @Override
+    public String getAnswerStr(String text, String model) {
+        setModelName(model);
+        return getAnswerStr(text);
     }
 
     /**

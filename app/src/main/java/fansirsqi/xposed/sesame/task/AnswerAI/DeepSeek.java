@@ -1,3 +1,9 @@
+/**
+ * @author Byseven
+ * @date 2025/1/30
+ * @apiNote
+ */
+
 package fansirsqi.xposed.sesame.task.AnswerAI;
 
 import static fansirsqi.xposed.sesame.util.JsonUtil.getValueByPath;
@@ -11,17 +17,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Setter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-/**
- * @author Byseven
- * @date 2025/1/30
- * @apiNote
- */
 
 /**
  * DeepSeek帮助类，用于与DeepSeek接口交互以获取AI回答
@@ -29,13 +31,15 @@ import okhttp3.Response;
  */
 public class DeepSeek implements AnswerAIInterface {
     private static final String TAG = DeepSeek.class.getSimpleName();
-    private static final String BASE_URL = "https://api.deepseek.com/chat/completions";
-    private static final String MODEL_NAME = "deepseek-reasoner"; //"deepseek-chat";
+    private static final String BASE_URL = "https://api.deepseek.com/v1";
     private static final String CONTENT_TYPE = "application/json";
     private static final String JSON_PATH = "choices.[0].message.content";
-    private static final String SYSTEM_MESSAGE = "You are a helpful assistant.";
+    private static final String SYSTEM_MESSAGE = "你是一个拥有丰富的知识，并且能根据知识回答问题的专家。";
     private static final String AUTH_HEADER_PREFIX = "Bearer ";
     private static final Integer TIME_OUT_SECONDS = 180;
+
+    @Setter
+    private String modelName = "deepseek-reasoner"; //"deepseek-chat";
 
     private final String apiKey;
 
@@ -46,14 +50,14 @@ public class DeepSeek implements AnswerAIInterface {
 
     // 移除控制字符
     private String removeControlCharacters(String text) {
-        return text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+        return text.replaceAll("\\p{Cntrl}&&[^\n" + "\t]", "");
     }
 
     // 构建请求体的JSON对象
     private JSONObject buildRequestJson(String text) throws JSONException {
         text = removeControlCharacters(text);
         JSONObject requestJson = new JSONObject();
-        requestJson.put("model", MODEL_NAME);
+        requestJson.put("model", this.modelName);
 
         JSONArray messages = new JSONArray();
         JSONObject systemMessage = new JSONObject();
@@ -99,6 +103,13 @@ public class DeepSeek implements AnswerAIInterface {
             }
             return json;
         }
+    }
+
+
+    @Override
+    public String getAnswerStr(String text, String model) {
+        setModelName(model);
+        return getAnswerStr(text);
     }
 
     /**
