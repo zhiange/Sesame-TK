@@ -85,10 +85,13 @@ jobs:
           append_body: true
           generate_release_notes: true
           body: |
-            > ### 墙内更新
-            > [抗揍云-LanZou](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
-            > [Alist分流-LanZou](https://alist.byseven.us.kg/LanZou/Sesame-TK) 密码:`9527`
-            > [Alist分流-ALiYun](https://alist.byseven.us.kg/AliYun/share/Sesame-TK) 密码:`9527`
+            > ## 下载说明
+              * Normal 为正常版本,适用于Android 8.0及以上的系统
+              * Compatible 为兼容版本,适用于Android 7.0及以下的系统,最低支持Android 5.1
+            > ## 墙内更新
+              [抗揍云-LanZou](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+              [Alist分流-LanZou](https://alist.798356.xyz/LanZou/Sesame-TK) 密码:`9527`
+              [Alist分流-ALiYun](https://alist.798356.xyz/AliYun/share/Sesame-TK) 密码:`9527`
 
       - name: Sync Release to Target Repository
         uses: softprops/action-gh-release@v2
