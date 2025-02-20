@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 import lombok.Setter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -31,7 +32,7 @@ import okhttp3.Response;
  */
 public class DeepSeek implements AnswerAIInterface {
     private static final String TAG = DeepSeek.class.getSimpleName();
-    private static final String BASE_URL = "https://api.deepseek.com/v1";
+    private static final String BASE_URL = "https://api.deepseek.com/v1/chat/completions";
     private static final String CONTENT_TYPE = "application/json";
     private static final String JSON_PATH = "choices.[0].message.content";
     private static final String SYSTEM_MESSAGE = "你是一个拥有丰富的知识，并且能根据知识回答问题的专家。";
@@ -39,6 +40,7 @@ public class DeepSeek implements AnswerAIInterface {
     private static final Integer TIME_OUT_SECONDS = 180;
 
     @Setter
+    @Getter
     private String modelName = "deepseek-reasoner"; //"deepseek-chat";
 
     private final String apiKey;
