@@ -129,10 +129,10 @@ public final class ViewAppInfo {
             ApplicationInfo info = context.getApplicationInfo();
             boolean isDebuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             if (isDebuggable) {
-                Log.runtime("当前应用[" + info.packageName + "]处于调试模式");
+                Log.system("当前应用[" + info.packageName + "]处于调试模式");
                 return true;
             } else {
-                Log.runtime("当前应用[" + info.packageName + "]不处于调试模式");
+                Log.system("当前应用[" + info.packageName + "]不处于调试模式");
                 return false;
             }
         } catch (Exception e) {
@@ -150,10 +150,10 @@ public final class ViewAppInfo {
             ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, 0);
             boolean isDebuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             if (isDebuggable) {
-                Log.runtime("目标应用[" + packageName + "]处于调试模式");
+                Log.system("目标应用[" + packageName + "]处于调试模式");
                 return true;
             } else {
-                Log.runtime("目标应用[" + packageName + "]不处于调试模式");
+                Log.system("目标应用[" + packageName + "]不处于调试模式");
                 return false;
             }
         } catch (PackageManager.NameNotFoundException e) {
