@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
+import lombok.Setter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,6 +30,7 @@ public class TongyiAI implements AnswerAIInterface {
     private static final String URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
     private static final String CONTENT_TYPE = "application/json";
     @Getter
+    @Setter
     private String modelName = "qwen-turbo";
     private static final String JSON_PATH = "choices.[0].message.content";
     private final String token;

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 import lombok.Setter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -30,6 +31,7 @@ public class GeminiAI implements AnswerAIInterface {
     private static final Integer TIME_OUT_SECONDS = 180;
 
     @Setter
+    @Getter
     private String modelName = "gemini-1.5-flash";
     private final String token;
 

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
+import lombok.Getter;
 import lombok.Setter;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -28,6 +29,7 @@ public class CustomService implements AnswerAIInterface {
     private final String apiKey;
     private final String baseUrl;
     @Setter
+    @Getter
     private String modelName = "gpt-3.5-turbo"; // 默认模型
 
     public CustomService(String apiKey, String baseUrl) {
