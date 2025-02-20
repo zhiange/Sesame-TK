@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -133,12 +134,20 @@ public class AntStall extends ModelTask {
     }
     @Override
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
     @Override
     public void run() {
         try {
-            Log.other("执行开始-" + getName());
+            Log.record("执行开始-" + getName());
             String s = AntStallRpcCall.home();
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResCode(jo)) {
@@ -185,7 +194,7 @@ public class AntStall extends ModelTask {
             Log.runtime(TAG, "home err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.other("执行结束-" + getName());
+            Log.record("执行结束-" + getName());
         }
     }
     private void sendBack(String billNo, String seatId, String shopId, String shopUserId) {

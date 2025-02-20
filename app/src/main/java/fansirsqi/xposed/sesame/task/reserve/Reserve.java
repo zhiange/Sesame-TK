@@ -1,10 +1,14 @@
 package fansirsqi.xposed.sesame.task.reserve;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
 import fansirsqi.xposed.sesame.entity.ReserveEntity;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
@@ -37,17 +41,25 @@ public class Reserve extends ModelTask {
         return modelFields;
     }
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
     public void run() {
         try {
-            Log.other("开始保护地任务");
+            Log.record("开始保护地任务");
             animalReserve();
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.other("保护地任务");
+            Log.record("保护地任务");
         }
     }
     private void animalReserve() {

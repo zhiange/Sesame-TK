@@ -15,6 +15,7 @@ import java.util.Set;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -233,12 +234,20 @@ public class AntFarm extends ModelTask {
     }
     @Override
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
     @Override
     public void run() {
         try {
-            Log.farm("执行开始-蚂蚁" + getName());
+            Log.record("执行开始-蚂蚁" + getName());
             if (enterFarm() == null) {
                 return;
             }
@@ -403,7 +412,7 @@ public class AntFarm extends ModelTask {
             Log.runtime(TAG, "AntFarm.start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.farm("执行结束-蚂蚁" + getName());
+            Log.record("执行结束-蚂蚁" + getName());
         }
     }
     private void animalSleepAndWake() {

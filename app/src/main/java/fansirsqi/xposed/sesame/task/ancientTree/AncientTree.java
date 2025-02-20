@@ -55,13 +55,13 @@ public class AncientTree extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.other("开始执行"+getName());
+            Log.record("开始执行"+getName());
             ancientTree(ancientTreeCityCodeList.getValue());
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.other("结束执行"+getName());
+            Log.record("结束执行"+getName());
         }
     }
     private static void ancientTree(Collection<String> ancientTreeCityCodeList) {

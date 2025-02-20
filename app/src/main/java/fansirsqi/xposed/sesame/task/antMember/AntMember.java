@@ -3,6 +3,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.Arrays;
+
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -62,12 +64,20 @@ public class AntMember extends ModelTask {
   }
   @Override
   public Boolean check() {
-    return !TaskCommon.IS_ENERGY_TIME;
+    if (TaskCommon.IS_ENERGY_TIME){
+      Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+      return false;
+    }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+      Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+      return false;
+    } else {
+      return true;
+    }
   }
   @Override
   public void run() {
     try {
-      Log.other("执行开始-" + getName());
+      Log.record("执行开始-" + getName());
       if (memberSign.getValue()) {
         doMemberSign();
       }
@@ -123,7 +133,7 @@ public class AntMember extends ModelTask {
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.other("执行结束-" + getName());
+      Log.record("执行结束-" + getName());
     }
   }
   /**

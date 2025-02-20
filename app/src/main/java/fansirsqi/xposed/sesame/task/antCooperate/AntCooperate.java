@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 
 import fansirsqi.xposed.sesame.entity.CooperateEntity;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -58,13 +59,21 @@ public class AntCooperate extends ModelTask {
 
     @Override
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
     public void run() {
         try {
-            Log.forest("执行开始-" + getName());
+            Log.record("执行开始-" + getName());
             if (cooperateWater.getValue()) {
                 Log.runtime(TAG, "浇水列表配置: " + cooperateWaterList.getValue());
                 Log.runtime(TAG, "浇水总量限制列表配置: " + cooperateWaterTotalLimitList.getValue());
@@ -130,7 +139,7 @@ public class AntCooperate extends ModelTask {
             Log.printStackTrace(TAG, t);
         } finally {
             CooperateMap.getInstance(CooperateMap.class).save(UserId);
-            Log.forest("执行结束-" + getName());
+            Log.record("执行结束-" + getName());
         }
     }
 
