@@ -16,13 +16,14 @@
 >
 > [戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
 >
-> [Alist分流-LanZou](https://alist.byseven.us.kg/LanZou/Sesame-TK) 密码:`9527`
+> [Alist分流-LanZou](https://alist.798356.xyz/LanZou/Sesame-TK) 密码:`9527`
 >
-> [Alist分流-ALiYun](https://alist.byseven.us.kg/AliYun/share/Sesame-TK) 密码:`9527`
+> [Alist分流-ALiYun](https://alist.798356.xyz/AliYun/share/Sesame-TK) 密码:`9527`
 
 🤖 代码的大部分内容是通过 `GPT-4o` 模型的辅助来完成的。
 
 🐛 `BUG`和功能建议和请提交 [ISSUE](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
+🐛 墙内用户可以在这反馈建议 [飞书链接](https://ylybfitrlv.feishu.cn/base/NtZYbKjrxafQp0sAyOTckiRTnbf?from=from_copylink) 密码：`911247#w`
 
 🙁 相关问题，我也可能不会修复,大家轻喷，因为我不是专业的开发者，我可能真的不会修复。
 
