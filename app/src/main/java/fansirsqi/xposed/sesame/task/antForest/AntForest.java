@@ -152,7 +152,6 @@ public class AntForest extends ModelTask {
     private ChoiceModelField bubbleBoostCard;//加速卡
     private BooleanModelField youthPrivilege;//青春特权 森林道具
     public static SelectModelField ecoLifeOption;
-    private EmptyModelField photoGuangPanClear;
     private BooleanModelField ecoLife;
     /**
      * 异常返回检测开关
@@ -251,7 +250,6 @@ public class AntForest extends ModelTask {
         modelFields.addField(ecoLife = new BooleanModelField("ecoLife", "绿色行动 | 开启", false));
         modelFields.addField(ecoLifeOpen = new BooleanModelField("ecoLifeOpen", "绿色任务 |  自动开通", false));
         modelFields.addField(ecoLifeOption = new SelectModelField("ecoLifeOption", "绿色行动 | 选项", new LinkedHashSet<>(), EcoLifeEntity::listEcoLifeOptions, "请先完成一次光盘打卡"));
-        modelFields.addField(photoGuangPanClear = new EmptyModelField("photoGuangPanClear", "光盘行动 | 清空图片ID", EcoLife::resetPhotoGuangPan));
         modelFields.addField(queryInterval = new StringModelField("queryInterval", "查询间隔(毫秒或毫秒范围)", "1000-2000"));
         modelFields.addField(collectInterval = new StringModelField("collectInterval", "收取间隔(毫秒或毫秒范围)", "1000-1500"));
         modelFields.addField(doubleCollectInterval = new StringModelField("doubleCollectInterval", "双击间隔(毫秒或毫秒范围)", "800-2400"));
