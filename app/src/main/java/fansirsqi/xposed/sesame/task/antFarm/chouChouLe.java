@@ -37,7 +37,7 @@ public class chouChouLe {
                         int rightsTimes = taskItem.optInt("rightsTimes", 0); // 已执行次数
                         int rightsTimesLimit = taskItem.optInt("rightsTimesLimit", 0); // 总次数
                         int additionalRightsTimes = rightsTimesLimit - rightsTimes;
-                        Log.farm("抽抽乐🧾️[任务: " + title + "]" + " 状态: " + taskStatus + " 已执行: " + rightsTimes + "/" + rightsTimesLimit + " 剩余: " + additionalRightsTimes);
+                        // Log.farm("抽抽乐🧾️[任务: " + title + "]" + " 状态: " + taskStatus + " 已执行: " + rightsTimes + "/" + rightsTimesLimit + " 剩余: " + additionalRightsTimes);
                         if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                             if (receiveFarmTaskAward(taskId)) {
                                 doubleCheck = true;
