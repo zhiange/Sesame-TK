@@ -379,7 +379,6 @@ public class MainActivity extends BaseActivity {
                 });
 
         int length = userNameArray.length;
-        Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
         if (length > 0 && length < 3) {
             // 定义超时时间（单位：毫秒）
             final long timeoutMillis = 800;
@@ -418,7 +417,6 @@ public class MainActivity extends BaseActivity {
                 });
 
         int length = userNameArray.length;
-        Log.debug("selectSettingUid: " + Arrays.toString(userNameArray));
         if (length > 0 && length < 3) {
             // 定义超时时间（单位：毫秒）
             final long timeoutMillis = 800;
