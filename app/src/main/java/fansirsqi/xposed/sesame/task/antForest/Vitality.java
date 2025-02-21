@@ -52,7 +52,7 @@ public class Vitality {
                     handleVitalityItem(itemInfoVO);
                 }
             } else {
-                Log.error(TAG, "活力兑换💱初始化失败！");
+                Log.error(TAG, "活力兑换🍃初始化失败！");
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "initVitality err");
@@ -112,7 +112,7 @@ public class Vitality {
         }
         JSONObject sku = skuInfo.get(skuId);
         if (sku == null) {
-            Log.record("活力兑换💱找不到要兑换的权益！");
+            Log.record("活力兑换🍃找不到要兑换的权益！");
             return false;
         }
         try {
@@ -122,10 +122,10 @@ public class Vitality {
                 String itemStatus = itemStatusList.getString(i);
                 ExchangeStatus Status = ExchangeStatus.valueOf(itemStatus);
                 if (Status.name().equals(itemStatus) || Status.name().equals(itemStatus) || Status.name().equals(itemStatus)) {
-                    Log.record("活力兑换💱[" + skuName + "]停止:" + Status.name());
+                    Log.record("活力兑换🍃[" + skuName + "]停止:" + Status.getNickName());
                     if (ExchangeStatus.REACH_LIMIT.name().equals(itemStatus)) {
                         StatusUtil.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
-                        Log.forest("活力兑换💱[" + skuName + "]已达上限,停止兑换！");
+                        Log.forest("活力兑换🍃[" + skuName + "]已达设置上限,停止兑换！");
                     }
                     return false;
                 }
@@ -149,7 +149,7 @@ public class Vitality {
             if (VitalityExchange(spuId, skuId)) {
                 StatusUtil.vitalityExchangeToday(skuId);
                 int exchangedCount = StatusUtil.getVitalityCount(skuId);
-                Log.forest("活力兑换💱[" + skuName + "]#第" + exchangedCount + "次");
+                Log.forest("活力兑换🍃[" + skuName + "]#第" + exchangedCount + "次");
                 return true;
             }
         } catch (Throwable th) {
