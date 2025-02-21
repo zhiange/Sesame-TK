@@ -84,10 +84,10 @@ public class AnswerAI extends Model {
         try {
             enable = getEnableField().getValue();
             int selectedType = aiType.getValue();
-            Log.other(String.format("初始化AI服务：已选择[%s]", AIType.nickNames[selectedType]));
+            Log.runtime(String.format("初始化AI服务：已选择[%s]", AIType.nickNames[selectedType]));
             initializeAIService(selectedType);
         } catch (Exception e) {
-            Log.runtime("初始化AI服务失败: " + e.getMessage());
+            Log.error("初始化AI服务失败: " + e.getMessage());
             Log.printStackTrace(TAG, e);
         }
     }
@@ -111,7 +111,7 @@ public class AnswerAI extends Model {
             case AIType.CUSTOM:
                 answerAIInterface = new CustomService(CustomServiceToken.getValue(), CustomServiceUrl.getValue());
                 answerAIInterface.setModelName(CustomServiceModel.getValue());
-                Log.other(String.format("已配置自定义服务：URL=[%s], Model=[%s]", CustomServiceUrl.getValue(), CustomServiceModel.getValue()));
+                Log.runtime(String.format("已配置自定义服务：URL=[%s], Model=[%s]", CustomServiceUrl.getValue(), CustomServiceModel.getValue()));
                 break;
             default:
                 answerAIInterface = AnswerAIInterface.getInstance();
@@ -134,14 +134,14 @@ public class AnswerAI extends Model {
                     answerStr = answerList.get(answer);
                     Log.other(String.format(AI_ANSWER_LOG_FORMAT, answerStr, AIType.nickNames[aiType.getValue()], answerAIInterface.getModelName()));
                 } else {
-                    Log.other(ERROR_AI_ANSWER);
+                    Log.error(ERROR_AI_ANSWER);
                 }
             } else if (!answerList.isEmpty()) {
                 answerStr = answerList.get(0);
                 Log.other(String.format(NORMAL_ANSWER_LOG_FORMAT, answerStr));
             }
         } catch (Throwable t) {
-            Log.runtime("获取答案异常: " + t.getMessage());
+            Log.error("获取答案异常: " + t.getMessage());
             Log.printStackTrace(TAG, t);
         }
         return answerStr;
