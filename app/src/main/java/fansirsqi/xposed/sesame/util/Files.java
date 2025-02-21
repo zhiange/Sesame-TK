@@ -223,9 +223,9 @@ public class Files {
     public static File getStatisticsFile() {
         return getTargetFileofDir(MAIN_DIR, "statistics.json");
     }
-    public static File getUIConfigFile() {
-        return getTargetFileofDir(MAIN_DIR, "ui_config.json");
-    }
+//    public static File getUIConfigFile() {
+//        return getTargetFileofDir(MAIN_DIR, "ui_config.json");
+//    }
     /**
      * 获取已经导出的统计文件在载目录中
      *
