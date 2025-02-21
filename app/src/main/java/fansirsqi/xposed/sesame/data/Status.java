@@ -125,33 +125,7 @@ public class Status {
             save();
         }
     }
-    public static boolean canExchangeEnergyShield() {
-        return !INSTANCE.exchangeEnergyShield;
-    }
-    public static void exchangeEnergyShield() {
-        if (!INSTANCE.exchangeEnergyShield) {
-            INSTANCE.exchangeEnergyShield = true;
-            save();
-        }
-    }
-    public static boolean canExchangeCollectHistoryAnimal7Days() {
-        return !INSTANCE.exchangeCollectHistoryAnimal7Days;
-    }
-    public static void exchangeCollectHistoryAnimal7Days() {
-        if (!INSTANCE.exchangeCollectHistoryAnimal7Days) {
-            INSTANCE.exchangeCollectHistoryAnimal7Days = true;
-            save();
-        }
-    }
-    public static boolean canExchangeCollectToFriendTimes7Days() {
-        return !INSTANCE.exchangeCollectToFriendTimes7Days;
-    }
-    public static void exchangeCollectToFriendTimes7Days() {
-        if (!INSTANCE.exchangeCollectToFriendTimes7Days) {
-            INSTANCE.exchangeCollectToFriendTimes7Days = true;
-            save();
-        }
-    }
+
     public static boolean canAnimalSleep() {
         return !INSTANCE.animalSleep;
     }
@@ -248,26 +222,7 @@ public class Status {
         INSTANCE.visitFriendLogList.put(id, newCount);
         save();
     }
-    public static boolean canStallHelpToday(String id) {
-        Integer count = INSTANCE.stallHelpedCountLogList.get(id);
-        if (count == null) {
-            return true;
-        }
-        return count < 3;
-    }
-    public static void stallHelpToday(String id, boolean limited) {
-        Integer count = INSTANCE.stallHelpedCountLogList.get(id);
-        if (count == null) {
-            count = 0;
-        }
-        if (limited) {
-            count = 3;
-        } else {
-            count += 1;
-        }
-        INSTANCE.stallHelpedCountLogList.put(id, count);
-        save();
-    }
+
     public static boolean canMemberSignInToday(String uid) {
         return !INSTANCE.memberSignInList.contains(uid);
     }
@@ -302,17 +257,7 @@ public class Status {
             save();
         }
     }
-    public static boolean canStallP2PHelpToday(String uid) {
-        uid = UserMap.getCurrentUid() + "-" + uid;
-        return !INSTANCE.stallP2PHelpedList.contains(uid);
-    }
-    public static void stallP2PHelpeToday(String uid) {
-        uid = UserMap.getCurrentUid() + "-" + uid;
-        if (!INSTANCE.stallP2PHelpedList.contains(uid)) {
-            INSTANCE.stallP2PHelpedList.add(uid);
-            save();
-        }
-    }
+
     /**
      * 是否可以新村助力
      *
@@ -599,76 +544,5 @@ public class Status {
             save();
         }
     }
-    @Data
-    private static class WaterFriendLog {
-        String userId;
-        int waterCount = 0;
-        public WaterFriendLog() {
-        }
-        public WaterFriendLog(String id) {
-            userId = id;
-        }
-    }
-    @Data
-    private static class ReserveLog {
-        String projectId;
-        int applyCount = 0;
-        public ReserveLog() {
-        }
-        public ReserveLog(String id) {
-            projectId = id;
-        }
-    }
-    @Data
-    private static class BeachLog {
-        String cultivationCode;
-        int applyCount = 0;
-        public BeachLog() {
-        }
-        public BeachLog(String id) {
-            cultivationCode = id;
-        }
-    }
-    @Data
-    private static class FeedFriendLog {
-        String userId;
-        int feedCount = 0;
-        public FeedFriendLog() {
-        }
-        public FeedFriendLog(String id) {
-            userId = id;
-        }
-    }
-    @Data
-    private static class VisitFriendLog {
-        String userId;
-        int visitCount = 0;
-        public VisitFriendLog() {
-        }
-        public VisitFriendLog(String id) {
-            userId = id;
-        }
-    }
-    @Data
-    private static class StallShareIdLog {
-        String userId;
-        String shareId;
-        public StallShareIdLog() {
-        }
-        public StallShareIdLog(String uid, String sid) {
-            userId = uid;
-            shareId = sid;
-        }
-    }
-    @Data
-    private static class StallHelpedCountLog {
-        String userId;
-        int helpedCount = 0;
-        int beHelpedCount = 0;
-        public StallHelpedCountLog() {
-        }
-        public StallHelpedCountLog(String id) {
-            userId = id;
-        }
-    }
+
 }
