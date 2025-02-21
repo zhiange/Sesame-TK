@@ -40,32 +40,30 @@ public class UIConfig {
     }
 
     public static synchronized UIConfig load() {
-        File uiConfigFile = Files.getUIConfigFile();
+        File targetFile = Files.getTargetFileofDir(Files.MAIN_DIR, "ui_config.json");
         try {
-            if (uiConfigFile.exists()) {
-                String json = Files.readFromFile(uiConfigFile);
+            if (targetFile.exists()) {
+                String json = Files.readFromFile(targetFile);
                 if (!json.trim().isEmpty()) {
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                     String formatted = JsonUtil.formatJson(INSTANCE);
                     if (formatted != null && !formatted.equals(json)) {
-                        Log.runtime(TAG, "格式化UI配置");
-                        Files.write2File(formatted, uiConfigFile);
+                        Log.runtime(TAG, "格式化"+TAG+"配置");
+                        Files.write2File(formatted, targetFile);
                     }
                 } else {
-                    Log.runtime(TAG, "配置文件为空，使用默认配置");
                     resetToDefault();
                 }
             } else {
-                Log.runtime(TAG, "配置文件不存在，初始化默认配置");
                 resetToDefault();
-                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
+                Files.write2File(JsonUtil.formatJson(INSTANCE), targetFile);
             }
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
-            Log.runtime(TAG, "重置UI配置");
+            Log.runtime(TAG, "重置"+TAG+"配置");
             resetToDefault();
             try {
-                Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
+                Files.write2File(JsonUtil.formatJson(INSTANCE), targetFile);
             } catch (Exception e2) {
                 Log.printStackTrace(TAG, e2);
             }
@@ -75,6 +73,7 @@ public class UIConfig {
     }
 
     private static synchronized void resetToDefault() {
+        Log.runtime(TAG, "重置UI配置");
         INSTANCE.setUiOption(UI_OPTION_NEW); // 默认设置为 "new"
         INSTANCE.setInit(false);
     }
