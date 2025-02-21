@@ -16,6 +16,9 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+
+import fansirsqi.xposed.sesame.data.General;
+
 public class Files {
     @SuppressLint("StaticFieldLeak")
     private static final String TAG = Files.class.getSimpleName();
