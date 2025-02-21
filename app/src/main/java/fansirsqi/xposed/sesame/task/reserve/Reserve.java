@@ -158,13 +158,13 @@ public class Reserve extends ModelTask {
                     Log.record(jo.getString("resultDesc"));
                     Log.runtime(jo.toString());
                     Log.forest("领保护地🏕️[" + itemName + "]#发生未知错误，停止申请");
-                    // StatisticsUtil.reserveToday(projectId, count);
+                    // Statistics.reserveToday(projectId, count);
                     break;
                 }
                 ThreadUtil.sleep(300);
                 canApply = queryTreeForExchange(projectId);
                 if (!canApply) {
-                    // StatisticsUtil.reserveToday(projectId, count);
+                    // Statistics.reserveToday(projectId, count);
                     break;
                 } else {
                     ThreadUtil.sleep(300);

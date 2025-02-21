@@ -41,7 +41,7 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.util.StatisticsUtil;
+import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
 
@@ -128,8 +128,8 @@ public class MainActivity extends BaseActivity {
                                     }
                                     break;
                                 case "fansirsqi.xposed.sesame.update":
-                                    StatisticsUtil.load();
-                                    tvStatistics.setText(StatisticsUtil.getText());
+                                    Statistics.load();
+                                    tvStatistics.setText(Statistics.getText());
                                     break;
                             }
                         }
@@ -143,8 +143,8 @@ public class MainActivity extends BaseActivity {
         } else {
             registerReceiver(broadcastReceiver, intentFilter);
         }
-        StatisticsUtil.load();
-        tvStatistics.setText(StatisticsUtil.getText());
+        Statistics.load();
+        tvStatistics.setText(Statistics.getText());
         // 调用 FansirsqiUtil 获取句子
         FansirsqiUtil.getOneWord(
                 new FansirsqiUtil.OneWordCallback() {
@@ -216,9 +216,9 @@ public class MainActivity extends BaseActivity {
                 Log.printStackTrace(e);
             }
             try {
-                StatisticsUtil.load();
-                StatisticsUtil.updateDay();
-                tvStatistics.setText(StatisticsUtil.getText());
+                Statistics.load();
+                Statistics.updateDay();
+                tvStatistics.setText(Statistics.getText());
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
@@ -333,7 +333,7 @@ public class MainActivity extends BaseActivity {
                 break;
             case 6:
                 if (Files.copyTo(Files.getExportedStatisticsFile(), Files.getStatisticsFile())) {
-                    tvStatistics.setText(StatisticsUtil.getText());
+                    tvStatistics.setText(Statistics.getText());
                     ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                 }
                 break;

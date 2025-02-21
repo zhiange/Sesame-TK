@@ -58,7 +58,7 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.util.StatisticsUtil;
+import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
@@ -312,7 +312,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     }
                                 }));
                                 registerBroadcastReceiver(appService);
-                                StatisticsUtil.load();
+                                Statistics.load();
                                 FriendWatch.load(UserId.get());
                                 dayCalendar = Calendar.getInstance();
                                 if (initHandler(true)) {
@@ -338,7 +338,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 Notify.updateStatusText("支付宝前台服务被销毁");
                                 destroyHandler(true);
                                 FriendWatch.unload();
-                                StatisticsUtil.unload();
+                                Statistics.unload();
                                 restartByBroadcast();
                             }
                         });
@@ -702,7 +702,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             Log.printStackTrace(e);
         }
         try {
-            StatisticsUtil.save(Calendar.getInstance());
+            Statistics.save(Calendar.getInstance());
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.antForest.AntForest;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
@@ -375,11 +377,11 @@ public class StatusUtil {
         save();
     }
     public static boolean canKbSignInToday() {
-        return INSTANCE.kbSignIn < StatisticsUtil.INSTANCE.getDay().time;
+        return INSTANCE.kbSignIn < Statistics.INSTANCE.getDay().time;
     }
     public static void KbSignInToday() {
-        if (INSTANCE.kbSignIn != StatisticsUtil.INSTANCE.getDay().time) {
-            INSTANCE.kbSignIn = StatisticsUtil.INSTANCE.getDay().time;
+        if (INSTANCE.kbSignIn != Statistics.INSTANCE.getDay().time) {
+            INSTANCE.kbSignIn = Statistics.INSTANCE.getDay().time;
             save();
         }
     }
