@@ -14,7 +14,7 @@ import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 public class AntMember extends ModelTask {
@@ -141,13 +141,13 @@ public class AntMember extends ModelTask {
    */
   private void doMemberSign() {
     try {
-      if (StatusUtil.canMemberSignInToday(UserMap.getCurrentUid())) {
+      if (Status.canMemberSignInToday(UserMap.getCurrentUid())) {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
         ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         if (ResUtil.checkResCode(jo)) {
           Log.other("会员签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
-          StatusUtil.memberSignInToday(UserMap.getCurrentUid());
+          Status.memberSignInToday(UserMap.getCurrentUid());
         } else {
           Log.record(jo.getString("resultDesc"));
           Log.runtime(s);
@@ -705,7 +705,7 @@ public class AntMember extends ModelTask {
   }
   public void kbMember() {
     try {
-      if (!StatusUtil.canKbSignInToday()) {
+      if (!Status.canKbSignInToday()) {
         return;
       }
       String s = AntMemberRpcCall.rpcCall_signIn();
@@ -713,9 +713,9 @@ public class AntMember extends ModelTask {
       if (jo.optBoolean("success", false)) {
         jo = jo.getJSONObject("data");
         Log.other("口碑签到📅[第" + jo.getString("dayNo") + "天]#获得" + jo.getString("value") + "积分");
-        StatusUtil.KbSignInToday();
+        Status.KbSignInToday();
       } else if (s.contains("\"HAS_SIGN_IN\"")) {
-        StatusUtil.KbSignInToday();
+        Status.KbSignInToday();
       } else {
         Log.runtime(TAG, jo.getString("errorMessage"));
       }

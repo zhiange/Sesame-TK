@@ -15,7 +15,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 public class AncientTree extends ModelTask {
     private static final String TAG = AncientTree.class.getSimpleName();
@@ -67,7 +67,7 @@ public class AncientTree extends ModelTask {
     private static void ancientTree(Collection<String> ancientTreeCityCodeList) {
         try {
             for (String cityCode : ancientTreeCityCodeList) {
-                if (!StatusUtil.canAncientTreeToday(cityCode))
+                if (!Status.canAncientTreeToday(cityCode))
                     continue;
                 ancientTreeProtect(cityCode);
                 ThreadUtil.sleep(1000L);
@@ -96,7 +96,7 @@ public class AncientTree extends ModelTask {
                     districtDetail(districtCode);
                     ThreadUtil.sleep(1000L);
                 }
-                StatusUtil.ancientTreeToday(cityCode);
+                Status.ancientTreeToday(cityCode);
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "ancientTreeProtect err:");

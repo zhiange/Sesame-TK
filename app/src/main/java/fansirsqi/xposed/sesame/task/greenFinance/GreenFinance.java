@@ -20,7 +20,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 /**
@@ -374,7 +374,7 @@ public class GreenFinance extends ModelTask {
      */
     private void prizes() {
     try {
-        if (StatusUtil.canGreenFinancePrizesMap()) {
+        if (Status.canGreenFinancePrizesMap()) {
             return;
         }
         String campId = "CP14664674";
@@ -392,7 +392,7 @@ public class GreenFinance extends ModelTask {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
                 Date dateTime = formatter.parse(bizTime);
                 if (TimeUtil.getWeekNumber(dateTime) == TimeUtil.getWeekNumber(new Date())) {
-                    StatusUtil.greenFinancePrizesMap();
+                    Status.greenFinancePrizesMap();
                     return;
                 }
             }
@@ -418,7 +418,7 @@ public class GreenFinance extends ModelTask {
      */
     private void batchStealFriend() {
         try {
-            if (StatusUtil.canGreenFinancePointFriend() || !greenFinancePointFriend.getValue()) {
+            if (Status.canGreenFinancePointFriend() || !greenFinancePointFriend.getValue()) {
                 return;
             }
             int n = 0;
@@ -434,7 +434,7 @@ public class GreenFinance extends ModelTask {
                     JSONObject result = jsonObject.getJSONObject("result");
                     if (result.getBoolean("lastPage")) {
                         Log.other("绿色经营🙋，好友金币巡查完成");
-                        StatusUtil.greenFinancePointFriend();
+                        Status.greenFinancePointFriend();
                         return;
                     }
                     n = result.getInt("nextStartIndex");

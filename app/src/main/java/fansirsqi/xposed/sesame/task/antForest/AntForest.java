@@ -54,7 +54,7 @@ import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Statistics;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
@@ -655,7 +655,7 @@ public class AntForest extends ModelTask {
                     continue;
                 }
                 waterCount = Math.min(waterCount, 3);
-                if (StatusUtil.canWaterFriendToday(uid, waterCount)) {
+                if (Status.canWaterFriendToday(uid, waterCount)) {
                     try {
                         String response = AntForestRpcCall.queryFriendHomePage(uid);
                         JSONObject jo = new JSONObject(response);
@@ -664,7 +664,7 @@ public class AntForest extends ModelTask {
                             KVNode<Integer, Boolean> waterCountKVNode = returnFriendWater(uid, bizNo, waterCount, waterFriendCount.getValue());
                             int actualWaterCount = waterCountKVNode.getKey();
                             if (actualWaterCount > 0) {
-                                StatusUtil.waterFriendToday(uid, actualWaterCount);
+                                Status.waterFriendToday(uid, actualWaterCount);
                             }
                             if (!waterCountKVNode.getValue()) {
                                 break;
@@ -697,7 +697,7 @@ public class AntForest extends ModelTask {
                     continue;
                 }
                 // 处理活力值兑换
-                while (StatusUtil.canVitalityExchangeToday(skuId, count)) {
+                while (Status.canVitalityExchangeToday(skuId, count)) {
                     if (!Vitality.handleVitalityExchange(skuId)) {
                         Log.record("活力值兑换失败: skuId=" + skuId);
                         break;
@@ -949,7 +949,7 @@ public class AntForest extends ModelTask {
 //                            Log.runtime("不收取[" + UserMap.getMaskName(userId) + "]");
 //                        }
                     }
-                    if (helpFriendCollect.getValue() && friendObject.optBoolean("canProtectBubble") && StatusUtil.canProtectBubbleToday(selfId)) {
+                    if (helpFriendCollect.getValue() && friendObject.optBoolean("canProtectBubble") && Status.canProtectBubbleToday(selfId)) {
                         boolean isHelpCollect = helpFriendCollectList.getValue().contains(userId);
                         if (helpFriendCollectType.getValue() == HelpFriendCollectType.DONT_HELP) {
                             isHelpCollect = !isHelpCollect;
@@ -1030,7 +1030,7 @@ public class AntForest extends ModelTask {
                             continue;
                         }
                         if (wateringBubble.getJSONObject("extInfo").optInt("restTimes", 0) == 0) {
-                            StatusUtil.protectBubbleToday(selfId);
+                            Status.protectBubbleToday(selfId);
                         }
                         if (!wateringBubble.getBoolean("canProtect")) {
                             continue;
@@ -1552,7 +1552,7 @@ public class AntForest extends ModelTask {
     private boolean exchangeEnergyShield() {
         String spuId = "CR20230517000497";
         String skuId = "CR20230516000370";
-        if (!StatusUtil.canVitalityExchangeToday(skuId, 1)) {
+        if (!Status.canVitalityExchangeToday(skuId, 1)) {
             return false;
         }
         return Vitality.VitalityExchange(spuId, skuId, "保护罩");
@@ -1564,7 +1564,7 @@ public class AntForest extends ModelTask {
     private boolean exchangeStealthCard() {
         String skuId = "SK20230521000206";
         String spuId = "SP20230521000082";
-        if (!StatusUtil.canVitalityExchangeToday(skuId, 1)) {
+        if (!Status.canVitalityExchangeToday(skuId, 1)) {
             return false;
         }
         return Vitality.VitalityExchange(spuId, skuId, "隐身卡");
@@ -1731,7 +1731,7 @@ public class AntForest extends ModelTask {
      */
     private void useDoubleCard(JSONObject bagObject) {
         try {
-            if (hasDoubleCardTime() && StatusUtil.canDoubleToday()) {
+            if (hasDoubleCardTime() && Status.canDoubleToday()) {
                 JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
                 if (jo == null && doubleCardConstant.getValue()) {
                     if (Vitality.handleVitalityExchange("SK20240805004754")) {
@@ -1743,7 +1743,7 @@ public class AntForest extends ModelTask {
                 if (jo == null) jo = findPropBag(bagObject, "ENERGY_DOUBLE_CLICK");
                 if (jo != null && usePropBag(jo)) {
                     doubleEndTime = System.currentTimeMillis() + 1000 * 60 * 5;
-                    StatusUtil.DoubleToday();
+                    Status.DoubleToday();
                 } else {
                     updateSelfHomePage();
                 }
@@ -2337,7 +2337,7 @@ public class AntForest extends ModelTask {
 
     private void useEnergyRainChanceCard() {
         try {
-            if (StatusUtil.hasFlagToday("AntForest::useEnergyRainChanceCard")) {
+            if (Status.hasFlagToday("AntForest::useEnergyRainChanceCard")) {
                 return;
             }
             // 背包查找 限时能量雨机会
@@ -2349,7 +2349,7 @@ public class AntForest extends ModelTask {
                     return;
                 }
                 String skuId = skuInfo.getString("skuId");
-                if (StatusUtil.canVitalityExchangeToday(skuId, 1) && Vitality.VitalityExchange(skuInfo.getString("spuId"), skuId, "限时能量雨机会")) {
+                if (Status.canVitalityExchangeToday(skuId, 1) && Vitality.VitalityExchange(skuInfo.getString("spuId"), skuId, "限时能量雨机会")) {
                     jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
                 }
             }
@@ -2358,7 +2358,7 @@ public class AntForest extends ModelTask {
             }
             // 使用 道具
             if (usePropBag(jo)) {
-                StatusUtil.setFlagToday("AntForest::useEnergyRainChanceCard");
+                Status.setFlagToday("AntForest::useEnergyRainChanceCard");
                 ThreadUtil.sleep(500);
                 EnergyRain.startEnergyRain();
             }

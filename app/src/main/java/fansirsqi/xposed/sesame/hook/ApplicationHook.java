@@ -59,7 +59,7 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
 import fansirsqi.xposed.sesame.data.Statistics;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
@@ -603,7 +603,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     }
                 }
                 Model.bootAllModel(classLoader);
-                StatusUtil.load();
+                Status.load();
                 updateDay(userId);
                 BaseModel.initData();
                 String successMsg = "芝麻粒-TK 加载成功🎉";
@@ -626,7 +626,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (service != null) {
                     stopHandler();
                     BaseModel.destroyData();
-                    StatusUtil.unload();
+                    Status.unload();
                     Notify.stop();
                     RpcIntervalLimit.clearIntervalLimit();
                     Config.unload();
@@ -707,7 +707,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             Log.printStackTrace(e);
         }
         try {
-            StatusUtil.save(nowCalendar);
+            Status.save(nowCalendar);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

@@ -19,7 +19,7 @@ import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
@@ -102,7 +102,7 @@ public class AntCooperate extends ModelTask {
                         int waterDayLimit = jo.getInt("waterDayLimit");
                         Log.runtime(TAG, "合种[" + name + "]:" + cooperationId + ", 限额:" + waterDayLimit);
                         CooperateMap.getInstance(CooperateMap.class).add(cooperationId, name);
-                        if (!StatusUtil.canCooperateWaterToday(UserId, cooperationId)) {
+                        if (!Status.canCooperateWaterToday(UserId, cooperationId)) {
                             Log.runtime(TAG, "今天已经浇过水了，跳过合种[" + name + "]");
                             continue;
                         }
@@ -149,7 +149,7 @@ public class AntCooperate extends ModelTask {
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResCode(jo)) {
                 Log.forest("合种浇水🚿[" + name + "]" + jo.getString("barrageText"));
-                StatusUtil.cooperateWaterToday(UserId, coopId);
+                Status.cooperateWaterToday(UserId, coopId);
             } else {
                 Log.runtime(TAG, "浇水失败[" + name + "]: " + jo.getString("resultDesc"));
             }

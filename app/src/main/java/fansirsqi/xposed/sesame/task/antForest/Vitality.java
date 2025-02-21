@@ -9,7 +9,7 @@ import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 /**
  * @author Byseven
  * @see  2025/1/20
@@ -124,7 +124,7 @@ public class Vitality {
                 if (Status.name().equals(itemStatus) || Status.name().equals(itemStatus) || Status.name().equals(itemStatus)) {
                     Log.record("活力兑换🍃[" + skuName + "]停止:" + Status.getNickName());
                     if (ExchangeStatus.REACH_LIMIT.name().equals(itemStatus)) {
-                        StatusUtil.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
+                        fansirsqi.xposed.sesame.data.Status.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
                         Log.forest("活力兑换🍃[" + skuName + "]已达设置上限,停止兑换！");
                     }
                     return false;
@@ -133,7 +133,7 @@ public class Vitality {
             String spuId = sku.getString("spuId");
             if (VitalityExchange(spuId, skuId, skuName)) {
                 if (skuName.contains("限时")){
-                    StatusUtil.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
+                    Status.setFlagToday("forest::VitalityExchangeLimit::" + skuId);
                 }
                 return true;
             }
@@ -147,8 +147,8 @@ public class Vitality {
     public static Boolean VitalityExchange(String spuId, String skuId, String skuName) {
         try {
             if (VitalityExchange(spuId, skuId)) {
-                StatusUtil.vitalityExchangeToday(skuId);
-                int exchangedCount = StatusUtil.getVitalityCount(skuId);
+                Status.vitalityExchangeToday(skuId);
+                int exchangedCount = Status.getVitalityCount(skuId);
                 Log.forest("活力兑换🍃[" + skuName + "]#第" + exchangedCount + "次");
                 return true;
             }

@@ -17,7 +17,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 public class Reserve extends ModelTask {
     private static final String TAG = Reserve.class.getSimpleName();
@@ -90,7 +90,7 @@ public class Reserve extends ModelTask {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         if (Objects.equals(entry.getKey(), projectId)) {
                             Integer count = entry.getValue();
-                            if (count != null && count > 0 && StatusUtil.canReserveToday(projectId, count)) {
+                            if (count != null && count > 0 && Status.canReserveToday(projectId, count)) {
                                 exchangeTree(projectId, itemName, count);
                             }
                             break;
@@ -149,11 +149,11 @@ public class Reserve extends ModelTask {
                 jo = new JSONObject(s);
                 if (ResUtil.checkResCode(jo)) {
                     int vitalityAmount = jo.optInt("vitalityAmount", 0);
-                    appliedTimes = StatusUtil.getReserveTimes(projectId) + 1;
+                    appliedTimes = Status.getReserveTimes(projectId) + 1;
                     String str = "领保护地🏕️[" + itemName + "]#第" + appliedTimes + "次"
                             + (vitalityAmount > 0 ? "-活力值+" + vitalityAmount : "");
                     Log.forest(str);
-                    StatusUtil.reserveToday(projectId, 1);
+                    Status.reserveToday(projectId, 1);
                 } else {
                     Log.record(jo.getString("resultDesc"));
                     Log.runtime(jo.toString());
@@ -169,7 +169,7 @@ public class Reserve extends ModelTask {
                 } else {
                     ThreadUtil.sleep(300);
                 }
-                if (!StatusUtil.canReserveToday(projectId, count))
+                if (!Status.canReserveToday(projectId, count))
                     break;
             }
         } catch (Throwable t) {

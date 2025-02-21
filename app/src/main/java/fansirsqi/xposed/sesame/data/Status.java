@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.util;
+package fansirsqi.xposed.sesame.data;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import java.util.Calendar;
 import java.util.Date;
@@ -7,15 +7,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.antForest.AntForest;
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Data;
 @Data
-public class StatusUtil {
-    private static final String TAG = StatusUtil.class.getSimpleName();
-    public static final StatusUtil INSTANCE = new StatusUtil();
+public class Status {
+    private static final String TAG = Status.class.getSimpleName();
+    public static final Status INSTANCE = new Status();
     // ===========================forest
     private Map<String, Integer> waterFriendLogList = new HashMap<>();
     private Set<String> cooperateWaterList = new HashSet<>();//合作浇水
@@ -466,7 +470,7 @@ public class StatusUtil {
      *
      * @return 状态对象
      */
-    public static synchronized StatusUtil load() {
+    public static synchronized Status load() {
         String currentUid = UserMap.getCurrentUid();
         if (StringUtil.isEmpty(currentUid)) {
             Log.runtime(TAG, "用户为空，状态加载失败");
@@ -509,7 +513,7 @@ public class StatusUtil {
      */
     private static void initializeDefaultConfig(java.io.File statusFile) {
         try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
+            JsonUtil.copyMapper().updateValue(INSTANCE, new Status());
             Log.runtime(TAG, "初始化 status.json");
             Files.write2File(JsonUtil.formatJson(INSTANCE), statusFile);
         } catch (JsonMappingException e) {
@@ -522,7 +526,7 @@ public class StatusUtil {
      */
     private static void resetAndSaveConfig() {
         try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
+            JsonUtil.copyMapper().updateValue(INSTANCE, new Status());
             Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatusFile(UserMap.getCurrentUid()));
         } catch (JsonMappingException e) {
             Log.printStackTrace(TAG, e);
@@ -531,7 +535,7 @@ public class StatusUtil {
     }
     public static synchronized void unload() {
         try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
+            JsonUtil.copyMapper().updateValue(INSTANCE, new Status());
         } catch (JsonMappingException e) {
             Log.printStackTrace(TAG, e);
         }
@@ -561,7 +565,7 @@ public class StatusUtil {
     }
     public static Boolean updateDay(Calendar nowCalendar) {
         if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowCalendar.getTimeInMillis())) {
-            StatusUtil.unload();
+            Status.unload();
             return true;
         } else {
             return false;

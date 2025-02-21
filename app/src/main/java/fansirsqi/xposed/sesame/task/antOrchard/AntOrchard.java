@@ -19,7 +19,7 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 public class AntOrchard extends ModelTask {
   private static final String TAG = AntOrchard.class.getSimpleName();
@@ -95,7 +95,7 @@ public class AntOrchard extends ModelTask {
               triggerTbTask();
             }
             Integer orchardSpreadManureCountValue = orchardSpreadManureCount.getValue();
-            if (orchardSpreadManureCountValue > 0 && StatusUtil.canSpreadManureToday(userId)) orchardSpreadManure();
+            if (orchardSpreadManureCountValue > 0 && Status.canSpreadManureToday(userId)) orchardSpreadManure();
             if (orchardSpreadManureCountValue >= 3 && orchardSpreadManureCountValue < 10) {
               querySubplotsActivity(3);
             } else if (orchardSpreadManureCountValue >= 10) {
@@ -192,7 +192,7 @@ public class AntOrchard extends ModelTask {
             String stageText = jo.getJSONObject("currentStage").getString("stageText");
             Log.farm("农场施肥💩[" + stageText + "]");
             if (!canSpreadManureContinue(seedStage.getInt("totalValue"), jo.getJSONObject("currentStage").getInt("totalValue"))) {
-              StatusUtil.spreadManureToday(userId);
+              Status.spreadManureToday(userId);
               return;
             }
             continue;
@@ -452,7 +452,7 @@ public class AntOrchard extends ModelTask {
   // 助力
   private void orchardassistFriend() {
     try {
-      if (!StatusUtil.canAntOrchardAssistFriendToday()) {
+      if (!Status.canAntOrchardAssistFriendToday()) {
         return;
       }
       Set<String> friendSet = assistFriendList.getValue();
@@ -466,7 +466,7 @@ public class AntOrchard extends ModelTask {
           String code = jsonObject.getString("code");
           if ("600000027".equals(code)) {
             Log.record("农场助力💪今日助力他人次数上限");
-            StatusUtil.antOrchardAssistFriendToday();
+            Status.antOrchardAssistFriendToday();
             return;
           }
           Log.record("农场助力😔失败[" + name + "]" + jsonObject.optString("desc"));
@@ -474,7 +474,7 @@ public class AntOrchard extends ModelTask {
         }
         Log.farm("农场助力💪[助力:" + name + "]");
       }
-      StatusUtil.antOrchardAssistFriendToday();
+      Status.antOrchardAssistFriendToday();
     } catch (Throwable t) {
       Log.runtime(TAG, "orchardassistFriend err:");
       Log.printStackTrace(TAG, t);

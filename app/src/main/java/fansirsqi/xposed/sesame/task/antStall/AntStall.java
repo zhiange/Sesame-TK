@@ -26,7 +26,7 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
@@ -178,7 +178,7 @@ public class AntStall extends ModelTask {
                     taskList();
                 }
                 assistFriend();
-                if (stallDonate.getValue() && StatusUtil.canStallDonateToday()) {
+                if (stallDonate.getValue() && Status.canStallDonateToday()) {
                     donate();
                 }
                 if (roadmap.getValue()) {
@@ -718,7 +718,7 @@ public class AntStall extends ModelTask {
      */
     private void assistFriend() {
         try {
-            if (!StatusUtil.canAntStallAssistFriendToday()) {
+            if (!Status.canAntStallAssistFriendToday()) {
                 return;
             }
             Set<String> friendSet = assistFriendList.getValue();
@@ -736,7 +736,7 @@ public class AntStall extends ModelTask {
                     }
                     if ("600000027".equals(code)) {
                         Log.record("新村助力💪今日助力他人次数上限");
-                        StatusUtil.antStallAssistFriendToday();
+                        Status.antStallAssistFriendToday();
                         return;
                     }
                     //600000010 人传人邀请关系不存在
@@ -749,7 +749,7 @@ public class AntStall extends ModelTask {
                 Log.farm("新村助力🎉成功[" + name + "]");
             }
             //暂时一天只做一次
-            StatusUtil.antStallAssistFriendToday();
+            Status.antStallAssistFriendToday();
         } catch (Throwable t) {
             Log.runtime(TAG, "assistFriend err:");
             Log.printStackTrace(TAG, t);
@@ -803,7 +803,7 @@ public class AntStall extends ModelTask {
                                     // 检查捐赠操作返回结果是否成功
                                     if ("SUCCESS".equals(donateResponse.optString("resultCode", ""))) {
                                         Log.farm("蚂蚁新村⛪[捐赠:" + title + "]");
-                                        StatusUtil.setStallDonateToday();
+                                        Status.setStallDonateToday();
                                     }
                                 }
                             }
@@ -936,7 +936,7 @@ public class AntStall extends ModelTask {
      */
     private void pasteTicket() {
         try {
-            if (!StatusUtil.canPasteTicketTime()) {
+            if (!Status.canPasteTicketTime()) {
                 return;
             }
             while (true) {
@@ -949,7 +949,7 @@ public class AntStall extends ModelTask {
                     }
                     if (jsonObject.getInt("canPasteTicketCount") == 0) {
                         Log.farm("蚂蚁新村👍[今日罚单已贴完]");
-                        StatusUtil.pasteTicketTime();
+                        Status.pasteTicketTime();
                         return;
                     }
                     String friendId = jsonObject.optString("friendUserId");

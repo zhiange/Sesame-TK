@@ -7,13 +7,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 public class Privilege {
     public static final String TAG = Privilege.class.getSimpleName();
     //青春特权🌸领取
 static boolean youthPrivilege() {
     try {
-        if (!StatusUtil.canYouthPrivilegeToday()) return false;
+        if (!Status.canYouthPrivilegeToday()) return false;
         List<List<String>> taskList = Arrays.asList(
                 Arrays.asList("DNHZ_SL_college", "DAXUESHENG_SJK", "双击卡"),
                 Arrays.asList("DXS_BHZ", "NENGLIANGZHAO_20230807", "保护罩"),
@@ -38,7 +38,7 @@ static boolean youthPrivilege() {
             }
         }
         if (allSuccessful) {
-            StatusUtil.setYouthPrivilegeToday();
+            Status.setYouthPrivilegeToday();
             return true;
         } else {
             return false;
@@ -89,7 +89,7 @@ static void studentSignInRedEnvelope() {
             Log.forest("青春特权🧧5点前不执行签到");
             return;
         }
-        if (StatusUtil.canStudentTask()) {
+        if (Status.canStudentTask()) {
             String tag = currentHour < END_HOUR ? "double" : "single";
             studentTaskHandle(tag);
         } else {
@@ -125,7 +125,7 @@ static void studentSignInRedEnvelope() {
             }
             String resultDesc = resultJson.optString("resultDesc", "签到成功");
             Log.forest("青春特权🧧" + tag + "：" + resultDesc);
-            StatusUtil.setStudentTaskToday();
+            Status.setStudentTaskToday();
         } catch (JSONException e) {
             Log.runtime(TAG, "studentTask JSON解析错误:");
             Log.printStackTrace(TAG, e);
@@ -141,7 +141,7 @@ static void studentSignInRedEnvelope() {
      */
     private static void studentTaskHandle(String tag) {
         try {
-            if (!StatusUtil.canStudentTask()) {
+            if (!Status.canStudentTask()) {
                 Log.record("青春特权🧧今日已达上限");
                 return;
             }
@@ -174,7 +174,7 @@ static void studentSignInRedEnvelope() {
             }
             if ("DO_TASK".equals(action)) {
                 Log.record("青春特权🧧今日已签到");
-                StatusUtil.setStudentTaskToday();
+                Status.setStudentTaskToday();
             } else {
                 studentTask(tag);
             }
