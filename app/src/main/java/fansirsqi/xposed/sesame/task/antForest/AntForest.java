@@ -36,7 +36,6 @@ import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
-import fansirsqi.xposed.sesame.model.modelFieldExt.EmptyModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
@@ -102,6 +101,10 @@ public class AntForest extends ModelTask {
      * 保护罩结束时间
      */
     private volatile long shieldEndTime = 0;
+    /**
+     * 炸弹卡结束时间
+     */
+    private volatile long energyBombCardTime = 0;
     private final Average delayTimeMath = new Average(5);
     private final ObjReference<Long> collectEnergyLockLimit = new ObjReference<>(0L);
     private final Object doubleCardLockObj = new Object();
@@ -159,6 +162,10 @@ public class AntForest extends ModelTask {
     private static Boolean errorWait = false;
     public static BooleanModelField ecoLifeOpen;
     private BooleanModelField energyRainChance;
+    /**
+     * 能量炸弹卡
+     */
+    private ChoiceModelField energyBombCardType;
     /**
      * 加速器定时
      */
@@ -224,6 +231,7 @@ public class AntForest extends ModelTask {
         modelFields.addField(bubbleBoostTime = new ListModelField.ListJoinCommaToStringModelField("bubbleBoostTime", "加速器 | 使用时间/范围", ListUtil.newArrayList("0030,0630")));
         modelFields.addField(shieldCard = new ChoiceModelField("shieldCard", "保护罩开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(shieldCardConstant = new BooleanModelField("shieldCardConstant", "保护罩 | 限时保护永动机", false));
+        modelFields.addField(energyBombCardType = new ChoiceModelField("energyBombCardType", "炸弹卡接力 | 和保护罩不能同时用", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(stealthCard = new ChoiceModelField("stealthCard", "隐身卡开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(stealthCardConstant = new BooleanModelField("stealthCardConstant", "隐身卡 | 限时隐身永动机", false));
         modelFields.addField(returnWater10 = new IntegerModelField("returnWater10", "返水 | 10克需收能量(关闭:0)", 0));
@@ -1276,6 +1284,10 @@ public class AntForest extends ModelTask {
                         shieldEndTime = userUsingProp.getLong("endTime");
                         Log.runtime("保护罩剩余时间⏰：" + formatTimeDifference(shieldEndTime - System.currentTimeMillis()));
                         break;
+                    case "energyBombCard": // 能量炸弹卡
+                        energyBombCardTime = userUsingProp.getLong("endTime");
+                        Log.runtime("能量炸弹卡剩余时间⏰：" + formatTimeDifference(energyBombCardTime - System.currentTimeMillis()));
+                        break;
                     case "robExpandCard": // 不知道什么卡，偷袭卡？
                         String extInfo = userUsingProp.optString("extInfo");
                         if (!extInfo.isEmpty()) {
@@ -1707,13 +1719,15 @@ public class AntForest extends ModelTask {
             }
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
-            boolean needshield = !shieldCard.getValue().equals(applyPropType.CLOSE) && ((shieldEndTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
-            if (needDouble || needStealth || needshield) {
+            boolean needShield = !shieldCard.getValue().equals(applyPropType.CLOSE) && energyBombCardType.getValue().equals(applyPropType.CLOSE) && ((shieldEndTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
+            boolean needEnergyBombCard = !energyBombCardType.getValue().equals(applyPropType.CLOSE)&& shieldCard.getValue().equals(applyPropType.CLOSE) && ((energyBombCardTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
+            if (needDouble || needStealth || needShield || needEnergyBombCard) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();
                     if (needDouble) useDoubleCard(bagObject);
                     if (needStealth) useStealthCard(bagObject);
-                    if (needshield) useShieldCard(bagObject);
+                    if (needShield) useShieldCard(bagObject);
+                    if (needEnergyBombCard) useEnergyBombCard(bagObject);
                 }
             }
         } catch (Exception e) {
@@ -2363,6 +2377,33 @@ public class AntForest extends ModelTask {
         } catch (Throwable th) {
             Log.runtime(TAG, "useEnergyRainChanceCard err");
             Log.printStackTrace(TAG, th);
+        }
+    }
+
+    /**
+     * 炸弹卡使用
+     */
+    private void useEnergyBombCard(JSONObject bagObject) {
+        try {
+            // 在背包中查询限时保护罩
+            JSONObject jo = findPropBag(bagObject, "ENERGY_BOMB_CARD");
+            if (jo == null) {
+                JSONObject skuInfo = Vitality.findSkuInfoBySkuName("能量炸弹卡");
+                if (skuInfo == null) {
+                    return;
+                }
+                String skuId = skuInfo.getString("skuId");
+                if (Status.canVitalityExchangeToday(skuId, 1) && Vitality.VitalityExchange(skuInfo.getString("spuId"), skuId, "能量炸弹卡")) {
+                    jo = findPropBag(getBag(), "ENERGY_BOMB_CARD");
+                }
+            }
+            if (jo != null && usePropBag(jo)) {
+                energyBombCardTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+            } else {
+                updateSelfHomePage();
+            }
+        } catch (Throwable th) {
+            Log.error(TAG + "useShieldCard err");
         }
     }
 
