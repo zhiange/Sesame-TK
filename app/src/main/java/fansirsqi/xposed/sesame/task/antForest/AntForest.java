@@ -2385,7 +2385,6 @@ public class AntForest extends ModelTask {
      */
     private void useEnergyBombCard(JSONObject bagObject) {
         try {
-            // 在背包中查询限时保护罩
             JSONObject jo = findPropBag(bagObject, "ENERGY_BOMB_CARD");
             if (jo == null) {
                 JSONObject skuInfo = Vitality.findSkuInfoBySkuName("能量炸弹卡");
