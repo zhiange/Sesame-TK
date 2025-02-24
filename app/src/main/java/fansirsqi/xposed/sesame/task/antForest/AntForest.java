@@ -1726,8 +1726,12 @@ public class AntForest extends ModelTask {
                     JSONObject bagObject = getBag();
                     if (needDouble) useDoubleCard(bagObject);
                     if (needStealth) useStealthCard(bagObject);
-                    if (needShield) useShieldCard(bagObject);
-                    if (needEnergyBombCard) useEnergyBombCard(bagObject);
+                    // 互斥逻辑：如果两个开关都打开，则优先使用保护罩|不会使用炸弹卡
+                    if (needShield) {
+                        useShieldCard(bagObject);
+                    } else if (needEnergyBombCard) {
+                        useEnergyBombCard(bagObject);
+                    }
                 }
             }
         } catch (Exception e) {
