@@ -24,13 +24,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
+import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.data.UIConfig;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
@@ -41,7 +41,6 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
 
@@ -53,7 +52,7 @@ public class MainActivity extends BaseActivity {
     private Runnable titleRunner;
     private String[] userNameArray = {"默认"};
     private UserEntity[] userEntityArray = {null};
-    private String userId = null;
+    private  TextView oneWord = null;
 
     @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
     @Override
@@ -71,13 +70,12 @@ public class MainActivity extends BaseActivity {
         tvStatistics = findViewById(R.id.tv_statistics);
         TextView buildVersion = findViewById(R.id.bulid_version);
         TextView buildTarget = findViewById(R.id.bulid_target);
-        TextView oneWord = findViewById(R.id.one_word);
+        oneWord = findViewById(R.id.one_word);
         // 获取并设置一言句子
         ViewAppInfo.checkRunType();
         updateSubTitle(ViewAppInfo.getRunType());
 //        viewHandler = new Handler(Looper.getMainLooper());
         titleRunner = () -> updateSubTitle(RunType.DISABLE);
-        userId = UserMap.getCurrentUid();
         if (mainImage != null) {
             mainImage.setOnLongClickListener(
                     v -> {
@@ -108,20 +106,7 @@ public class MainActivity extends BaseActivity {
                                     }
                                     viewHandler.removeCallbacks(titleRunner);
                                     if (isClick) {
-                                        // 调用 FansirsqiUtil 获取句子
-                                        FansirsqiUtil.getOneWord(
-                                                new FansirsqiUtil.OneWordCallback() {
-                                                    @Override
-                                                    public void onSuccess(String result) {
-                                                        runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
-                                                    }
 
-                                                    @Override
-                                                    public void onFailure(String error) {
-                                                        runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
-                                                    }
-                                                });
-                                        Log.debug("Now User Id: " + userId);
                                         Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
                                         ThreadUtil.sleep(200); // 别急，等一会儿再说
                                         isClick = false;
@@ -252,13 +237,26 @@ public class MainActivity extends BaseActivity {
             return;
         } else if (id == R.id.btn_friend_watch) {
             selectFriendWatchUid();
-//            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
-
+            return;
+        }else if (id == R.id.one_word) {
+            FansirsqiUtil.getOneWord(
+                    new FansirsqiUtil.OneWordCallback() {
+                        @Override
+                        public void onSuccess(String result) {
+                            runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
+                        }
+                        @Override
+                        public void onFailure(String error) {
+                            runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
+                        }
+                    });
             return;
         }
         Intent it = new Intent(this, HtmlViewerActivity.class);
         it.setData(Uri.parse(data));
         startActivity(it);
+
+
     }
 
     @Override
