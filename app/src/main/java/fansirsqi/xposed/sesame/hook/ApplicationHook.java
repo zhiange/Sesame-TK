@@ -37,6 +37,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.data.Config;
+import fansirsqi.xposed.sesame.data.DataCache;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
 import fansirsqi.xposed.sesame.entity.AlipayVersion;
@@ -604,6 +605,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 }
                 Model.bootAllModel(classLoader);
                 Status.load();
+                DataCache.load();
                 updateDay(userId);
                 BaseModel.initData();
                 String successMsg = "芝麻粒-TK 加载成功🎉";
