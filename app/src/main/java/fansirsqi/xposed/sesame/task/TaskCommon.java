@@ -12,7 +12,7 @@ public class TaskCommon {
     public static volatile Boolean IS_MODULE_SLEEP_TIME = false;
     public static void update() {
         long currentTimeMillis = System.currentTimeMillis();
-        IS_MODULE_SLEEP_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, BaseModel.getEnergyTime().getValue());
+        IS_MODULE_SLEEP_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, BaseModel.getModelSleepTime().getValue());
         IS_ENERGY_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, BaseModel.getEnergyTime().getValue());
         IS_AFTER_8AM = TimeUtil.isAfterOrCompareTimeStr(currentTimeMillis, "0800");
     }
