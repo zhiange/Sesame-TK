@@ -286,6 +286,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
                                     try {
+                                        TaskCommon.update();
                                         if (TaskCommon.IS_MODULE_SLEEP_TIME) {
                                             Log.record("️💤跳过执行-休眠时间");
                                             return;
@@ -317,7 +318,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             reLogin();
                                             return;
                                         }
-                                        TaskCommon.update();
+
                                         ModelTask.startAllTask(false);
                                         scheduleNextExecution(lastExecTime);
                                         UserId.set(targetUid);
@@ -475,15 +476,16 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
     @SuppressLint("WakelockTimeout")
     private synchronized Boolean initHandler(Boolean force) {
-        if (service == null) {
-            return false;
-        }
-        if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠中,停止初始化");
-            return false;
-        }
-        destroyHandler(force);
         try {
+            TaskCommon.update();
+            if (service == null) {
+                return false;
+            }
+            if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+                Log.record("💤 模块休眠中,停止初始化");
+                return false;
+            }
+            destroyHandler(force);
             if (force) {
                 String userId = getUserId();
                 if (userId == null) {
@@ -493,11 +495,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 }
                 UserMap.initUser(userId);
                 Model.initAllModel();
-                String startMsg = "芝麻粒-TK 开始加载";
+                String startMsg = "芝麻粒-TK 开始初始化...";
                 Log.record(startMsg);
                 Log.record("⚙️模块版本：" + modelVersion);
                 Log.record("📦应用版本：" + alipayVersion.getVersionString());
-                if (!Config.load(userId)) {
+                Config.load(userId);
+                if (!Config.isLoaded()) {
                     Log.record("用户模块配置加载失败");
                     Toast.show("用户模块配置加载失败");
                     return false;
