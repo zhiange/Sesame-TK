@@ -25,13 +25,12 @@ import lombok.Data;
  */
 @Data
 public class Config {
-    private static boolean isLoaded = false;
     private static final String TAG = Config.class.getSimpleName();
     // 单例实例
     public static final Config INSTANCE = new Config();
     // 是否初始化标志
     @JsonIgnore
-    private volatile boolean init;
+    private volatile boolean init = false;
     // 存储模型字段的映射
     private final Map<String, ModelFields> modelFieldsMap = new ConcurrentHashMap<>();
 
@@ -110,7 +109,7 @@ public class Config {
      * @param userId 用户 ID
      * @return 是否已修改
      */
-    public static Boolean isModify(String userId)  {
+    public static Boolean isModify(String userId) {
         String json = null;
         java.io.File configV2File;
         if (StringUtil.isEmpty(userId)) {
@@ -178,7 +177,7 @@ public class Config {
     }
 
     public static boolean isLoaded() {
-        return isLoaded;
+        return INSTANCE.init;
     }
 
     /**
@@ -187,11 +186,10 @@ public class Config {
      * @param userId 用户 ID
      * @return 配置是否成功加载
      */
-    public static synchronized boolean load(String userId) {
-        Log.record(TAG, "开始加载配置...");
+    public static synchronized Config load(String userId) {
+        Log.record(TAG, "开始加载配置");
         String userName = "";
         File configV2File = null;
-
         try {
             if (StringUtil.isEmpty(userId)) {
                 configV2File = Files.getDefaultConfigV2File();
@@ -205,61 +203,43 @@ public class Config {
                     userName = userEntity.getShowName();
                 }
             }
-            Log.record("载入用户[" + userName + "]配置");
+            Log.record("加载配置: " + userName);
             if (configV2File.exists()) {
                 String json = Files.readFromFile(configV2File);
-                if (StringUtil.isEmpty(json)) {
-                    Log.record(TAG, "配置文件内容为空，初始化新配置: " + userName);
-                    unload();
-                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
-                } else {
-                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                    String formatted = JsonUtil.formatJson(INSTANCE);
-                    if (formatted != null && !formatted.equals(json)) {
-                        Log.record(TAG, "格式化配置: " + userName);
-                        Files.write2File(formatted, configV2File);
-                    }
+                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                String formatted = toSaveStr();
+                if (formatted != null && !formatted.equals(json)) {
+                    Log.runtime(TAG, "格式化配置: " + userName);
+                    Files.write2File(formatted, configV2File);
                 }
-            }
-            else {
-                // 如果配置文件不存在，复制默认配置或初始化
-                java.io.File defaultConfigV2File = Files.getDefaultConfigV2File();
+            } else {
+                File defaultConfigV2File = Files.getDefaultConfigV2File();
                 if (defaultConfigV2File.exists()) {
                     String json = Files.readFromFile(defaultConfigV2File);
-                    if (!StringUtil.isEmpty(json)) {
-                        JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                        Log.record(TAG, "复制新配置: " + userName);
-                        Files.write2File(json, configV2File);
-                    } else {
-                        unload();
-                        Log.record(TAG, "默认配置为空，重置配置: " + userName);
-                        Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
-                    }
+                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                    Log.runtime(TAG, "复制新配置: " + userName);
+                    Files.write2File(json, configV2File);
                 } else {
                     unload();
-                    Log.record(TAG, "重置配置: " + userName);
-                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
+                    Log.runtime(TAG, "初始新配置: " + userName);
+                    Files.write2File(toSaveStr(), configV2File);
                 }
             }
-            INSTANCE.setInit(true);
-            isLoaded = true;
-
-            Log.record(TAG, "加载配置结束！");
-            return true;
         } catch (Throwable t) {
             Log.printStackTrace(TAG, t);
             Log.record(TAG, "重置配置: " + userName);
             try {
                 unload();
                 if (configV2File != null) {
-                    Files.write2File(JsonUtil.formatJson(INSTANCE), configV2File);
+                    Files.write2File(toSaveStr(), configV2File);
                 }
             } catch (Exception e) {
                 Log.printStackTrace(TAG, t);
             }
-            isLoaded = false;
-            return false;
         }
+        INSTANCE.setInit(true);
+        Log.record(TAG, "加载配置结束");
+        return INSTANCE;
     }
 
     /**
@@ -274,4 +254,9 @@ public class Config {
             }
         }
     }
+
+    public static String toSaveStr() {
+        return JsonUtil.formatJson(INSTANCE);
+    }
+
 }
