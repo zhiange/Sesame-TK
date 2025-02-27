@@ -79,7 +79,6 @@ public class ToastUtil {
      */
     public static Toast makeText(Context context, String message, int duration) {
         try {
-            Log.runtime("makeText Context: " + context.getClass().getSimpleName());
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             @SuppressLint("InflateParams")
             View layout = inflater.inflate(R.layout.toast, null);
