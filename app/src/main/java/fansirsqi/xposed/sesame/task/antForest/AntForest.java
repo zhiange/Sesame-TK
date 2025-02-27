@@ -136,6 +136,7 @@ public class AntForest extends ModelTask {
     private ChoiceModelField helpFriendCollectType;
     private SelectModelField helpFriendCollectList;
     private SelectAndCountModelField vitalityExchangeList;
+    private SelectAndCountModelField vitalityExchangeMaxList;
     private IntegerModelField returnWater33;
     private IntegerModelField returnWater18;
     private IntegerModelField returnWater10;
@@ -177,8 +178,9 @@ public class AntForest extends ModelTask {
     @Getter
     private Set<String> dontCollectMap = new HashSet<>();
     ArrayList<String> emojiList = new ArrayList<>(Arrays.asList(
-            "🍎", "🍌", "🍇", "🍊", "🍋", "🍓", "🍈", "🍉", "🍒", "🍑", "🍍", "🥥", "🥝", "🍅", "🍆",
-            "🥦", "🥦", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞"
+        "🟢"
+            // "🍎", "🍌", "🍇", "🍊", "🍋", "🍓", "🍈", "🍉", "🍒", "🍑", "🍍", "🥥", "🥝", "🍅", "🍆",
+            // "🥦", "🥦", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞"
     ));
     private final Random random = new Random();
 
@@ -246,6 +248,7 @@ public class AntForest extends ModelTask {
         modelFields.addField(helpFriendCollectList = new SelectModelField("helpFriendCollectList", "复活能量 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(vitalityExchange = new BooleanModelField("vitalityExchange", "活力值 | 兑换开关", false));
         modelFields.addField(vitalityExchangeList = new SelectAndCountModelField("vitalityExchangeList", "活力值 | 兑换列表", new LinkedHashMap<>(), VitalityStore::getList, "兑换次数"));
+//        modelFields.addField(vitalityExchangeMaxList = new SelectAndCountModelField("vitalityExchangeMaxList", "活力值 | 兑换限制", new LinkedHashMap<>(), VitalityStore::getList, "如果背包中已经有该数量的道具，则不进行兑换"));
         modelFields.addField(userPatrol = new BooleanModelField("userPatrol", "保护地巡护", false));
         modelFields.addField(combineAnimalPiece = new BooleanModelField("combineAnimalPiece", "合成动物碎片", false));
         modelFields.addField(consumeAnimalProp = new BooleanModelField("consumeAnimalProp", "派遣动物伙伴", false));
@@ -274,7 +277,7 @@ public class AntForest extends ModelTask {
             Log.record(getName() + "任务-异常等待中，暂不执行检测！");
             return false;
         } else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record("💤 模块休眠时间【" + BaseModel.getModelSleepTime().getValue() + "】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -693,8 +696,11 @@ public class AntForest extends ModelTask {
 
     private void handleVitalityExchange() {
         try {
+//            JSONObject bag = getBag();
+
             Vitality.initVitality("SC_ASSETS");
             Map<String, Integer> exchangeList = vitalityExchangeList.getValue();
+//            Map<String, Integer> maxLimitList = vitalityExchangeMaxList.getValue();
             for (Map.Entry<String, Integer> entry : exchangeList.entrySet()) {
                 String skuId = entry.getKey();
                 Integer count = entry.getValue();
@@ -705,7 +711,7 @@ public class AntForest extends ModelTask {
                 // 处理活力值兑换
                 while (Status.canVitalityExchangeToday(skuId, count)) {
                     if (!Vitality.handleVitalityExchange(skuId)) {
-                        Log.record("活力值兑换失败: skuId=" + skuId);
+                        Log.record("活力值兑换失败: " + VitalityStore.getNameById(skuId));
                         break;
                     }
                     ThreadUtil.sleep(5000L);
@@ -1160,7 +1166,7 @@ public class AntForest extends ModelTask {
                             }
                             if (collected > 0) {
                                 FriendWatch.friendWatch(userId, collected);
-                                String str = "一键收取⚡️" + collected + "g[" + UserMap.getMaskName(userId) + "]#";
+                                String str = "一键收取🟢" + collected + "g[" + UserMap.getMaskName(userId) + "]#";
                                 if (needDouble) {
                                     Log.forest(str + "耗时[" + spendTime + "]ms[双击]");
                                     Toast.show(str + "[双击]");
@@ -1720,7 +1726,7 @@ public class AntForest extends ModelTask {
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
             boolean needShield = !shieldCard.getValue().equals(applyPropType.CLOSE) && energyBombCardType.getValue().equals(applyPropType.CLOSE) && ((shieldEndTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
-            boolean needEnergyBombCard = !energyBombCardType.getValue().equals(applyPropType.CLOSE)&& shieldCard.getValue().equals(applyPropType.CLOSE) && ((energyBombCardTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
+            boolean needEnergyBombCard = !energyBombCardType.getValue().equals(applyPropType.CLOSE) && shieldCard.getValue().equals(applyPropType.CLOSE) && ((energyBombCardTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
             if (needDouble || needStealth || needShield || needEnergyBombCard) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();

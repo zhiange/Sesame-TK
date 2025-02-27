@@ -235,10 +235,10 @@ public class AntFarm extends ModelTask {
     @Override
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -867,7 +867,6 @@ public class AntFarm extends ModelTask {
                                     s = DadaDailyRpcCall.submit("100", answer, questionId);
                                     JSONObject joDailySubmit = new JSONObject(s);
                                     if (joDailySubmit.optBoolean("success")) {
-                                        Log.record("提交完成");
                                         dadaDailySet = new HashSet<>();
                                         JSONObject extInfo = joDailySubmit.getJSONObject("extInfo");
                                         boolean correct = joDailySubmit.getBoolean("correct");
@@ -876,8 +875,7 @@ public class AntFarm extends ModelTask {
                                         } else {
                                             dadaDailySet.add(TimeUtil.getDateStr() + answer);
                                         }
-                                        Log.record("答题" + (correct ? "正确" : "错误") + "可领取［"
-                                                + extInfo.getString("award") + "克］");
+                                        Log.other("饲料任务答题：" + (correct ? "正确" : "错误") + "领取饲料［" + extInfo.getString("award") + "g］");
                                         Status.answerQuestionToday();
                                         JSONArray operationConfigList = joDailySubmit
                                                 .getJSONArray("operationConfigList");
