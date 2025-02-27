@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.ui;
 
+import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_TEST;
 import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
 
 import android.annotation.SuppressLint;
@@ -352,9 +353,14 @@ public class MainActivity extends BaseActivity {
                 selectSettingUid();
                 break;
             case 10:
-                Intent it = new Intent(this, DemoSettingActivity.class);
-                it.putExtra("userName", userNameArray[0]);
-                startActivity(it);
+                UIConfig.INSTANCE.setUiOption(UI_OPTION_TEST);
+                if (UIConfig.save()) {
+                    Intent it = new Intent(this, DemoSettingActivity.class);
+                    it.putExtra("userName", userNameArray[0]);
+                    startActivity(it);
+                } else {
+                    Toast.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
+                }
         }
         return super.onOptionsItemSelected(item);
     }
