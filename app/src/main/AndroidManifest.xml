@@ -17,6 +17,7 @@
             android:roundIcon="@drawable/ic_launcher"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
+            android:enableOnBackInvokedCallback="true"
             >
         <meta-data
                 android:name="xposedmodule"
