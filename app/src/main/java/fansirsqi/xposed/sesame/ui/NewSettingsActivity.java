@@ -176,7 +176,7 @@ public class NewSettingsActivity extends BaseActivity {
         });
         if (isApkInDebug()) {
             WebView.setWebContentsDebuggingEnabled(true);
-            webView.loadUrl("http://127.0.0.1:5500/app/src/main/assets/web/index.html");
+            webView.loadUrl("http://192.168.31.69:5500/app/src/main/assets/web/index.html");
         } else {
             webView.loadUrl("file:///android_asset/web/index.html");
         }
