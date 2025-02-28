@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.File;
 
-import fansirsqi.xposed.sesame.ui.DemoSettingActivity;
-import fansirsqi.xposed.sesame.ui.NewSettingsActivity;
-import fansirsqi.xposed.sesame.ui.SettingsActivity;
+import fansirsqi.xposed.sesame.ui.SettingActivity;
+import fansirsqi.xposed.sesame.ui.WebSettingsActivity;
+import fansirsqi.xposed.sesame.ui.OldSettingsActivity;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
@@ -24,12 +24,12 @@ public class UIConfig {
 
 
     public static final String UI_OPTION_OLD = "old";
+    public static final String UI_OPTION_WEB = "web"; //webUI
     public static final String UI_OPTION_NEW = "new";
-    public static final String UI_OPTION_TEST = "test";
 
     @Setter
     @JsonProperty("uiOption") // 直接序列化 uiOption 字段
-    private String uiOption = UI_OPTION_NEW; // 默认值为 "new"
+    private String uiOption = UI_OPTION_WEB; // 默认值为 "new"
 
     private UIConfig() {
     }
@@ -74,19 +74,19 @@ public class UIConfig {
 
     private static synchronized void resetToDefault() {
         Log.runtime(TAG, "重置UI配置");
-        INSTANCE.setUiOption(UI_OPTION_NEW); // 默认设置为 "new"
+        INSTANCE.setUiOption(UI_OPTION_WEB); // 默认设置为 "new"
         INSTANCE.setInit(false);
     }
 
     @JsonIgnore
     public Class<?> getTargetActivityClass() {
         return switch (uiOption) {
-            case UI_OPTION_OLD -> SettingsActivity.class;
-            case UI_OPTION_NEW -> NewSettingsActivity.class;
-            case UI_OPTION_TEST -> DemoSettingActivity.class;
+            case UI_OPTION_OLD -> OldSettingsActivity.class;
+            case UI_OPTION_WEB -> WebSettingsActivity.class;
+            case UI_OPTION_NEW -> SettingActivity.class;
             default -> {
                 Log.runtime(TAG, "未知的 UI 选项: " + uiOption);
-                yield NewSettingsActivity.class;
+                yield WebSettingsActivity.class;
             }
         };
     }

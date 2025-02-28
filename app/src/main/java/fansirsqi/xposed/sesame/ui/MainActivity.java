@@ -1,8 +1,5 @@
 package fansirsqi.xposed.sesame.ui;
 
-import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_TEST;
-import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
-
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -276,9 +273,6 @@ public class MainActivity extends BaseActivity {
             menu.add(0, 7, 7, R.string.view_capture);
             menu.add(0, 8, 8, R.string.extend);
             menu.add(0, 9, 9, R.string.settings);
-            if (isApkInDebug()) {
-                menu.add(0, 10, 10, "Demo Setting UI");
-            }
         } catch (Exception e) {
             Log.printStackTrace(e);
             ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -352,15 +346,15 @@ public class MainActivity extends BaseActivity {
             case 9:
                 selectSettingUid();
                 break;
-            case 10:
-                UIConfig.INSTANCE.setUiOption(UI_OPTION_TEST);
-                if (UIConfig.save()) {
-                    Intent it = new Intent(this, DemoSettingActivity.class);
-                    it.putExtra("userName", userNameArray[0]);
-                    startActivity(it);
-                } else {
-                    Toast.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
-                }
+//            case 10:
+//                UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
+//                if (UIConfig.save()) {
+//                    Intent it = new Intent(this, SettingActivity.class);
+//                    it.putExtra("userName", userNameArray[0]);
+//                    startActivity(it);
+//                } else {
+//                    Toast.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
+//                }
         }
         return super.onOptionsItemSelected(item);
     }

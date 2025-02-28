@@ -1,6 +1,6 @@
 package fansirsqi.xposed.sesame.ui;
 
-import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_OLD;
+import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_NEW;
 import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
 
 import android.annotation.SuppressLint;
@@ -62,7 +62,7 @@ import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
-public class NewSettingsActivity extends BaseActivity {
+public class WebSettingsActivity extends BaseActivity {
     private static final Integer EXPORT_REQUEST_CODE = 1;
     private static final Integer IMPORT_REQUEST_CODE = 2;
     private ActivityResultLauncher<Intent> exportLauncher;
@@ -201,14 +201,14 @@ public class NewSettingsActivity extends BaseActivity {
                 if (webView.canGoBack()) {
                     webView.goBack();
                 } else {
-                    NewSettingsActivity.this.finish();
+                    WebSettingsActivity.this.finish();
                 }
             });
         }
 
         @JavascriptInterface
         public void onExit() {
-            runOnUiThread(NewSettingsActivity.this::finish);
+            runOnUiThread(WebSettingsActivity.this::finish);
         }
     }
 
@@ -217,7 +217,7 @@ public class NewSettingsActivity extends BaseActivity {
         public String getTabs() {
             String result = JsonUtil.formatJson(tabList, false);
             if (isApkInDebug()) {
-                Log.runtime("NewSettingsActivity.getTabs: " + result);
+                Log.runtime("WebSettingsActivity.getTabs: " + result);
             }
             return result;
         }
@@ -231,7 +231,7 @@ public class NewSettingsActivity extends BaseActivity {
         public String getGroup() {
             String result = JsonUtil.formatJson(groupList, false);
             if (isApkInDebug()) {
-                Log.runtime("NewSettingsActivity.getGroup: " + result);
+                Log.runtime("WebSettingsActivity.getGroup: " + result);
             }
             return result;
         }
@@ -249,7 +249,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             String result = JsonUtil.formatJson(modelDtoList, false);
             if (isApkInDebug()) {
-                Log.runtime("NewSettingsActivity.getModelByGroup: " + result);
+                Log.runtime("WebSettingsActivity.getModelByGroup: " + result);
             }
             return result;
         }
@@ -289,7 +289,7 @@ public class NewSettingsActivity extends BaseActivity {
                 }
                 String result = JsonUtil.formatJson(list, false);
                 if (isApkInDebug()) {
-                    Log.runtime("NewSettingsActivity.getModel: " + result);
+                    Log.runtime("WebSettingsActivity.getModel: " + result);
                 }
                 return result;
             }
@@ -322,7 +322,7 @@ public class NewSettingsActivity extends BaseActivity {
                         return "SUCCESS";
                     }
                 } catch (Exception e) {
-                    Log.printStackTrace("NewSettingsActivity", e);
+                    Log.printStackTrace("WebSettingsActivity", e);
                 }
             }
             return "FAILED";
@@ -336,7 +336,7 @@ public class NewSettingsActivity extends BaseActivity {
                 if (modelField != null) {
                     String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField), false);
                     if (isApkInDebug()) {
-                        Log.runtime("NewSettingsActivity.getField: " + result);
+                        Log.runtime("WebSettingsActivity.getField: " + result);
                     }
                     return result;
                 }
@@ -373,7 +373,7 @@ public class NewSettingsActivity extends BaseActivity {
         menu.add(0, 2, 2, "导入配置");
         menu.add(0, 3, 3, "删除配置");
         menu.add(0, 4, 4, "单向好友");
-        menu.add(0, 5, 5, "切换至旧UI");
+        menu.add(0, 5, 5, "切换UI");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -422,9 +422,9 @@ public class NewSettingsActivity extends BaseActivity {
                 ListDialog.show(this, "单向好友列表", AlipayUser.getList(user -> user.getFriendStatus() != 1), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
                 break;
             case 5:
-                UIConfig.INSTANCE.setUiOption(UI_OPTION_OLD);
+                UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
                 if (UIConfig.save()) {
-                    Intent intent = new Intent(this, SettingsActivity.class);
+                    Intent intent = new Intent(this, OldSettingsActivity.class);
                     intent.putExtra("userId", userId);
                     intent.putExtra("userName", userName);
                     finish();
@@ -437,68 +437,6 @@ public class NewSettingsActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode != RESULT_OK) {
-//            return;
-//        }
-//        if (requestCode == EXPORT_REQUEST_CODE) {
-//            Uri uri = data.getData();
-//            if (uri != null) {
-//                try {
-//                    java.io.File configV2File;
-//                    if (StringUtil.isEmpty(userId)) {
-//                        configV2File = Files.getDefaultConfigV2File();
-//                    } else {
-//                        configV2File = Files.getConfigV2File(userId);
-//                    }
-//                    FileInputStream inputStream = new FileInputStream(configV2File);
-//                    if (Files.streamTo(inputStream, getContentResolver().openOutputStream(data.getData()))) {
-//                        Toast.makeText(this, "导出成功！", Toast.LENGTH_SHORT).show();
-//                    } else {
-//                        Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-//                    }
-//                } catch (IOException e) {
-//                    Log.printStackTrace(e);
-//                    Toast.makeText(this, "导出失败！", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        } else if (requestCode == IMPORT_REQUEST_CODE) {
-//            Uri uri = data.getData();
-//            if (uri != null) {
-//                try {
-//                    java.io.File configV2File;
-//                    if (StringUtil.isEmpty(userId)) {
-//                        configV2File = Files.getDefaultConfigV2File();
-//                    } else {
-//                        configV2File = Files.getConfigV2File(userId);
-//                    }
-//                    FileOutputStream outputStream = new FileOutputStream(configV2File);
-//                    if (Files.streamTo(Objects.requireNonNull(getContentResolver().openInputStream(data.getData())), outputStream)) {
-//                        Toast.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
-//                        if (!StringUtil.isEmpty(userId)) {
-//                            try {
-//                                Intent intent = new Intent("com.eg.android.AlipayGphone.sesame.restart");
-//                                intent.putExtra("userId", userId);
-//                                sendBroadcast(intent);
-//                            } catch (Throwable th) {
-//                                Log.printStackTrace(th);
-//                            }
-//                        }
-//                        Intent intent = getIntent();
-//                        finish();
-//                        startActivity(intent);
-//                    } else {
-//                        Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-//                    }
-//                } catch (IOException e) {
-//                    Log.printStackTrace(e);
-//                    Toast.makeText(this, "导入失败！", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        }
-//    }
     private void save() {
         if (Config.isModify(userId) && Config.save(userId, false)) {
             Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
