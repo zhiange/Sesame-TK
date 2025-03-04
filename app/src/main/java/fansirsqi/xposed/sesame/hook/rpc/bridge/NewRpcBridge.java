@@ -1,7 +1,11 @@
 package fansirsqi.xposed.sesame.hook.rpc.bridge;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
@@ -11,6 +15,7 @@ import fansirsqi.xposed.sesame.data.General;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.RandomUtil;
+
 /**
  * 新版rpc接口，支持最低支付宝版本v10.3.96.8100 记录rpc抓包，支持最低支付宝版本v10.3.96.8100
  */
@@ -21,10 +26,12 @@ public class NewRpcBridge implements RpcBridge {
     private Method parseObjectMethod;
     private Class<?>[] bridgeCallbackClazzArray;
     private Method newRpcCallMethod;
+
     @Override
     public RpcVersion getVersion() {
         return RpcVersion.NEW;
     }
+
     @Override
     public void load() throws Exception {
         loader = ApplicationHook.getClassLoader();
@@ -81,6 +88,7 @@ public class NewRpcBridge implements RpcBridge {
             throw e;
         }
     }
+
     @Override
     public void unload() {
         newRpcCallMethod = null;
@@ -89,6 +97,7 @@ public class NewRpcBridge implements RpcBridge {
         newRpcInstance = null;
         loader = null;
     }
+
     public String requestString(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         RpcEntity resRpcEntity = requestObject(rpcEntity, tryCount, retryInterval);
         if (resRpcEntity != null) {
@@ -96,6 +105,7 @@ public class NewRpcBridge implements RpcBridge {
         }
         return null;
     }
+
     @Override
     public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         if (ApplicationHook.isOffline()) {
@@ -144,10 +154,21 @@ public class NewRpcBridge implements RpcBridge {
                     }
                     try {
                         String errorCode = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "error");
-                        if ("2000".equals(errorCode)) {
+                        String errorMessage = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "errorMessage");
+                        String response = rpcEntity.getResponseString();
+                        ArrayList<String> errorMark = new ArrayList<>(Arrays.asList(
+                                "1004", "2000", "46", "48"
+                        ));
+                        ArrayList<String> errorStringMark = new ArrayList<>(Arrays.asList(
+                                "繁忙", "网络不可用", "重试"
+                        ));
+                        if (errorMark.contains(errorCode) || errorStringMark.contains(errorMessage)) {
                             if (!ApplicationHook.isOffline()) {
                                 ApplicationHook.setOffline(true);
-                                Notify.updateStatusText("登录超时");
+                                Notify.updateStatusText("网络连接异常，已进入离线模式");
+                                if (BaseModel.getErrNotify().getValue()) {
+                                    Notify.sendErrorNotification("网络连接异常，可能需要滑动验证", response);
+                                }
                                 if (BaseModel.getTimeoutRestart().getValue()) {
                                     Log.record("尝试重新登录");
                                     ApplicationHook.reLoginByBroadcast();
@@ -173,8 +194,7 @@ public class NewRpcBridge implements RpcBridge {
                             Log.printStackTrace(e);
                         }
                     }
-                }
-                catch (Throwable t) {
+                } catch (Throwable t) {
                     Log.error("new rpc request | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
                     Log.printStackTrace(t);
                     if (retryInterval < 0) {
