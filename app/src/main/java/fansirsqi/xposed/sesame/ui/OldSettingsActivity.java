@@ -166,7 +166,7 @@ public class OldSettingsActivity extends BaseActivity {
         menu.add(0, 2, 2, "导入配置");
         menu.add(0, 3, 3, "删除配置");
         menu.add(0, 4, 4, "单向好友");
-        menu.add(0, 5, 5, "切换至新UI"); // 允许切换到新 UI
+        menu.add(0, 5, 5, "切换至New UI");
         return super.onCreateOptionsMenu(menu);
     }
     @Override
@@ -215,7 +215,7 @@ public class OldSettingsActivity extends BaseActivity {
             case 5: // 切换到新 UI
                 UIConfig.INSTANCE.setUiOption(UI_OPTION_WEB);
                 if (UIConfig.save()) {
-                    Intent intent = new Intent(this, WebSettingsActivity.class);
+                    Intent intent = new Intent(this, UIConfig.INSTANCE.getTargetActivityClass());
                     intent.putExtra("userId", this.userId);
                     intent.putExtra("userName", this.userName);
                     finish();

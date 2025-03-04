@@ -123,6 +123,7 @@ public class SettingActivity extends BaseActivity {
             ViewPager2 viewPager = findViewById(R.id.view_pager_content);
             ContentPagerAdapter contentAdapter = new ContentPagerAdapter(getSupportFragmentManager(), getLifecycle(), modelConfigMap);
             viewPager.setAdapter(contentAdapter);
+            viewPager.setUserInputEnabled(false);// 禁止用户手动滑动
             viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                 @Override
                 public void onPageSelected(int position) {
@@ -193,7 +194,7 @@ public class SettingActivity extends BaseActivity {
             case 5: // 切换到新 UI
                 UIConfig.INSTANCE.setUiOption(UI_OPTION_WEB);
                 if (UIConfig.save()) {
-                    Intent intent = new Intent(this, WebSettingsActivity.class);
+                    Intent intent = new Intent(this, UIConfig.INSTANCE.getTargetActivityClass());
                     intent.putExtra("userId", this.userId);
                     intent.putExtra("userName", this.userName);
                     finish();

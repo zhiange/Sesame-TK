@@ -101,7 +101,7 @@ public class WebSettingsActivity extends BaseActivity {
         IdMapManager.getInstance(BeachMap.class).load();
         Config.load(userId);
         LanguageUtil.setLocale(this);
-        setContentView(R.layout.activity_new_settings);
+        setContentView(R.layout.activity_web_settings);
         //处理返回键
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -424,7 +424,7 @@ public class WebSettingsActivity extends BaseActivity {
             case 5:
                 UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
                 if (UIConfig.save()) {
-                    Intent intent = new Intent(this, OldSettingsActivity.class);
+                    Intent intent = new Intent(this, UIConfig.INSTANCE.getTargetActivityClass());
                     intent.putExtra("userId", userId);
                     intent.putExtra("userName", userName);
                     finish();
