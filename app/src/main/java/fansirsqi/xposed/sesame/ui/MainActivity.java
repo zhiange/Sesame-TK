@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Consumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -231,10 +232,30 @@ public class MainActivity extends BaseActivity {
         } else if (id == R.id.btn_github) {
             data = "https://github.com/Fansirsqi/Sesame-TK";
         } else if (id == R.id.btn_settings) {
-            selectSettingUid();
+//            selectSettingUid();
+            showSelectionDialog(
+                    "请选择配置",
+                    userNameArray,
+                    this::goSettingActivity,
+                    "返回",
+                    () -> {},
+                    true
+            );
             return;
         } else if (id == R.id.btn_friend_watch) {
-            selectFriendWatchUid();
+//            selectFriendWatchUid();
+
+            // 调用 goFrinedWatch 时不展示默认选项
+            showSelectionDialog(
+                    "请选择有效账户",
+                    userNameArray,
+                    this::goFrinedWatch,
+                    "返回",
+                    () -> {},
+                    false
+            );
+
+
             return;
         }else if (id == R.id.one_word) {
             FansirsqiUtil.getOneWord(
@@ -346,15 +367,6 @@ public class MainActivity extends BaseActivity {
             case 9:
                 selectSettingUid();
                 break;
-//            case 10:
-//                UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
-//                if (UIConfig.save()) {
-//                    Intent it = new Intent(this, SettingActivity.class);
-//                    it.putExtra("userName", userNameArray[0]);
-//                    startActivity(it);
-//                } else {
-//                    Toast.makeText(this, "切换失败", Toast.LENGTH_SHORT).show();
-//                }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -434,6 +446,50 @@ public class MainActivity extends BaseActivity {
             }).start();
         }
     }
+
+    public void showSelectionDialog(String title, String[] options,
+                                    Consumer<Integer> onItemSelected,
+                                    String negativeButtonText,
+                                    Runnable onNegativeButtonClick,
+                                    boolean showDefaultOption) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AlertDialog dialog = StringDialog.showSelectionDialog(
+                this,
+                title,
+                options,
+                (dialog1, which) -> {
+                    onItemSelected.accept(which);
+                    dialog1.dismiss();
+                    latch.countDown();
+                },
+                negativeButtonText,
+                dialog1 -> {
+                    onNegativeButtonClick.run();
+                    dialog1.dismiss();
+                    latch.countDown();
+                });
+
+        int length = options.length;
+        if (showDefaultOption && length > 0 && length < 3) {
+            // 定义超时时间（单位：毫秒）
+            final long timeoutMillis = 800;
+            new Thread(() -> {
+                try {
+                    if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                        runOnUiThread(() -> {
+                            if (dialog.isShowing()) {
+                                onItemSelected.accept(length - 1);
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
+    }
+
 
     private void goFrinedWatch(int index) {
         UserEntity userEntity = userEntityArray[index];
