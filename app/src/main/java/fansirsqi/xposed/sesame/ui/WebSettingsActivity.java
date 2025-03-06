@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -401,7 +402,7 @@ public class WebSettingsActivity extends BaseActivity {
                         .setTitle("警告")
                         .setMessage("确认删除该配置？")
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
-                            java.io.File userConfigDirectoryFile;
+                            File userConfigDirectoryFile;
                             if (StringUtil.isEmpty(userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {

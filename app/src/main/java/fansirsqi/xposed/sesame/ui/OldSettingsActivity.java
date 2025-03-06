@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.ui;
+
 import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_WEB;
 
 import android.app.AlertDialog;
@@ -15,11 +16,15 @@ import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
+
+import java.io.File;
 import java.util.Map;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -192,7 +197,7 @@ public class OldSettingsActivity extends BaseActivity {
                         .setTitle("警告")
                         .setMessage("确认删除该配置？")
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
-                            java.io.File userConfigDirectoryFile;
+                            File userConfigDirectoryFile;
                             if (StringUtil.isEmpty(this.userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {

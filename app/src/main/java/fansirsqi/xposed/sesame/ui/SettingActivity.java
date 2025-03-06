@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +172,7 @@ public class SettingActivity extends BaseActivity {
                         .setTitle("警告")
                         .setMessage("确认删除该配置？")
                         .setPositiveButton(R.string.ok, (dialog, id) -> {
-                            java.io.File userConfigDirectoryFile;
+                            File userConfigDirectoryFile;
                             if (StringUtil.isEmpty(this.userId)) {
                                 userConfigDirectoryFile = Files.getDefaultConfigV2File();
                             } else {
