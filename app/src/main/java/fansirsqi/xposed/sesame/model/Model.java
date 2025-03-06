@@ -14,6 +14,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 public abstract class Model {
+    private static final String TAG = Model.class.getSimpleName();
     private static final Map<String, ModelConfig> modelConfigMap = new LinkedHashMap<>();
     private static final Map<String, ModelConfig> readOnlyModelConfigMap = Collections.unmodifiableMap(modelConfigMap);
     private static final Map<ModelGroup, Map<String, ModelConfig>> groupModelConfigMap = new LinkedHashMap<>();
@@ -78,6 +79,7 @@ public abstract class Model {
         }
     }
     public static synchronized void initAllModel() {
+        Log.runtime(TAG,"初始化所有模块数据");
     destroyAllModel();
     for (int i = 0, len = modelClazzList.size(); i < len; i++) {
         Class<? extends Model> modelClazz = modelClazzList.get(i);
@@ -119,6 +121,7 @@ public abstract class Model {
         }
     }
     public static synchronized void destroyAllModel() {
+        Log.runtime(TAG,"销毁所有模块数据");
         for (int i = 0, len = modelArray.length; i < len; i++) {
             Model model = modelArray[i];
             if (model != null) {
