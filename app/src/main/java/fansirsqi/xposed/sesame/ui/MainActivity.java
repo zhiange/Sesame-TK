@@ -51,7 +51,7 @@ public class MainActivity extends BaseActivity {
     private Runnable titleRunner;
     private String[] userNameArray = {"默认"};
     private UserEntity[] userEntityArray = {null};
-    private  TextView oneWord = null;
+    private TextView oneWord = null;
 
     @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
     @Override
@@ -106,7 +106,7 @@ public class MainActivity extends BaseActivity {
                                     viewHandler.removeCallbacks(titleRunner);
                                     if (isClick) {
 
-                                        Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, "😄 一切看起来都很好！", Toast.LENGTH_SHORT).show();
                                         ThreadUtil.sleep(200); // 别急，等一会儿再说
                                         isClick = false;
                                     }
@@ -234,10 +234,10 @@ public class MainActivity extends BaseActivity {
         } else if (id == R.id.btn_settings) {
 //            selectSettingUid();
             showSelectionDialog(
-                    "请选择配置",
+                    "📌 请选择配置",
                     userNameArray,
                     this::goSettingActivity,
-                    "返回",
+                    "😡 老子就不选",
                     () -> {},
                     true
             );
@@ -247,23 +247,26 @@ public class MainActivity extends BaseActivity {
 
             // 调用 goFrinedWatch 时不展示默认选项
             showSelectionDialog(
-                    "请选择有效账户",
+                    "🤣 请选择有效账户[别选默认]",
                     userNameArray,
                     this::goFrinedWatch,
-                    "返回",
+                    "😡 老子不选了，滚",
                     () -> {},
                     false
             );
 
 
             return;
-        }else if (id == R.id.one_word) {
+        } else if (id == R.id.one_word) {
+            ToastUtil.makeText(this, "😡 正在获取句子，请稍后……", Toast.LENGTH_SHORT).show();
+            ThreadUtil.sleep(3000);
             FansirsqiUtil.getOneWord(
                     new FansirsqiUtil.OneWordCallback() {
                         @Override
                         public void onSuccess(String result) {
                             runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
                         }
+
                         @Override
                         public void onFailure(String error) {
                             runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
@@ -294,6 +297,9 @@ public class MainActivity extends BaseActivity {
             menu.add(0, 7, 7, R.string.view_capture);
             menu.add(0, 8, 8, R.string.extend);
             menu.add(0, 9, 9, R.string.settings);
+            if (ViewAppInfo.isApkInDebug()) {
+                menu.add(0, 10, 10, "🧹 清空配置");
+            }
         } catch (Exception e) {
             Log.printStackTrace(e);
             ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
@@ -367,6 +373,21 @@ public class MainActivity extends BaseActivity {
             case 9:
                 selectSettingUid();
                 break;
+            case 10:
+                new AlertDialog.Builder(this)
+                        .setTitle("⚠️ 警告")
+                        .setMessage("🤔 确认清除所有模块配置？")
+                        .setPositiveButton(R.string.ok, (dialog, id) -> {
+                            if (Files.delFile(Files.CONFIG_DIR)) {
+                                Toast.makeText(this, "🙂 清空配置成功", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "😭 清空配置失败", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, (dialog, id) -> dialog.dismiss())
+                        .create()
+                        .show();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -375,7 +396,7 @@ public class MainActivity extends BaseActivity {
         final CountDownLatch latch = new CountDownLatch(1);
         AlertDialog dialog = StringDialog.showSelectionDialog(
                 this,
-                "请选择配置",
+                "📌 请选择配置",
                 userNameArray,
                 (dialog1, which) -> {
                     goSettingActivity(which);
@@ -413,7 +434,7 @@ public class MainActivity extends BaseActivity {
         final CountDownLatch latch = new CountDownLatch(1);
         AlertDialog dialog = StringDialog.showSelectionDialog(
                 this,
-                "请选择有效账户",
+                "🤣 请选择有效账户[别选默认]",
                 userNameArray,
                 (dialog1, which) -> {
                     goFrinedWatch(which);
@@ -496,7 +517,7 @@ public class MainActivity extends BaseActivity {
         if (userEntity != null) {
             ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userEntity.getUserId()), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
         } else {
-            ToastUtil.makeText(this, "请先选择有效用户", Toast.LENGTH_SHORT).show();
+            ToastUtil.makeText(this, "😡 别他妈选默认！！！！！！！！", Toast.LENGTH_LONG).show();
         }
     }
 
