@@ -234,8 +234,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 Log.runtime(TAG, "Activity onResume");
                                 String targetUid = getUserId();
                                 if (targetUid == null) {
-                                    Log.record("用户未登录");
-                                    Toast.show("用户未登录");
+                                    Log.record("onResume:用户未登录");
+                                    Toast.show("onResume:用户未登录");
                                     return;
                                 }
                                 if (!init) {
@@ -489,8 +489,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             if (force) {
                 String userId = getUserId();
                 if (userId == null) {
-                    Log.record("用户未登录");
-                    Toast.show("用户未登录");
+                    Log.record("initHandler:用户未登录");
+                    Toast.show("initHandler:用户未登录");
                     return false;
                 }
                 UserMap.initUser(userId);
@@ -530,7 +530,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             2000);
                 }
                 Notify.start(service);
-                if (!Objects.requireNonNull(Model.getModel(BaseModel.class)).getEnableField().getValue()) {
+                if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
                     Log.record("❌ 芝麻粒已禁用");
                     Toast.show("❌ 芝麻粒已禁用");
                     Notify.setStatusTextDisabled();
