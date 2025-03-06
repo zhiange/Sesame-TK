@@ -36,11 +36,11 @@ public class UIConfig {
 
     public static Boolean save() {
         Log.record("保存UI配置");
-        return Files.setUIConfigFile(JsonUtil.formatJson(INSTANCE));
+        return Files.setTargetFileofDir(JsonUtil.formatJson(INSTANCE), new File(Files.CONFIG_DIR, "app_config.json"));
     }
 
     public static synchronized UIConfig load() {
-        File targetFile = Files.getTargetFileofDir(Files.MAIN_DIR, "ui_config.json");
+        File targetFile = Files.getTargetFileofDir(Files.CONFIG_DIR, "app_config.json");
         try {
             if (targetFile.exists()) {
                 String json = Files.readFromFile(targetFile);
@@ -48,7 +48,7 @@ public class UIConfig {
                     JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
                     String formatted = JsonUtil.formatJson(INSTANCE);
                     if (formatted != null && !formatted.equals(json)) {
-                        Log.runtime(TAG, "格式化"+TAG+"配置");
+                        Log.runtime(TAG, "格式化" + TAG + "配置");
                         Files.write2File(formatted, targetFile);
                     }
                 } else {
@@ -60,7 +60,7 @@ public class UIConfig {
             }
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
-            Log.runtime(TAG, "重置"+TAG+"配置");
+            Log.runtime(TAG, "重置" + TAG + "配置");
             resetToDefault();
             try {
                 Files.write2File(JsonUtil.formatJson(INSTANCE), targetFile);
