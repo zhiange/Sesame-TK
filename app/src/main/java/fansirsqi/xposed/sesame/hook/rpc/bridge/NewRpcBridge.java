@@ -27,6 +27,13 @@ public class NewRpcBridge implements RpcBridge {
     private Class<?>[] bridgeCallbackClazzArray;
     private Method newRpcCallMethod;
 
+    ArrayList<String> errorMark = new ArrayList<>(Arrays.asList(
+            "1004", "2000", "46", "48"
+    ));
+    ArrayList<String> errorStringMark = new ArrayList<>(Arrays.asList(
+            "繁忙", "网络不可用", "重试"
+    ));
+
     @Override
     public RpcVersion getVersion() {
         return RpcVersion.NEW;
@@ -156,12 +163,7 @@ public class NewRpcBridge implements RpcBridge {
                         String errorCode = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "error");
                         String errorMessage = (String) XposedHelpers.callMethod(rpcEntity.getResponseObject(), "getString", "errorMessage");
                         String response = rpcEntity.getResponseString();
-                        ArrayList<String> errorMark = new ArrayList<>(Arrays.asList(
-                                "1004", "2000", "46", "48"
-                        ));
-                        ArrayList<String> errorStringMark = new ArrayList<>(Arrays.asList(
-                                "繁忙", "网络不可用", "重试"
-                        ));
+
                         if (errorMark.contains(errorCode) || errorStringMark.contains(errorMessage)) {
                             if (!ApplicationHook.isOffline()) {
                                 ApplicationHook.setOffline(true);
