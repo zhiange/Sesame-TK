@@ -530,7 +530,21 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             2000);
                 }
                 Notify.start(service);
-                if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
+//                if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
+//                    Log.record("❌ 芝麻粒已禁用");
+//                    Toast.show("❌ 芝麻粒已禁用");
+//                    Notify.setStatusTextDisabled();
+//                    return false;
+//                }
+                // 获取 BaseModel 实例
+                BaseModel baseModel = Model.getModel(BaseModel.class);
+                if (baseModel == null) {
+                    Log.error("BaseModel 未找到 初始化失败");
+                    Notify.setStatusTextDisabled();
+                    return false;
+                }
+                // 检查 enableField 的值
+                if (!baseModel.getEnableField().getValue()) {
                     Log.record("❌ 芝麻粒已禁用");
                     Toast.show("❌ 芝麻粒已禁用");
                     Notify.setStatusTextDisabled();
