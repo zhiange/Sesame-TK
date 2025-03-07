@@ -258,8 +258,8 @@ public class MainActivity extends BaseActivity {
 
             return;
         } else if (id == R.id.one_word) {
-            ToastUtil.makeText(this, "😡 正在获取句子，请稍后……", Toast.LENGTH_SHORT).show();
-            ThreadUtil.sleep(3000);
+            ToastUtil.showToastWithDelay(this, "😡 正在获取句子，请稍后……", 800);
+            ThreadUtil.sleep(5000);
             FansirsqiUtil.getOneWord(
                     new FansirsqiUtil.OneWordCallback() {
                         @Override
