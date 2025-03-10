@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.task.antForest;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,7 +106,12 @@ public class AntForest extends ModelTask {
     /**
      * 炸弹卡结束时间
      */
-    private volatile long energyBombCardTime = 0;
+    private volatile long energyBombCardEndTime = 0;
+    /**
+     * 1.1倍能量卡结束时间
+     */
+    private volatile long robExpandCardEndTime = 0;
+
     private final Average delayTimeMath = new Average(5);
     private final ObjReference<Long> collectEnergyLockLimit = new ObjReference<>(0L);
     private final Object doubleCardLockObj = new Object();
@@ -158,6 +165,10 @@ public class AntForest extends ModelTask {
     private BooleanModelField youthPrivilege;//青春特权 森林道具
     public static SelectModelField ecoLifeOption;
     private BooleanModelField ecoLife;
+
+    private ChoiceModelField robExpandCard;//1.1倍能量卡
+    private ListModelField robExpandCardTime; //1.1倍能量卡时间
+
     /**
      * 异常返回检测开关
      **/
@@ -236,19 +247,24 @@ public class AntForest extends ModelTask {
         modelFields.addField(doubleCardTime = new ListModelField.ListJoinCommaToStringModelField("doubleCardTime", "双击卡 | 使用时间/范围", ListUtil.newArrayList(
                 "0700", "0730", "1200", "1230", "1700", "1730", "2000", "2030", "2359")));
         modelFields.addField(doubleCardConstant = new BooleanModelField("DoubleCardConstant", "限时双击永动机 | 开关", false));
+
         modelFields.addField(bubbleBoostCard = new ChoiceModelField("bubbleBoostCard", "加速器开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
-        modelFields.addField(bubbleBoostTime = new ListModelField.ListJoinCommaToStringModelField("bubbleBoostTime", "加速器 | 使用时间/范围", ListUtil.newArrayList(
-                "0030,0630")));
+        modelFields.addField(bubbleBoostTime = new ListModelField.ListJoinCommaToStringModelField("bubbleBoostTime", "加速器 | 使用时间/不能范围", ListUtil.newArrayList(
+                "0030,0630", "0700", "0730", "1200", "1230", "1700", "1730", "2000", "2030", "2359")));
+
         modelFields.addField(shieldCard = new ChoiceModelField("shieldCard", "保护罩开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
         modelFields.addField(shieldCardConstant = new BooleanModelField("shieldCardConstant", "限时保护永动机 | 开关", false));
-        modelFields.addField(energyBombCardType = new ChoiceModelField("energyBombCardType", "炸弹卡接力 | 和保护罩不能同时用", applyPropType.CLOSE,
-                applyPropType.nickNames));
-//        modelFields.addField(robExpandCard = new BooleanModelField("robExpandCard", "1.1倍能量卡 | 开关", false));
-//        modelFields.addField(robExpandCardTime = new ListModelField.ListJoinCommaToStringModelField("robExpandCardTime", "1.1倍能量卡 | 使用时间(一天只能用)",
-//                ListUtil.newArrayList("0700", "0730", "1200", "1230", "1700", "1730", "2000", "2030", "2359")));
+
+        modelFields.addField(energyBombCardType = new ChoiceModelField("energyBombCardType", "炸弹卡开关 | 消耗类型", applyPropType.CLOSE,
+                applyPropType.nickNames, "若开启了保护罩，则不会使用炸弹卡"));
+
+        modelFields.addField(robExpandCard = new ChoiceModelField("robExpandCard", "1.1倍能量卡开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
+        modelFields.addField(robExpandCardTime = new ListModelField.ListJoinCommaToStringModelField("robExpandCardTime", "1.1倍能量卡 | 使用时间/不能范围",
+                ListUtil.newArrayList("0700", "0730", "1200", "1230", "1700", "1730", "2000", "2030", "2359")));
 
         modelFields.addField(stealthCard = new ChoiceModelField("stealthCard", "隐身卡开关 | 消耗类型", applyPropType.CLOSE, applyPropType.nickNames));
-        modelFields.addField(stealthCardConstant = new BooleanModelField("stealthCardConstant", "隐身卡 | 限时隐身永动机", false));
+        modelFields.addField(stealthCardConstant = new BooleanModelField("stealthCardConstant", "限时隐身永动机 | 开关", false));
+
         modelFields.addField(returnWater10 = new IntegerModelField("returnWater10", "返水 | 10克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater18 = new IntegerModelField("returnWater18", "返水 | 18克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater33 = new IntegerModelField("returnWater33", "返水 | 33克需收能量(关闭:0)", 0));
@@ -826,9 +842,7 @@ public class AntForest extends ModelTask {
      */
     private JSONObject collectSelfEnergy() {
         try {
-            if (!bubbleBoostCard.getValue().equals(applyPropType.CLOSE)) {
-                useBubbleBoost();
-            }
+
             JSONObject selfHomeObj = querySelfHome();
             if (selfHomeObj != null) {
                 if (closeWhackMole.getValue()) {
@@ -1326,11 +1340,13 @@ public class AntForest extends ModelTask {
                         Log.runtime("保护罩剩余时间⏰：" + formatTimeDifference(shieldEndTime - System.currentTimeMillis()));
                         break;
                     case "energyBombCard": // 能量炸弹卡
-                        energyBombCardTime = userUsingProp.getLong("endTime");
-                        Log.runtime("能量炸弹卡剩余时间⏰：" + formatTimeDifference(energyBombCardTime - System.currentTimeMillis()));
+                        energyBombCardEndTime = userUsingProp.getLong("endTime");
+                        Log.runtime("能量炸弹卡剩余时间⏰：" + formatTimeDifference(energyBombCardEndTime - System.currentTimeMillis()));
                         break;
-                    case "robExpandCard": // 不知道什么卡，偷袭卡？
+                    case "robExpandCard": // 1.1倍能量卡
                         String extInfo = userUsingProp.optString("extInfo");
+                        robExpandCardEndTime = userUsingProp.getLong("endTime");
+                        Log.runtime("1.1倍能量卡剩余时间⏰：" + formatTimeDifference(robExpandCardEndTime - System.currentTimeMillis()));
                         if (!extInfo.isEmpty()) {
                             JSONObject extInfoObj = new JSONObject(extInfo);
                             double leftEnergy = Double.parseDouble(extInfoObj.optString("leftEnergy", "0"));
@@ -1340,7 +1356,7 @@ public class AntForest extends ModelTask {
                                 JSONObject jo = new JSONObject(AntForestRpcCall.collectRobExpandEnergy(propId, propType));
                                 if (ResUtil.checkResultCode(jo)) {
                                     int collectEnergy = jo.optInt("collectEnergy");
-                                    Log.forest("额外能量🌳收取[" + collectEnergy + "g]");
+                                    Log.forest("额外能量🌳[" + collectEnergy + "g][1.1倍能量卡]");
                                 }
                             }
                         }
@@ -1625,17 +1641,34 @@ public class AntForest extends ModelTask {
             if (Objects.equals(selfId, userId)) {
                 return;
             }
+
+
             boolean needDouble = !doubleCard.getValue().equals(applyPropType.CLOSE) && doubleEndTime < System.currentTimeMillis();
+
+            boolean needrobExpand = !robExpandCard.getValue().equals(applyPropType.CLOSE) && robExpandCardEndTime < System.currentTimeMillis();
+
             boolean needStealth = !stealthCard.getValue().equals(applyPropType.CLOSE) && stealthEndTime < System.currentTimeMillis();
             boolean needShield =
                     !shieldCard.getValue().equals(applyPropType.CLOSE) && energyBombCardType.getValue().equals(applyPropType.CLOSE) && ((shieldEndTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
             boolean needEnergyBombCard =
-                    !energyBombCardType.getValue().equals(applyPropType.CLOSE) && shieldCard.getValue().equals(applyPropType.CLOSE) && ((energyBombCardTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
-            if (needDouble || needStealth || needShield || needEnergyBombCard) {
+                    !energyBombCardType.getValue().equals(applyPropType.CLOSE) && shieldCard.getValue().equals(applyPropType.CLOSE) && ((energyBombCardEndTime - System.currentTimeMillis()) < 3600);//调整保护罩剩余时间不超过一小时自动续命
+
+            boolean needBubbleBoostCard = !bubbleBoostCard.getValue().equals(applyPropType.CLOSE);
+
+            if (needDouble || needStealth || needShield || needEnergyBombCard || needrobExpand) {
                 synchronized (doubleCardLockObj) {
                     JSONObject bagObject = getBag();
                     if (needDouble) useDoubleCard(bagObject);
+                    if (needrobExpand) {
+//                        userobExpandCard(bagObject);
+                        useCardBoot(robExpandCardTime.getValue(), "1.1倍能量卡", this::userobExpandCard);
+                    }
                     if (needStealth) useStealthCard(bagObject);
+                    if (needBubbleBoostCard) {
+//                        useBubbleBoostCard(bagObject);
+                        useCardBoot(bubbleBoostTime.getValue(), "加速卡", this::useBubbleBoostCard);
+                    }
+
                     // 互斥逻辑：如果两个开关都打开，则优先使用保护罩|不会使用炸弹卡
                     if (needShield) {
                         useShieldCard(bagObject);
@@ -2098,19 +2131,9 @@ public class AntForest extends ModelTask {
                     propJsonObj.getString("propType")));
             if (ResUtil.checkSuccess(jo)) {
                 String propName = propJsonObj.getJSONObject("propConfigVO").getString("propName");
-                String tag;
-                if (propName.contains("保护")) {
-                    tag = "🛡️";
-                } else if (propName.contains("双击")) {
-                    tag = "👥";
-                } else if (propName.contains("加速")) {
-                    tag = "🌪";
-                } else if (propName.contains("雨")) {
-                    tag = "🌧️";
-                } else {
-                    tag = "🥳";
-                }
+                String tag = propEmoji(propName);
                 Log.forest("使用道具" + tag + "[" + propName + "]");
+                updateSelfHomePage();
                 return true;
             } else {
                 Log.record(jo.getString("resultDesc"));
@@ -2122,6 +2145,25 @@ public class AntForest extends ModelTask {
             Log.printStackTrace(TAG, th);
             return false;
         }
+    }
+
+    @NonNull
+    private static String propEmoji(String propName) {
+        String tag;
+        if (propName.contains("保")) {
+            tag = "🛡️";
+        } else if (propName.contains("双")) {
+            tag = "👥";
+        } else if (propName.contains("加")) {
+            tag = "🌪";
+        } else if (propName.contains("雨")) {
+            tag = "🌧️";
+        } else if (propName.contains("炸")) {
+            tag = "💥";
+        } else {
+            tag = "🥳";
+        }
+        return tag;
     }
 
     /**
@@ -2212,73 +2254,69 @@ public class AntForest extends ModelTask {
         }
     }
 
-
-    /**
-     * 使用能量1.1倍卡
-     */
-    private void useRobExpandCard() {
-        List<String> boostTimeValue = bubbleBoostTime.getValue();
-        if (Objects.isNull(boostTimeValue)) return;
-        if (boostTimeValue.isEmpty()) return;
-        for (String bubbleBoostTimeStr : boostTimeValue) {
-            if ("-1".equals(bubbleBoostTimeStr)) {
+    public void useCardBoot(List<String> TargetTimeValue, String propName, Runnable func) {
+        for (String targetTimeStr : TargetTimeValue) {
+            if ("-1".equals(targetTimeStr)) {
                 return;
             }
-            Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
-            if (bubbleBoostTimeCalendar == null) {
+            Calendar targetTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(targetTimeStr);
+            if (targetTimeCalendar == null) {
                 return;
             }
-            long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
+            long targetTime = targetTimeCalendar.getTimeInMillis();
             long now = System.currentTimeMillis();
-            if (now > bubbleBoostTime) {
+            if (now > targetTime) {
                 continue;
             }
-            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
-            if (!hasChildTask(bubbleBoostTaskId)) {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-                Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+            String targetTaskId = "TAGET|" + targetTime;
+            if (!hasChildTask(targetTaskId)) {
+                addChildTask(new ChildModelTask(targetTaskId, "TAGET", func, targetTime));
+                Log.record("添加定时使用" + propName + "[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(targetTime) + "]执行");
             } else {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+                addChildTask(new ChildModelTask(targetTaskId, "TAGET", func, targetTime));
             }
         }
-
     }
 
 
     /**
      * 定时使用加速器
      */
-    public void useBubbleBoost() {
-        List<String> boostTimeValue = bubbleBoostTime.getValue();
-        if (Objects.isNull(boostTimeValue)) return;
-        if (boostTimeValue.isEmpty()) return;
-        for (String bubbleBoostTimeStr : boostTimeValue) {
-            if ("-1".equals(bubbleBoostTimeStr)) {
-                return;
-            }
-            Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
-            if (bubbleBoostTimeCalendar == null) {
-                return;
-            }
-            long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
-            long now = System.currentTimeMillis();
-            if (now > bubbleBoostTime) {
-                continue;
-            }
-            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
-            if (!hasChildTask(bubbleBoostTaskId)) {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-                Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
-            } else {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-            }
-        }
+//    public void useBubbleBoost() {
+//        List<String> boostTimeValue = bubbleBoostTime.getValue();
+//        for (String bubbleBoostTimeStr : boostTimeValue) {
+//            if ("-1".equals(bubbleBoostTimeStr)) {
+//                return;
+//            }
+//            Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
+//            if (bubbleBoostTimeCalendar == null) {
+//                return;
+//            }
+//            long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
+//            long now = System.currentTimeMillis();
+//            if (now > bubbleBoostTime) {
+//                continue;
+//            }
+//            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+//            if (!hasChildTask(bubbleBoostTaskId)) {
+//                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+//                Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+//            } else {
+//                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+//            }
+//        }
+//    }
+    private void useBubbleBoostCard() {
+        useBubbleBoostCard(getBag());
     }
 
-    private void useBubbleBoostCard() {
+    private void userobExpandCard() {
+        userobExpandCard(getBag());
+    }
+
+    private void useBubbleBoostCard(JSONObject bag) {
         try {
             // 在背包中查询限时加速器
-            JSONObject bag = getBag();
             JSONObject jo = findPropBag(bag, "LIMIT_TIME_ENERGY_BUBBLE_BOOST");
             if (jo == null) {
                 Privilege.youthPrivilege();
@@ -2287,8 +2325,21 @@ public class AntForest extends ModelTask {
                     jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
                 }
             }
+            if (jo != null) {
+                usePropBag(jo);
+            }
+        } catch (Throwable th) {
+            Log.runtime(TAG, "useBubbleBoostCard err");
+            Log.printStackTrace(TAG, th);
+        }
+    }
+
+
+    private void userobExpandCard(JSONObject bag) {
+        try {
+            JSONObject jo = findPropBag(bag, "VITALITY_ROB_EXPAND_CARD_1.1_3DAYS");
             if (jo != null && usePropBag(jo)) {
-                collectSelfEnergy();
+                robExpandCardEndTime = System.currentTimeMillis() + 1000 * 60 * 5;
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "useBubbleBoostCard err");
@@ -2343,7 +2394,7 @@ public class AntForest extends ModelTask {
                 }
             }
             if (jo != null && usePropBag(jo)) {
-                energyBombCardTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+                energyBombCardEndTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
             } else {
                 updateSelfHomePage();
             }
