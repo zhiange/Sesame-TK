@@ -150,6 +150,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             int checkInterval = BaseModel.getCheckInterval().getValue();
             List<String> execAtTimeList = BaseModel.getExecAtTimeList().getValue();
+            if (execAtTimeList != null && execAtTimeList.contains("-1")) {
+                Log.record("定时执行未开启");
+                return;
+            }
             try {
                 if (execAtTimeList != null) {
                     Calendar lastExecTimeCalendar = TimeUtil.getCalendarByTimeMillis(lastExecTime);
@@ -398,6 +402,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
     private static void setWakenAtTimeAlarm() {
         try {
+            List<String> wakenAtTimeList = BaseModel.getWakenAtTimeList().getValue();
+            if (wakenAtTimeList != null && wakenAtTimeList.contains("-1")) {
+                Log.record("定时唤醒未开启");
+                return;
+            }
             unsetWakenAtTimeAlarm();
             try {
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("com.eg.android.AlipayGphone.sesame.execute"), getPendingIntentFlag());
@@ -415,7 +424,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.runtime(TAG, "setWakenAt0 err:");
                 Log.printStackTrace(TAG, e);
             }
-            List<String> wakenAtTimeList = BaseModel.getWakenAtTimeList().getValue();
             if (wakenAtTimeList != null && !wakenAtTimeList.isEmpty()) {
                 Calendar nowCalendar = Calendar.getInstance();
                 for (int i = 1, len = wakenAtTimeList.size(); i < len; i++) {
