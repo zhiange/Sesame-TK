@@ -72,7 +72,8 @@ public class Files {
      * @return mainDir 主路径
      */
     private static File getMainDir() {
-        String storageDirStr = Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + General.PACKAGE_NAME;
+        String storageDirStr =
+                Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + General.PACKAGE_NAME;
         File storageDir = new File(storageDirStr);
         File mainDir = new File(storageDir, CONFIG_DIR_NAME);
         ensureDir(mainDir);
@@ -160,7 +161,12 @@ public class Files {
         return write2File(json, new File(CONFIG_DIR + File.separator + userId, "config_v2.json"));
     }
 
-    public static File getTargetFileofUser(String userId, String fullTargetFileName) {
+    public static synchronized File getTargetFileofUser(String userId, String fullTargetFileName) {
+        if (userId == null || userId.isEmpty()) {
+            Log.error(TAG, "Invalid userId for target file: " + fullTargetFileName);
+            // 返回一个默认文件或null
+            return null;
+        }
         File targetFile = new File(CONFIG_DIR + File.separator + userId, fullTargetFileName);
         // 如果文件不存在且不是目录，尝试创建
         if (!targetFile.exists()) {
@@ -193,7 +199,7 @@ public class Files {
         return targetFile;
     }
 
-    public static File getTargetFileofDir(File dir, String fullTargetFileName) {
+    public static synchronized File getTargetFileofDir(File dir, String fullTargetFileName) {
         // 创建目标文件对象
         File targetFile = new File(dir, fullTargetFileName);
 
