@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Consumer;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -201,7 +202,7 @@ public class MainActivity extends BaseActivity {
             }
             try {
                 Statistics.load();
-                Statistics.updateDay();
+                Statistics.updateDay(Calendar.getInstance());
                 tvStatistics.setText(Statistics.getText());
             } catch (Exception e) {
                 Log.printStackTrace(e);
