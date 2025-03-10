@@ -220,24 +220,7 @@ public class Statistics {
         }
         return true;
     }
-    public static void updateDay() {
-        Calendar nowDate = Calendar.getInstance();
-        int currentYear = nowDate.get(Calendar.YEAR);
-        int currentMonth = nowDate.get(Calendar.MONTH) + 1; // 注意：Calendar.MONTH 从0开始
-        int currentDay = nowDate.get(Calendar.DAY_OF_MONTH);
-        if (currentYear != INSTANCE.year.time) {
-            INSTANCE.year.reset(currentYear);
-            INSTANCE.month.reset(currentMonth);
-            INSTANCE.day.reset(currentDay);
-        } else if (currentMonth != INSTANCE.month.time) {
-            INSTANCE.month.reset(currentMonth);
-            INSTANCE.day.reset(currentDay);
-        } else if (currentDay != INSTANCE.day.time) {
-            INSTANCE.day.reset(currentDay);
-        } else {
-            Log.runtime(TAG, "日期更新失败！");
-        }
-    }
+
     public enum TimeType {
         YEAR, MONTH, DAY
     }
