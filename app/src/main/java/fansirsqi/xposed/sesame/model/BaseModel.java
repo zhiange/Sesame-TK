@@ -99,6 +99,10 @@ public class BaseModel extends Model {
      */
     @Getter
     private static final BooleanModelField debugMode = new BooleanModelField("debugMode", "开启抓包(基于新接口)", false);
+
+    @Getter
+    private static final BooleanModelField hideVPNStatus = new BooleanModelField("hideVPNStatus", "隐藏VPN", true);
+
     /**
      * 是否申请支付宝的后台运行权限
      */
@@ -176,6 +180,7 @@ public class BaseModel extends Model {
         modelFields.addField(setMaxErrorCount);//异常次数阈值
         modelFields.addField(newRpc);//是否启用新接口
         modelFields.addField(debugMode);//是否开启抓包调试模式
+        modelFields.addField(hideVPNStatus);//是否开启VPN隐藏
         modelFields.addField(sendHookData);//启用Hook数据转发
         modelFields.addField(sendHookDataUrl);//Hook数据转发地址
         modelFields.addField(batteryPerm);//是否申请支付宝的后台运行权限

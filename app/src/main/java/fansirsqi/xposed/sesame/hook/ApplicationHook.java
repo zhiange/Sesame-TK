@@ -42,7 +42,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.DataCache;
+import fansirsqi.xposed.sesame.data.General;
 import fansirsqi.xposed.sesame.data.RunType;
+import fansirsqi.xposed.sesame.data.Statistics;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.data.ViewAppInfo;
 import fansirsqi.xposed.sesame.entity.AlipayVersion;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
@@ -58,13 +61,11 @@ import fansirsqi.xposed.sesame.task.BaseTask;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
-import fansirsqi.xposed.sesame.data.General;
+import fansirsqi.xposed.sesame.util.HideVPNStatus;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.data.Statistics;
-import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
@@ -524,6 +525,16 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     return false;
                 }
                 // ！！所有权限申请应该放在加载配置之后
+                try {
+                    if (BaseModel.getHideVPNStatus().getValue()) {
+                        HideVPNStatus.proxy();
+                        Log.record("VPN隐藏功能已启用");
+                    }
+                } catch (Throwable t) {
+                    Log.error(TAG, "VPN隐藏功能启用失败");
+                    Log.printStackTrace(TAG, t);
+                }
+
                 //闹钟权限申请
                 if (!PermissionUtil.checkAlarmPermissions()) {
                     Log.record("❌ 支付宝无闹钟权限");
