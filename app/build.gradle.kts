@@ -164,6 +164,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     implementation(libs.kotlin.stdlib)
     implementation(libs.slf4j.api)
     implementation(libs.logback.android)
@@ -171,6 +172,7 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.viewpager2)
     implementation(libs.material)
+    implementation(libs.webkit)
     compileOnly(libs.xposed.api)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
