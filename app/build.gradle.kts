@@ -161,6 +161,15 @@ android {
             }
         }
     }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val flavorName = variant.flavorName.replaceFirstChar { it.uppercase() }
+            val fileName = "Sesame-$flavorName-${variant.versionName}.apk"
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = fileName
+        }
+    }
 }
 
 dependencies {

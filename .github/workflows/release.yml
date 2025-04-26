@@ -64,7 +64,6 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
-          signedFile: app/build/outputs/apk/normal/release/Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk
 
       - name: Sign Compatible APK
         id: sign_compatible_apk
@@ -76,7 +75,6 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
-          signedFile: app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk
 
       - name: Generate APKS Checksum
         run: |
