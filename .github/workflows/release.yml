@@ -61,6 +61,7 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
+          signedFile: app/build/outputs/apk/normal/release/Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk
 
       - name: Sign Compatible APK
         id: sign_compatible_apk
@@ -72,21 +73,25 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
+          signedFile: app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk
+
+      - name: Rename artifact
+        run: mv ./build/output.zip ./build/myapp-${{ github.ref_name }}.zip
 
       - name: Generate APKS Checksum
         run: |
-          sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
-          sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
+          sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+          sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
 
       - name: Upload Assets to Source Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
+          name: ${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
-            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
-            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
           tag_name: ${{ github.ref_name }}
           draft: false
           append_body: true
@@ -102,12 +107,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           repository: Xposed-Modules-Repo/fansirsqi.xposed.sesame # 目标仓库的拥有者和仓库名称
-          name: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
+          name: ${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
-            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
-            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
           token: ${{ secrets.TARGET_REPO_PAT }}
           tag_name: ${{ github.ref_name }}
           draft: false
