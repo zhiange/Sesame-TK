@@ -26,8 +26,8 @@ android {
         // 版本配置
         val major = 0
         val minor = 2
-        val patch = 6
-        val buildTag = "alpha"
+        val patch = 5
+        val buildTag = "beta7"
         
         val buildDate = SimpleDateFormat("yy-MM-dd", Locale.CHINA).apply {
             timeZone = TimeZone.getTimeZone("GMT+8")
