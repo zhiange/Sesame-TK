@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 获取短 SHA
+      - name: Get short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::4}" >> $GITHUB_ENV
       # 设置时区为亚洲/上海
       - name: Set Timezone to Asia/Shanghai
         run: |
@@ -61,7 +64,7 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
-          signedFile: app/build/outputs/apk/normal/release/Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk
+          signedFile: app/build/outputs/apk/normal/release/Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk
 
       - name: Sign Compatible APK
         id: sign_compatible_apk
@@ -73,15 +76,12 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
-          signedFile: app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk
-
-      - name: Rename artifact
-        run: mv ./build/output.zip ./build/myapp-${{ github.ref_name }}.zip
+          signedFile: app/build/outputs/apk/compatible/release/Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk
 
       - name: Generate APKS Checksum
         run: |
-          sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
-          sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+          sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+          sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
 
       - name: Upload Assets to Source Release
         uses: softprops/action-gh-release@v2
@@ -90,8 +90,8 @@ jobs:
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
-            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
-            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
           tag_name: ${{ github.ref_name }}
           draft: false
           append_body: true
@@ -111,8 +111,8 @@ jobs:
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
-            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
-            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ GITHUB_SHA::4 }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
           token: ${{ secrets.TARGET_REPO_PAT }}
           tag_name: ${{ github.ref_name }}
           draft: false
