@@ -14,12 +14,15 @@ import fansirsqi.xposed.sesame.util.RandomUtil;
 public class AntFarmRpcCall {
     private static final String VERSION = "1.8.2302070202.46";
 
-    public static String enterFarm(String farmId, String userId) {
-        return RequestManager.requestString("com.alipay.antfarm.enterFarm",
-                "[{\"animalId\":\"\",\"farmId\":\"" + farmId +
-                        "\",\"gotoneScene\":\"\",\"gotoneTemplateId\":\"\",\"masterFarmId\":\"\",\"queryLastRecordNum\":true,\"recall\":false,\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"ANTFOREST\",\"touchRecordId\":\"\",\"userId\":\""
-                        + userId + "\",\"version\":\"" + VERSION + "\"}]");
-    }
+public static String enterFarm(String farmId, String userId) {
+    String shareUniqueId = System.currentTimeMillis() + "_" + userId;
+    return RequestManager.requestString("com.alipay.antfarm.enterFarm",
+            "[{\"animalId\":\"\",\"farmId\":\"" + farmId +
+                    "\",\"gotoneScene\":\"\",\"gotoneTemplateId\":\"\",\"masterFarmId\":\"\",\"queryLastRecordNum\":true," +
+                    "\"recall\":false,\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"ANTFOREST\"," +
+                    "\"touchRecordId\":\"\",\"userId\":\"" + userId + "\",\"shareUniqueId\":\"" + shareUniqueId + "\"," +
+                    "\"version\":\"" + VERSION + "\"}]");
+}
 
     // 一起拿小鸡饲料
     public static String letsGetChickenFeedTogether() {
