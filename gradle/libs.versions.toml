@@ -1,7 +1,7 @@
 [versions]
-android-plugin = "8.11.0-alpha08"
-kotlin-plugin = "2.2.0-Beta1"
-kotlin-stdlib = "2.2.0-Beta1"
+android-plugin = "8.11.0-alpha09"
+kotlin-plugin = "2.2.0-Beta2"
+kotlin-stdlib = "2.2.0-Beta2"
 slf4j = "2.1.0-alpha1"
 logback-android = "3.0.0"
 appcompat = "1.7.0"
@@ -14,7 +14,7 @@ okhttp = "5.0.0-alpha.14"
 jackson = "2.19.0"
 #noinspection NewerVersionAvailable
 jackson-compatible = "2.13.5"
-webkit = "1.13.0"
+webkit = "1.14.0-alpha01"
 core-ktx = "1.16.0"
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin-stdlib" }
