@@ -6,7 +6,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
-
+tasks.register("testClasses") {
+    description = "Dummy task for compatibility"
+    group = "Verification"
+}
 android {
     namespace = "fansirsqi.xposed.sesame"
     compileSdk = 36
