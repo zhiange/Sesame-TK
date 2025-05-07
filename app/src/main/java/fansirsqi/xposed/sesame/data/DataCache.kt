@@ -17,11 +17,11 @@ object DataCache {
     private const val TAG: String = "DataCache"
     private const val FILENAME = "dataCache.json"
 
-    @JsonIgnore
+    @get:JsonIgnore
     private var init = false
 
     // 光盘行动图片缓存
-    private val photoGuangPanCacheSet: MutableSet<Map<String, String>> = HashSet()
+    val photoGuangPanList: MutableList<Map<String, String>> = ArrayList()
 
     init {
         // 在单例初始化时加载数据
@@ -39,32 +39,33 @@ object DataCache {
                 && beforeImageId != afterImageId
     }
 
-    fun saveGuangPanPhoto(guangPanPhoto: Map<String, String>) {
+    fun saveGuangPanPhoto(guangPanPhoto: Map<String, String>) : Boolean{
         if (!checkGuangPanPhoto(guangPanPhoto)) {
-            return
+            Log.error(TAG,"传入的参数不合法：${guangPanPhoto}")
+            return false
         }
-        if (!photoGuangPanCacheSet.contains(guangPanPhoto)) {
-            photoGuangPanCacheSet.add(guangPanPhoto)
-            save()
-        }
-    }
-
-    val guangPanPhotoCount: Int
-        get() = photoGuangPanCacheSet.size // 直接返回缓存大小，避免触发加载
-
-    fun clearGuangPanPhoto(): Boolean {
-        photoGuangPanCacheSet.clear()
+        photoGuangPanList.add(guangPanPhoto)
         return save()
     }
 
+    // 动态获取光盘行动图片数量
+    @get:JsonIgnore
+    val guangPanPhotoCount: Int
+        get() = photoGuangPanList.size
+
+    fun clearGuangPanPhoto(): Boolean {
+        photoGuangPanList.clear()
+        return save()
+    }
+
+    @get:JsonIgnore
     val randomGuangPanPhoto: Map<String, String>?
         get() {
-            val list: List<Map<String, String>> = ArrayList(photoGuangPanCacheSet)
-            if (list.isEmpty()) {
+            if (photoGuangPanList.isEmpty()) {
                 return null
             }
-            val pos = RandomUtil.nextInt(0, list.size - 1)
-            val photo = list[pos]
+            val pos = RandomUtil.nextInt(0, photoGuangPanList.size - 1)
+            val photo = photoGuangPanList[pos]
             return if (checkGuangPanPhoto(photo)) photo else null
         }
 
@@ -93,6 +94,7 @@ object DataCache {
             }
         } catch (e: Exception) {
             reset(targetFile)
+            Log.error(TAG, "重置缓存，会影响光盘等配置${e.message}")
         }
         init = true
     }
