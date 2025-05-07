@@ -1,5 +1,5 @@
 [versions]
-android-plugin = "8.11.0-alpha09"
+android-plugin = "8.9.2"
 kotlin-plugin = "2.2.0-Beta2"
 kotlin-stdlib = "2.2.0-Beta2"
 slf4j = "2.1.0-alpha1"
