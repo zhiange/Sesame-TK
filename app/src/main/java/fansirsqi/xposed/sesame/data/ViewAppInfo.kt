@@ -7,7 +7,6 @@ import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import fansirsqi.xposed.sesame.BuildConfig
 import fansirsqi.xposed.sesame.R
-import fansirsqi.xposed.sesame.data.RunType.Companion.getByCode
 import fansirsqi.xposed.sesame.util.Log
 import androidx.core.net.toUri
 
@@ -65,12 +64,12 @@ object ViewAppInfo {
             var result: Bundle? = null
             try {
                 result = contentResolver.call(uri, "active", null, null)
-            } catch (e: RuntimeException) {
+            } catch (_: RuntimeException) {
                 try {
                     val intent = Intent("me.weishu.exp.ACTION_ACTIVE")
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context!!.startActivity(intent)
-                } catch (e1: Throwable) {
+                } catch (_: Throwable) {
                     runType = RunType.DISABLE
                     return
                 }
@@ -86,32 +85,13 @@ object ViewAppInfo {
                 runType = RunType.ACTIVE // 激活状态
                 return
             }
-        } catch (ignored: Throwable) {
+        } catch (_: Throwable) {
             Log.runtime(TAG, "捕获异常，设置 runType 为 DISABLE")
         }
         runType = RunType.DISABLE
     }
 
-    /**
-     * 根据运行类型的编码设置当前应用的运行状态
-     *
-     * @param runTypeCode 运行类型编码
-     */
-    fun setRunTypeByCode(runTypeCode: Int?) {
-        Log.debug(TAG, "设置 runType 编码为 $runTypeCode")
-        var newRunType: RunType?
-        if (runTypeCode == null) {
-            Log.debug(TAG, "runTypeCode 为空，设置 runType 为 DISABLE")
-            newRunType = RunType.DISABLE
-        } else {
-            newRunType = getByCode(runTypeCode)
-            if (newRunType == null) {
-                newRunType = RunType.DISABLE
-            }
-        }
-        Log.debug(TAG, "设置 runType 为 $newRunType")
-        runType = newRunType
-    }
+
 
     @JvmStatic
     val isApkInDebug: Boolean
@@ -124,7 +104,7 @@ object ViewAppInfo {
             try {
                 val info = context!!.applicationInfo
                 return (info.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 return false
             }
         }
