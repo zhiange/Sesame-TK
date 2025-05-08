@@ -32,10 +32,10 @@ public class NewRpcBridge implements RpcBridge {
     private final Integer setMaxErrorCount = BaseModel.getSetMaxErrorCount().getValue();
 
     ArrayList<String> errorMark = new ArrayList<>(Arrays.asList(
-            "1004", "2000", "46", "48"
+            "1004","1009", "2000", "46", "48"
     ));
     ArrayList<String> errorStringMark = new ArrayList<>(Arrays.asList(
-            "繁忙", "网络不可用", "重试"
+            "繁忙","拒绝", "网络不可用", "重试"
     ));
 
     @Override
