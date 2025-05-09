@@ -30,7 +30,7 @@ android {
         val major = 0
         val minor = 2
         val patch = 5
-        val buildTag = "beta7"
+        val buildTag = "beta.8"
         
         val buildDate = SimpleDateFormat("yy-MM-dd", Locale.CHINA).apply {
             timeZone = TimeZone.getTimeZone("GMT+8")
@@ -43,6 +43,7 @@ android {
         val buildTargetCode = try {
             MessageDigest.getInstance("MD5")
                 .digest(buildTime.toByteArray())
+                //noinspection WrongGradleMethod
                 .joinToString("") { "%02x".format(it) }
                 .substring(0, 4)
         } catch (_: Exception) {
