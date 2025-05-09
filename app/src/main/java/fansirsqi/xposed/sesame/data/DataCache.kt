@@ -44,7 +44,9 @@ object DataCache {
             Log.error(TAG,"传入的参数不合法：${guangPanPhoto}")
             return false
         }
-        photoGuangPanList.add(guangPanPhoto)
+        if (!photoGuangPanList.contains(guangPanPhoto)) {
+            photoGuangPanList.add(guangPanPhoto)
+        }
         return save()
     }
 
