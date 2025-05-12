@@ -1,7 +1,7 @@
 package fansirsqi.xposed.sesame.ui;
 
 import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_NEW;
-import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -39,6 +39,7 @@ import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.UIConfig;
+import fansirsqi.xposed.sesame.data.ViewAppInfo;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelConfig;
@@ -95,7 +96,7 @@ public class WebSettingsActivity extends BaseActivity {
         if (intent != null) {
             userId = intent.getStringExtra("userId");
             userName = intent.getStringExtra("userName");
-            intent.getBooleanExtra("debug", isApkInDebug());
+            intent.getBooleanExtra("debug", ViewAppInfo.INSTANCE.isApkInDebug());
         }
         Model.initAllModel();
         UserMap.setCurrentUserId(userId);
@@ -182,7 +183,7 @@ public class WebSettingsActivity extends BaseActivity {
                 return false;
             }
         });
-        if (isApkInDebug()) {
+        if (ViewAppInfo.INSTANCE.isApkInDebug()) {
             WebView.setWebContentsDebuggingEnabled(true);
 //            webView.loadUrl("http://192.168.31.69:5500/app/src/main/assets/web/index.html");
             webView.loadUrl("file:///android_asset/web/index.html");
@@ -227,7 +228,7 @@ public class WebSettingsActivity extends BaseActivity {
         @JavascriptInterface
         public String getTabs() {
             String result = JsonUtil.formatJson(tabList, false);
-            if (isApkInDebug()) {
+            if (ViewAppInfo.INSTANCE.isApkInDebug()) {
                 Log.runtime("WebSettingsActivity.getTabs: " + result);
             }
             return result;
@@ -241,7 +242,7 @@ public class WebSettingsActivity extends BaseActivity {
         @JavascriptInterface
         public String getGroup() {
             String result = JsonUtil.formatJson(groupList, false);
-            if (isApkInDebug()) {
+            if (ViewAppInfo.INSTANCE.isApkInDebug()) {
                 Log.runtime("WebSettingsActivity.getGroup: " + result);
             }
             return result;
@@ -259,7 +260,7 @@ public class WebSettingsActivity extends BaseActivity {
                 modelDtoList.add(new ModelDto(modelConfig.getCode(), modelConfig.getName(), modelConfig.getIcon(), groupCode, modelFields));
             }
             String result = JsonUtil.formatJson(modelDtoList, false);
-            if (isApkInDebug()) {
+            if (ViewAppInfo.INSTANCE.isApkInDebug()) {
                 Log.runtime("WebSettingsActivity.getModelByGroup: " + result);
             }
             return result;
@@ -299,7 +300,7 @@ public class WebSettingsActivity extends BaseActivity {
                     list.add(ModelFieldShowDto.toShowDto(modelField));
                 }
                 String result = JsonUtil.formatJson(list, false);
-                if (isApkInDebug()) {
+                if (ViewAppInfo.INSTANCE.isApkInDebug()) {
                     Log.runtime("WebSettingsActivity.getModel: " + result);
                 }
                 return result;
@@ -346,7 +347,7 @@ public class WebSettingsActivity extends BaseActivity {
                 ModelField<?> modelField = modelConfig.getModelField(fieldCode);
                 if (modelField != null) {
                     String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField), false);
-                    if (isApkInDebug()) {
+                    if (ViewAppInfo.INSTANCE.isApkInDebug()) {
                         Log.runtime("WebSettingsActivity.getField: " + result);
                     }
                     return result;
@@ -452,9 +453,7 @@ public class WebSettingsActivity extends BaseActivity {
                 webView.evaluateJavascript("if(typeof handleData === 'function'){ handleData(); } else { console.error('handleData function not found'); }", null);
                 // 使用 Handler 延迟执行 save()，给 JS 一点时间完成异步操作
                 // 200 毫秒是一个经验值，如果仍然有问题可以适当增加
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    save();
-                }, 200); // 延迟 200 毫秒
+                new Handler(Looper.getMainLooper()).postDelayed(this::save, 200); // 延迟 200 毫秒
                 break;
         }
         return super.onOptionsItemSelected(item);

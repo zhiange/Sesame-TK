@@ -195,8 +195,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
         if (General.MODULE_PACKAGE_NAME.equals(lpparam.packageName)) {
             try {
-                ViewAppInfo.INSTANCE.setRunType(RunType.ACTIVE);
-                Log.runtime(TAG, "handleLoadPackage setRunType: " + ViewAppInfo.INSTANCE.getRunType());
+                ViewAppInfo.setRunType(RunType.ACTIVE);
+                Log.runtime(TAG, "handleLoadPackage setRunType: " + ViewAppInfo.getRunType());
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
@@ -228,7 +228,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             } catch (Exception e) {
                                 Log.error("load libSesame err:" + e.getMessage());
                             }
-                            alipayVersion = new AlipayVersion(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
+                            alipayVersion = new AlipayVersion(Objects.requireNonNull(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName));
                         } catch (Exception e) {
                             Log.runtime(TAG, "获取支付宝版本信息失败");
                             Log.printStackTrace(e);
@@ -302,6 +302,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
+
                                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
                                     try {
@@ -354,7 +355,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     init = true;
                                 }
                             }
-                        });
+                        }
+
+                );
                 Log.runtime(TAG, "hook service onCreate successfully");
             } catch (Throwable t) {
                 Log.runtime(TAG, "hook service onCreate err");
@@ -975,7 +978,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             replyIntent.putExtra("EXTRA_RUN_TYPE", RunType.ACTIVE.getNickName());
                             replyIntent.setPackage(General.MODULE_PACKAGE_NAME);
                             context.sendBroadcast(replyIntent);
-                            Log.runtime(TAG, "Replied with status: "+RunType.ACTIVE.getNickName());
+                            Log.runtime(TAG, "Replied with status: " + RunType.ACTIVE.getNickName());
                         } catch (Throwable th) {
                             Log.runtime(TAG, "sesame sendBroadcast status err:");
                             Log.printStackTrace(TAG, th);
