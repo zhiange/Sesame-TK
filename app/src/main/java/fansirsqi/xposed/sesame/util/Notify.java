@@ -12,6 +12,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.Manifest;
+import android.content.pm.PackageManager;
+
+import androidx.core.content.ContextCompat;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -23,6 +27,7 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import lombok.Getter;
 
 public class Notify {
+    private static final String TAG = Notify.class.getSimpleName();
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @SuppressLint("StaticFieldLeak")
@@ -31,6 +36,7 @@ public class Notify {
     private static final int ERROR_NOTIFICATION_ID = 98;
     private static final String CHANNEL_ID = "fansirsqi.xposed.sesame.ANTFOREST_NOTIFY_CHANNEL";
     private static NotificationManager mNotifyManager;
+    @SuppressLint("StaticFieldLeak")
     private static NotificationCompat.Builder builder;
 
     private static long lastUpdateTime = 0;
@@ -38,74 +44,58 @@ public class Notify {
     private static String titleText = "";
     private static String contentText = "";
 
-    @SuppressLint("ObsoleteSdkInt")
-    public static void sendErrorNotification(String title, String content) {
-        try {
-            if (context == null) {
-                return;
-            }
-            mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
-                mNotifyManager.createNotificationChannel(notificationChannel);
-            }
-            builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setCategory(NotificationCompat.CATEGORY_ERROR)
-                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
-                    .setContentTitle(title)
-                    .setContentText(content)
-                    .setSubText("芝麻粒")
-                    .setAutoCancel(true);
-            if (context instanceof Service) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
-                } else {
-                    ((Service) context).startForeground(ERROR_NOTIFICATION_ID, builder.build());
-                }
-            } else {
-                NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
-            }
-        } catch (Exception e) {
-            Log.printStackTrace(e);
-        }
-    }
 
     @SuppressLint("ObsoleteSdkInt")
     @Getter
     private static volatile long lastNoticeTime = 0;
 
+    private static boolean checkPermission(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.error(TAG, "Missing POST_NOTIFICATIONS permission to send new notification" + context);
+                return false;
+            }
+        }
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            Log.error(TAG, "Notifications are disabled for this app." + context);
+            return false;
+        }
+        return true;
+    }
+
     public static void start(Context context) {
         try {
-            Notify.context = context;
-            Notify.stop();
-            titleText = "🚀 启动中";
-            contentText = "🔔 暂无消息";
-            lastUpdateTime = System.currentTimeMillis();
-            mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            Intent it = new Intent(Intent.ACTION_VIEW);
-            it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
-            PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒能量提醒", NotificationManager.IMPORTANCE_LOW);
-                notificationChannel.enableLights(false);
-                notificationChannel.enableVibration(false);
-                notificationChannel.setShowBadge(false);
-                mNotifyManager.createNotificationChannel(notificationChannel);
+            if (checkPermission(context)) {
+                Notify.context = context;
+                Notify.stop();
+                titleText = "🚀 启动中";
+                contentText = "🔔 暂无消息";
+                lastUpdateTime = System.currentTimeMillis();
+                mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                Intent it = new Intent(Intent.ACTION_VIEW);
+                it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
+                PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒能量提醒", NotificationManager.IMPORTANCE_LOW);
+                    notificationChannel.enableLights(false);
+                    notificationChannel.enableVibration(false);
+                    notificationChannel.setShowBadge(false);
+                    mNotifyManager.createNotificationChannel(notificationChannel);
+                }
+                builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                        .setContentTitle(titleText)
+                        .setContentText(contentText)
+                        .setSubText("芝麻粒")
+                        .setAutoCancel(false)
+                        .setContentIntent(pi);
+                if (BaseModel.getEnableOnGoing().getValue()) {
+                    builder.setOngoing(true);
+                }
+                NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
             }
-            builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
-                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
-                    .setContentTitle(titleText)
-                    .setContentText(contentText)
-                    .setSubText("芝麻粒")
-                    .setAutoCancel(false)
-                    .setContentIntent(pi);
-            if (BaseModel.getEnableOnGoing().getValue()) {
-                builder.setOngoing(true);
-            }
-            NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -116,8 +106,16 @@ public class Notify {
      */
     public static void stop() {
         try {
+            if (context == null) {
+                // Log.error(TAG, "Context is null in stop(), cannot proceed.");
+                return;
+            }
             if (context instanceof Service) {
-                ((Service) context).stopForeground(Service.STOP_FOREGROUND_REMOVE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    ((Service) context).stopForeground(Service.STOP_FOREGROUND_REMOVE);
+                } else {
+                    ((Service) context).stopSelf();
+                }
             }
             NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
             mNotifyManager = null;
@@ -274,33 +272,69 @@ public class Notify {
     @SuppressLint("ObsoleteSdkInt")
     public static void sendNewNotification(Context context, String title, String content, int newNotificationId) {
         try {
-            NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            Intent it = new Intent(Intent.ACTION_VIEW);
-            it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
-            PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-            NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(context, CHANNEL_ID);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒其他提醒", NotificationManager.IMPORTANCE_HIGH);
-                notifyManager.createNotificationChannel(notificationChannel);
-            }
-            // 配置新通知的样式
-            newBuilder
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                    .setContentTitle(title)
-                    .setContentText(content)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
-                    .setAutoCancel(true)
-                    .setContentIntent(pi);
-            // 发送新通知
-            if (context instanceof Service) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
-                } else {
-                    ((Service) context).startForeground(newNotificationId, newBuilder.build());
+            if (checkPermission(context)) {
+                NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                Intent it = new Intent(Intent.ACTION_VIEW);
+                it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
+                PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(context, CHANNEL_ID);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒其他提醒", NotificationManager.IMPORTANCE_HIGH);
+                    notifyManager.createNotificationChannel(notificationChannel);
                 }
-            } else {
-                NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
+                // 配置新通知的样式
+                newBuilder
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                        .setAutoCancel(true)
+                        .setContentIntent(pi);
+                // 发送新通知
+                if (context instanceof Service) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
+                    } else {
+                        ((Service) context).startForeground(newNotificationId, newBuilder.build());
+                    }
+                } else {
+                    NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
+                }
+            }
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+    }
+
+    public static void sendErrorNotification(String title, String content) {
+        try {
+            if (context == null) {
+                return;
+            }
+            if (checkPermission(context)) {
+                mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
+                    mNotifyManager.createNotificationChannel(notificationChannel);
+                }
+                builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setCategory(NotificationCompat.CATEGORY_ERROR)
+                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setSubText("芝麻粒")
+                        .setAutoCancel(true);
+                if (context instanceof Service) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
+                    } else {
+                        ((Service) context).startForeground(ERROR_NOTIFICATION_ID, builder.build());
+                    }
+                } else {
+                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
+                }
             }
         } catch (Exception e) {
             Log.printStackTrace(e);
