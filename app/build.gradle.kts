@@ -103,21 +103,20 @@ android {
             extra.set("applicationType", "Compatible")
         }
     }
+    compileOptions {
+        // 全局默认设置
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
+    }
 
     productFlavors.all {
         when (name) {
             "normal" -> {
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_24
-                    targetCompatibility = JavaVersion.VERSION_24
-                }
-                kotlin {
-                    compilerOptions {
-                        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24
-                    }
-                }
-            }
-            "compatible" -> {
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_17
                     targetCompatibility = JavaVersion.VERSION_17
@@ -125,6 +124,17 @@ android {
                 kotlin {
                     compilerOptions {
                         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+                    }
+                }
+            }
+            "compatible" -> {
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_11
+                    targetCompatibility = JavaVersion.VERSION_11
+                }
+                kotlin {
+                    compilerOptions {
+                        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
                     }
                 }
             }
