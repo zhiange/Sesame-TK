@@ -13,15 +13,22 @@ import androidx.core.net.toUri
 @SuppressLint("StaticFieldLeak")
 object ViewAppInfo {
     val TAG: String = ViewAppInfo::class.java.simpleName
-
-    @SuppressLint("StaticFieldLeak")
     var context: Context? = null
     var appTitle: String = ""
     var appVersion: String = ""
     var appBuildTarget: String = ""
     var appBuildNumber: String = ""
-    var runType: RunType? = RunType.DISABLE
+//    var runType: RunType? = RunType.DISABLE
+    @Volatile
+    internal var runType: RunType? = RunType.DISABLE
+    @Synchronized set
+    @JvmStatic
+    fun setRunType(type: RunType) {
+        runType = type
+    }
 
+    @JvmStatic
+    fun getRunType() = runType
 
     /**
      * 初始化 ViewAppInfo，设置应用的相关信息，如版本号、构建日期等
@@ -49,10 +56,6 @@ object ViewAppInfo {
      * 检查当前应用的运行类型，判断是否启用或禁用 通过与 content provider 交互来检查应用是否处于激活状态
      */
     fun checkRunType() {
-        if (runType != null) {
-            Log.runtime(TAG, "runType 已设置，直接返回")
-            return
-        }
         try {
             if (context == null) {
                 Log.runtime(TAG, "context 为空，设置 runType 为 DISABLE")
@@ -92,14 +95,12 @@ object ViewAppInfo {
     }
 
 
-
-    @JvmStatic
+    /**
+     * 判断当前应用是否处于调试模式
+     *
+     * @return 如果应用处于调试模式返回 true，否则返回 false
+     */
     val isApkInDebug: Boolean
-        /**
-         * 判断当前应用是否处于调试模式
-         *
-         * @return 如果应用处于调试模式返回 true，否则返回 false
-         */
         get() {
             try {
                 val info = context!!.applicationInfo
