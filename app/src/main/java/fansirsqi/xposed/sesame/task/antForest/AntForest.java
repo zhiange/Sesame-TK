@@ -364,7 +364,11 @@ public class AntForest extends ModelTask {
             taskCount.set(0);
             selfId = UserMap.getCurrentUid();
             usePropBeforeCollectEnergy(selfId);
-            JSONObject selfHomeObj = collectSelfEnergy();
+//            JSONObject selfHomeObj = collectSelfEnergy();
+            JSONObject selfHomeObj = querySelfHome();
+            //从首页信息中查找是否有派遣中的动物，如果有，则收集动物能量
+            handleUserProps(selfHomeObj);
+            selfHomeObj = collectUserEnergy(UserMap.getCurrentUid(), selfHomeObj);
             try {
                 JSONObject friendsObject = new JSONObject(AntForestRpcCall.queryEnergyRanking());
                 if (!ResUtil.checkResultCode(friendsObject)) {
@@ -391,10 +395,10 @@ public class AntForest extends ModelTask {
                 Log.printStackTrace(TAG, t);
             }
             if (!TaskCommon.IS_ENERGY_TIME && selfHomeObj != null) {
-                String whackMoleStatus = selfHomeObj.optString("whackMoleStatus");
-                if (Arrays.asList("CAN_PLAY", "CAN_INITIATIVE_PLAY", "NEED_MORE_FRIENDS").contains(whackMoleStatus)) {
-                    WhackMole.whackMole();
-                }
+//                String whackMoleStatus = selfHomeObj.optString("whackMoleStatus");
+//                if (Arrays.asList("CAN_PLAY", "CAN_INITIATIVE_PLAY", "NEED_MORE_FRIENDS").contains(whackMoleStatus)) {
+//                    WhackMole.whackMole();
+//                }
                 boolean hasMore;
                 do {//循环处理-浇水金球和被赠送道具领取逻辑
                     hasMore = false;
@@ -420,8 +424,7 @@ public class AntForest extends ModelTask {
                         selfHomeObj = querySelfHome();
                     }
                 } while (hasMore);
-                //从首页信息中查找是否有派遣中的动物，如果有，则收集动物能量
-                handleUserProps(selfHomeObj);
+
                 if (userPatrol.getValue()) {
                     queryUserPatrol();//动物巡护任务[保护地巡护]
                 }
@@ -659,28 +662,31 @@ public class AntForest extends ModelTask {
      */
     private void handleUserProps(JSONObject selfHomeObj) {
         try {
-            JSONArray usingUserProps = selfHomeObj.optJSONArray("usingUserProps");
+            JSONArray usingUserProps = selfHomeObj.optJSONArray("usingUserPropsNew");
             if (usingUserProps == null || usingUserProps.length() == 0) {
-                return; // 如果没有使用中的用户道具，直接返回
+                    return; // 如果没有使用中的用户道具，直接返回
             }
+            Log.runtime("尝试遍历使用中的道具:" + usingUserProps);
             for (int i = 0; i < usingUserProps.length(); i++) {
                 JSONObject jo = usingUserProps.getJSONObject(i);
-                if (!"animal".equals(jo.getString("type"))) {
+                if (!"animal".equals(jo.getString("propGroup"))) {
                     continue; // 如果当前道具不是动物类型，跳过
                 }
                 JSONObject extInfo = new JSONObject(jo.getString("extInfo"));
                 if (extInfo.optBoolean("isCollected")) {
+                    Log.runtime("动物派遣能量已被收取");
                     continue; // 如果动物能量已经被收取，跳过
                 }
                 canConsumeAnimalProp = false; // 设置标志位，表示不可再使用动物道具
-                String propId = jo.getString("propSeq");
+                String propId = jo.getString("propId");
                 String propType = jo.getString("propType");
                 String shortDay = extInfo.getString("shortDay");
+                String animalName = extInfo.getJSONObject("animal").getString("name");
                 String response = AntForestRpcCall.collectAnimalRobEnergy(propId, propType, shortDay);
                 JSONObject responseObj = new JSONObject(response);
                 if (ResUtil.checkResultCode(responseObj)) {
                     int energy = extInfo.optInt("energy", 0);
-                    String str = "收取动物能量🦩[" + energy + "g]";
+                    String str = "收取[" + animalName + "]派遣能量🦩[" + energy + "g]";
                     Toast.show(str);
                     Log.forest(str);
                 } else {
@@ -850,7 +856,7 @@ public class AntForest extends ModelTask {
                     JSONObject propertiesObject = selfHomeObj.optJSONObject("properties");
                     if (propertiesObject != null) {
                         // 如果用户主页的属性中标记了“whackMole”
-                        if (Objects.equals("Y", propertiesObject.optString("whackMole"))) {
+                        if (Objects.equals("Y", propertiesObject.optString("whackMoleEntry"))) {
                             // 尝试关闭“6秒拼手速”功能
                             boolean success = WhackMole.closeWhackMole();
                             Log.record(success ? "6秒拼手速关闭成功" : "6秒拼手速关闭失败");
