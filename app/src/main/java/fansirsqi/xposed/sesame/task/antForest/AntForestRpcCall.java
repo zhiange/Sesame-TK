@@ -143,7 +143,7 @@ public class AntForestRpcCall {
     }
 
     public static String queryEnergyRainHome() {
-        return RequestManager.requestString("alipay.antforest.forest.h5.queryEnergyRainHome", "[{\"source\":\"senlinguangchuangrukou\",\"version\":\""+VERSION+"\"}]");
+        return RequestManager.requestString("alipay.antforest.forest.h5.queryEnergyRainHome", "[{\"source\":\"senlinguangchuangrukou\",\"version\":\"" + VERSION + "\"}]");
     }
 
     public static String queryEnergyRainCanGrantList() {
@@ -425,7 +425,7 @@ public class AntForestRpcCall {
         return RequestManager.requestString(
                 "alipay.antforest.forest.h5.collectAnimalRobEnergy",
                 "[{\"propId\":\"" + propId + "\",\"propType\":\"" + propType + "\",\"shortDay\":\"" + shortDay + "\",\"source" +
-                        "\":\"chInfo_ch_appcenter__chsub_9patch\"}]");
+                        "\":\"chInfo_ch_appcenter__chsub_9patch\",\"version\":\"" + VERSION + "\"}]");
     }
 
     /**
