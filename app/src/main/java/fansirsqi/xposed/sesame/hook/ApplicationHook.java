@@ -228,7 +228,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             } catch (Exception e) {
                                 Log.error("load libSesame err:" + e.getMessage());
                             }
-                            alipayVersion = new AlipayVersion(Objects.requireNonNull(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName));
+                            alipayVersion = new AlipayVersion(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
                         } catch (Exception e) {
                             Log.runtime(TAG, "获取支付宝版本信息失败");
                             Log.printStackTrace(e);
@@ -974,11 +974,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         break;
                     case "com.eg.android.AlipayGphone.sesame.status":
                         try {
-                            Intent replyIntent = new Intent("fansirsqi.xposed.sesame.status");
-                            replyIntent.putExtra("EXTRA_RUN_TYPE", RunType.ACTIVE.getNickName());
-                            replyIntent.setPackage(General.MODULE_PACKAGE_NAME);
-                            context.sendBroadcast(replyIntent);
-                            Log.runtime(TAG, "Replied with status: " + RunType.ACTIVE.getNickName());
+                            if (ViewAppInfo.getRunType() == RunType.DISABLE) {
+                                Intent replyIntent = new Intent("fansirsqi.xposed.sesame.status");
+                                replyIntent.putExtra("EXTRA_RUN_TYPE", RunType.ACTIVE.getNickName());
+                                replyIntent.setPackage(General.MODULE_PACKAGE_NAME);
+                                context.sendBroadcast(replyIntent);
+                                Log.runtime(TAG, "Replied with status: " + RunType.ACTIVE.getNickName());
+                            }
                         } catch (Throwable th) {
                             Log.runtime(TAG, "sesame sendBroadcast status err:");
                             Log.printStackTrace(TAG, th);
