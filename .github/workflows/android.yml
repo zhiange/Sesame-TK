@@ -77,7 +77,11 @@ jobs:
 
       - name: Get Commit Message
         id: commit_message
-        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        run: |
+          message=$(git log -1 --pretty=%B)
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          echo "$message" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send Normal APK to Telegram
         uses: appleboy/telegram-action@master
