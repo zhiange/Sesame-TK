@@ -90,7 +90,7 @@ class MainActivity : BaseActivity() {
         ViewAppInfo.checkRunType()
         updateSubTitle(ViewAppInfo.runType?.nickName ?: "未激活")
         try {
-            if (!AssetUtil.copySoFileToStorage(this, "libchecker.so")) {
+            if (!AssetUtil.copySoFileToStorage(this, AssetUtil.checkerDestFile)) {
                 Log.error("so file copy failed")
             }
             val libSesamePath = Detector.getLibPath(this)
