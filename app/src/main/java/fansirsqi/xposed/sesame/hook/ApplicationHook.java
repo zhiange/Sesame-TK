@@ -208,7 +208,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             }
             Log.runtime("Loading " + soFile.getName() + " from :" + soPath);
         } catch (Exception e) {
-            Log.runtime(TAG, "载入so库失败！！");
+            Log.error(TAG, "载入so库失败！！");
             Log.printStackTrace(e);
         }
     }

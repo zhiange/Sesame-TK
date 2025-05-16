@@ -42,7 +42,6 @@ import fansirsqi.xposed.sesame.util.PermissionUtil
 import fansirsqi.xposed.sesame.util.ThreadUtil
 import fansirsqi.xposed.sesame.util.ToastUtil
 import java.util.Calendar
-import java.util.Random
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -91,13 +90,12 @@ class MainActivity : BaseActivity() {
         updateSubTitle(ViewAppInfo.runType?.nickName ?: "未激活")
         try {
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.checkerDestFile)) {
-                Log.error("so file copy failed")
+                Log.error("checker file copy failed")
             }
-            val libSesamePath = Detector.getLibPath(this)
-            if (libSesamePath != null) {
-                System.load(libSesamePath)
+            if (!AssetUtil.copySoFileToStorage(this, AssetUtil.dexkitDestFile)) {
+                Log.error("dexkit file copy failed")
             }
-            Log.runtime("Loading so from original path$libSesamePath")
+            Detector.loadLibrary("checker")
             Detector.initDetector(this)
         } catch (e: Exception) {
             Log.error("load libSesame err:" + e.message)
@@ -127,17 +125,19 @@ class MainActivity : BaseActivity() {
                                 // 收到来自支付宝进程的确认广播
                                 val gotRunType: String? = intent.getStringExtra("EXTRA_RUN_TYPE")
                                 if (gotRunType != null) {
-                                    when (gotRunType){
+                                    when (gotRunType) {
                                         RunType.DISABLE.nickName -> {
                                             ViewAppInfo.runType = RunType.DISABLE // 更新状态为 DISABLE
                                             updateSubTitle(RunType.DISABLE.nickName) // 更新 UI 显示为“未激活”
                                             Log.runtime("MainActivity received status confirmation: DISABLE")
                                         }
+
                                         RunType.ACTIVE.nickName -> {
                                             ViewAppInfo.runType = RunType.ACTIVE // 更新状态为 ACTIVE
                                             updateSubTitle(RunType.ACTIVE.nickName) // 更新 UI 显示为“已激活”
                                             Log.runtime("MainActivity received status confirmation: ACTIVE")
                                         }
+
                                         RunType.LOADED.nickName -> {
                                             ViewAppInfo.runType = RunType.LOADED // 更新状态为 LOADED
                                             updateSubTitle(RunType.LOADED.nickName) // 更新 UI 显示为“已加载”
@@ -147,7 +147,11 @@ class MainActivity : BaseActivity() {
                                 }
                                 if (isClick) {
                                     Handler(Looper.getMainLooper()).post {
-                                        Toast.makeText(context, "${emojiList.random()} 一切看起来都很棒！", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "${emojiList.random()} 一切看起来都很棒！",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         Thread {
                                             ThreadUtil.sleep(200)
                                             runOnUiThread { isClick = false }
@@ -370,7 +374,8 @@ class MainActivity : BaseActivity() {
                 )
 
                 // 提示用户需要重启启动器才能看到效果
-                Toast.makeText(this, "设置已保存，可能需要重启桌面才能生效", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "设置已保存，可能需要重启桌面才能生效", Toast.LENGTH_SHORT)
+                    .show()
                 return true
             }
 
@@ -407,7 +412,11 @@ class MainActivity : BaseActivity() {
             5 -> {
                 val statisticsFile = Files.exportFile(Files.getStatisticsFile())
                 if (statisticsFile != null) {
-                    ToastUtil.makeText(this, "文件已导出到: " + statisticsFile.path, Toast.LENGTH_SHORT).show()
+                    ToastUtil.makeText(
+                        this,
+                        "文件已导出到: " + statisticsFile.path,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -535,7 +544,11 @@ class MainActivity : BaseActivity() {
         val userEntity = userEntityArray[index]
         if (userEntity != null) {
             ListDialog.show(
-                this, getString(R.string.friend_watch), FriendWatch.getList(userEntity.userId), SelectModelFieldFunc.newMapInstance(), false,
+                this,
+                getString(R.string.friend_watch),
+                FriendWatch.getList(userEntity.userId),
+                SelectModelFieldFunc.newMapInstance(),
+                false,
                 ListDialog.ListType.SHOW
             )
         } else {
@@ -564,9 +577,26 @@ class MainActivity : BaseActivity() {
         Log.runtime("updateSubTitle$runType")
         baseTitle = ViewAppInfo.appTitle + "[" + runType + "]"
         when (runType) {
-            RunType.DISABLE.nickName -> setBaseTitleTextColor(ContextCompat.getColor(this, R.color.not_active_text))
-            RunType.ACTIVE.nickName -> setBaseTitleTextColor(ContextCompat.getColor(this, R.color.active_text))
-            RunType.LOADED.nickName -> setBaseTitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary))
+            RunType.DISABLE.nickName -> setBaseTitleTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.not_active_text
+                )
+            )
+
+            RunType.ACTIVE.nickName -> setBaseTitleTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.active_text
+                )
+            )
+
+            RunType.LOADED.nickName -> setBaseTitleTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.textColorPrimary
+                )
+            )
         }
     }
 }
