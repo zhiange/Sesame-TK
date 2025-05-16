@@ -2,7 +2,7 @@ name: Develop CI
 
 on:
   push:
-    branches: ["develop"]
+    branches-ignore: ["main"]
   pull_request:
     branches: ["develop"]
   workflow_dispatch:
@@ -74,3 +74,37 @@ jobs:
         with:
           name: apk-normal
           path: "./app/build/outputs/apk/normal/release/*signed.apk"
+
+      - name: Get Commit Message
+        id: commit_message
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Send Normal APK to Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TG_CHAT_ID }}
+          token: ${{ secrets.TG_BOT_TOKEN }}
+          message: |
+            📦 New Normal Build!
+            Branch: ${{ github.ref_name }}
+            Commit: `${{ github.sha }}`
+            Author: ${{ github.actor }}
+            Message: 
+            ${{ steps.commit_message.outputs.message }}
+          document: ${{ steps.sign_normal_apk.outputs.signedReleaseFile }}
+          format: markdown
+
+      - name: Send Compatible APK to Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TG_CHAT_ID }}
+          token: ${{ secrets.TG_BOT_TOKEN }}
+          message: |
+            📦 New Compatible Build!
+            Branch: ${{ github.ref_name }}
+            Commit: `${{ github.sha }}`
+            Author: ${{ github.actor }}
+            Message: 
+            ${{ steps.commit_message.outputs.message }}
+          document: ${{ steps.sign_compatible_apk.outputs.signedReleaseFile }}
+          format: markdown
