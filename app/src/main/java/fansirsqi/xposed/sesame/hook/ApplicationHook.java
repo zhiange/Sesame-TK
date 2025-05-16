@@ -67,7 +67,6 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.util.AssetUtil;
 import fansirsqi.xposed.sesame.util.Detector;
-import fansirsqi.xposed.sesame.util.HideVPNStatus;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
@@ -540,15 +539,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     return false;
                 }
                 // ！！所有权限申请应该放在加载配置之后
-                try {
-                    if (BaseModel.getHideVPNStatus().getValue()) {
-                        HideVPNStatus.proxy();
-                        Log.record("VPN隐藏功能已启用");
-                    }
-                } catch (Throwable t) {
-                    Log.error(TAG, "VPN隐藏功能启用失败");
-                    Log.printStackTrace(TAG, t);
-                }
 
                 //闹钟权限申请
                 if (!PermissionUtil.checkAlarmPermissions()) {
