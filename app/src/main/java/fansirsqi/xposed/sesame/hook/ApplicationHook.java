@@ -10,12 +10,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
+
+import org.luckypray.dexkit.DexKitBridge;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -109,6 +112,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     private static PendingIntent alarm0Pi;
     private static XC_MethodHook.Unhook rpcRequestUnhook;
     private static XC_MethodHook.Unhook rpcResponseUnhook;
+    private final ExecutorService executorService = Executors.newScheduledThreadPool(20);
 
     public static void setOffline(boolean offline) {
         ApplicationHook.offline = offline;
@@ -191,55 +195,54 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
     }
 
+
+    @SuppressLint("UnsafeDynamicallyLoadedCode")
+    private void loadNativeLibs(Context context, File soFile) {
+        try {
+            String soPath = context.getApplicationInfo().dataDir + File.separator + "lib" + File.separator + soFile.getName();
+            if (AssetUtil.INSTANCE.copyDtorageSoFileToPrivateDir(context, soFile)) {
+                System.load(soPath);
+            } else {
+                soPath = Detector.INSTANCE.getLibPath(context);
+                assert soPath != null;
+                System.load(soPath);
+            }
+            Log.runtime("Loading " + soFile.getName() + " from :" + soPath);
+        } catch (Exception e) {
+            Log.runtime(TAG, "载入so库失败！！");
+            Log.printStackTrace(e);
+        }
+    }
+
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
-        if (General.MODULE_PACKAGE_NAME.equals(lpparam.packageName)) {
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
+        if (General.MODULE_PACKAGE_NAME.equals(loadPackageParam.packageName)) {
             try {
                 ViewAppInfo.setRunType(RunType.ACTIVE);
                 Log.runtime(TAG, "handleLoadPackage setRunType: " + ViewAppInfo.getRunType());
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
-        } else if (General.PACKAGE_NAME.equals(lpparam.packageName) && General.PACKAGE_NAME.equals(lpparam.processName)) {
+        } else if (General.PACKAGE_NAME.equals(loadPackageParam.packageName) && General.PACKAGE_NAME.equals(loadPackageParam.processName)) {
             if (hooked) return;
-            classLoader = lpparam.classLoader;
-            try {
-                XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
-                    // 重写afterHookedMethod方法，在attach方法执行后执行自定义逻辑
-                    @SuppressLint("UnsafeDynamicallyLoadedCode")
-                    @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        context = (Context) param.args[0];
-                        Log.runtime(TAG, "Application context: " + context);
-                        Log.runtime(TAG, "Application package: " + context.getPackageName());
-                        try {
-                            try {
-                                String soFileOfStorage = context.getApplicationInfo().dataDir + File.separator + "lib" + File.separator + "libchecker.so";
-                                Log.runtime("soPath: " + soFileOfStorage);
-                                if (AssetUtil.INSTANCE.copyDtorageSoFileToPrivateDir(context, "libchecker.so")) {
-                                    System.load(soFileOfStorage);
-                                    Log.runtime("Loading so from : " + soFileOfStorage);
-                                } else {
-                                    String libSesamePath = Detector.INSTANCE.getLibPath(context);
-                                    assert libSesamePath != null;
-                                    System.load(libSesamePath);
-                                    Log.runtime("Loading so from original path" + libSesamePath);
-                                }
-                            } catch (Exception e) {
-                                Log.error("load libSesame err:" + e.getMessage());
-                            }
-                            alipayVersion = new AlipayVersion(context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName);
-                        } catch (Exception e) {
-                            Log.runtime(TAG, "获取支付宝版本信息失败");
-                            Log.printStackTrace(e);
-                        }
-                        super.afterHookedMethod(param);
+            classLoader = loadPackageParam.classLoader;
+            XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    context = (Context) param.args[0];
+                    try {
+                        PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                        assert pInfo.versionName != null;
+                        alipayVersion = new AlipayVersion(pInfo.versionName);
+                        Log.runtime(TAG, "handleLoadPackage alipayVersion: " + alipayVersion);
+                        loadNativeLibs(context, AssetUtil.INSTANCE.getCheckerDestFile());
+                        loadNativeLibs(context, AssetUtil.INSTANCE.getDexkitDestFile());
+                    } catch (Exception e) {
+                        Log.printStackTrace(e);
                     }
-                });
-            } catch (Throwable t) {
-                Log.runtime(TAG, "hook attach err");
-                Log.printStackTrace(TAG, t);
-            }
+                    super.afterHookedMethod(param);
+                }
+            });
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.quinox.LauncherActivity", classLoader, "onResume",
                         new XC_MethodHook() {
@@ -285,7 +288,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             try {
                 XposedHelpers.findAndHookMethod("android.app.Service", classLoader, "onCreate",
                         new XC_MethodHook() {
-                            @SuppressLint({"WakelockTimeout", "UnsafeDynamicallyLoadedCode"})
                             @Override
                             protected void afterHookedMethod(MethodHookParam param) {
                                 Service appService = (Service) param.thisObject;
@@ -299,11 +301,16 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     Detector.INSTANCE.dangerous(context);
                                     return;
                                 }
+                                String packageName = loadPackageParam.packageName;
+                                String apkPath = loadPackageParam.appInfo.sourceDir;
+                                try (DexKitBridge bridge = DexKitBridge.create(apkPath)) {
+                                    // Other use cases
+                                    Log.runtime(TAG, "hook dexkit successfully");
+                                }
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
 
-                                ExecutorService executorService = Executors.newSingleThreadExecutor();
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
                                     try {
                                         TaskCommon.update();
@@ -319,7 +326,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             Log.record("️⚙跳过执行-用户模块配置未加载");
                                             return;
                                         }
-                                        Log.record("⚡ 开始执行");
+                                        Log.record("开始执行");
                                         long currentTime = System.currentTimeMillis();
                                         if (lastExecTime + 2000 > currentTime) {
                                             Log.record("执行间隔较短，跳过执行");
@@ -338,7 +345,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             reLogin();
                                             return;
                                         }
-
                                         ModelTask.startAllTask(false);
                                         scheduleNextExecution(lastExecTime);
                                         UserId.set(targetUid);
@@ -414,7 +420,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.printStackTrace(TAG, t);
             }
             hooked = true;
-            Log.runtime(TAG, "load success: " + lpparam.packageName);
+            Log.runtime(TAG, "load success: " + loadPackageParam.packageName);
         }
     }
 

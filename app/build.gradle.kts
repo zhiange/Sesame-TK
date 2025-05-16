@@ -204,6 +204,7 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
     implementation(libs.okhttp)
+    implementation(libs.dexkit)
 
     add("normalImplementation", libs.jackson.core)
     add("normalImplementation", libs.jackson.databind)
