@@ -22,14 +22,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: set up JDK
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "zulu"
           cache: gradle
 
-      - name: set up Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
@@ -41,39 +41,54 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleNormalRelease assembleCompatibleRelease -Pversion=${{ github.ref_name }}
 
-      - name: Sign Normal APK
-        id: sign_normal_apk
+      - name: Locate APKs and Set Outputs
+        id: locate_apks
+        run: |
+          normal_apk=$(find app/build/outputs/apk/normal/release -name "*.apk" | head -n 1)
+          compatible_apk=$(find app/build/outputs/apk/compatible/release -name "*.apk" | head -n 1)
+          echo "normal_apk=$normal_apk" >> $GITHUB_OUTPUT
+          echo "compatible_apk=$compatible_apk" >> $GITHUB_OUTPUT
+
+      - name: Copy APKs to staging for signing
+        run: |
+          mkdir -p app/build/outputs/apk/all
+          cp "${{ steps.locate_apks.outputs.normal_apk }}" app/build/outputs/apk/all/
+          cp "${{ steps.locate_apks.outputs.compatible_apk }}" app/build/outputs/apk/all/
+
+      - name: Sign APKs
+        id: sign_apks
         uses: ilharp/sign-android-release@v2
         with:
-          releaseDir: app/build/outputs/apk/normal/release/
+          releaseDir: app/build/outputs/apk/all
           signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
           keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
 
-      - name: Sign Compatible APK
-        id: sign_compatible_apk
-        uses: ilharp/sign-android-release@v2
-        with:
-          releaseDir: app/build/outputs/apk/compatible/release/
-          signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
-          keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          buildToolsVersion: 36.0.0
+      - name: Extract Signed APK Paths
+        id: extract_apks
+        run: |
+          IFS=':' read -r -a files <<< "${{ steps.sign_apks.outputs.signedFiles }}"
+          for file in "${files[@]}"; do
+            if [[ "$file" == *Normal* ]]; then
+              echo "signed_normal=$file" >> $GITHUB_OUTPUT
+            elif [[ "$file" == *Compatible* ]]; then
+              echo "signed_compatible=$file" >> $GITHUB_OUTPUT
+            fi
+          done
 
-      - name: Upload Sesame compatible
+      - name: Upload APK - Compatible
         uses: actions/upload-artifact@v4
         with:
           name: apk-compatible
-          path: "./app/build/outputs/apk/compatible/release/*signed.apk"
+          path: ${{ steps.extract_apks.outputs.signed_compatible }}
 
-      - name: Upload Sesame normal
+      - name: Upload APK - Normal
         uses: actions/upload-artifact@v4
         with:
           name: apk-normal
-          path: "./app/build/outputs/apk/normal/release/*signed.apk"
+          path: ${{ steps.extract_apks.outputs.signed_normal }}
 
       - name: Get Commit Message
         id: commit_message
@@ -83,19 +98,28 @@ jobs:
           echo "$message" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Extract file names
+        id: file_names
+        run: |
+          normal_file=$(basename "${{ steps.extract_apks.outputs.signed_normal }}")
+          compatible_file=$(basename "${{ steps.extract_apks.outputs.signed_compatible }}")
+          echo "normal_file=$normal_file" >> $GITHUB_OUTPUT
+          echo "compatible_file=$compatible_file" >> $GITHUB_OUTPUT
+
       - name: Send Normal APK to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TG_CHAT_ID }}
           token: ${{ secrets.TG_BOT_TOKEN }}
           message: |
-            📦 New Normal Build!
-            Branch: ${{ github.ref_name }}
+            📦 *New Normal Build!*
+            File: `${{ steps.file_names.outputs.normal_file }}`
+            Branch: `${{ github.ref_name }}`
             Commit: `${{ github.sha }}`
-            Author: ${{ github.actor }}
+            Author: `${{ github.actor }}`
             Message: 
             ${{ steps.commit_message.outputs.message }}
-          document: ${{ steps.sign_normal_apk.outputs.signedReleaseFile }}
+          document: ${{ steps.extract_apks.outputs.signed_normal }}
           format: markdown
 
       - name: Send Compatible APK to Telegram
@@ -104,11 +128,12 @@ jobs:
           to: ${{ secrets.TG_CHAT_ID }}
           token: ${{ secrets.TG_BOT_TOKEN }}
           message: |
-            📦 New Compatible Build!
-            Branch: ${{ github.ref_name }}
+            📦 *New Compatible Build!*
+            File: `${{ steps.file_names.outputs.compatible_file }}`
+            Branch: `${{ github.ref_name }}`
             Commit: `${{ github.sha }}`
-            Author: ${{ github.actor }}
+            Author: `${{ github.actor }}`
             Message: 
             ${{ steps.commit_message.outputs.message }}
-          document: ${{ steps.sign_compatible_apk.outputs.signedReleaseFile }}
+          document: ${{ steps.extract_apks.outputs.signed_compatible }}
           format: markdown
