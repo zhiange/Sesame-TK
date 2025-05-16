@@ -5,6 +5,7 @@ import java.util.*
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 tasks.register("testClasses") {
     description = "Dummy task for compatibility"
@@ -90,7 +91,9 @@ android {
 
     buildFeatures {
         buildConfig = true
+        compose = true
     }
+
 
     flavorDimensions += "default"
     productFlavors {
@@ -191,6 +194,17 @@ android {
 }
 
 dependencies {
+    implementation(libs.ui.tooling.preview.android)
+    val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
+    implementation(composeBom)
+    testImplementation(composeBom)
+    androidTestImplementation(composeBom)
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+
+    implementation(libs.activity.compose)
+
     implementation(libs.core.ktx)
     implementation(libs.kotlin.stdlib)
     implementation(libs.slf4j.api)
