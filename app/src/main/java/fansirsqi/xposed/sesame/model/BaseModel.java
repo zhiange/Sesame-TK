@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.concurrent.ExecutorService;
+
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
@@ -11,6 +13,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.ListModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.task.antOcean.AntOceanRpcCall;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.ListUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
@@ -24,6 +27,8 @@ import lombok.Getter;
  * 基础配置模块
  */
 public class BaseModel extends Model {
+
+    private static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor();
     /**
      * 是否保持唤醒状态
      */
@@ -193,7 +198,7 @@ public class BaseModel extends Model {
      * 初始化数据，通过异步线程加载初始化 Reserve 和 Beach 任务数据。
      */
     public static void initData() {
-        new Thread(
+        MAIN_THREAD_POOL.submit(
                 () -> {
                     try {
                         Log.runtime("🍼初始化海洋，保护地数据");
@@ -203,8 +208,7 @@ public class BaseModel extends Model {
                     } catch (Exception e) {
                         Log.printStackTrace(e);
                     }
-                })
-                .start();
+                });
     }
 
     /**
@@ -229,10 +233,6 @@ public class BaseModel extends Model {
             // 调用 ReserveRpc 接口，查询可兑换的树项目列表
             String response = ReserveRpcCall.queryTreeItemsForExchange();
             // 若首次调用结果为空，进行延迟后再次调用
-            if (response == null) {
-                ThreadUtil.sleep(RandomUtil.delay());
-                response = ReserveRpcCall.queryTreeItemsForExchange();
-            }
             JSONObject jsonResponse = new JSONObject(response);
             // 检查接口调用是否成功，resultCode 为 SUCCESS 表示成功
             if ("SUCCESS".equals(jsonResponse.optString("resultCode", ""))) {

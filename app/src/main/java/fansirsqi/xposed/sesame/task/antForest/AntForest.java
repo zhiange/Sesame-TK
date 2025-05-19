@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,6 +51,7 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.ui.ObjReference;
 import fansirsqi.xposed.sesame.util.Average;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.ListUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
@@ -65,6 +67,8 @@ import lombok.Getter;
  */
 public class AntForest extends ModelTask {
     public static final String TAG = AntForest.class.getSimpleName();
+
+    ExecutorService executorService = GlobalThreadPools.getGeneralPurposeExecutor();
     private static final Average offsetTimeMath = new Average(5);
     private static final Set<String> AntForestTaskTypeSet;
 
@@ -866,7 +870,7 @@ public class AntForest extends ModelTask {
                 String nextAction = selfHomeObj.optString("nextAction");
                 if ("WhackMole".equalsIgnoreCase(nextAction)) {
                     Log.record("检测到6秒拼手速强制弹窗，先执行拼手速");
-                    WhackMole.whackMole();
+                    WhackMole.startWhackMole();
                 }
                 return collectUserEnergy(UserMap.getCurrentUid(), selfHomeObj);
             }

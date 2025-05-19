@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -111,7 +110,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     private static PendingIntent alarm0Pi;
     private static XC_MethodHook.Unhook rpcRequestUnhook;
     private static XC_MethodHook.Unhook rpcResponseUnhook;
-    private final ExecutorService executorService = Executors.newScheduledThreadPool(20);
+    private final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getScheduledExecutor();
 
     public static void setOffline(boolean offline) {
         ApplicationHook.offline = offline;
@@ -135,8 +134,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     private boolean executeCheckTask(long lastExecTime) {
         try {
             FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
-            Thread checkThread = new Thread(checkTask);
-            checkThread.start();
+            MAIN_THREAD_POOL.submit(checkTask);
             if (!checkTask.get(10, TimeUnit.SECONDS)) {
                 long waitTime = 10000 - System.currentTimeMillis() + lastExecTime;
                 if (waitTime > 0) {
@@ -308,7 +306,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
 
-                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
+                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> MAIN_THREAD_POOL.submit(() -> {
                                     try {
                                         TaskCommon.update();
                                         if (TaskCommon.IS_MODULE_SLEEP_TIME) {

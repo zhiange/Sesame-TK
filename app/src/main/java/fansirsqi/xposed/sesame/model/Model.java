@@ -8,13 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 
 public abstract class Model {
+    ExecutorService executorService = GlobalThreadPools.getGeneralPurposeExecutor();
     private static final String TAG = Model.class.getSimpleName();
     private static final Map<String, ModelConfig> modelConfigMap = new LinkedHashMap<>();
     private static final Map<String, ModelConfig> readOnlyModelConfigMap = Collections.unmodifiableMap(modelConfigMap);

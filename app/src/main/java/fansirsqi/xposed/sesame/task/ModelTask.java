@@ -3,9 +3,9 @@ import android.os.Build;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelFields;
@@ -15,23 +15,20 @@ import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
+import lombok.Setter;
+
 public abstract class ModelTask extends Model {
     // 存储所有主任务与线程的映射
     private static final Map<ModelTask, Thread> MAIN_TASK_MAP = new ConcurrentHashMap<>();
+    // 存储所有主任务与 Future 的映射
+    private static final Map<ModelTask, Future<?>> MAIN_TASK_FUTURE_MAP = new ConcurrentHashMap<>();
 
     // 线程同步计数
     private static CountDownLatch taskCompletionLatch;
 
-    // 主任务线程池，线程池大小为模型数组长度，最大线程数无限制，空闲时间30秒
-    private static final ThreadPoolExecutor MAIN_THREAD_POOL = new ThreadPoolExecutor(
-            Math.max(1, getModelArray().length)// 核心线程数，至少为 1
-            , Math.min(Integer.MAX_VALUE, getModelArray().length * 2)// 最大线程数
-            , 30L// 空闲线程存活时间
-            , TimeUnit.SECONDS
-//            , new SynchronousQueue<>()
-            , new LinkedBlockingQueue<>(getModelArray().length * 2)// 队列容量
-            , new ThreadPoolExecutor.CallerRunsPolicy()
-    );
+    // 主任务线程池，现在使用全局线程池
+    private static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor();
+
     // 存储子任务的映射
     private final Map<String, ChildModelTask> childTaskMap = new ConcurrentHashMap<>();
     private ChildTaskExecutor childTaskExecutor;
@@ -141,7 +138,7 @@ public abstract class ModelTask extends Model {
                 if (value != null) {
                     value.cancel();
                 }
-                childTask.modelTask = this;
+                childTask.setModelTask(this);
                 if (childTaskExecutor.addChildTask(childTask)) {
                     return childTask;
                 }
@@ -153,7 +150,7 @@ public abstract class ModelTask extends Model {
                 if (oldTask != null) {
                     oldTask.cancel();
                 }
-                childTask.modelTask = this;
+                childTask.setModelTask(this);
                 if (childTaskExecutor.addChildTask(childTask)) {
                     childTaskMap.put(childId, childTask);
                 }
@@ -218,7 +215,8 @@ public abstract class ModelTask extends Model {
                     mainRunnable.run();
                     taskCompletionLatch.countDown();
                 } else {
-                    MAIN_THREAD_POOL.execute(mainRunnable);
+                    Future<?> future = MAIN_THREAD_POOL.submit(mainRunnable);
+                    MAIN_TASK_FUTURE_MAP.put(this, future);
                 }
                 return true;
             }
@@ -242,7 +240,10 @@ public abstract class ModelTask extends Model {
             childTaskExecutor.clearAllChildTask();
         }
         childTaskMap.clear();
-        MAIN_THREAD_POOL.remove(mainRunnable);
+        Future<?> future = MAIN_TASK_FUTURE_MAP.remove(this);
+        if (future != null) {
+            future.cancel(true);
+        }
         MAIN_TASK_MAP.remove(this);
     }
     /**
@@ -259,15 +260,15 @@ public abstract class ModelTask extends Model {
     public static void startAllTask(Boolean force) {
         Notify.setStatusTextExec();
         taskCompletionLatch = new CountDownLatch(getModelArray().length);
-        // 启动一个线程等待所有任务完成
-        new Thread(() -> {
+        // 使用全局线程池等待所有任务完成
+        fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor().execute(() -> {
             try {
                 taskCompletionLatch.await(); // 等待所有任务完成
                 Notify.forceUpdateText();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }).start();
+        }); // Removed .start() as execute() itself submits the task for execution
         for (Model model : getModelArray()) {
             if (model != null) {
                 if (ModelType.TASK == model.getType()) {
@@ -318,18 +319,15 @@ public abstract class ModelTask extends Model {
         }
         return childTaskExecutor;
     }
+    @Getter
     public static class ChildModelTask implements Runnable {
-        @Getter
+        @Setter
         private ModelTask modelTask;
-        @Getter
         private final String id;
-        @Getter
         private final String group;
         private final Runnable runnable;
-        @Getter
         private final Long execTime;
         private CancelTask cancelTask;
-        @Getter
         private Boolean isCancel = false;
         public ChildModelTask() {
             this(null, null, () -> {
@@ -379,7 +377,7 @@ public abstract class ModelTask extends Model {
          * 执行子任务
          */
         public final void run() {
-            runnable.run();
+            getRunnable().run();
         }
         /**
          * 设置取消任务的逻辑
@@ -393,14 +391,22 @@ public abstract class ModelTask extends Model {
          * 取消子任务
          */
         public final void cancel() {
-            if (cancelTask != null) {
+            if (getCancelTask() != null) {
                 try {
-                    cancelTask.cancel();
-                    isCancel = true;
+                    getCancelTask().cancel();
+                    setCancel(true);
                 } catch (Exception e) {
                     Log.printStackTrace(e);
                 }
             }
+        }
+
+        public Boolean getCancel() {
+            return isCancel;
+        }
+
+        public void setCancel(Boolean cancel) {
+            isCancel = cancel;
         }
     }
     /**
