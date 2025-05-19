@@ -202,9 +202,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             if (AssetUtil.INSTANCE.copyDtorageSoFileToPrivateDir(context, soFile)) {
                 System.load(soPath);
             } else {
-                soPath = Detector.INSTANCE.getLibPath(context);
-                assert soPath != null;
-                System.load(soPath);
+                Detector.INSTANCE.loadLibrary("checker");
             }
             Log.runtime("Loading " + soFile.getName() + " from :" + soPath);
         } catch (Exception e) {
