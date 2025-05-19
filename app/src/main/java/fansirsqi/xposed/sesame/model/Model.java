@@ -23,8 +23,6 @@ public abstract class Model {
     private static final List<Class<? extends Model>> modelClazzList = ModelOrder.getClazzList();
     @Getter
     private static final Model[] modelArray = new Model[modelClazzList.size()];
-    //    private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
-//    @Getter public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
     private final BooleanModelField enableField;
 
     public final BooleanModelField getEnableField() {
@@ -157,8 +155,8 @@ public abstract class Model {
                 }
                 modelArray[i] = null;
             }
-            modelMap.clear();
-            modelConfigMap.clear();
         }
+        modelMap.clear();
+        modelConfigMap.clear();
     }
 }
