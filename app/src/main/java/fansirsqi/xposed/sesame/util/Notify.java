@@ -136,9 +136,9 @@ public class Notify {
                 status = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
             }
 
-            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+            if (builder != null && BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
                 builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
-            } else {
+            } else if (builder != null) {
                 builder.setProgress(0, 0, false);
             }
 
@@ -159,9 +159,9 @@ public class Notify {
             if (nextExecTime != -1) {
                 nextExecTimeCache = nextExecTime;
             }
-            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+            if (builder != null && BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
                 builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
-            } else {
+            } else if (builder != null) {
                 builder.setProgress(0, 0, false);
             }
             if (ModelTask.isAllTaskFinished()) {
@@ -177,9 +177,9 @@ public class Notify {
      * 强制刷新通知，全部任务结束后调用
      */
     public static void forceUpdateText() {
-        if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+        if (builder != null && BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
             builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
-        } else {
+        } else if (builder != null) {
             builder.setProgress(0, 0, false);
         }
         if (ModelTask.isAllTaskFinished()) {
@@ -213,11 +213,13 @@ public class Notify {
             if (forestPauseTime > System.currentTimeMillis()) {
                 titleText = "❌ 触发异常，等待至" + TimeUtil.getCommonDate(forestPauseTime) + "恢复运行";
             }
-            if (BaseModel.getEnableProgress().getValue()) {
+            if (builder != null && BaseModel.getEnableProgress().getValue()) {
                 builder.setProgress(100, 0, false);
             }
             titleText = "⚙️ 芝麻粒正在施工中...";
-            builder.setContentTitle(titleText);
+            if (builder != null) {
+                builder.setContentTitle(titleText);
+            }
             mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -229,11 +231,13 @@ public class Notify {
      */
     public static void setStatusTextDisabled() {
         try {
-            builder.setContentTitle("🚫 芝麻粒已禁用");
-            if (!StringUtil.isEmpty(contentText)) {
-                builder.setContentText(contentText);
+            if (builder != null) {
+                builder.setContentTitle("🚫 芝麻粒已禁用");
+                if (!StringUtil.isEmpty(contentText)) {
+                    builder.setContentText(contentText);
+                }
+                builder.setProgress(0, 0, false);
             }
-            builder.setProgress(0, 0, false);
             mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -256,14 +260,16 @@ public class Notify {
                 return;
             }
             lastUpdateTime = System.currentTimeMillis();
-            builder.setContentTitle(titleText);
-            if (!StringUtil.isEmpty(contentText)) {
-                builder.setContentText(contentText);
+            if (builder != null) {
+                builder.setContentTitle(titleText);
+                if (!StringUtil.isEmpty(contentText)) {
+                    builder.setContentText(contentText);
+                }
+                if (!BaseModel.getEnableProgress().getValue()) {
+                    builder.setProgress(0, 0, false);
+                }
+                mNotifyManager.notify(NOTIFICATION_ID, builder.build());
             }
-            if (!BaseModel.getEnableProgress().getValue()) {
-                builder.setProgress(0, 0, false);
-            }
-            mNotifyManager.notify(NOTIFICATION_ID, builder.build());
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -318,7 +324,8 @@ public class Notify {
                     NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
                     mNotifyManager.createNotificationChannel(notificationChannel);
                 }
-                builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                // This builder is local to this method, no need for null check related to the static builder
+                NotificationCompat.Builder errorBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setCategory(NotificationCompat.CATEGORY_ERROR)
                         .setSmallIcon(android.R.drawable.sym_def_app_icon)
                         .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
@@ -328,12 +335,12 @@ public class Notify {
                         .setAutoCancel(true);
                 if (context instanceof Service) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
+                        NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
                     } else {
-                        ((Service) context).startForeground(ERROR_NOTIFICATION_ID, builder.build());
+                        ((Service) context).startForeground(ERROR_NOTIFICATION_ID, errorBuilder.build());
                     }
                 } else {
-                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, builder.build());
+                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
                 }
             }
         } catch (Exception e) {
