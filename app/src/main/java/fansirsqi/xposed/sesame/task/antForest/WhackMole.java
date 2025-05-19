@@ -21,7 +21,7 @@ public class WhackMole {
     /**
      * 6秒拼手速 打地鼠
      */
-    public static void whackMole() {
+    public static void startWhackMole() {
         try {
             long startTime = System.currentTimeMillis();
             JSONObject response = new JSONObject(AntForestRpcCall.startWhackMole("senlinguangchangdadishu"));
