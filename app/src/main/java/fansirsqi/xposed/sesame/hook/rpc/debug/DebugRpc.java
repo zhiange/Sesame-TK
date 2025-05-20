@@ -4,6 +4,7 @@ import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,44 +15,33 @@ public class DebugRpc {
         return "Rpc测试";
     }
     public void start(String broadcastFun, String broadcastData, String testType) {
-        new Thread() {
-            String broadcastFun;
-            String broadcastData;
-            String testType;
-            public Thread setData(String fun, String data, String type) {
-                broadcastFun = fun;
-                broadcastData = data;
-                testType = type;
-                return this;
+        Runnable task = () -> {
+            switch (testType) {
+                case "Rpc":
+                    String s = test(broadcastFun, broadcastData);
+                    Log.debug("收到测试消息:\n方法:" + broadcastFun + "\n数据:" + broadcastData + "\n结果:" + s);
+                    break;
+                case "getNewTreeItems": // 获取新树上苗🌱信息
+                    getNewTreeItems();
+                    break;
+                case "getTreeItems": // 🔍查询树苗余量
+                    getTreeItems();
+                    break;
+                case "queryAreaTrees":
+                    queryAreaTrees();
+                    break;
+                case "getUnlockTreeItems":
+                    getUnlockTreeItems();
+                    break;
+                case "walkGrid": // 走格子
+                    walkGrid();
+                    break;
+                default:
+                    Log.debug("未知的测试类型: " + testType);
+                    break;
             }
-            @Override
-            public void run() {
-                switch (testType) {
-                    case "Rpc":
-                        String s = test(broadcastFun, broadcastData);
-                        Log.debug("收到测试消息:\n方法:" + broadcastFun + "\n数据:" + broadcastData + "\n结果:" + s);
-                        break;
-                    case "getNewTreeItems": // 获取新树上苗🌱信息
-                        getNewTreeItems();
-                        break;
-                    case "getTreeItems": // 🔍查询树苗余量
-                        getTreeItems();
-                        break;
-                    case "queryAreaTrees":
-                        queryAreaTrees();
-                        break;
-                    case "getUnlockTreeItems":
-                        getUnlockTreeItems();
-                        break;
-                    case "walkGrid": // 走格子
-                        walkGrid();
-                        break;
-                    default:
-                        Log.debug("未知的测试类型: " + testType);
-                        break;
-                }
-            }
-        }.setData(broadcastFun, broadcastData, testType).start();
+        };
+        GlobalThreadPools.getGeneralPurposeExecutor().submit(task);
     }
     private String test(String fun, String data) {
         return RequestManager.requestString(fun, data);

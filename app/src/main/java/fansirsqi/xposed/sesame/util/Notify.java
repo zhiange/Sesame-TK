@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
+import fansirsqi.xposed.sesame.hook.Toast;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.task.ModelTask;
 
@@ -38,6 +39,7 @@ public class Notify {
     private static NotificationManager mNotifyManager;
     @SuppressLint("StaticFieldLeak")
     private static NotificationCompat.Builder builder;
+    private static volatile boolean isNotificationStarted = false;
 
     private static long lastUpdateTime = 0;
     private static long nextExecTimeCache = 0;
@@ -53,11 +55,13 @@ public class Notify {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 Log.error(TAG, "Missing POST_NOTIFICATIONS permission to send new notification" + context);
+                Toast.show("请在设置中开启支付宝通知权限");
                 return false;
             }
         }
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             Log.error(TAG, "Notifications are disabled for this app." + context);
+            Toast.show("请在设置中开启支付宝通知权限");
             return false;
         }
         return true;
@@ -95,6 +99,7 @@ public class Notify {
                     builder.setOngoing(true);
                 }
                 NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
+                isNotificationStarted = true;
             }
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -119,6 +124,7 @@ public class Notify {
             }
             NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID);
             mNotifyManager = null;
+            isNotificationStarted = false;
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -130,6 +136,8 @@ public class Notify {
      * @param status 要更新的状态文本。
      */
     public static void updateStatusText(String status) {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
             long forestPauseTime = RuntimeInfo.getInstance().getLong(RuntimeInfo.RuntimeInfoKey.ForestPauseTime);
             if (forestPauseTime > System.currentTimeMillis()) {
@@ -155,11 +163,13 @@ public class Notify {
      * @param nextExecTime 下一次执行的时间。
      */
     public static void updateNextExecText(long nextExecTime) {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
             if (nextExecTime != -1) {
                 nextExecTimeCache = nextExecTime;
             }
-            if (builder != null && BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+            if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
                 builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
             } else if (builder != null) {
                 builder.setProgress(0, 0, false);
@@ -177,7 +187,9 @@ public class Notify {
      * 强制刷新通知，全部任务结束后调用
      */
     public static void forceUpdateText() {
-        if (builder != null && BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
+        if (BaseModel.getEnableProgress().getValue() && !ModelTask.isAllTaskFinished()) {
             builder.setProgress(100, ModelTask.completedTaskPercentage(), false);
         } else if (builder != null) {
             builder.setProgress(0, 0, false);
@@ -194,6 +206,8 @@ public class Notify {
      * @param content 上一次执行的内容。
      */
     public static void updateLastExecText(String content) {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
             contentText = "📌 上次执行 " + TimeUtil.getTimeStr(System.currentTimeMillis()) + "\n🌾 " + content;
             mainHandler.post(() -> sendText(false));
@@ -207,6 +221,8 @@ public class Notify {
      * 设置状态文本为执行中。
      */
     public static void setStatusTextExec() {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
             long forestPauseTime = RuntimeInfo.getInstance().getLong(RuntimeInfo.RuntimeInfoKey.ForestPauseTime);
 
@@ -230,14 +246,14 @@ public class Notify {
      * 设置状态文本为已禁用
      */
     public static void setStatusTextDisabled() {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
-            if (builder != null) {
-                builder.setContentTitle("🚫 芝麻粒已禁用");
-                if (!StringUtil.isEmpty(contentText)) {
-                    builder.setContentText(contentText);
-                }
-                builder.setProgress(0, 0, false);
+            builder.setContentTitle("🚫 芝麻粒已禁用");
+            if (!StringUtil.isEmpty(contentText)) {
+                builder.setContentText(contentText);
             }
+            builder.setProgress(0, 0, false);
             mainHandler.post(() -> sendText(true));
         } catch (Exception e) {
             Log.printStackTrace(e);
@@ -255,6 +271,8 @@ public class Notify {
      * @param force 是否强制刷新
      */
     private static void sendText(Boolean force) {
+        if (!isNotificationStarted || context == null || builder == null || mNotifyManager == null)
+            return;
         try {
             if (!force && System.currentTimeMillis() - lastUpdateTime < 500) {
                 return;
@@ -275,39 +293,39 @@ public class Notify {
         }
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     public static void sendNewNotification(Context context, String title, String content, int newNotificationId) {
         try {
-            if (checkPermission(context)) {
-                NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                Intent it = new Intent(Intent.ACTION_VIEW);
-                it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
-                PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-                NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(context, CHANNEL_ID);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒其他提醒", NotificationManager.IMPORTANCE_HIGH);
-                    notifyManager.createNotificationChannel(notificationChannel);
-                }
-                // 配置新通知的样式
-                newBuilder
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
-                        .setAutoCancel(true)
-                        .setContentIntent(pi);
-                // 发送新通知
-                if (context instanceof Service) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
-                    } else {
-                        ((Service) context).startForeground(newNotificationId, newBuilder.build());
-                    }
-                } else {
-                    NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
-                }
+            if (!checkPermission(context) || !isNotificationStarted) return;
+
+            NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            Intent it = new Intent(Intent.ACTION_VIEW);
+            it.setData(Uri.parse("alipays://platformapi/startapp?appId="));
+            PendingIntent pi = PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(context, CHANNEL_ID);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "🔔 芝麻粒其他提醒", NotificationManager.IMPORTANCE_HIGH);
+                notifyManager.createNotificationChannel(notificationChannel);
             }
+            // 配置新通知的样式
+            newBuilder
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                    .setAutoCancel(true)
+                    .setContentIntent(pi);
+            // 发送新通知
+            if (context instanceof Service) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
+                } else {
+                    ((Service) context).startForeground(newNotificationId, newBuilder.build());
+                }
+            } else {
+                NotificationManagerCompat.from(context).notify(newNotificationId, newBuilder.build());
+            }
+
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
@@ -316,33 +334,33 @@ public class Notify {
     public static void sendErrorNotification(String title, String content) {
         try {
             if (context == null) {
+                Log.error(TAG, "Context is null in sendErrorNotification, cannot proceed.");
                 return;
             }
-            if (checkPermission(context)) {
-                mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
-                    mNotifyManager.createNotificationChannel(notificationChannel);
-                }
-                // This builder is local to this method, no need for null check related to the static builder
-                NotificationCompat.Builder errorBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setCategory(NotificationCompat.CATEGORY_ERROR)
-                        .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setSubText("芝麻粒")
-                        .setAutoCancel(true);
-                if (context instanceof Service) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
-                    } else {
-                        ((Service) context).startForeground(ERROR_NOTIFICATION_ID, errorBuilder.build());
-                    }
-                } else {
-                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
-                }
+            if (!checkPermission(context) || !isNotificationStarted) return;
+            mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "‼️ 芝麻粒异常通知", NotificationManager.IMPORTANCE_LOW);
+                mNotifyManager.createNotificationChannel(notificationChannel);
             }
+            NotificationCompat.Builder errorBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setCategory(NotificationCompat.CATEGORY_ERROR)
+                    .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), android.R.drawable.sym_def_app_icon))
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .setSubText("芝麻粒")
+                    .setAutoCancel(true);
+            if (context instanceof Service) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
+                } else {
+                    ((Service) context).startForeground(ERROR_NOTIFICATION_ID, errorBuilder.build());
+                }
+            } else {
+                NotificationManagerCompat.from(context).notify(ERROR_NOTIFICATION_ID, errorBuilder.build());
+            }
+
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

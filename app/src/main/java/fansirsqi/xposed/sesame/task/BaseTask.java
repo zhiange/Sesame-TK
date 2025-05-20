@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import fansirsqi.xposed.sesame.util.Log;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
 
@@ -52,7 +52,7 @@ public abstract class BaseTask {
                 if (!force) return;
                 stopTask();
             }
-            executorService = Executors.newSingleThreadExecutor();
+            executorService = GlobalThreadPools.getGeneralPurposeExecutor();
             if (check()) {
                 executorService.submit(this::run);
                 startChildTasks();
