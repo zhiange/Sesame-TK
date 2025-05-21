@@ -1,11 +1,15 @@
 package fansirsqi.xposed.sesame.task.antSports;
+
 import android.annotation.SuppressLint;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashSet;
+
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
@@ -27,6 +31,7 @@ import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
+
 public class AntSports extends ModelTask {
     private static final String TAG = AntSports.class.getSimpleName();
     private int tmpStepCount = -1;
@@ -54,14 +59,17 @@ public class AntSports extends ModelTask {
     public String getName() {
         return "运动";
     }
+
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.SPORTS;
     }
+
     @Override
     public String getIcon() {
         return "AntSports.png";
     }
+
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -85,6 +93,7 @@ public class AntSports extends ModelTask {
         modelFields.addField(coinExchangeDoubleCard = new BooleanModelField("coinExchangeDoubleCard", "运动币兑换限时能量双击卡", false));
         return modelFields;
     }
+
     @Override
     public void boot(ClassLoader classLoader) {
         try {
@@ -105,22 +114,24 @@ public class AntSports extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "hook readDailyStep err:");
             Log.printStackTrace(TAG, t);
-        }finally{
-            Log.other("执行结束-"+getName());
+        } finally {
+            Log.other("执行结束-" + getName());
         }
     }
+
     @Override
     public Boolean check() {
-        if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+        if (TaskCommon.IS_ENERGY_TIME) {
+            Log.record("⏸ 当前为只收能量时间【" + BaseModel.getEnergyTime().getValue() + "】，停止执行" + getName() + "任务！");
             return false;
-        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+        } else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("💤 模块休眠时间【" + BaseModel.getModelSleepTime().getValue() + "】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
         }
     }
+
     @Override
     public void run() {
         Log.record("执行开始-" + getName());
@@ -136,7 +147,7 @@ public class AntSports extends ModelTask {
                         if ((Boolean) XposedHelpers.callMethod(XposedHelpers.callStaticMethod(classLoader.loadClass("com.alibaba.health.pedometer.intergation.rpc.RpcManager"), "a"), "a", new Object[]{step, Boolean.FALSE, "system"})) {
                             Log.other("同步步数🏃🏻‍♂️[" + step + "步]");
                         } else {
-                            Log.record("同步运动步数失败:" + step);
+                            Log.error("同步运动步数失败:" + step);
                         }
                         Status.SyncStepToday(UserMap.getCurrentUid());
                     } catch (Throwable t) {
@@ -174,7 +185,7 @@ public class AntSports extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
-        }finally {
+        } finally {
             Log.record("执行结束-" + getName());
         }
     }
@@ -219,6 +230,7 @@ public class AntSports extends ModelTask {
         }
         return tmpStepCount;
     }
+
     // 运动
     private void sportsTasks() {
         try {
@@ -235,7 +247,7 @@ public class AntSports extends ModelTask {
                     String taskStatus = taskDetail.getString("taskStatus");
                     int currentNum = taskDetail.getInt("currentNum");
                     // 要完成的次数
-                    int limitConfigNum = taskDetail.getInt("limitConfigNum")-currentNum;
+                    int limitConfigNum = taskDetail.getInt("limitConfigNum") - currentNum;
                     if (taskStatus.equals("HAS_RECEIVED"))
                         return;
                     for (int i1 = 0; i1 < limitConfigNum; i1++) {
@@ -244,7 +256,7 @@ public class AntSports extends ModelTask {
                             Log.record("做任务得运动币👯[完成任务：" + taskName + "，得" + prizeAmount + "🪙]");
                             receiveCoinAsset();
                         }
-                        if (limitConfigNum>1)
+                        if (limitConfigNum > 1)
                             ThreadUtil.sleep(10000);
                         else
                             ThreadUtil.sleep(1000);
@@ -255,23 +267,24 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(e);
         }
     }
+
     private void sportsCheck_in() {
         try {
             JSONObject jo = new JSONObject(AntSportsRpcCall.sportsCheck_in());
             if (jo.optBoolean("success")) {
                 JSONObject data = jo.getJSONObject("data");
-                if(!data.getBoolean("signed")){
+                if (!data.getBoolean("signed")) {
                     JSONObject subscribeConfig;
                     if (data.has("subscribeConfig")) {
                         subscribeConfig = data.getJSONObject("subscribeConfig");
-                        Log.record("做任务得运动币👯[完成任务：签到" + subscribeConfig.getString("subscribeExpireDays")+"天，"+data.getString("toast") + "🪙]");
-                    }else {
+                        Log.record("做任务得运动币👯[完成任务：签到" + subscribeConfig.getString("subscribeExpireDays") + "天，" + data.getString("toast") + "🪙]");
+                    } else {
                         Log.record("没有签到");
                     }
-                }else {
+                } else {
                     Log.record("运动签到今日已签到");
                 }
-            }else {
+            } else {
                 Log.record(jo.toString());
             }
         } catch (Exception e) {
@@ -279,6 +292,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(e);
         }
     }
+
     private void receiveCoinAsset() {
         try {
             String s = AntSportsRpcCall.queryCoinBubbleModule();
@@ -307,6 +321,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     /*
      * 新版行走路线 -- begin
      */
@@ -335,7 +350,7 @@ public class AntSports extends ModelTask {
             int forwardStepCount = userPathStep.getInt("forwardStepCount");
             int remainStepCount = userPathStep.getInt("remainStepCount");
             int needStepCount = pathStepCount - forwardStepCount;
-            if  (remainStepCount >= minGoStepCount) {
+            if (remainStepCount >= minGoStepCount) {
                 int useStepCount = Math.min(remainStepCount, needStepCount);
                 walkGo(userPathStep.getString("pathId"), useStepCount, userPathStep.getString("pathName"));
             }
@@ -344,6 +359,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void walkGo(String pathId, int useStepCount, String pathName) {
         try {
             Date date = new Date();
@@ -358,6 +374,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private JSONObject queryWorldMap(String themeId) {
         JSONObject theme = null;
         try {
@@ -371,6 +388,7 @@ public class AntSports extends ModelTask {
         }
         return theme;
     }
+
     private JSONObject queryCityPath(String cityId) {
         JSONObject city = null;
         try {
@@ -384,6 +402,7 @@ public class AntSports extends ModelTask {
         }
         return city;
     }
+
     private JSONObject queryPath(String pathId) {
         JSONObject path = null;
         try {
@@ -404,6 +423,7 @@ public class AntSports extends ModelTask {
         }
         return path;
     }
+
     private void receiveEvent(String eventBillNo) {
         try {
             JSONObject jo = new JSONObject(AntSportsRpcCall.receiveEvent(eventBillNo));
@@ -420,6 +440,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private String queryJoinPath(String themeId) {
         if (walkCustomPath.getValue()) {
             return walkCustomPathId.getValue();
@@ -452,6 +473,7 @@ public class AntSports extends ModelTask {
         }
         return pathId;
     }
+
     private void joinPath(String pathId) {
         if (pathId == null) {
             // 龙年祈福线
@@ -470,6 +492,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void getWalkPathThemeIdOnConfig() {
         if (walkPathTheme.getValue() == WalkPathTheme.DA_MEI_ZHONG_GUO) {
             walkPathThemeId = "M202308082226";
@@ -487,6 +510,7 @@ public class AntSports extends ModelTask {
             walkPathThemeId = "WF202312050200";
         }
     }
+
     /*
      * 新版行走路线 -- end
      */
@@ -543,6 +567,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void join(ClassLoader loader, JSONArray allPathBaseInfoList, JSONArray otherAllPathBaseInfoList,
                       String firstJoinPathTitle) {
         try {
@@ -594,6 +619,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void go(ClassLoader loader, String day, String rankCacheKey, int stepCount, String title) {
         try {
             String s = AntSportsRpcCall.go(day, rankCacheKey, stepCount);
@@ -617,6 +643,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void parseTreasureBoxModel(ClassLoader loader, JSONObject jo, String rankCacheKey) {
         try {
             String canOpenTime = jo.getString("canOpenTime");
@@ -656,6 +683,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private int openTreasureBox(ClassLoader loader, String boxNo, String userId) {
         try {
             String s = AntSportsRpcCall.openTreasureBox(boxNo, userId);
@@ -681,6 +709,7 @@ public class AntSports extends ModelTask {
         }
         return 0;
     }
+
     private void queryProjectList(ClassLoader loader) {
         try {
             JSONObject jo = new JSONObject(AntSportsRpcCall.queryProjectList(0));
@@ -697,7 +726,7 @@ public class AntSports extends ModelTask {
                     }
                     donate(loader, donateCharityCoinAmount.getValue(), jo.getString("projectId"), jo.getString("title"));
                     Status.donateCharityCoin();
-                    charityCoinCount -=  donateCharityCoinAmount.getValue();
+                    charityCoinCount -= donateCharityCoinAmount.getValue();
                     if (donateCharityCoinType.getValue() == DonateCharityCoinType.ONE) {
                         break;
                     }
@@ -711,6 +740,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void donate(ClassLoader loader, int donateCharityCoin, String projectId, String title) {
         try {
             String s = AntSportsRpcCall.donate(donateCharityCoin, projectId);
@@ -725,6 +755,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void queryWalkStep(ClassLoader loader) {
         try {
             String s = AntSportsRpcCall.queryWalkStep();
@@ -732,7 +763,8 @@ public class AntSports extends ModelTask {
             if (ResUtil.checkResultCode(jo)) {
                 jo = jo.getJSONObject("dailyStepModel");
                 int produceQuantity = jo.getInt("produceQuantity");
-                int hour = Integer.parseInt(TimeUtil.getFormatTime().split(":")[0]);;
+                int hour = Integer.parseInt(TimeUtil.getFormatTime().split(":")[0]);
+                ;
                 if (produceQuantity >= minExchangeCount.getValue() || hour >= latestExchangeTime.getValue()) {
                     s = AntSportsRpcCall.walkDonateSignInfo(produceQuantity);
                     s = AntSportsRpcCall.donateWalkHome(produceQuantity);
@@ -770,6 +802,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     /* 文体中心 */// SPORTS_DAILY_SIGN_GROUP SPORTS_DAILY_GROUP
     private void userTaskGroupQuery(String groupId) {
         try {
@@ -801,6 +834,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void participate() {
         try {
             String s = AntSportsRpcCall.queryAccount();
@@ -850,6 +884,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void userTaskRightsReceive() {
         try {
             String s = AntSportsRpcCall.userTaskGroupQuery("SPORTS_DAILY_GROUP");
@@ -888,6 +923,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void pathFeatureQuery() {
         try {
             String s = AntSportsRpcCall.pathFeatureQuery();
@@ -926,6 +962,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void pathMapHomepage(String pathId) {
         try {
             String s = AntSportsRpcCall.pathMapHomepage(pathId);
@@ -963,6 +1000,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void pathMapJoin(String title, String pathId) {
         try {
             JSONObject jo = new JSONObject(AntSportsRpcCall.pathMapJoin(pathId));
@@ -977,6 +1015,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     private void tiyubizGo(String countDate, String title, int goStepCount, String pathId,
                            String userPathRecordId) {
         try {
@@ -999,6 +1038,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     /* 抢好友大战 */
     private void queryClubHome() {
         try {
@@ -1019,6 +1059,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     // 抢好友大战-收金币
     private void processBubbleList(JSONObject object) {
         if (object != null && object.has("bubbleList")) {
@@ -1042,6 +1083,7 @@ public class AntSports extends ModelTask {
             }
         }
     }
+
     // 抢好友大战-训练好友
     private void queryTrainItem() {
         try {
@@ -1107,6 +1149,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     // 抢好友大战-抢购好友
     private void buyMember() {
         try {
@@ -1186,6 +1229,7 @@ public class AntSports extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
+
     public interface WalkPathTheme {
         int DA_MEI_ZHONG_GUO = 0;
         int GONG_YI_YI_XIAO_BU = 1;
@@ -1194,11 +1238,13 @@ public class AntSports extends ModelTask {
         int LONG_NIAN_QI_FU = 4;
         String[] nickNames = {"大美中国", "公益一小步", "登顶芝麻山", "维C大挑战", "龙年祈福"};
     }
+
     public interface DonateCharityCoinType {
         int ONE = 0;
         int ALL = 1;
         String[] nickNames = {"捐赠一个项目", "捐赠所有项目"};
     }
+
     public interface BattleForFriendType {
         int ROB = 0;
         int DONT_ROB = 1;
