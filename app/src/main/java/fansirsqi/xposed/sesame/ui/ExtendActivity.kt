@@ -3,6 +3,7 @@ package fansirsqi.xposed.sesame.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -116,14 +117,18 @@ class ExtendActivity : BaseActivity() {
                 }
             )
 
+            //我想在这加一个编辑框，里面支持输入文字，下面的展示随机光盘的字段从编辑框里面取
+
             extendFunctions.add(
-                ExtendFunctionItem("展示随机光盘") {
+                ExtendFunctionItem("获取DataCache字段") {
+                    val inputEditText = EditText(this)
                     AlertDialog.Builder(this)
-                        .setTitle("看看效果")
-                        .setMessage("xxxx")
+                        .setTitle("输入字段Key")
+                        .setView(inputEditText)
                         .setPositiveButton(R.string.ok) { _, _ ->
-                            val photoList = DataCache.getData<List<Map<String, String>>>("guangPanPhoto")
-                            ToastUtil.showToast(this, "${photoList?.randomOrNull()}")
+                            val inputText = inputEditText.text.toString()
+                            val photoList = DataCache.getData<List<Map<String, String>>>(inputText)
+                            ToastUtil.showToast(this, "${photoList?.randomOrNull()} 输入内容: $inputText")
                         }
                         .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                         .show()
