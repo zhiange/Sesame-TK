@@ -663,29 +663,15 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         Object[] recordArray = rpcHookMap.remove(object);
                                         if (recordArray != null) {
                                             try {
-//                                                Map<String, Object> HookResponse = new HashMap<>();
-                                                String TimeStamp = String.valueOf(recordArray[0]);
-                                                String Method = String.valueOf(recordArray[1]);
-                                                String Params = String.valueOf(recordArray[2]);
-                                                String rawData = String.valueOf(recordArray[3]);
-//                                                HookResponse.put("TimeStamp", recordArray[0]);
-//                                                HookResponse.put("Method", recordArray[1]);
-//                                                HookResponse.put("Params", Params);
-//                                                HookResponse.put("Data", recordArray[3]);
-
                                                 JSONObject Res = new JSONObject();
                                                 Res.put("TimeStamp", recordArray[0]);
                                                 Res.put("Method", recordArray[1]);
-                                                Res.put("Params", Params);
-                                                Res.put("Data", rawData);
-
-
+                                                Res.put("Params", recordArray[2]);
+                                                Res.put("Data", recordArray[3]);
                                                 if (BaseModel.getSendHookData().getValue()) {
                                                     HookSender.sendHookData(Res);
                                                 }
-                                                String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData + "\n<========================\n";
-                                                if (!logMessage.trim().isEmpty() && !rawData.equals("null")) {
-//                                                Log.capture(logMessage);
+                                                if (recordArray[3] != null && !recordArray[3].equals("null")) {
                                                     Log.capture(Res.toString());
                                                 }
                                             } catch (JSONException j) {
@@ -694,7 +680,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         } else {
                                             Log.capture("delete record ID: " + object.hashCode());
                                         }
-
                                     }
                                 });
                         Log.runtime(TAG, "hook record request successfully");
@@ -1016,7 +1001,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 replyIntent.putExtra("EXTRA_RUN_TYPE", RunType.ACTIVE.getNickName());
                                 replyIntent.setPackage(General.MODULE_PACKAGE_NAME);
                                 context.sendBroadcast(replyIntent);
-                                Log.runtime(TAG, "Replied with status: " + RunType.ACTIVE.getNickName());
+                                Log.system(TAG, "Replied with status: " + RunType.ACTIVE.getNickName());
                             }
                         } catch (Throwable th) {
                             Log.runtime(TAG, "sesame sendBroadcast status err:");

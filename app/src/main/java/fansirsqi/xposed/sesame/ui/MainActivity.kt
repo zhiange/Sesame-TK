@@ -87,7 +87,7 @@ class MainActivity : BaseActivity() {
         oneWord = findViewById(R.id.one_word)
         // 获取并设置一言句子
         ViewAppInfo.checkRunType()
-        updateSubTitle(ViewAppInfo.runType?.nickName ?: "未激活")
+        updateSubTitle(ViewAppInfo.runType?.nickName ?: RunType.LOADED.nickName)
         try {
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.checkerDestFile)) {
                 Log.error("checker file copy failed")
@@ -118,7 +118,7 @@ class MainActivity : BaseActivity() {
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val action = intent.action
-                    Log.runtime("module got broadcast:$action intent:$intent")
+                    Log.system("module got broadcast:$action intent:$intent")
                     if (action != null) {
                         when (action) {
                             "fansirsqi.xposed.sesame.status" -> {
@@ -129,19 +129,17 @@ class MainActivity : BaseActivity() {
                                         RunType.DISABLE.nickName -> {
                                             ViewAppInfo.runType = RunType.DISABLE // 更新状态为 DISABLE
                                             updateSubTitle(RunType.DISABLE.nickName) // 更新 UI 显示为“未激活”
-                                            Log.runtime("MainActivity received status confirmation: DISABLE")
+                                            Log.system("MainActivity received status confirmation: DISABLE")
                                         }
-
                                         RunType.ACTIVE.nickName -> {
                                             ViewAppInfo.runType = RunType.ACTIVE // 更新状态为 ACTIVE
                                             updateSubTitle(RunType.ACTIVE.nickName) // 更新 UI 显示为“已激活”
-                                            Log.runtime("MainActivity received status confirmation: ACTIVE")
+                                            Log.system("MainActivity received status confirmation: ACTIVE")
                                         }
-
                                         RunType.LOADED.nickName -> {
                                             ViewAppInfo.runType = RunType.LOADED // 更新状态为 LOADED
                                             updateSubTitle(RunType.LOADED.nickName) // 更新 UI 显示为“已加载”
-                                            Log.runtime("MainActivity received status confirmation: LOADED")
+                                            Log.system("MainActivity received status confirmation: LOADED")
                                         }
                                     }
                                 }
