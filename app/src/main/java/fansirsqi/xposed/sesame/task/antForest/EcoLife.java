@@ -192,14 +192,14 @@ public class EcoLife {
                     }
                     if (!exists) {
                         guangPanPhotos.add(photo);
-                        DataCache.INSTANCE.saveData("guangPanPhotos", guangPanPhotos);
+                        DataCache.INSTANCE.saveData("guangPanPhoto", guangPanPhotos);
                     }
                 }
             }
             if ("SUCCESS".equals(JsonUtil.getValueByPath(jo, "data.status"))) {
                 return;
             }
-            List<Map<String, String>> allPhotos = DataCache.INSTANCE.getData("guangPanPhotos", new ArrayList<>());
+            List<Map<String, String>> allPhotos = DataCache.INSTANCE.getData("guangPanPhoto", new ArrayList<>());
             if (allPhotos == null || allPhotos.isEmpty()) {
                 Log.forest("光盘行动🍛缓存中没有照片数据");
                 photo = null;
