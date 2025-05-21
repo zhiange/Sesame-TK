@@ -132,26 +132,61 @@ public class ApplicationHook implements IXposedHookLoadPackage {
      * @return true表示检查失败，false表示检查成功
      */
     private boolean executeCheckTask(long lastExecTime) {
+        FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
+        MAIN_THREAD_POOL.submit(checkTask); // Submit the task
+
         try {
-            FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
-            MAIN_THREAD_POOL.submit(checkTask);
-            if (!checkTask.get(10, TimeUnit.SECONDS)) {
+            // Attempt to get the result with a timeout
+            boolean taskResult = checkTask.get(10, TimeUnit.SECONDS);
+
+            if (!taskResult) {
+                // AntMemberRpcCall.check() completed and returned false
+                Log.record("执行失败：检查逻辑返回false");
+                // The original code had a peculiar sleep here.
+                // This calculation for waitTime is suspicious and might need review by the user.
+                // For now, we include the interrupt handling for this sleep.
                 long waitTime = 10000 - System.currentTimeMillis() + lastExecTime;
                 if (waitTime > 0) {
-                    Thread.sleep(waitTime);
+                    try {
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException ie) {
+                        Log.record("执行失败：在额外等待期间被中断");
+                        Thread.currentThread().interrupt(); // Preserve interrupt status
+                        return true; // Treat as failure
+                    }
                 }
-                Log.record("执行失败：检查超时");
-                return true;
+                return true; // Failure because check() returned false
             }
+
+            // Task completed successfully and returned true
             reLoginCount.set(0);
-            return false;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Log.record("执行失败：检查中断");
-            return false;
-        } catch (Exception e) {
-            Log.record("执行失败：检查异常");
+            return false; // Success
+
+        } catch (InterruptedException e) {
+            Log.record("执行失败：等待检查结果时被中断");
+            Thread.currentThread().interrupt(); // Preserve interrupt status
+            checkTask.cancel(true); // Attempt to cancel the underlying task as well
+            return true; // Treat as failure
+        } catch (TimeoutException e) {
+            Log.record("执行失败：检查操作超时 (10秒)");
+            checkTask.cancel(true); // Attempt to cancel the underlying task
+            return true; // Treat as failure
+        } catch (ExecutionException e) {
+            Log.record("执行失败：检查操作内部抛出异常");
+            Throwable cause = e.getCause();
+            Log.printStackTrace(TAG, cause != null ? cause : e);
+            if (cause instanceof InterruptedException) {
+                // If the wrapped exception was InterruptedException, ensure current thread is interrupted
+                Thread.currentThread().interrupt();
+            }
+            return true; // Treat as failure
+        } catch (Exception e) { // Catch-all for other unexpected errors, e.g. submitting task or CancellationException
+            Log.record("执行失败：处理检查任务时发生未知错误");
             Log.printStackTrace(TAG, e);
-            return false;
+            if (e instanceof java.util.concurrent.CancellationException) {
+                 Log.record("执行失败：检查任务已被取消");
+            }
+            return true; // Treat as failure
         }
     }
 
@@ -560,12 +595,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             2000);
                 }
                 Notify.start(service);
-//                if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
-//                    Log.record("❌ 芝麻粒已禁用");
-//                    Toast.show("❌ 芝麻粒已禁用");
-//                    Notify.setStatusTextDisabled();
-//                    return false;
-//                }
                 // 获取 BaseModel 实例
                 BaseModel baseModel = Model.getModel(BaseModel.class);
                 if (baseModel == null) {
