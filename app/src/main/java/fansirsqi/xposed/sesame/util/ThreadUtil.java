@@ -26,11 +26,16 @@ public class ThreadUtil {
      *
      * @param millis 毫秒数。
      */
-    public static void sleep(long millis) {
+    public static void sleep(long millis)  {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            Log.printStackTrace(e);
+        }
+        catch (Throwable t) {
+            Log.printStackTrace(t);
         }
     }
     public boolean shutdownAndAwaitTermination(ExecutorService pool) {
