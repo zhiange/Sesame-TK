@@ -126,7 +126,7 @@ jobs:
           echo "normal_file=$normal_file" >> $GITHUB_OUTPUT
           echo "compatible_file=$compatible_file" >> $GITHUB_OUTPUT
 
-      - name: Send Normal APK to Telegram
+      - name: Send Commit Details to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TG_CHAT_ID }}
@@ -136,22 +136,20 @@ jobs:
             File: `${{ steps.file_names.outputs.normal_file }}`
             Branch: `${{ github.ref_name }}`
             Triggered by: `${{ github.actor }}`
-            
+
             ${{ steps.commit_details.outputs.COMMIT_MESSAGE_BODY }}
+          format: markdown
+      - name: Send Normal APK to Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TG_CHAT_ID }}
+          token: ${{ secrets.TG_BOT_TOKEN }}
           document: ${{ steps.extract_apks.outputs.signed_normal }}
           format: markdown
-
       - name: Send Compatible APK to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TG_CHAT_ID }}
           token: ${{ secrets.TG_BOT_TOKEN }}
-          message: |
-            📦 *New Compatible Build!*
-            File: `${{ steps.file_names.outputs.compatible_file }}`
-            Branch: `${{ github.ref_name }}`
-            Triggered by: `${{ github.actor }}`
-            
-            ${{ steps.commit_details.outputs.COMMIT_MESSAGE_BODY }}
           document: ${{ steps.extract_apks.outputs.signed_compatible }}
           format: markdown
