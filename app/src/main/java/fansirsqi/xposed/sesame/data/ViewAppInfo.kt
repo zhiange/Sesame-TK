@@ -18,10 +18,12 @@ object ViewAppInfo {
     var appVersion: String = ""
     var appBuildTarget: String = ""
     var appBuildNumber: String = ""
-//    var runType: RunType? = RunType.DISABLE
+
+    //    var runType: RunType? = RunType.DISABLE
     @Volatile
     internal var runType: RunType? = RunType.DISABLE
-    @Synchronized set
+        @Synchronized set
+
     @JvmStatic
     fun setRunType(type: RunType) {
         runType = type
@@ -42,10 +44,8 @@ object ViewAppInfo {
             appTitle = context.getString(R.string.app_name) //+ BuildConfig.VERSION_NAME
             appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME + " ⏰"
             try {
-                appVersion = BuildConfig.VERSION_NAME.replace(
-                    BuildConfig.BUILD_TIME.replace(":", "."),
-                    BuildConfig.BUILD_NUMBER
-                ) + " 📦"
+                appVersion =
+                    "${BuildConfig.BUILD_TAG}-${BuildConfig.FLAVOR}-${BuildConfig.BUILD_TYPE}  📦"
             } catch (e: Exception) {
                 Log.printStackTrace(e)
             }
