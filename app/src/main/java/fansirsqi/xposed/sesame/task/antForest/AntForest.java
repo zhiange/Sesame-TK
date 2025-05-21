@@ -1534,10 +1534,13 @@ public class AntForest extends ModelTask {
      */
     private void receiveTaskAward() {
         try {
-            Set<String> taskList = DataCache.INSTANCE.getData("forestTaskList", new HashSet<>(Arrays.asList(
-                    "TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK",
-                    "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"
-            )));
+            // 修复：使用new HashSet包装从缓存获取的数据，兼容List/Set类型
+            Set<String> taskList = new HashSet<>(Objects.requireNonNull(DataCache.INSTANCE.getData(
+                    "forestTaskList",
+                    Arrays.asList(
+                            "TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK",
+                            "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"
+                    ))));
             while (true) {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
