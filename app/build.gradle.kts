@@ -32,7 +32,7 @@ android {
         val patch = 5
         val buildTag = "beta.8"
         
-        val buildDate = SimpleDateFormat("yy-MM-dd", Locale.CHINA).apply {
+        val buildDate = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).apply {
             timeZone = TimeZone.getTimeZone("GMT+8")
         }.format(Date())
         
@@ -41,11 +41,7 @@ android {
         }.format(Date())
         
         val buildTargetCode = try {
-            MessageDigest.getInstance("MD5")
-                .digest(buildTime.toByteArray())
-                //noinspection WrongGradleMethod
-                .joinToString("") { "%02x".format(it) }
-                .substring(0, 4)
+            buildDate.replace("-",".")+"."+buildTime.replace(":",".")
         } catch (_: Exception) {
             "0000"
         }
@@ -184,7 +180,7 @@ android {
         val variant = this
         variant.outputs.all {
             val flavorName = variant.flavorName.replaceFirstChar { it.uppercase() }
-            val fileName = "Sesame-$flavorName-${variant.versionName}.apk"
+            val fileName = "Sesame-TK-$flavorName-${variant.versionName}.apk"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = fileName
         }
     }
