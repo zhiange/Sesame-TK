@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.robv.android.xposed.XposedHelpers;
+import fansirsqi.xposed.sesame.data.DataCache;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.data.Status;
@@ -1533,6 +1534,10 @@ public class AntForest extends ModelTask {
      */
     private void receiveTaskAward() {
         try {
+            Set<String> taskList = DataCache.INSTANCE.getData("forestTaskList", new HashSet<>(Arrays.asList(
+                    "TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK",
+                    "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"
+            )));
             while (true) {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
@@ -1579,7 +1584,6 @@ public class AntForest extends ModelTask {
                                 Log.runtime(joAward.toString()); // 打印奖励响应
                             }
                         } else if (TaskStatus.TODO.name().equals(taskStatus)) {
-                            Set<String> taskList = Set.of("TEST_LEAF_TASK","ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK", "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"); // 使用 Set.of 直接定义不可变集合
                             if (!taskList.contains(taskType)) {
                                 JSONObject joFinishTask = new JSONObject(AntForestRpcCall.finishTask(sceneCode, taskType)); // 完成任务请求
                                 ThreadUtil.sleep(500); // 等待500毫秒
@@ -1591,6 +1595,7 @@ public class AntForest extends ModelTask {
                                     taskList.add(taskType);
                                 }
                             }
+                            DataCache.INSTANCE.saveData("forestTaskList", taskList);
                         }
                     }
                 }
