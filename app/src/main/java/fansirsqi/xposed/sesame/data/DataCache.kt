@@ -20,56 +20,40 @@ object DataCache {
     @get:JsonIgnore
     private var init = false
 
-    // 光盘行动图片缓存
-    val photoGuangPanList: MutableList<Map<String, String>> = ArrayList()
+    // 通用数据缓存
+    val dataMap: MutableMap<String, Any> = mutableMapOf()
 
     init {
         // 在单例初始化时加载数据
         load()
     }
 
-    private fun checkGuangPanPhoto(guangPanPhoto: Map<String, String>?): Boolean {
-        if (guangPanPhoto == null) {
+    fun <T> saveData(key: String, value: T): Boolean {
+        if (value == null) {
+            Log.error(TAG, "Value for key '$key' cannot be null.")
             return false
         }
-        val beforeImageId = guangPanPhoto["before"]
-        val afterImageId = guangPanPhoto["after"]
-        return !StringUtil.isEmpty(beforeImageId)
-                && !StringUtil.isEmpty(afterImageId)
-                && beforeImageId != afterImageId
-    }
-
-    fun saveGuangPanPhoto(guangPanPhoto: Map<String, String>) : Boolean{
-        if (!checkGuangPanPhoto(guangPanPhoto)) {
-            Log.error(TAG,"传入的参数不合法：${guangPanPhoto}")
-            return false
-        }
-        if (!photoGuangPanList.contains(guangPanPhoto)) {
-            photoGuangPanList.add(guangPanPhoto)
-        }
+        dataMap[key] = value
         return save()
     }
 
-    // 动态获取光盘行动图片数量
-    @get:JsonIgnore
-    val guangPanPhotoCount: Int
-        get() = photoGuangPanList.size
-
-    fun clearGuangPanPhoto(): Boolean {
-        photoGuangPanList.clear()
-        return save()
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getData(key: String, defaultValue: T? = null): T? {
+        return dataMap[key] as? T ?: defaultValue
     }
 
-    @get:JsonIgnore
-    val randomGuangPanPhoto: Map<String, String>?
-        get() {
-            if (photoGuangPanList.isEmpty()) {
-                return null
-            }
-            val pos = RandomUtil.nextInt(0, photoGuangPanList.size - 1)
-            val photo = photoGuangPanList[pos]
-            return if (checkGuangPanPhoto(photo)) photo else null
+    fun removeData(key: String): Boolean {
+        if (dataMap.containsKey(key)) {
+            dataMap.remove(key)
+            return save()
         }
+        return false
+    }
+
+    fun clearAllData(): Boolean {
+        dataMap.clear()
+        return save()
+    }
 
     private fun save(): Boolean {
         Log.record(TAG, "save DataCache")

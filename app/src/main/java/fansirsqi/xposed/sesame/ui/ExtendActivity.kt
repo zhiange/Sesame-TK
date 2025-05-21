@@ -77,9 +77,9 @@ class ExtendActivity : BaseActivity() {
             ExtendFunctionItem(getString(R.string.clear_photo)) {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.clear_photo)
-                    .setMessage("确认清空${DataCache.guangPanPhotoCount}组光盘行动图片？")
+                    .setMessage("确认清空${DataCache.getData<List<Map<String, String>>>("guangPanPhoto")?.size ?: 0}组光盘行动图片？")
                     .setPositiveButton(R.string.ok) { _, _ ->
-                        if (DataCache.clearGuangPanPhoto()) {
+                        if (DataCache.removeData("guangPanPhoto")) {
                             ToastUtil.showToast(this, "光盘行动图片清空成功")
                         } else {
                             ToastUtil.showToast(this, "光盘行动图片清空失败")
@@ -93,18 +93,22 @@ class ExtendActivity : BaseActivity() {
         if(ViewAppInfo.isApkInDebug){
             extendFunctions.add(
                 ExtendFunctionItem("写入光盘") {
-                    val photos = HashMap<String, String>()
                     AlertDialog.Builder(this)
                         .setTitle("Test")
                         .setMessage("xxxx")
                         .setPositiveButton(R.string.ok) { _, _ ->
+                            val newPhotoEntry = HashMap<String, String>()
                             val randomStr = FansirsqiUtil.getRandomString(10)
-                            photos["before"] = "before$randomStr"
-                            photos["after"] = "after$randomStr"
-                            if (DataCache.saveGuangPanPhoto(photos)) {
-                                ToastUtil.showToast(this, "写入成功$photos")
+                            newPhotoEntry["before"] = "before$randomStr"
+                            newPhotoEntry["after"] = "after$randomStr"
+
+                            val existingPhotos = DataCache.getData<MutableList<Map<String, String>>>("guangPanPhoto")?.toMutableList() ?: mutableListOf()
+                            existingPhotos.add(newPhotoEntry)
+
+                            if (DataCache.saveData("guangPanPhoto", existingPhotos)) {
+                                ToastUtil.showToast(this, "写入成功$newPhotoEntry")
                             } else {
-                                ToastUtil.showToast(this, "写入失败$photos")
+                                ToastUtil.showToast(this, "写入失败$newPhotoEntry")
                             }
                         }
                         .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -118,7 +122,8 @@ class ExtendActivity : BaseActivity() {
                         .setTitle("看看效果")
                         .setMessage("xxxx")
                         .setPositiveButton(R.string.ok) { _, _ ->
-                            ToastUtil.showToast(this, "${DataCache.randomGuangPanPhoto}")
+                            val photoList = DataCache.getData<List<Map<String, String>>>("guangPanPhoto")
+                            ToastUtil.showToast(this, "${photoList?.randomOrNull()}")
                         }
                         .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                         .show()

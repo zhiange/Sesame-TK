@@ -9,10 +9,14 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fansirsqi.xposed.sesame.data.DataCache;
+import java.util.ArrayList;
+import java.util.List;
+import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.hook.Toast;
 import fansirsqi.xposed.sesame.util.JsonUtil;
@@ -174,13 +178,34 @@ public class EcoLife {
                     if (afterMatcher.find()) {
                         photo.put("after", afterMatcher.group(1));
                     }
-                    DataCache.INSTANCE.saveGuangPanPhoto(photo);
+                    List<Map<String, String>> guangPanPhotos = DataCache.INSTANCE.getData("guangPanPhotos", new ArrayList<>());
+                    if (guangPanPhotos == null) {
+                        guangPanPhotos = new ArrayList<>();
+                    }
+                    // 避免重复添加相同的照片信息
+                    boolean exists = false;
+                    for (Map<String, String> p : guangPanPhotos) {
+                        if (Objects.equals(p.get("before"), photo.get("before")) && Objects.equals(p.get("after"), photo.get("after"))) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        guangPanPhotos.add(photo);
+                        DataCache.INSTANCE.saveData("guangPanPhotos", guangPanPhotos);
+                    }
                 }
             }
             if ("SUCCESS".equals(JsonUtil.getValueByPath(jo, "data.status"))) {
                 return;
             }
-            photo = DataCache.INSTANCE.getRandomGuangPanPhoto();
+            List<Map<String, String>> allPhotos = DataCache.INSTANCE.getData("guangPanPhotos", new ArrayList<>());
+            if (allPhotos == null || allPhotos.isEmpty()) {
+                Log.forest("光盘行动🍛缓存中没有照片数据");
+                photo = null;
+            } else {
+                photo = allPhotos.get(RandomUtil.nextInt(0, allPhotos.size()));
+            }
             if (photo == null) {
                 Log.forest("光盘行动🍛请先完成一次光盘打卡");
                 return;
