@@ -21,23 +21,23 @@ import okhttp3.Response;
 public class HookSender {
     private static final OkHttpClient client = new OkHttpClient();
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-    public static void sendHookData(Map<String, Object> hookResponse) {
+    public static void sendHookData(JSONObject jo) {
         try {
-            JSONObject jo = new JSONObject();
-            for (Map.Entry<String, Object> entry : hookResponse.entrySet()) {
-                String k = entry.getKey();
-                Object v = entry.getValue();
-                if (v instanceof String stringValue) {
-                    try {
-                        JSONObject valueAsJson = new JSONObject(stringValue);
-                        jo.put(k, valueAsJson);
-                    } catch (JSONException e) {
-                        jo.put(k, v);
-                    }
-                } else {
-                    jo.put(k, v);
-                }
-            }
+//            JSONObject jo = new JSONObject();
+//            for (Map.Entry<String, Object> entry : hookResponse.entrySet()) {
+//                String k = entry.getKey();
+//                Object v = entry.getValue();
+//                if (v instanceof String stringValue) {
+//                    try {
+//                        JSONObject valueAsJson = new JSONObject(stringValue);
+//                        jo.put(k, valueAsJson);
+//                    } catch (JSONException e) {
+//                        jo.put(k, v);
+//                    }
+//                } else {
+//                    jo.put(k, v);
+//                }
+//            }
             RequestBody body = RequestBody.create(jo.toString(), JSON_MEDIA_TYPE);
             Request request = new Request.Builder()
                     .url(BaseModel.getSendHookDataUrl().getValue())
