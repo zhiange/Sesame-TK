@@ -18,6 +18,8 @@ import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.io.File;
@@ -180,11 +182,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Thread.currentThread().interrupt();
             }
             return true; // Treat as failure
-        } catch (Exception e) { // Catch-all for other unexpected errors, e.g. submitting task or CancellationException
+        } catch (
+                Exception e) { // Catch-all for other unexpected errors, e.g. submitting task or CancellationException
             Log.record("执行失败：处理检查任务时发生未知错误");
             Log.printStackTrace(TAG, e);
             if (e instanceof java.util.concurrent.CancellationException) {
-                 Log.record("执行失败：检查任务已被取消");
+                Log.record("执行失败：检查任务已被取消");
             }
             return true; // Treat as failure
         }
@@ -659,26 +662,39 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         Object object = param.args[15];
                                         Object[] recordArray = rpcHookMap.remove(object);
                                         if (recordArray != null) {
-                                            Map<String, Object> HookResponse = new HashMap<>();
-                                            String TimeStamp = String.valueOf(recordArray[0]);
-                                            String Method = String.valueOf(recordArray[1]);
-                                            String Params = String.valueOf(recordArray[2]);
-                                            String rawData = String.valueOf(recordArray[3]);
-                                            HookResponse.put("TimeStamp", recordArray[0]);
-                                            HookResponse.put("Method", recordArray[1]);
-                                            HookResponse.put("Params", Params);
-                                            HookResponse.put("Data", recordArray[3]);
-                                            if (BaseModel.getSendHookData().getValue()) {
-                                                HookSender.sendHookData(HookResponse);
-                                            }
-                                            String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method +
-                                                    "\n" + "Params: " + Params + "\n" + "Data: " + rawData + "\n<========================\n";
-                                            if (!logMessage.trim().isEmpty() && !rawData.equals("null")) {
-                                                Log.capture(logMessage);
+                                            try {
+//                                                Map<String, Object> HookResponse = new HashMap<>();
+                                                String TimeStamp = String.valueOf(recordArray[0]);
+                                                String Method = String.valueOf(recordArray[1]);
+                                                String Params = String.valueOf(recordArray[2]);
+                                                String rawData = String.valueOf(recordArray[3]);
+//                                                HookResponse.put("TimeStamp", recordArray[0]);
+//                                                HookResponse.put("Method", recordArray[1]);
+//                                                HookResponse.put("Params", Params);
+//                                                HookResponse.put("Data", recordArray[3]);
+
+                                                JSONObject Res = new JSONObject();
+                                                Res.put("TimeStamp", recordArray[0]);
+                                                Res.put("Method", recordArray[1]);
+                                                Res.put("Params", Params);
+                                                Res.put("Data", rawData);
+
+
+                                                if (BaseModel.getSendHookData().getValue()) {
+                                                    HookSender.sendHookData(Res);
+                                                }
+                                                String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData + "\n<========================\n";
+                                                if (!logMessage.trim().isEmpty() && !rawData.equals("null")) {
+//                                                Log.capture(logMessage);
+                                                    Log.capture(Res.toString());
+                                                }
+                                            } catch (JSONException j) {
+                                                Log.runtime(TAG, "JSON Exception: " + j.getMessage());
                                             }
                                         } else {
                                             Log.capture("delete record ID: " + object.hashCode());
                                         }
+
                                     }
                                 });
                         Log.runtime(TAG, "hook record request successfully");
