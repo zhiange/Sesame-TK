@@ -1598,12 +1598,13 @@ public class AntForest extends ModelTask {
                                     taskList.add(taskType);
                                 }
                             }
-                            DataCache.INSTANCE.saveData("forestTaskList", taskList);
+
                         }
                     }
                 }
                 // 如果需要重新检查任务，则继续循环
                 if (!doubleCheck) break;
+                DataCache.INSTANCE.saveData("forestTaskList", taskList);
             }
         } catch (JSONException e) {
             Log.record("JSON解析错误: " + e.getMessage());
