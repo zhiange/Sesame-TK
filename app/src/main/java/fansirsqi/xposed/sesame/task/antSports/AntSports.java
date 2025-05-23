@@ -97,14 +97,13 @@ public class AntSports extends ModelTask {
     @Override
     public void boot(ClassLoader classLoader) {
         try {
-            Log.other(TAG,"执行开始-" + getName());
             XposedHelpers.findAndHookMethod("com.alibaba.health.pedometer.core.datasource.PedometerAgent", classLoader,
                     "readDailyStep", new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) {
                             int originStep = (Integer) param.getResult();
                             int step = tmpStepCount();
-                            if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 6 || originStep >= step) {
+                            if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 6 || originStep >= step) {//早于6点或步数大于等于自定义步数 不hook
                                 return;
                             }
                             param.setResult(step);
@@ -114,8 +113,6 @@ public class AntSports extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "hook readDailyStep err:");
             Log.printStackTrace(TAG, t);
-        } finally {
-            Log.other(TAG,"执行结束-" + getName());
         }
     }
 
