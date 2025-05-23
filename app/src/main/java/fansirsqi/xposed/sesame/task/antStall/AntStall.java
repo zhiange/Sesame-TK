@@ -21,6 +21,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
@@ -28,7 +29,6 @@ import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 /**
  * @author Constanline
@@ -174,7 +174,7 @@ public class AntStall extends ModelTask {
                 }
                 if (stallAutoTask.getValue()) {
                     taskList();
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                     taskList();
                 }
                 assistFriend();
@@ -360,7 +360,7 @@ public class AntStall extends ModelTask {
                                     if (stallAutoClose.getValue()) {
                                         shopClose(shopId, rentLastBill, rentLastUser);
                                     }
-                                    ThreadUtil.sleep(300L);
+                                    GlobalThreadPools.sleep(300L);
                                     if (stallAutoOpen.getValue()) {
                                         openShop();
                                     }
@@ -534,7 +534,7 @@ public class AntStall extends ModelTask {
                             continue;
                         }
                         Log.farm("蚂蚁新村👣任务[" + title + "]完成");
-                        ThreadUtil.sleep(200L);
+                        GlobalThreadPools.sleep(200L);
                         continue;
                     }
                     switch (taskType) {
@@ -545,7 +545,7 @@ public class AntStall extends ModelTask {
                             break;
                         case "ANTSTALL_NORMAL_INVITE_REGISTER":
                             if (inviteRegister()) {
-                                ThreadUtil.sleep(200L);
+                                GlobalThreadPools.sleep(200L);
                                 continue;
                             }
                             break;
@@ -564,7 +564,7 @@ public class AntStall extends ModelTask {
                             if (!jo.optBoolean("success")) {
                                 Log.runtime(TAG, "taskList.queryCallAppSchema err:" + jo.optString("resultDesc"));
                             }
-                            ThreadUtil.sleep(5000);
+                            GlobalThreadPools.sleep(5000);
                             AntStallRpcCall.home();
                             AntStallRpcCall.taskList();
                             break;
@@ -582,12 +582,12 @@ public class AntStall extends ModelTask {
                             if (jsonArray == null || jsonArray.length() == 0) {
                                 continue;
                             }
-                            ThreadUtil.sleep(5000);
+                            GlobalThreadPools.sleep(5000);
                             for (int j = 0; j < jsonArray.length(); j++) {
                                 try{
                                     JSONObject jsonObject = jsonArray.getJSONObject(j);
                                     s = AntStallRpcCall.finish(pid, jsonObject);
-                                    ThreadUtil.sleep(5000);
+                                    GlobalThreadPools.sleep(5000);
                                     jo = new JSONObject(s);
                                     if (!jo.optBoolean("success")) {
                                         Log.runtime(TAG, "taskList.finish err:" + jo.optString("resultDesc"));
@@ -599,7 +599,7 @@ public class AntStall extends ModelTask {
                             }
                             break;
                     }
-                    ThreadUtil.sleep(200L);
+                    GlobalThreadPools.sleep(200L);
                 } catch (Throwable t) {
                     Log.runtime(TAG, "taskList for err:");
                     Log.printStackTrace(TAG, t);
@@ -726,7 +726,7 @@ public class AntStall extends ModelTask {
                 String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandom(5) + "ANUTSALTML_2PA_SHARE").getBytes(), Base64.NO_WRAP);
                 String str = AntStallRpcCall.achieveBeShareP2P(shareId);
                 JSONObject jsonObject = new JSONObject(str);
-                ThreadUtil.sleep(5000);
+                GlobalThreadPools.sleep(5000);
                 String name = UserMap.getMaskName(uid);
                 if (!jsonObject.optBoolean("success")) {
                     String code = jsonObject.getString("code");
@@ -873,7 +873,7 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, th);
         } finally {
             try {
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
@@ -999,7 +999,7 @@ public class AntStall extends ModelTask {
                             Log.farm("蚂蚁新村🚫在[" + UserMap.getMaskName(friendId) + "]贴罚单");
                         } finally {
                             try {
-                                ThreadUtil.sleep(1000);
+                                GlobalThreadPools.sleep(1000);
                             } catch (Exception e) {
                                 Log.printStackTrace(e);
                             }
@@ -1007,7 +1007,7 @@ public class AntStall extends ModelTask {
                     }
                 } finally {
                     try {
-                        ThreadUtil.sleep(1500);
+                        GlobalThreadPools.sleep(1500);
                     } catch (Exception e) {
                         Log.printStackTrace(e);
                     }

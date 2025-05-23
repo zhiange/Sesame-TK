@@ -16,11 +16,12 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.data.Status;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
+
 public class AntOrchard extends ModelTask {
   private static final String TAG = AntOrchard.class.getSimpleName();
   private String userId;
@@ -198,7 +199,7 @@ public class AntOrchard extends ModelTask {
             continue;
           }
         } finally {
-          ThreadUtil.sleep(executeIntervalInt);
+          GlobalThreadPools.sleep(executeIntervalInt);
         }
         break;
       } while (true);
@@ -460,7 +461,7 @@ public class AntOrchard extends ModelTask {
         String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandom(5) + "ANTFARM_ORCHARD_SHARE_P2P").getBytes(), Base64.NO_WRAP);
         String str = AntOrchardRpcCall.achieveBeShareP2P(shareId);
         JSONObject jsonObject = new JSONObject(str);
-        ThreadUtil.sleep(800);
+        GlobalThreadPools.sleep(800);
         String name = UserMap.getMaskName(uid);
         if (!jsonObject.optBoolean("success")) {
           String code = jsonObject.getString("code");

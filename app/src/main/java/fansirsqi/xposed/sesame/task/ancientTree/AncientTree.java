@@ -13,10 +13,11 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
+
 public class AncientTree extends ModelTask {
     private static final String TAG = AncientTree.class.getSimpleName();
     @Override
@@ -70,7 +71,7 @@ public class AncientTree extends ModelTask {
                 if (!Status.canAncientTreeToday(cityCode))
                     continue;
                 ancientTreeProtect(cityCode);
-                ThreadUtil.sleep(1000L);
+                GlobalThreadPools.sleep(1000L);
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "ancientTree err:");
@@ -94,7 +95,7 @@ public class AncientTree extends ModelTask {
                     JSONObject districtInfo = districtBriefInfo.getJSONObject("districtInfo");
                     String districtCode = districtInfo.getString("districtCode");
                     districtDetail(districtCode);
-                    ThreadUtil.sleep(1000L);
+                    GlobalThreadPools.sleep(1000L);
                 }
                 Status.ancientTreeToday(cityCode);
             }
@@ -141,7 +142,7 @@ public class AncientTree extends ModelTask {
                             cityCode = ancientTreeInfo.getString("cityCode");
                             if (currentEnergy < protectExpense)
                                 break;
-                            ThreadUtil.sleep(200);
+                            GlobalThreadPools.sleep(200);
                             jo = new JSONObject(AncientTreeRpcCall.protect(activityId, projectId, cityCode));
                             if (ResUtil.checkResultCode(jo)) {
                                 Log.forest("保护古树🎐[" + cityName + "-" + districtName
@@ -155,7 +156,7 @@ public class AncientTree extends ModelTask {
                         Log.record(jo.getString("resultDesc"));
                         Log.runtime(ancientTreeDetail.toString());
                     }
-                    ThreadUtil.sleep(500L);
+                    GlobalThreadPools.sleep(500L);
                 }
             }
         } catch (Throwable th) {

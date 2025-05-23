@@ -14,10 +14,10 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 public class AntDodo extends ModelTask {
     private static final String TAG = AntDodo.class.getSimpleName();
@@ -270,7 +270,7 @@ public class AntDodo extends ModelTask {
                         String propName = prop.getJSONObject("propConfig").getString("propName");
                         int holdsNum = prop.optInt("holdsNum", 0);
                         jo = new JSONObject(AntDodoRpcCall.consumeProp(propId, propType));
-                        ThreadUtil.sleep(300);
+                        GlobalThreadPools.sleep(300);
                         if (!ResUtil.checkResultCode(jo)) {
                             Log.record(jo.getString("resultDesc"));
                             Log.runtime(jo.toString());
@@ -340,7 +340,7 @@ public class AntDodo extends ModelTask {
                     JSONObject animal = animalForUser.getJSONObject("animal");
                     for (int j = 0; j < count; j++) {
                         sendCard(animal, targetUser);
-                        ThreadUtil.sleep(500L);
+                        GlobalThreadPools.sleep(500L);
                     }
                 }
             }

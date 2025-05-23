@@ -32,6 +32,7 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.StringModelField;
 import fansirsqi.xposed.sesame.task.AnswerAI.AnswerAI;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
@@ -41,7 +42,6 @@ import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 public class AntFarm extends ModelTask {
@@ -1108,7 +1108,7 @@ public class AntFarm extends ModelTask {
                     }
                     break;
                 } finally {
-                    ThreadUtil.sleep(2000);
+                    GlobalThreadPools.sleep(2000);
                 }
             } while (true);
         } catch (Throwable t) {
@@ -1152,7 +1152,7 @@ public class AntFarm extends ModelTask {
                                         videoUrl.indexOf("&refer"));
                                 jo = new JSONObject(AntFarmRpcCall.videoDeliverModule(contentId));
                                 if (jo.optBoolean("success")) {
-                                    ThreadUtil.sleep(15100);
+                                    GlobalThreadPools.sleep(15100);
                                     jo = new JSONObject(AntFarmRpcCall.videoTrigger(contentId));
                                     if (jo.optBoolean("success")) {
                                         Log.farm("庄园任务🧾[" + title + "]#获得饲料" + awardCount + "g");
@@ -1189,7 +1189,7 @@ public class AntFarm extends ModelTask {
             if ("SUCCESS".equals(memo)) {
                 JSONObject signList = jo.getJSONObject("signList");
                 sign(signList);
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
                 JSONArray jaFarmTaskList = jo.getJSONArray("farmTaskList");
                 for (int i = 0; i < jaFarmTaskList.length(); i++) {
                     jo = jaFarmTaskList.getJSONObject(i);
@@ -1209,7 +1209,7 @@ public class AntFarm extends ModelTask {
                                 }
                             }
                             s = AntFarmRpcCall.receiveFarmTaskAward(jo.getString("taskId"));
-                            ThreadUtil.sleep(1000);
+                            GlobalThreadPools.sleep(1000);
                             jo = new JSONObject(s);
                             memo = jo.getString("memo");
                             if ("SUCCESS".equals(memo)) {
@@ -1289,7 +1289,7 @@ public class AntFarm extends ModelTask {
                 Log.record("喂鸡饲料不足");
             } else {
                 String s = AntFarmRpcCall.feedAnimal(farmId);
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 JSONObject jo = new JSONObject(s);
                 String memo = jo.getString("memo");
                 if ("SUCCESS".equals(memo)) {
@@ -1364,7 +1364,7 @@ public class AntFarm extends ModelTask {
                 allFoodHaveEatten += consumeSpeed * 3600;
                 isUseAccelerateTool = true;
                 Status.useAccelerateTool();
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
             } else {
                 break;
             }
@@ -1745,7 +1745,7 @@ public class AntFarm extends ModelTask {
                         } else {
                             Log.runtime(TAG, jo.toString());
                         }
-                        ThreadUtil.sleep(RandomUtil.delay());
+                        GlobalThreadPools.sleep(RandomUtil.delay());
                     }
                 }
             } else {
@@ -1872,7 +1872,7 @@ public class AntFarm extends ModelTask {
                         Log.record(jo.getString("memo"));
                         Log.runtime(jo.toString());
                     }
-                    ThreadUtil.sleep(1000L);
+                    GlobalThreadPools.sleep(1000L);
                 }
             } else {
                 Log.record(jo.getString("memo"));
@@ -1956,7 +1956,7 @@ public class AntFarm extends ModelTask {
                         if (!jo.optBoolean("read", true)) {
                             String dateStr = jo.getString("dateStr");
                             queryChickenDiary(dateStr);
-                            ThreadUtil.sleep(300);
+                            GlobalThreadPools.sleep(300);
                         }
                     }
                 }
@@ -2159,14 +2159,14 @@ public class AntFarm extends ModelTask {
     private void drawGameCenterAward() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryGameList());
-            ThreadUtil.sleep(3000);
+            GlobalThreadPools.sleep(3000);
             if (jo.optBoolean("success")) {
                 JSONObject gameDrawAwardActivity = jo.getJSONObject("gameDrawAwardActivity");
                 int canUseTimes = gameDrawAwardActivity.getInt("canUseTimes");
                 while (canUseTimes > 0) {
                     try {
                         jo = new JSONObject(AntFarmRpcCall.drawGameCenterAward());
-                        ThreadUtil.sleep(3000);
+                        GlobalThreadPools.sleep(3000);
                         if (jo.optBoolean("success")) {
                             canUseTimes = jo.getInt("drawRightsTimes");
                             JSONArray gameCenterDrawAwardList = jo.getJSONArray("gameCenterDrawAwardList");
@@ -2623,10 +2623,10 @@ public class AntFarm extends ModelTask {
             JSONObject jo = new JSONObject(AntFarmRpcCall.assignFamilyMember(assignConfig.getString("assignAction"), beAssignUser));
             if ("SUCCESS".equals(jo.optString("memo"))) {
                 Log.farm("亲密家庭🏠提交任务[使用顶梁柱特权]");
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 jo = new JSONObject(AntFarmRpcCall.sendChat(assignConfig.getString("chatCardType"), beAssignUser));
                 if ("SUCCESS".equals(jo.optString("memo"))) {
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                     syncFamilyStatusIntimacy(familyGroupId);
                 }
             }
@@ -2673,17 +2673,17 @@ public class AntFarm extends ModelTask {
             String requestString = AntFarmRpcCall.deliverSubjectRecommend(userIds);
             JSONObject jo = new JSONObject(requestString);
             if (jo.optBoolean("success")) {
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 jo = new JSONObject(AntFarmRpcCall.deliverContentExpand(userIds, jo.toString().substring(1, jo.toString().length() - 1)));
                 if (jo.optBoolean("success")) {
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                     String content = jo.getString("content");
                     String deliverId = jo.getString("deliverId");
                     jo = new JSONObject(AntFarmRpcCall.deliverMsgSend(familyGroupId, userIds, content, deliverId));
                     if (jo.optBoolean("success")) {
                         Log.farm("亲密家庭🏠提交任务[道早安]");
                         Status.setFlagToday("antFarm::deliverMsgSend");
-                        ThreadUtil.sleep(500);
+                        GlobalThreadPools.sleep(500);
                         syncFamilyStatusIntimacy(familyGroupId);
                     }
                 }
@@ -2729,7 +2729,7 @@ public class AntFarm extends ModelTask {
             if (Objects.equals("SUCCESS", jo.getString("memo"))) {
                 Log.farm("亲密家庭🏠提交任务[分享好友]");
                 Status.setFlagToday("antFarm::inviteFriendVisitFamily");
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 syncFamilyStatusIntimacy(familyGroupId);
             }
         } catch (Throwable t) {
@@ -2770,7 +2770,7 @@ public class AntFarm extends ModelTask {
                 if (ResUtil.checkSuccess(TAG, jo)) {
                     Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
                     Status.setFlagToday("antFarm::familyBatchInviteP2P");
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                 }
             }
         } catch (Throwable t) {
@@ -2803,11 +2803,11 @@ public class AntFarm extends ModelTask {
                     familyDrawSignReceiveFarmTaskAward(taskId, title);
                     continue;
                 }
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
             }
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryFamilyDrawActivity());
             if (ResUtil.checkSuccess(TAG, jo)) {
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
                 int drawTimes = jo.optInt("familyDrawTimes");
                 //碎片个数
                 int giftNum = jo.optInt("mengliFragmentCount");
@@ -2818,7 +2818,7 @@ public class AntFarm extends ModelTask {
                     if (!familyDraw()) {
                         return;
                     }
-                    ThreadUtil.sleep(1500);
+                    GlobalThreadPools.sleep(1500);
                 }
             }
         } catch (Throwable t) {
@@ -2922,7 +2922,7 @@ public class AntFarm extends ModelTask {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyEatTogether(familyGroupId, friendUserIdList, array));
             if (ResUtil.checkSuccess(TAG, jo)) {
                 Log.farm("庄园家庭🏠" + periodName + "请客#消耗美食" + friendUserIdList.length() + "份");
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 syncFamilyStatusIntimacy(familyGroupId);
             }
         } catch (Throwable t) {

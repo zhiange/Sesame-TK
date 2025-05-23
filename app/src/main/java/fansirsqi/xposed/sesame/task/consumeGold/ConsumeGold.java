@@ -12,8 +12,8 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 public class ConsumeGold extends ModelTask {
     private static final String TAG = ConsumeGold.class.getSimpleName();
@@ -71,23 +71,23 @@ public class ConsumeGold extends ModelTask {
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             if (consumeGoldSign.getValue()) {
                 consumeGoldSign();
-                ThreadUtil.sleep(eachTaskDelay.getValue());
+                GlobalThreadPools.sleep(eachTaskDelay.getValue());
             }
             if (consumeGoldAward.getValue()) {
                 consumeGoldAward();
-                ThreadUtil.sleep(eachTaskDelay.getValue());
+                GlobalThreadPools.sleep(eachTaskDelay.getValue());
             }
             if (consumeGoldGainRepair.getValue()) {
                 consumeGoldGainRepair();
-                ThreadUtil.sleep(eachTaskDelay.getValue());
+                GlobalThreadPools.sleep(eachTaskDelay.getValue());
             }
             if (consumeGoldRepairSign.getValue()) {
                 consumeGoldRepairSign();
-                ThreadUtil.sleep(eachTaskDelay.getValue());
+                GlobalThreadPools.sleep(eachTaskDelay.getValue());
             }
             if (consumeGoldGainTask.getValue()) {
                 consumeGoldGainTask();
-                ThreadUtil.sleep(eachTaskDelay.getValue());
+                GlobalThreadPools.sleep(eachTaskDelay.getValue());
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG + ".run", t);
@@ -101,7 +101,7 @@ public class ConsumeGold extends ModelTask {
     private void consumeGoldSign() {
         try {
             String s = ConsumeGoldRpcCall.signinCalendar();
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldSign.signinCalendar", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -112,7 +112,7 @@ public class ConsumeGold extends ModelTask {
                 return;
             }
             s = ConsumeGoldRpcCall.taskV2Index("CG_SIGNIN_AD_FEEDS");
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldSign.taskV2Index", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -126,7 +126,7 @@ public class ConsumeGold extends ModelTask {
             jo = taskList.getJSONObject(0);
             String taskId = jo.getJSONObject("extInfo").getString("actionBizId");
             s = ConsumeGoldRpcCall.taskV2Trigger(taskId, "CG_SIGNIN_AD_FEEDS", "SIGN_UP");
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldSign.taskV2Trigger", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -134,7 +134,7 @@ public class ConsumeGold extends ModelTask {
                 return;
             }
             s = ConsumeGoldRpcCall.taskOpenBoxAward();
-            ThreadUtil.sleep(500);
+            GlobalThreadPools.sleep(500);
             jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldSign.taskOpenBoxAward", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -153,7 +153,7 @@ public class ConsumeGold extends ModelTask {
     private void consumeGoldAward() {
         try {
             String s = ConsumeGoldRpcCall.promoIndex();
-            ThreadUtil.sleep(500);
+            GlobalThreadPools.sleep(500);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldAward.promoIndex", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -177,7 +177,7 @@ public class ConsumeGold extends ModelTask {
             }
             for (int j = tokenTotalAmount - tokenLeftAmount; j < tokenTotalAmount; j++) {
                 s = ConsumeGoldRpcCall.promoTrigger();
-                ThreadUtil.sleep(1000);
+                GlobalThreadPools.sleep(1000);
                 jo = new JSONObject(s);
                 if (!jo.optBoolean("success")) {
                     Log.other(TAG + ".consumeGoldAward.promoTrigger", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -199,7 +199,7 @@ public class ConsumeGold extends ModelTask {
         try {
             // task type 1
             String s = ConsumeGoldRpcCall.signinCalendar();
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldGainRepair.signinCalendar", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -236,7 +236,7 @@ public class ConsumeGold extends ModelTask {
             }
             long consumeGoldRepairUseLimit = RuntimeInfo.getInstance().getLong("consumeGoldRepairSignUsed", 0);
             String s = ConsumeGoldRpcCall.signinCalendar();
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldRepairSign.signinCalendar", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -275,7 +275,7 @@ public class ConsumeGold extends ModelTask {
             consumeGoldRepairUseLimit = RuntimeInfo.getInstance().getLong("consumeGoldRepairSignUsed", 0);
             for (String repairDate : repairDateList) {
                 s = ConsumeGoldRpcCall.signinTrigger("check", repairDate);
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 jo = new JSONObject(s);
                 if (!jo.optBoolean("success")) {
                     Log.other(TAG + ".consumeGoldRepairSign.signinTrigger.check", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -283,7 +283,7 @@ public class ConsumeGold extends ModelTask {
                     return;
                 }
                 s = ConsumeGoldRpcCall.signinTrigger("repair", repairDate);
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 jo = new JSONObject(s);
                 if (!jo.optBoolean("success")) {
                     Log.other(TAG + ".consumeGoldRepairSign.signinTrigger.repair", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -303,7 +303,7 @@ public class ConsumeGold extends ModelTask {
     private void consumeGoldGainTask() {
         try {
             String s = ConsumeGoldRpcCall.taskV2Index("ALL_DAILY_TASK_LIST");
-            ThreadUtil.sleep(200);
+            GlobalThreadPools.sleep(200);
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
                 Log.other(TAG + ".consumeGoldGainTask.taskV2Index", "消费金🪙[响应失败]#" + jo.getString("errorMsg"));
@@ -349,7 +349,7 @@ public class ConsumeGold extends ModelTask {
             switch (status) {
                 case "NONE_SIGNUP":
                     if (needSignUp) {
-                        ThreadUtil.sleep(200);
+                        GlobalThreadPools.sleep(200);
                         s = ConsumeGoldRpcCall.taskV2Trigger(taskId, taskSceneCode, "SIGN_UP");
                         jo = new JSONObject(s);
                         if (!jo.optBoolean("success")) {
@@ -359,7 +359,7 @@ public class ConsumeGold extends ModelTask {
                     }
                 case "SIGNUP_COMPLETE":
                     if (needSend) {
-                        ThreadUtil.sleep(watchAdDelay.getValue());
+                        GlobalThreadPools.sleep(watchAdDelay.getValue());
                         s = ConsumeGoldRpcCall.taskV2Trigger(taskId, taskSceneCode, "SEND");
                         jo = new JSONObject(s);
                         if (!jo.optBoolean("success")) {
@@ -369,7 +369,7 @@ public class ConsumeGold extends ModelTask {
                     }
                 case "TO_RECEIVE":
                     if (needReceive) {
-                        ThreadUtil.sleep(200);
+                        GlobalThreadPools.sleep(200);
                         s = ConsumeGoldRpcCall.taskV2Trigger(taskId, taskSceneCode, "RECEIVE");
                         jo = new JSONObject(s);
                         if (!jo.optBoolean("success")) {

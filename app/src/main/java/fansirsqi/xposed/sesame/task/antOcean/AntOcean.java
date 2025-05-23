@@ -20,11 +20,12 @@ import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
+
 /**
  * @author Constanline
  * @since 2023/08/01
@@ -505,7 +506,7 @@ public class AntOcean extends ModelTask {
                     if (TaskStatus.TODO.name().equals(taskJson.getString("taskStatus"))){
                         finishTask(taskJson);
                     }
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                 }
             }
         } catch (Throwable t) {
@@ -539,7 +540,7 @@ public class AntOcean extends ModelTask {
                     } else {
                         return;
                     }
-                    ThreadUtil.sleep(2000);
+                    GlobalThreadPools.sleep(2000);
                 }
             }
         } catch (Throwable t) {
@@ -560,7 +561,7 @@ public class AntOcean extends ModelTask {
                     String taskType = jo.getString("taskType");
                     String sceneCode = jo.getString("sceneCode");
                     jo = new JSONObject(AntOceanRpcCall.receiveTaskAward(sceneCode, taskType));
-                    ThreadUtil.sleep(500);
+                    GlobalThreadPools.sleep(500);
                     if (jo.optBoolean("success")) {
                         String taskTitle = bizInfo.optString("taskTitle", taskType);
                         String awardCount = bizInfo.optString("awardCount", "0");
@@ -592,7 +593,7 @@ public class AntOcean extends ModelTask {
                 JSONArray options = questionJson.getJSONArray("options");
                 String answer = options.getString(0);
                 String submitResponse = AntOceanRpcCall.submitAnswer(answer, questionId);
-                ThreadUtil.sleep(500);
+                GlobalThreadPools.sleep(500);
                 JSONObject submitJson = new JSONObject(submitResponse);
                 if (submitJson.getInt("resultCode") == 200) {
                     Log.record("海洋答题成功");
@@ -614,7 +615,7 @@ public class AntOcean extends ModelTask {
             JSONObject homeJson = new JSONObject(homeResponse);
             if (ResUtil.checkResultCode(homeJson)) {
                 String taskListResponse = AntOceanRpcCall.PDLqueryTaskList();
-                ThreadUtil.sleep(300);
+                GlobalThreadPools.sleep(300);
                 JSONObject taskListJson = new JSONObject(taskListResponse);
                 JSONArray antOceanTaskVOList = taskListJson.getJSONArray("antOceanTaskVOList");
                 for (int i = 0; i < antOceanTaskVOList.length(); i++) {
@@ -627,7 +628,7 @@ public class AntOcean extends ModelTask {
                         int awardCount = bizInfo.getInt("awardCount");
                         String taskType = task.getString("taskType");
                         String receiveTaskResponse = AntOceanRpcCall.PDLreceiveTaskAward(taskType);
-                        ThreadUtil.sleep(300);
+                        GlobalThreadPools.sleep(300);
                         JSONObject receiveTaskJson = new JSONObject(receiveTaskResponse);
                         int code = receiveTaskJson.getInt("code");
                         if (code == 100000000) {
@@ -716,12 +717,12 @@ public class AntOcean extends ModelTask {
                     Log.forest("保护海洋🏖️[" + itemName + "]#发生未知错误，停止申请");
                     break;
                 }
-                ThreadUtil.sleep(300);
+                GlobalThreadPools.sleep(300);
                 appliedTimes = queryCultivationDetail(cultivationCode, projectCode, count);
                 if (appliedTimes < 0) {
                     break;
                 } else {
-                    ThreadUtil.sleep(300);
+                    GlobalThreadPools.sleep(300);
                 }
             }
         } catch (Throwable t) {
@@ -789,7 +790,7 @@ public class AntOcean extends ModelTask {
                         // 输出日志信息
                         Log.forest("神奇海洋🏖️[万能拼图]制作" + exchangeNum + "张,剩余" + exchangedPieceNum + "张碎片");
                         // 制作完成后休眠1秒钟
-                        ThreadUtil.sleep(1000);
+                        GlobalThreadPools.sleep(1000);
                     }
                 } else {
                     // 如果未成功获取道具列表，停止循环
@@ -859,7 +860,7 @@ public class AntOcean extends ModelTask {
                                 if (ResUtil.checkResultCode(usePropResultObj)) {
                                     int userCount = idSet.size();
                                     Log.forest("神奇海洋🏖️[万能拼图]使用" + userCount + "张，获得[" + name + "]剩余" + holdsNum + "张");
-                                    ThreadUtil.sleep(1000);
+                                    GlobalThreadPools.sleep(1000);
                                     if (holdsNum <= 0) {
                                         break th;
                                     }

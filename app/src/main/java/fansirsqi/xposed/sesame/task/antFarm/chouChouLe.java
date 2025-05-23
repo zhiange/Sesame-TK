@@ -3,11 +3,10 @@ package fansirsqi.xposed.sesame.task.antFarm;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fansirsqi.xposed.sesame.data.Status;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 /**
  * @author Byseven
@@ -104,7 +103,7 @@ public class chouChouLe {
                     int drawTimes = jo.optInt("drawTimes",0);
                     for (int ii = 0; ii < drawTimes; ii++) {
                         JSONObject drawMachine = new JSONObject(AntFarmRpcCall.drawMachine());
-                        ThreadUtil.sleep(2000L);
+                        GlobalThreadPools.sleep(2000L);
                         if (ResUtil.checkResultCode(TAG, drawMachine)) {
                             JSONObject drawMachinePrize = drawMachine.optJSONObject("drawMachinePrize");
                             String title = drawMachinePrize.getString("title");
@@ -132,7 +131,7 @@ public class chouChouLe {
                     String activityId = drawActivityInfo.optString("activityId", "null");
                     for (int ii = 0; ii < leftDrawTimes; ii++) {
                         JSONObject drawPrizeObj = new JSONObject(!activityId.equals("null") ? AntFarmRpcCall.DrawPrize(activityId) : AntFarmRpcCall.DrawPrize());
-                        ThreadUtil.sleep(2000L);
+                        GlobalThreadPools.sleep(2000L);
                         if (drawPrizeObj.optBoolean("success")) {
                             String title = drawPrizeObj.getString("title");
                             int prizeNum = drawPrizeObj.optInt("prizeNum", 0);
@@ -157,7 +156,7 @@ public class chouChouLe {
      */
     private boolean performFarmTask(String drawType, String bizKey, String name) {
         try {
-                ThreadUtil.sleep(15000L); // 所有等待15秒
+                GlobalThreadPools.sleep(15000L); // 所有等待15秒
                 String s = AntFarmRpcCall.chouchouleDoFarmTask(drawType, bizKey);
                 JSONObject jo = new JSONObject(s);
                 if (jo.optBoolean("success", false)) {
@@ -166,7 +165,7 @@ public class chouChouLe {
                     } else {
                         Log.farm("完成抽抽乐🧾️[任务: " + name + "]");
                     }
-                    ThreadUtil.sleep(1000L);
+                    GlobalThreadPools.sleep(1000L);
                     receiveFarmTaskAward(drawType, bizKey);
                     return true;
                 }

@@ -14,11 +14,12 @@ import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
+
 public class Reserve extends ModelTask {
     private static final String TAG = Reserve.class.getSimpleName();
     @Override
@@ -67,7 +68,7 @@ public class Reserve extends ModelTask {
             Log.record("开始执行-" + getName());
             String s = ReserveRpcCall.queryTreeItemsForExchange();
             if (s == null) {
-                ThreadUtil.sleep(RandomUtil.delay());
+                GlobalThreadPools.sleep(RandomUtil.delay());
                 s = ReserveRpcCall.queryTreeItemsForExchange();
             }
             JSONObject jo = new JSONObject(s);
@@ -161,13 +162,13 @@ public class Reserve extends ModelTask {
                     // Statistics.reserveToday(projectId, count);
                     break;
                 }
-                ThreadUtil.sleep(300);
+                GlobalThreadPools.sleep(300);
                 canApply = queryTreeForExchange(projectId);
                 if (!canApply) {
                     // Statistics.reserveToday(projectId, count);
                     break;
                 } else {
-                    ThreadUtil.sleep(300);
+                    GlobalThreadPools.sleep(300);
                 }
                 if (!Status.canReserveToday(projectId, count))
                     break;

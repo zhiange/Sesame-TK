@@ -1,24 +1,19 @@
 package fansirsqi.xposed.sesame.model;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 
 public abstract class Model {
-    ExecutorService executorService = GlobalThreadPools.getGeneralPurposeExecutor();
-    private static final String TAG = Model.class.getSimpleName();
+
     private static final Map<String, ModelConfig> modelConfigMap = new LinkedHashMap<>();
     private static final Map<String, ModelConfig> readOnlyModelConfigMap = Collections.unmodifiableMap(modelConfigMap);
     private static final Map<ModelGroup, Map<String, ModelConfig>> groupModelConfigMap = new LinkedHashMap<>();
@@ -66,28 +61,12 @@ public abstract class Model {
         return readOnlyModelConfigMap;
     }
 
-    public static Set<ModelGroup> getGroupModelConfigGroupSet() {
-        return groupModelConfigMap.keySet();
-    }
-
-    public static List<Map<String, ModelConfig>> getGroupModelConfigMapList() {
-        List<Map<String, ModelConfig>> list = new ArrayList<>();
-        for (Map<String, ModelConfig> modelConfigMap : groupModelConfigMap.values()) {
-            list.add(Collections.unmodifiableMap(modelConfigMap));
-        }
-        return list;
-    }
-
     public static Map<String, ModelConfig> getGroupModelConfig(ModelGroup modelGroup) {
         Map<String, ModelConfig> map = groupModelConfigMap.get(modelGroup);
         if (map == null) {
             return Collections.emptyMap();
         }
         return Collections.unmodifiableMap(map);
-    }
-
-    public static Boolean hasModel(Class<? extends Model> modelClazz) {
-        return modelMap.containsKey(modelClazz);
     }
 
     public static <T extends Model> T getModel(Class<T> modelClazz) {
@@ -102,7 +81,6 @@ public abstract class Model {
 
     public static synchronized void initAllModel() {
         destroyAllModel();
-        Log.runtime(TAG, "初始化所有模块数据");
         for (int i = 0, len = modelClazzList.size(); i < len; i++) {
             Class<? extends Model> modelClazz = modelClazzList.get(i);
             try {
@@ -144,7 +122,6 @@ public abstract class Model {
     }
 
     public static synchronized void destroyAllModel() {
-        Log.runtime(TAG, "销毁所有模块数据");
         for (int i = 0, len = modelArray.length; i < len; i++) {
             Model model = modelArray[i];
             if (model != null) {

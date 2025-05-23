@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
 import fansirsqi.xposed.sesame.data.DataCache;
 import java.util.ArrayList;
 import java.util.List;
+
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.hook.Toast;
@@ -23,7 +25,6 @@ import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class EcoLife {
     public static final String TAG = EcoLife.class.getSimpleName();
@@ -80,7 +81,7 @@ public class EcoLife {
      * @return 是否成功开通绿色任务
      */
     public static boolean openEcoLife() throws JSONException {
-        ThreadUtil.sleep(300);
+        GlobalThreadPools.sleep(300);
         JSONObject jsonObject = new JSONObject(AntForestRpcCall.ecolifeOpenEcolife());
         if (!jsonObject.optBoolean("success")) {
             Log.runtime(TAG + ".ecoLife.openEcolife", jsonObject.optString("resultDesc"));
@@ -91,7 +92,7 @@ public class EcoLife {
             return false;
         }
         Log.forest("绿色任务🍀报告大人，开通成功(～￣▽￣)～可以愉快的玩耍了");
-        ThreadUtil.sleep(300);
+        GlobalThreadPools.sleep(300);
         return true;
     }
 
@@ -120,7 +121,7 @@ public class EcoLife {
                     String actionId = actionItem.getString("actionId");
                     String actionName = actionItem.getString("actionName");
                     if ("photoguangpan".equals(actionId)) continue;
-                    ThreadUtil.sleep(300);
+                    GlobalThreadPools.sleep(300);
                     JSONObject jo = new JSONObject(AntForestRpcCall.ecolifeTick(actionId, dayPoint, source));
                     if (ResUtil.checkResultCode(jo)) {
                         Log.forest("绿色打卡🍀[" + actionName + "]"); // 成功打卡日志
@@ -129,7 +130,7 @@ public class EcoLife {
                         Log.error(TAG + jo.getString("resultDesc"));
                         Log.error(TAG + jo);
                     }
-                    ThreadUtil.sleep(300);
+                    GlobalThreadPools.sleep(300);
                 }
             }
         } catch (Throwable th) {
@@ -215,7 +216,7 @@ public class EcoLife {
             if (!ResUtil.checkSuccess(TAG, jo)) {
                 return;
             }
-            ThreadUtil.sleep(3000);
+            GlobalThreadPools.sleep(3000);
             str = AntForestRpcCall.ecolifeUploadDishImage("AFTER_MEALS", photo.get("after"), 0.00040030346, 0.99891376, 0.0006858421, dayPoint);
             jo = new JSONObject(str);
             if (!ResUtil.checkSuccess(TAG, jo)) {

@@ -36,10 +36,10 @@ import fansirsqi.xposed.sesame.util.Detector
 import fansirsqi.xposed.sesame.util.FansirsqiUtil
 import fansirsqi.xposed.sesame.util.FansirsqiUtil.OneWordCallback
 import fansirsqi.xposed.sesame.util.Files
+import fansirsqi.xposed.sesame.util.GlobalThreadPools
 import fansirsqi.xposed.sesame.util.Log
 import fansirsqi.xposed.sesame.util.Maps.UserMap
 import fansirsqi.xposed.sesame.util.PermissionUtil
-import fansirsqi.xposed.sesame.util.ThreadUtil
 import fansirsqi.xposed.sesame.util.ToastUtil
 import java.util.Calendar
 import java.util.concurrent.CountDownLatch
@@ -151,7 +151,7 @@ class MainActivity : BaseActivity() {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                         Thread {
-                                            ThreadUtil.sleep(200)
+                                            GlobalThreadPools.sleep(200)
                                             runOnUiThread { isClick = false }
                                         }.start()
                                     }
@@ -306,7 +306,7 @@ class MainActivity : BaseActivity() {
             R.id.one_word -> {
                 Thread {
                     ToastUtil.showToastWithDelay(this@MainActivity, "😡 正在获取句子，请稍后……", 800)
-                    ThreadUtil.sleep(5000)
+                    GlobalThreadPools.sleep(5000)
                     FansirsqiUtil.getOneWord(
                         object : OneWordCallback {
                             override fun onSuccess(result: String?) {

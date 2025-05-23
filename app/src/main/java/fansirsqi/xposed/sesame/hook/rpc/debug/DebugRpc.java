@@ -3,7 +3,6 @@ import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -145,7 +144,7 @@ public class DebugRpc {
                     // 对当前项目查询当前预算
                     getTreeCurrentBudget(projectId, itemName);
                     // 在查询每个项目后暂停100毫秒
-                    ThreadUtil.sleep(100);
+                    GlobalThreadPools.sleep(100);
                 }
             } else {
                 // 如果RPC调用失败，记录错误描述
@@ -217,7 +216,7 @@ public class DebugRpc {
                     String gameId = miniGameInfo.getString("gameId");
                     String key = miniGameInfo.getString("key");
                     // 模拟等待迷你游戏完成
-                    ThreadUtil.sleep(4000L);
+                    GlobalThreadPools.sleep(4000L);
                     // 调用RPC方法完成迷你游戏
                     jo = new JSONObject(DebugRpcCall.miniGameFinish(gameId, key));
                     // 检查迷你游戏是否完成成功
@@ -248,7 +247,7 @@ public class DebugRpc {
                 int leftCount = data.getInt("leftCount");
                 // 如果还有剩余次数，继续行走
                 if (leftCount > 0) {
-                    ThreadUtil.sleep(3000L);
+                    GlobalThreadPools.sleep(3000L);
                     walkGrid(); // 递归调用，继续行走
                 }
             } else {

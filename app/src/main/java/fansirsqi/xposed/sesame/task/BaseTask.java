@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import fansirsqi.xposed.sesame.util.Log;
 import java.util.concurrent.ExecutorService;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
 
 public abstract class BaseTask {
@@ -64,7 +63,7 @@ public abstract class BaseTask {
 
     public synchronized void stopTask() {
         if (executorService != null && !executorService.isTerminated()) {
-            ThreadUtil.shutdownAndAwaitTermination(executorService, 5, TimeUnit.SECONDS);
+            GlobalThreadPools.shutdownAndAwaitTermination(executorService, 5, TimeUnit.SECONDS);
         }
         stopChildTasks();
         executorService = null;

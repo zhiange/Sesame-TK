@@ -10,10 +10,10 @@ import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelType;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.StringUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -273,7 +273,7 @@ public abstract class ModelTask extends Model {
             if (model != null) {
                 if (ModelType.TASK == model.getType()) {
                     if (((ModelTask) model).startTask(force)) {
-                        ThreadUtil.sleep(750);
+                        GlobalThreadPools.sleep(750);
                     } else {
                         taskCompletionLatch.countDown();
                         Notify.updateNextExecText(-1);

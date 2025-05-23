@@ -14,13 +14,13 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 public class AntCooperate extends ModelTask {
@@ -79,7 +79,7 @@ public class AntCooperate extends ModelTask {
 //                Log.runtime(TAG, "浇水总量限制列表配置: " + cooperateWaterTotalLimitList.getValue());
                 String s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 if (s == null) {
-                    ThreadUtil.sleep(RandomUtil.delay());
+                    GlobalThreadPools.sleep(RandomUtil.delay());
                     s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 }
                 JSONObject jo = new JSONObject(s);
@@ -163,7 +163,7 @@ public class AntCooperate extends ModelTask {
             Log.runtime(TAG, "cooperateWater err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            ThreadUtil.sleep(1500);
+            GlobalThreadPools.sleep(1500);
         }
     }
 

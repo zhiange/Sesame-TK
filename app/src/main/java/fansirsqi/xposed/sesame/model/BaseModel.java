@@ -20,7 +20,6 @@ import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
 
 /**
@@ -202,7 +201,7 @@ public class BaseModel extends Model {
                 () -> {
                     try {
                         Log.runtime("🍼初始化海洋，保护地数据");
-                        ThreadUtil.sleep(RandomUtil.nextInt(4500, 6000));
+                        GlobalThreadPools.sleep(RandomUtil.nextInt(4500, 6000));
                         initReserve();
                         initBeach();
                     } catch (Exception e) {

@@ -8,10 +8,10 @@ import org.json.JSONObject;
 import java.util.Set;
 
 import fansirsqi.xposed.sesame.hook.Toast;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class EnergyRain {
     private static final String TAG = EnergyRain.class.getSimpleName();
@@ -20,7 +20,7 @@ public class EnergyRain {
         try {
             Log.forest("开始执行能量雨🌧️");
             JSONObject jo = new JSONObject(AntForestRpcCall.startEnergyRain());
-            ThreadUtil.sleep(300);
+            GlobalThreadPools.sleep(300);
             if (ResUtil.checkResultCode(jo)) {
                 String token = jo.getString("token");
                 JSONArray bubbleEnergyList = jo.getJSONObject("difficultyInfo").getJSONArray("bubbleEnergyList");
@@ -28,14 +28,14 @@ public class EnergyRain {
                 for (int i = 0; i < bubbleEnergyList.length(); i++) {
                     sum += bubbleEnergyList.getInt(i);
                 }
-                ThreadUtil.sleep(5000);
+                GlobalThreadPools.sleep(5000);
                 String result = AntForestRpcCall.energyRainSettlement(sum, token);
                 if (ResUtil.checkResultCode(result)) {
                     String s = "收获能量雨🌧️[" + sum + "g]";
                     Toast.show(s);
                     Log.forest(s);
                 }
-                ThreadUtil.sleep(300);
+                GlobalThreadPools.sleep(300);
             }
         } catch (Throwable th) {
             Log.runtime(TAG, "执行能量雨出错:");
@@ -65,7 +65,7 @@ public class EnergyRain {
                             uid = grantInfo.getString("userId");
                             if (set.contains(uid)) {
                                 JSONObject rainJsonObj = new JSONObject(AntForestRpcCall.grantEnergyRainChance(uid));
-                                ThreadUtil.sleep(300);
+                                GlobalThreadPools.sleep(300);
                                 Log.record("尝试送能量雨给【" + UserMap.getMaskName(uid) + "】");
                                 granted = true;
                                 if (ResUtil.checkResultCode(rainJsonObj)) {

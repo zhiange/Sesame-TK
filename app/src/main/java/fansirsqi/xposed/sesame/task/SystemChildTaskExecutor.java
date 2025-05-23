@@ -1,7 +1,6 @@
 package fansirsqi.xposed.sesame.task;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -36,7 +35,7 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
                 try {
                     long delay = childTask.getExecTime() - System.currentTimeMillis();
                     if (delay > 0) {
-                        ThreadUtil.sleep(delay); // 延时执行任务
+                        GlobalThreadPools.sleep(delay); // 延时执行任务
                     }
                     childTask.run(); // 执行子任务
                 } catch (Exception e) {

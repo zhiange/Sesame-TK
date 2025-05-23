@@ -2,8 +2,10 @@ package fansirsqi.xposed.sesame.hook.rpc.intervallimit;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
+
 /**
  * RpcIntervalLimit类用于管理不同方法的调用间隔限制，确保调用间隔不小于设定值。
  * 提供添加、更新、进入间隔限制以及清除限制的功能。
@@ -68,7 +70,7 @@ public class RpcIntervalLimit {
         synchronized (Objects.requireNonNull(intervalLimit, "间隔限制对象不能为空")) {
             long sleep = intervalLimit.getInterval() - (System.currentTimeMillis() - intervalLimit.getTime());
             if (sleep > 0) {
-                ThreadUtil.sleep(sleep);
+                GlobalThreadPools.sleep(sleep);
             }
             intervalLimit.setTime(System.currentTimeMillis());
         }

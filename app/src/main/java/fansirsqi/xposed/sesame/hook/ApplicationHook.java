@@ -112,7 +112,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     private static PendingIntent alarm0Pi;
     private static XC_MethodHook.Unhook rpcRequestUnhook;
     private static XC_MethodHook.Unhook rpcResponseUnhook;
-    private final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getScheduledExecutor();
+    private final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor();
 
     public static void setOffline(boolean offline) {
         ApplicationHook.offline = offline;
