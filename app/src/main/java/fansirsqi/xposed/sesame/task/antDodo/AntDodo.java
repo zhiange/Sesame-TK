@@ -59,10 +59,10 @@ public class AntDodo extends ModelTask {
     @Override
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -71,7 +71,7 @@ public class AntDodo extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.record(TAG,"执行开始-" + getName());
             receiveTaskAward();
             propList();
             collect();
@@ -85,7 +85,7 @@ public class AntDodo extends ModelTask {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.record("执行结束-" + getName());
+            Log.record(TAG,"执行结束-" + getName());
         }
     }
     /*
@@ -107,7 +107,7 @@ public class AntDodo extends ModelTask {
             if (ResUtil.checkResultCode(jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 if (data.getBoolean("collect")) {
-                    Log.record("神奇物种卡片今日收集完成！");
+                    Log.record(TAG,"神奇物种卡片今日收集完成！");
                 } else {
                     collectAnimalCard();
                 }
@@ -217,7 +217,7 @@ public class AntDodo extends ModelTask {
                                 if (joAward.optBoolean("success")) {
                                     Log.forest("任务奖励🎖️[" + taskTitle + "]#" + awardCount + "个");
                                 } else {
-                                    Log.record("领取失败，" + response); // 记录领取失败信息
+                                    Log.record(TAG,"领取失败，" + response); // 记录领取失败信息
                                 }
                                 Log.runtime(joAward.toString()); // 打印奖励响应
                             }
@@ -231,7 +231,7 @@ public class AntDodo extends ModelTask {
                                         Log.forest("物种任务🧾️[" + taskTitle + "]");
                                         continue th; // 成功完成任务，返回外层循环
                                     } else {
-                                        Log.record("完成任务失败，" + taskTitle); // 记录完成任务失败信息
+                                        Log.record(TAG,"完成任务失败，" + taskTitle); // 记录完成任务失败信息
                                     }
                                 }
                             }

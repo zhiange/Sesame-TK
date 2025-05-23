@@ -497,7 +497,7 @@ public class Status {
     public static synchronized void save(Calendar nowCalendar) {
         String currentUid = UserMap.getCurrentUid();
         if (StringUtil.isEmpty(currentUid)) {
-            Log.record("用户为空，状态保存失败");
+            Log.record(TAG,"用户为空，状态保存失败");
             throw new RuntimeException("用户为空，状态保存失败");
         }
         if (updateDay(nowCalendar)) {

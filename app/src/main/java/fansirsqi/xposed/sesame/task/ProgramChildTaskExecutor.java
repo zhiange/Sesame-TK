@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
  * 它现在使用全局线程池来执行任务。
  */
 public class ProgramChildTaskExecutor implements ChildTaskExecutor {
+    private static final String TAG = "ProgramChildTaskExecutor";
 
     /**
      * 向任务组中添加子任务
@@ -41,7 +42,7 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
                     if (childTask.getModelTask() != null) {
                         childTask.getModelTask().removeChildTask(childTask.getId()); // 移除已完成的子任务
                     } else {
-                        Log.error("ProgramChildTaskExecutor", "ChildModelTask's ModelTask is null, cannot remove child task: " + childTask.getId());
+                        Log.error(TAG, "ChildModelTask's ModelTask is null, cannot remove child task: " + childTask.getId());
                     }
                 }
             });
@@ -55,7 +56,7 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
                     if (childTask.getModelTask() != null) {
                         childTask.getModelTask().removeChildTask(childTask.getId()); // 移除已完成的子任务
                     } else {
-                        Log.error("ProgramChildTaskExecutor", "ChildModelTask's ModelTask is null, cannot remove child task: " + childTask.getId());
+                        Log.error(TAG, "ChildModelTask's ModelTask is null, cannot remove child task: " + childTask.getId());
                     }
                 }
             });
@@ -88,7 +89,7 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
         // With a global executor, we don't shut down parts of it.
         // Task cancellation should be handled by ModelTask iterating its children and calling childTask.cancel().
         // This method effectively becomes a no-op in terms of executor management.
-        Log.runtime("ProgramChildTaskExecutor", "clearGroupChildTask called for group: " + group + ". No specific executor to clear for global pool.");
+        Log.runtime(TAG,"clearGroupChildTask called for group: " + group + ". No specific executor to clear for global pool.");
         return true;
     }
 
@@ -103,7 +104,7 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
         // With a global executor, we don't shut it down here.
         // Task cancellation should be handled by ModelTask iterating its children and calling childTask.cancel().
         // This method effectively becomes a no-op in terms of executor management.
-        Log.runtime("ProgramChildTaskExecutor", "clearAllChildTask called. No specific executors to clear for global pool.");
+        Log.runtime(TAG, "clearAllChildTask called. No specific executors to clear for global pool.");
     }
 
     // getChildGroupThreadPool method is removed.

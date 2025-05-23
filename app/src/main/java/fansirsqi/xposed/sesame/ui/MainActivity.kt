@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit
 //   但是如果打包改个名拿去卖钱忽悠小白
 //   那我只能说你妈死了 就当开源项目给你妈烧纸钱了
 class MainActivity : BaseActivity() {
+    private val TAG = "MainActivity"
     private var hasPermissions = false
     private var isClick = false
     private lateinit var tvStatistics: TextView
@@ -90,15 +91,15 @@ class MainActivity : BaseActivity() {
         updateSubTitle(ViewAppInfo.runType?.nickName ?: RunType.LOADED.nickName)
         try {
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.checkerDestFile)) {
-                Log.error("checker file copy failed")
+                Log.error(TAG,"checker file copy failed")
             }
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.dexkitDestFile)) {
-                Log.error("dexkit file copy failed")
+                Log.error(TAG,"dexkit file copy failed")
             }
             Detector.loadLibrary("checker")
             Detector.initDetector(this)
         } catch (e: Exception) {
-            Log.error("load libSesame err:" + e.message)
+            Log.error(TAG,"load libSesame err:" + e.message)
         }
 
         mainImage?.setOnLongClickListener { v: View ->
@@ -195,10 +196,10 @@ class MainActivity : BaseActivity() {
         if (hasPermissions) {
             // 每次进入界面时都发送状态查询广播给支付宝进程，以确认 Hook 是否加载
             try {
-                Log.runtime("MainActivity onResume: Sending status ping to Alipay process.")
+                Log.runtime(TAG,"MainActivity onResume: Sending status ping to Alipay process.")
                 sendBroadcast(Intent("com.eg.android.AlipayGphone.sesame.status"))
             } catch (th: Throwable) {
-                Log.runtime("view sendBroadcast status err:")
+                Log.runtime(TAG,"view sendBroadcast status err:")
                 Log.printStackTrace(th)
             }
             try { //打开设置前需要确认设置了哪个UI
@@ -252,7 +253,7 @@ class MainActivity : BaseActivity() {
                 sendBroadcast(Intent("com.eg.android.AlipayGphone.sesame.status"))
                 isClick = true
             } catch (th: Throwable) {
-                Log.runtime("view sendBroadcast status err:")
+                Log.runtime(TAG,"view sendBroadcast status err:")
                 Log.printStackTrace(th)
             }
             return
@@ -572,7 +573,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun updateSubTitle(runType: String) {
-        Log.runtime("updateSubTitle$runType")
+        Log.runtime(TAG,"updateSubTitle$runType")
         baseTitle = ViewAppInfo.appTitle + "[" + runType + "]"
         when (runType) {
             RunType.DISABLE.nickName -> setBaseTitleTextColor(

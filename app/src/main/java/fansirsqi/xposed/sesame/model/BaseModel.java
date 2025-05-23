@@ -26,8 +26,9 @@ import lombok.Getter;
  * 基础配置模块
  */
 public class BaseModel extends Model {
+    private static final String TAG = "BaseModel";
 
-    private static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor();
+    private static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getScheduledExecutor();
     /**
      * 是否保持唤醒状态
      */
@@ -200,7 +201,7 @@ public class BaseModel extends Model {
         MAIN_THREAD_POOL.submit(
                 () -> {
                     try {
-                        Log.runtime("🍼初始化海洋，保护地数据");
+                        Log.runtime(TAG,"🍼初始化海洋，保护地数据");
                         GlobalThreadPools.sleep(RandomUtil.nextInt(4500, 6000));
                         initReserve();
                         initBeach();
@@ -215,7 +216,7 @@ public class BaseModel extends Model {
      */
     public static void destroyData() {
         try {
-            Log.runtime("🧹清理海洋，保护地数据");
+            Log.runtime(TAG,"🧹清理海洋，保护地数据");
             IdMapManager.getInstance(ReserveaMap.class).clear();
             IdMapManager.getInstance(BeachMap.class).clear();
             //其他也可以清理清理
@@ -253,7 +254,7 @@ public class BaseModel extends Model {
                             IdMapManager.getInstance(ReserveaMap.class).add(itemId, itemName + "(" + energy + "g)");
                         }
                     }
-                    Log.runtime("初始化保护地任务成功。");
+                    Log.runtime(TAG,"初始化保护地任务成功。");
                 }
                 // 将筛选结果保存到 ReserveIdMapUtil
                 IdMapManager.getInstance(ReserveaMap.class).save();
@@ -263,12 +264,12 @@ public class BaseModel extends Model {
             }
         } catch (JSONException e) {
             // 捕获 JSON 解析错误并记录日志
-            Log.runtime("JSON 解析错误：" + e.getMessage());
+            Log.runtime(TAG,"JSON 解析错误：" + e.getMessage());
             Log.printStackTrace(e);
             IdMapManager.getInstance(ReserveaMap.class).load(); // 若出现异常则加载保存的 ReserveIdMapUtil 备份
         } catch (Exception e) {
             // 捕获所有其他异常并记录
-            Log.runtime("初始化保护地任务时出错：" + e.getMessage());
+            Log.runtime(TAG,"初始化保护地任务时出错：" + e.getMessage());
             Log.printStackTrace(e);
             IdMapManager.getInstance(ReserveaMap.class).load(); // 加载备份的 ReserveIdMapUtil
         }
@@ -310,7 +311,7 @@ public class BaseModel extends Model {
                         int energy = item.getInt("energy");
                         IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
                     }
-                    Log.runtime("初始化沙滩数据成功。");
+                    Log.runtime(TAG,"初始化沙滩数据成功。");
                 }
                 // 将所有筛选结果保存到 BeachMap
                 IdMapManager.getInstance(BeachMap.class).save();
@@ -320,12 +321,12 @@ public class BaseModel extends Model {
             }
         } catch (JSONException e) {
             // 记录 JSON 解析过程中的异常
-            Log.runtime("JSON 解析错误：" + e.getMessage());
+            Log.runtime(TAG,"JSON 解析错误：" + e.getMessage());
             Log.printStackTrace(e);
             IdMapManager.getInstance(BeachMap.class).load(); // 若出现异常则加载保存的 BeachMap 备份
         } catch (Exception e) {
             // 捕获所有其他异常并记录
-            Log.runtime("初始化沙滩任务时出错：" + e.getMessage());
+            Log.runtime(TAG,"初始化沙滩任务时出错：" + e.getMessage());
             Log.printStackTrace(e);
             IdMapManager.getInstance(BeachMap.class).load(); // 加载保存的 BeachMap 备份
         }

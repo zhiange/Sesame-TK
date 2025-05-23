@@ -67,7 +67,7 @@ public class GlobalThreadPools {
         if (pool == null || pool.isShutdown()) {
             return;
         }
-        Log.runtime("GlobalThreadPools", "Shutting down executor service: " + poolName);
+        Log.runtime(TAG, "Shutting down executor service: " + poolName);
         pool.shutdown(); // 禁用新任务提交
         try {
             // 等待现有任务完成
@@ -75,7 +75,7 @@ public class GlobalThreadPools {
                 pool.shutdownNow(); // 取消当前执行的任务
                 // 等待任务响应被取消
                 if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
-                    Log.error("GlobalThreadPools", "Executor service " + poolName + " did not terminate.");
+                    Log.error(TAG, "Executor service " + poolName + " did not terminate.");
                 }
             }
         } catch (InterruptedException ie) {
@@ -84,7 +84,7 @@ public class GlobalThreadPools {
             // 保留中断状态
             Thread.currentThread().interrupt();
         }
-        Log.runtime("GlobalThreadPools", "Executor service " + poolName + " has been shut down.");
+        Log.runtime(TAG, "Executor service " + poolName + " has been shut down.");
     }
 
     /**

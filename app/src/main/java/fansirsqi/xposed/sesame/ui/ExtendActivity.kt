@@ -21,6 +21,7 @@ import fansirsqi.xposed.sesame.util.ToastUtil
  * 扩展功能页面
  */
 class ExtendActivity : BaseActivity() {
+    private val TAG = ExtendActivity::class.java.simpleName
     private var debugTips: String? = null
     private lateinit var recyclerView: RecyclerView
     private lateinit var extendFunctionAdapter: ExtendFunctionAdapter
@@ -149,6 +150,6 @@ class ExtendActivity : BaseActivity() {
         intent.putExtra("data", "")
         intent.putExtra("type", type)
         sendBroadcast(intent) // 发送广播
-        Log.debug("扩展工具主动调用广播查询📢：$type")
+        Log.debug(TAG,"扩展工具主动调用广播查询📢：$type")
     }
 }

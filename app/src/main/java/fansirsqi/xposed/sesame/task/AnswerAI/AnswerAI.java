@@ -87,7 +87,7 @@ public class AnswerAI extends Model {
             Log.runtime(String.format("初始化AI服务：已选择[%s]", AIType.nickNames[selectedType]));
             initializeAIService(selectedType);
         } catch (Exception e) {
-            Log.error("初始化AI服务失败: " + e.getMessage());
+            Log.error(TAG,"初始化AI服务失败: " + e.getMessage());
             Log.printStackTrace(TAG, e);
         }
     }
@@ -141,7 +141,7 @@ public class AnswerAI extends Model {
                 Log.other(String.format(NORMAL_ANSWER_LOG_FORMAT, answerStr));
             }
         } catch (Throwable t) {
-            Log.error("获取答案异常: " + t.getMessage());
+            Log.error(TAG,"获取答案异常: " + t.getMessage());
             Log.printStackTrace(TAG, t);
         }
         return answerStr;

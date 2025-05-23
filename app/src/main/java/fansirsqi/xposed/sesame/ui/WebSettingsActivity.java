@@ -69,6 +69,7 @@ import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 
 public class WebSettingsActivity extends BaseActivity {
+    private static final String TAG = "WebSettingsActivity";
     private static final Integer EXPORT_REQUEST_CODE = 1;
     private static final Integer IMPORT_REQUEST_CODE = 2;
     private ActivityResultLauncher<Intent> exportLauncher;
@@ -115,10 +116,10 @@ public class WebSettingsActivity extends BaseActivity {
             @Override
             public void handleOnBackPressed() {
                 if (webView.canGoBack()) {
-                    Log.runtime("WebSettingsActivity.handleOnBackPressed: go back");
+                    Log.runtime(TAG,"WebSettingsActivity.handleOnBackPressed: go back");
                     webView.goBack();
                 } else {
-                    Log.runtime("WebSettingsActivity.handleOnBackPressed: save");
+                    Log.runtime(TAG,"WebSettingsActivity.handleOnBackPressed: save");
                     save();
                     finish();
                 }
@@ -211,7 +212,7 @@ public class WebSettingsActivity extends BaseActivity {
                 if (webView.canGoBack()) {
                     webView.goBack();
                 } else {
-                    Log.runtime("WebAppInterface onBackPressed: save");
+                    Log.runtime(TAG,"WebAppInterface onBackPressed: save");
                     save();
                     WebSettingsActivity.this.finish();
                 }
@@ -229,7 +230,7 @@ public class WebSettingsActivity extends BaseActivity {
         public String getTabs() {
             String result = JsonUtil.formatJson(tabList, false);
             if (ViewAppInfo.INSTANCE.isApkInDebug()) {
-                Log.runtime("WebSettingsActivity.getTabs: " + result);
+                Log.runtime(TAG,"WebSettingsActivity.getTabs: " + result);
             }
             return result;
         }
@@ -243,7 +244,7 @@ public class WebSettingsActivity extends BaseActivity {
         public String getGroup() {
             String result = JsonUtil.formatJson(groupList, false);
             if (ViewAppInfo.INSTANCE.isApkInDebug()) {
-                Log.runtime("WebSettingsActivity.getGroup: " + result);
+                Log.runtime(TAG,"WebSettingsActivity.getGroup: " + result);
             }
             return result;
         }
@@ -261,7 +262,7 @@ public class WebSettingsActivity extends BaseActivity {
             }
             String result = JsonUtil.formatJson(modelDtoList, false);
             if (ViewAppInfo.INSTANCE.isApkInDebug()) {
-                Log.runtime("WebSettingsActivity.getModelByGroup: " + result);
+                Log.runtime(TAG,"WebSettingsActivity.getModelByGroup: " + result);
             }
             return result;
         }
@@ -301,7 +302,7 @@ public class WebSettingsActivity extends BaseActivity {
                 }
                 String result = JsonUtil.formatJson(list, false);
                 if (ViewAppInfo.INSTANCE.isApkInDebug()) {
-                    Log.runtime("WebSettingsActivity.getModel: " + result);
+                    Log.runtime(TAG,"WebSettingsActivity.getModel: " + result);
                 }
                 return result;
             }
@@ -348,7 +349,7 @@ public class WebSettingsActivity extends BaseActivity {
                 if (modelField != null) {
                     String result = JsonUtil.formatJson(ModelFieldInfoDto.toInfoDto(modelField), false);
                     if (ViewAppInfo.INSTANCE.isApkInDebug()) {
-                        Log.runtime("WebSettingsActivity.getField: " + result);
+                        Log.runtime(TAG,"WebSettingsActivity.getField: " + result);
                     }
                     return result;
                 }
@@ -375,7 +376,7 @@ public class WebSettingsActivity extends BaseActivity {
 
         @JavascriptInterface
         public void Log(String log) {
-            Log.record("设置：" + log);
+            Log.record(TAG,"设置：" + log);
         }
     }
 
@@ -449,7 +450,7 @@ public class WebSettingsActivity extends BaseActivity {
                 break;
             case 6:
                 // 在调用 save() 之前，先调用 JS 函数同步 WebView 中的数据到 Java 端
-                Log.runtime("WebSettingsActivity.onOptionsItemSelected: Calling handleData() in WebView");
+                Log.runtime(TAG,"WebSettingsActivity.onOptionsItemSelected: Calling handleData() in WebView");
                 webView.evaluateJavascript("if(typeof handleData === 'function'){ handleData(); } else { console.error('handleData function not found'); }", null);
                 // 使用 Handler 延迟执行 save()，给 JS 一点时间完成异步操作
                 // 200 毫秒是一个经验值，如果仍然有问题可以适当增加

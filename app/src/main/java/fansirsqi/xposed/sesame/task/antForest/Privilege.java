@@ -167,7 +167,9 @@ public class Privilege {
             JSONObject result = new JSONObject(AntForestRpcCall.studentCheckin());
             handleSignInResult(result, tag);
         } catch (JSONException e) {
-            Log.printStackTrace(TAG + "签到结果解析失败", e);
+            Log.error(TAG, "学生签到失败：" + e.getMessage());
+            Log.printStackTrace(e);
+
         }
     }
 

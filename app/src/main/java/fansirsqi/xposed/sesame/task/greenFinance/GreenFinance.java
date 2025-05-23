@@ -66,10 +66,10 @@ public class GreenFinance extends ModelTask {
     @Override
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -78,7 +78,7 @@ public class GreenFinance extends ModelTask {
     @Override
     public void  run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.record(TAG,"执行开始-" + getName());
             String s = GreenFinanceRpcCall.greenFinanceIndex();
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
@@ -125,7 +125,7 @@ public class GreenFinance extends ModelTask {
             Log.runtime(TAG, "index err:");
             Log.printStackTrace(TAG, th);
         }finally {
-            Log.record("执行结束-" + getName());
+            Log.record(TAG,"执行结束-" + getName());
         }
     }
     /**

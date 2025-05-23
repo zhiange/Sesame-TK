@@ -13,6 +13,7 @@ import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 
 public abstract class Model {
+    private static final String TAG = "Model";
 
     private static final Map<String, ModelConfig> modelConfigMap = new LinkedHashMap<>();
     private static final Map<String, ModelConfig> readOnlyModelConfigMap = Collections.unmodifiableMap(modelConfigMap);
@@ -74,7 +75,7 @@ public abstract class Model {
         if (modelClazz.isInstance(model)) {
             return modelClazz.cast(model);
         } else {
-            Log.error("Model " + modelClazz.getSimpleName() + " not found.");
+            Log.error(TAG,"Model " + modelClazz.getSimpleName() + " not found.");
             return null;
         }
     }

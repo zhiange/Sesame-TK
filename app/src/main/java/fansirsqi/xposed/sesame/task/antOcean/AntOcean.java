@@ -79,10 +79,10 @@ public class AntOcean extends ModelTask {
     @Override
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -91,7 +91,7 @@ public class AntOcean extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.record(TAG,"执行开始-" + getName());
             String s = AntOceanRpcCall.queryOceanStatus();
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResultCode(jo)) {
@@ -112,7 +112,7 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
         finally {
-            Log.record("执行结束-" + getName());
+            Log.record(TAG,"执行结束-" + getName());
         }
     }
     private void queryHomePage() {
@@ -585,7 +585,7 @@ public class AntOcean extends ModelTask {
             String questionResponse = AntOceanRpcCall.getQuestion();
             JSONObject questionJson = new JSONObject(questionResponse);
             if (questionJson.getBoolean("answered")) {
-                Log.record("问题已经被回答过，跳过答题流程");
+                Log.record(TAG,"问题已经被回答过，跳过答题流程");
                 return;
             }
             if (questionJson.getInt("resultCode") == 200) {
@@ -596,12 +596,12 @@ public class AntOcean extends ModelTask {
                 GlobalThreadPools.sleep(500);
                 JSONObject submitJson = new JSONObject(submitResponse);
                 if (submitJson.getInt("resultCode") == 200) {
-                    Log.record("海洋答题成功");
+                    Log.record(TAG,"海洋答题成功");
                 } else {
-                    Log.record("答题失败：" + submitJson.getString("resultMsg"));
+                    Log.record(TAG,"答题失败：" + submitJson.getString("resultMsg"));
                 }
             } else {
-                Log.record("获取问题失败：" + questionJson.getString("resultMsg"));
+                Log.record(TAG,"获取问题失败：" + questionJson.getString("resultMsg"));
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "answerQuestion err:");
@@ -635,15 +635,15 @@ public class AntOcean extends ModelTask {
                             Log.forest("海洋奖励🌊[领取:" + taskTitle + "]获得潘多拉能量x" + awardCount);
                         } else {
                             if (receiveTaskJson.has("message")) {
-                                Log.record("领取任务奖励失败: " + receiveTaskJson.getString("message"));
+                                Log.record(TAG,"领取任务奖励失败: " + receiveTaskJson.getString("message"));
                             } else {
-                                Log.record("领取任务奖励失败，未返回错误信息");
+                                Log.record(TAG,"领取任务奖励失败，未返回错误信息");
                             }
                         }
                     }
                 }
             } else {
-                Log.record("PDLqueryReplicaHome调用失败: " + homeJson.optString("message"));
+                Log.record(TAG,"PDLqueryReplicaHome调用失败: " + homeJson.optString("message"));
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "doOceanPDLTask err:");

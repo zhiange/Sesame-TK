@@ -148,12 +148,12 @@ public class NewRpcBridge implements RpcBridge {
                                                 if (!(Boolean) XposedHelpers.callMethod(obj, "containsKey", "success")
                                                         && !(Boolean) XposedHelpers.callMethod(obj, "containsKey", "isSuccess")) {
                                                     rpcEntity.setError();
-                                                    Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + "\n " +
+                                                    Log.error(TAG,"new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + "\n " +
                                                             "args: " + rpcEntity.getRequestData() + " |\n data: " + rpcEntity.getResponseString());
                                                 }
                                             } catch (Exception e) {
                                                 rpcEntity.setError();
-                                                Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() +
+                                                Log.error(TAG,"new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() +
                                                         " err:");
                                                 Log.printStackTrace(e);
                                             }
@@ -187,7 +187,7 @@ public class NewRpcBridge implements RpcBridge {
                                     Notify.sendErrorNotification(TimeUtil.getTimeStr() + " | 网络异常: "+methodName, response);
                                 }
                                 if (BaseModel.getTimeoutRestart().getValue()) {
-                                    Log.record("尝试重新登录");
+                                    Log.record(TAG,"尝试重新登录");
                                     ApplicationHook.reLoginByBroadcast();
                                 }
                             }
@@ -195,7 +195,7 @@ public class NewRpcBridge implements RpcBridge {
                         }
                         return rpcEntity;
                     } catch (Exception e) {
-                        Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " get err:");
+                        Log.error(TAG,"new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " get err:");
                         Log.printStackTrace(e);
                     }
                     if (retryInterval < 0) {
@@ -212,7 +212,7 @@ public class NewRpcBridge implements RpcBridge {
                         }
                     }
                 } catch (Throwable t) {
-                    Log.error("new rpc request | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
+                    Log.error(TAG,"new rpc request | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
                     Log.printStackTrace(t);
                     if (retryInterval < 0) {
                         try {

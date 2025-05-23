@@ -97,7 +97,7 @@ public class chouChouLe {
                     JSONObject drawMachineActivity = jo.getJSONObject("drawMachineActivity");
                     long endTime = drawMachineActivity.getLong("endTime");
                     if (System.currentTimeMillis() > endTime) {
-                        Log.record("该[" + drawMachineActivity.optString("activityId") + "]抽奖活动已结束");
+                        Log.record(TAG,"该[" + drawMachineActivity.optString("activityId") + "]抽奖活动已结束");
                         return;
                     }
                     int drawTimes = jo.optInt("drawTimes",0);
@@ -124,7 +124,7 @@ public class chouChouLe {
                     JSONObject drawActivityInfo = jo.getJSONObject("drawActivityInfo");
                     long endTime = drawActivityInfo.getLong("endTime");
                     if (System.currentTimeMillis() > endTime) {
-                        Log.record("该[" + drawActivityInfo.optString("activityId") + "]抽奖活动已结束");
+                        Log.record(TAG,"该[" + drawActivityInfo.optString("activityId") + "]抽奖活动已结束");
                         return;
                     }
                     int leftDrawTimes = userInfo.optInt("leftDrawTimes", 0);

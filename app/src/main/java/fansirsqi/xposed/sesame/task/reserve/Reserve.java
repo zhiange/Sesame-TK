@@ -43,10 +43,10 @@ public class Reserve extends ModelTask {
     }
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             return true;
@@ -54,18 +54,18 @@ public class Reserve extends ModelTask {
     }
     public void run() {
         try {
-            Log.record("开始保护地任务");
+            Log.record(TAG,"开始保护地任务");
             animalReserve();
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.record("保护地任务");
+            Log.record(TAG,"保护地任务");
         }
     }
     private void animalReserve() {
         try {
-            Log.record("开始执行-" + getName());
+            Log.record(TAG,"开始执行-" + getName());
             String s = ReserveRpcCall.queryTreeItemsForExchange();
             if (s == null) {
                 GlobalThreadPools.sleep(RandomUtil.delay());
@@ -105,7 +105,7 @@ public class Reserve extends ModelTask {
             Log.runtime(TAG, "animalReserve err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.record("结束执行-" + getName());
+            Log.record(TAG,"结束执行-" + getName());
         }
     }
     private boolean queryTreeForExchange(String projectId) {

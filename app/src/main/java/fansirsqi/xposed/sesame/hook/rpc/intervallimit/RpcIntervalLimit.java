@@ -11,6 +11,7 @@ import fansirsqi.xposed.sesame.util.Log;
  * 提供添加、更新、进入间隔限制以及清除限制的功能。
  */
 public class RpcIntervalLimit {
+    private static final String TAG = "RpcIntervalLimit";
     // 默认的间隔限制设置为50毫秒
     private static final IntervalLimit DEFAULT_INTERVAL_LIMIT = new DefaultIntervalLimit(500);
     // 存储各方法的间隔限制，使用线程安全的ConcurrentHashMap
@@ -34,7 +35,7 @@ public class RpcIntervalLimit {
         {
             synchronized (intervalLimitMap) {
                 if (intervalLimitMap.containsKey(method)) {
-                    Log.runtime("方法：" + method + " 间隔限制已存在");
+                    Log.runtime(TAG,"方法：" + method + " 间隔限制已存在");
                     throw new IllegalArgumentException("方法：" + method + " 间隔限制已存在");
                 }
                 intervalLimitMap.put(method, intervalLimit);

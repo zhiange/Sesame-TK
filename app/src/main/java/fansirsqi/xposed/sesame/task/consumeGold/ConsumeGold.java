@@ -54,10 +54,10 @@ public class ConsumeGold extends ModelTask {
     }
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME){
-            Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
         }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-            Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
             return false;
         } else {
             long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
@@ -67,7 +67,7 @@ public class ConsumeGold extends ModelTask {
     }
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.record(TAG,"执行开始-" + getName());
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             if (consumeGoldSign.getValue()) {
                 consumeGoldSign();
@@ -92,7 +92,7 @@ public class ConsumeGold extends ModelTask {
         } catch (Throwable t) {
             Log.printStackTrace(TAG + ".run", t);
         } finally {
-            Log.record("执行结束-" + getName());
+            Log.record(TAG,"执行结束-" + getName());
         }
     }
     /**

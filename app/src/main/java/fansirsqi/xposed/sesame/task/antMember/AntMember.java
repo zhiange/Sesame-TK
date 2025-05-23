@@ -74,10 +74,10 @@ public class AntMember extends ModelTask {
   @Override
   public Boolean check() {
     if (TaskCommon.IS_ENERGY_TIME){
-      Log.record("⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+      Log.record(TAG,"⏸ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
       return false;
     }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-      Log.record("💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+      Log.record(TAG,"💤 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
       return false;
     } else {
       return true;
@@ -86,7 +86,7 @@ public class AntMember extends ModelTask {
   @Override
   public void run() {
     try {
-      Log.record("执行开始-" + getName());
+      Log.record(TAG,"执行开始-" + getName());
       if (memberSign.getValue()) {
         doMemberSign();
       }
@@ -126,7 +126,7 @@ public class AntMember extends ModelTask {
         }
         JSONObject data = jo.getJSONObject("data");
         if (!data.optBoolean("isOpened")) {
-          Log.record("商家服务👪未开通");
+          Log.record(TAG,"商家服务👪未开通");
           return;
         }
         if (merchantKmdk.getValue()) {
@@ -145,7 +145,7 @@ public class AntMember extends ModelTask {
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.record("执行结束-" + getName());
+      Log.record(TAG,"执行结束-" + getName());
     }
   }
 
@@ -165,7 +165,7 @@ public class AntMember extends ModelTask {
         return;
       }
       if (!jo.has("benefits")) {
-        Log.record("会员积分[未找到可兑换权益]");
+        Log.record(TAG,"会员积分[未找到可兑换权益]");
         return;
       }
       JSONArray benefits = jo.getJSONArray("benefits");
@@ -189,7 +189,7 @@ public class AntMember extends ModelTask {
       }
       IdMapManager.getInstance(MemberBenefitsMap.class).save(userId);
     } catch (JSONException e) {
-      Log.record("JSON解析错误: " + e.getMessage());
+      Log.record(TAG,"JSON解析错误: " + e.getMessage());
       Log.printStackTrace(TAG, e);
     } catch (Throwable t) {
       Log.runtime(TAG, "memberPointExchangeBenefit err:");
@@ -487,7 +487,7 @@ public class AntMember extends ModelTask {
           }
         }
       } else {
-        Log.record("queryActivity" + " " + s);
+        Log.record(TAG,"queryActivity" + " " + s);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "kmdkSignIn err:");
@@ -521,7 +521,7 @@ public class AntMember extends ModelTask {
             }
           }
         } else {
-          Log.record("queryActivity");
+          Log.record(TAG,"queryActivity");
           Log.runtime(jo.toString());
         }
         GlobalThreadPools.sleep(500);
@@ -640,7 +640,7 @@ public class AntMember extends ModelTask {
           doMerchantMoreTask();
         }
       } else {
-        Log.runtime("taskListQuery err:" + " " + s);
+        Log.runtime(TAG,"taskListQuery err:" + " " + s);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "taskListQuery err:");
@@ -674,7 +674,7 @@ public class AntMember extends ModelTask {
           }
         }
       } else {
-        Log.record("taskReceive" + " " + s);
+        Log.record(TAG,"taskReceive" + " " + s);
       }
     } catch (Throwable t) {
       Log.runtime(TAG, "taskReceive err:");
@@ -899,7 +899,7 @@ public class AntMember extends ModelTask {
         jo = new JSONObject(AntMemberRpcCall.signInTrigger("AP16242232", "INS_BLUE_BEAN_SIGN"));
         if (jo.optBoolean("success")) {
           String prizeName = jo.getJSONObject("result").getJSONArray("prizeSendOrderDTOList").getJSONObject(0).getString("prizeName");
-          Log.record("安心豆🫘[" + prizeName + "]");
+          Log.record(TAG,"安心豆🫘[" + prizeName + "]");
         } else {
           Log.runtime(jo.toString());
         }
@@ -932,7 +932,7 @@ public class AntMember extends ModelTask {
       }
       jo = new JSONObject(AntMemberRpcCall.beanExchange(itemId, realConsumePointAmount));
       if (jo.optBoolean("success")) {
-        Log.record("安心豆🫘[兑换:" + itemName + "]");
+        Log.record(TAG,"安心豆🫘[兑换:" + itemName + "]");
       } else {
         Log.runtime(jo.toString());
       }
