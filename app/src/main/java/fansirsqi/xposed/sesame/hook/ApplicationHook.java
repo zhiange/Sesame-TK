@@ -3,6 +3,7 @@ package fansirsqi.xposed.sesame.hook;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AndroidAppHelper;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -79,6 +80,7 @@ import fansirsqi.xposed.sesame.util.PermissionUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
+import com.tencent.mmkv.MMKV;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
     static final String TAG = ApplicationHook.class.getSimpleName();
@@ -261,7 +263,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.printStackTrace(e);
             }
         } else if (General.PACKAGE_NAME.equals(loadPackageParam.packageName) && General.PACKAGE_NAME.equals(loadPackageParam.processName)) {
-            if (hooked) return;
+               if (hooked) return;
             classLoader = loadPackageParam.classLoader;
             XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
                 @Override
@@ -271,12 +273,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                         assert pInfo.versionName != null;
                         alipayVersion = new AlipayVersion(pInfo.versionName);
-                        Log.runtime(TAG, "handleLoadPackage alipayVersion: " + alipayVersion);
+                        Log.runtime(TAG, "handleLoadPackage alipayVersion: " + alipayVersion.getVersionString());
                         loadNativeLibs(context, AssetUtil.INSTANCE.getCheckerDestFile());
                         loadNativeLibs(context, AssetUtil.INSTANCE.getDexkitDestFile());
-
                         HookUtil.INSTANCE.fuckAccounLimit(loadPackageParam);
-
                     } catch (Exception e) {
                         Log.printStackTrace(e);
                     }
@@ -354,8 +354,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
+//                                if (!MMKV.isInitialized()) {
+//                                    MMKV.initialize(AndroidAppHelper.currentApplication());
+//                                }
 
-                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> MAIN_THREAD_POOL.submit(() -> {
+                                mainTask = BaseTask.newInstance("MAIN_TASK", () -> {
                                     try {
                                         TaskCommon.update();
                                         if (TaskCommon.IS_MODULE_SLEEP_TIME) {
@@ -385,10 +388,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             return;
                                         }
                                         lastExecTime = currentTime; // 更新最后执行时间
-                                        if (executeCheckTask(lastExecTime)) {
-                                            reLogin();
-                                            return;
-                                        }
+//                                        if (executeCheckTask(lastExecTime)) {
+//                                            reLogin();
+//                                            return;
+//                                        }
                                         ModelTask.startAllTask(false);
                                         scheduleNextExecution(lastExecTime);
                                         UserId.set(targetUid);
@@ -396,7 +399,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         Log.record(TAG, "❌执行异常");
                                         Log.printStackTrace(TAG, e);
                                     }
-                                }));
+                                });
                                 registerBroadcastReceiver(appService);
                                 Statistics.load();
                                 FriendWatch.load(UserId.get());
@@ -796,7 +799,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
      * @param delayMillis 延迟执行的毫秒数
      */
     static void execDelayedHandler(long delayMillis) {
-        mainHandler.postDelayed(() -> mainTask.startTask(true), delayMillis);
+        mainHandler.postDelayed(
+                () -> mainTask.startTask(true), delayMillis);
         try {
             Notify.updateNextExecText(System.currentTimeMillis() + delayMillis);
         } catch (Exception e) {
