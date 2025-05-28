@@ -645,15 +645,17 @@ public class AntOcean extends ModelTask {
                         if (!taskList.contains(taskType)) {
                             if (taskTitle.contains("答题")) {
                                 answerQuestion();
+                            }else {
+                                JSONObject joFinishTask = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
+                                if (ResUtil.checkSuccess(TAG, joFinishTask)) {
+                                    Log.forest("海洋任务🧾️完成[" + taskTitle + "]");
+                                    done = true;
+                                } else {
+                                    Log.error(TAG, "完成任务失败，" + taskTitle);
+                                    taskList.add(taskType);
+                                }
                             }
-                            JSONObject joFinishTask = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
-                            if (ResUtil.checkSuccess(TAG, joFinishTask)) {
-                                Log.forest("海洋任务🧾️完成[" + taskTitle + "]");
-                                done = true;
-                            } else {
-                                Log.error(TAG, "完成任务失败，" + taskTitle);
-                                taskList.add(taskType);
-                            }
+
                         }
                     }
                     GlobalThreadPools.sleep(500);
