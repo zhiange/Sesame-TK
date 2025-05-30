@@ -125,8 +125,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
     private volatile long lastExecTime = 0; // 添加为类成员变量
 
+    private XC_LoadPackage.LoadPackageParam modelLoadPackageParam;
+
+    private XC_LoadPackage.LoadPackageParam appLloadPackageParam;
+
     static {
-        // 初始化dayCalendar
         dayCalendar = Calendar.getInstance();
         dayCalendar.set(Calendar.HOUR_OF_DAY, 0);
         dayCalendar.set(Calendar.MINUTE, 0);
@@ -143,15 +146,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         MAIN_THREAD_POOL.submit(checkTask); // Submit the task
 
         try {
-            // Attempt to get the result with a timeout
             boolean taskResult = checkTask.get(10, TimeUnit.SECONDS);
-
             if (!taskResult) {
-                // AntMemberRpcCall.check() completed and returned false
                 Log.record(TAG, "执行失败：检查逻辑返回false");
-                // The original code had a peculiar sleep here.
-                // This calculation for waitTime is suspicious and might need review by the user.
-                // For now, we include the interrupt handling for this sleep.
                 long waitTime = 10000 - System.currentTimeMillis() + lastExecTime;
                 if (waitTime > 0) {
                     try {
@@ -164,8 +161,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 }
                 return true; // Failure because check() returned false
             }
-
-            // Task completed successfully and returned true
             reLoginCount.set(0);
             return false; // Success
 
@@ -257,18 +252,21 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         if (General.MODULE_PACKAGE_NAME.equals(loadPackageParam.packageName)) {
             try {
                 ViewAppInfo.setRunType(RunType.ACTIVE);
+                modelLoadPackageParam = loadPackageParam;
                 Log.runtime(TAG, "handleLoadPackage setRunType: " + ViewAppInfo.getRunType());
+
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
         } else if (General.PACKAGE_NAME.equals(loadPackageParam.packageName) && General.PACKAGE_NAME.equals(loadPackageParam.processName)) {
-               if (hooked) return;
-            classLoader = loadPackageParam.classLoader;
-            XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    context = (Context) param.args[0];
-                    try {
+            try {
+                if (hooked) return;
+                appLloadPackageParam = loadPackageParam;
+                classLoader = loadPackageParam.classLoader;
+                XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        context = (Context) param.args[0];
                         PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
                         assert pInfo.versionName != null;
                         alipayVersion = new AlipayVersion(pInfo.versionName);
@@ -276,13 +274,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         loadNativeLibs(context, AssetUtil.INSTANCE.getCheckerDestFile());
                         loadNativeLibs(context, AssetUtil.INSTANCE.getDexkitDestFile());
                         HookUtil.INSTANCE.fuckAccounLimit(loadPackageParam);
-                    } catch (Exception e) {
-                        Log.printStackTrace(e);
+                        super.afterHookedMethod(param);
                     }
-                    super.afterHookedMethod(param);
-                }
-            });
-
+                });
+            } catch (Exception e) {
+                Log.printStackTrace(e);
+            }
 
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.quinox.LauncherActivity", classLoader, "onResume",
@@ -291,6 +288,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             protected void afterHookedMethod(MethodHookParam param) {
                                 Log.runtime(TAG, "hook onResume after start");
                                 String targetUid = getUserId();
+                                Log.runtime(TAG, "onResume targetUid: " + targetUid);
                                 if (targetUid == null) {
                                     Log.record(TAG, "onResume:用户未登录");
                                     Toast.show("用户未登录");
@@ -304,6 +302,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     return;
                                 }
                                 String currentUid = UserMap.getCurrentUid();
+                                Log.runtime(TAG, "onResume currentUid: " + currentUid);
                                 if (!targetUid.equals(currentUid)) {
                                     if (currentUid != null) {
                                         initHandler(true);
@@ -327,7 +326,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.runtime(TAG, "hook login err");
                 Log.printStackTrace(TAG, t);
             }
-            //hook "android.app.Service" 类的onCreate方法
             try {
                 XposedHelpers.findAndHookMethod("android.app.Service", classLoader, "onCreate",
                         new XC_MethodHook() {
@@ -351,15 +349,17 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     Log.runtime(TAG, "hook dexkit successfully");
                                 }
                                 service = appService;
+                                TaskCommon.update();
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
 //                                if (!MMKV.isInitialized()) {
 //                                    MMKV.initialize(AndroidAppHelper.currentApplication());
 //                                }
+                                Log.runtime(TAG, "是否休眠时间 " + TaskCommon.IS_MODULE_SLEEP_TIME);
 
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> {
                                     try {
-                                        TaskCommon.update();
+
                                         if (TaskCommon.IS_MODULE_SLEEP_TIME) {
                                             Log.record(TAG, "️💤跳过执行-休眠时间");
                                             return;
@@ -381,16 +381,14 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         }
                                         String currentUid = UserMap.getCurrentUid();
                                         String targetUid = getUserId();
+
                                         if (targetUid == null || !targetUid.equals(currentUid)) {
                                             Log.record(TAG, "用户切换或为空，重新登录");
                                             reLogin();
                                             return;
                                         }
                                         lastExecTime = currentTime; // 更新最后执行时间
-//                                        if (executeCheckTask(lastExecTime)) {
-//                                            reLogin();
-//                                            return;
-//                                        }
+
                                         ModelTask.startAllTask(false);
                                         scheduleNextExecution(lastExecTime);
                                         UserId.set(targetUid);
@@ -406,6 +404,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 if (initHandler(true)) {
                                     init = true;
                                 }
+                                Log.runtime(TAG, "是否休眠时间 " + TaskCommon.IS_MODULE_SLEEP_TIME);
                             }
                         }
 
@@ -472,6 +471,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
     }
 
+    /**
+     * 设置定时唤醒
+     */
     private static void setWakenAtTimeAlarm() {
         try {
             List<String> wakenAtTimeList = BaseModel.getWakenAtTimeList().getValue();
@@ -481,8 +483,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             }
             unsetWakenAtTimeAlarm();
             try {
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("com.eg.android.AlipayGphone.sesame.execute"),
-                        getPendingIntentFlag());
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent("com.eg.android.AlipayGphone.sesame.execute"), getPendingIntentFlag());
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -505,8 +506,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Calendar wakenAtTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(wakenAtTime);
                         if (wakenAtTimeCalendar != null) {
                             if (wakenAtTimeCalendar.compareTo(nowCalendar) > 0) {
-                                PendingIntent wakenAtTimePendingIntent = PendingIntent.getBroadcast(context, i, new Intent("com.eg.android.AlipayGphone" +
-                                        ".sesame.execute"), getPendingIntentFlag());
+                                PendingIntent wakenAtTimePendingIntent = PendingIntent.getBroadcast(context, i, new Intent("com.eg.android.AlipayGphone" + ".sesame.execute"), getPendingIntentFlag());
                                 if (setAlarmTask(wakenAtTimeCalendar.getTimeInMillis(), wakenAtTimePendingIntent)) {
                                     String wakenAtTimeKey = i + "|" + wakenAtTime;
                                     wakenAtTimeAlarmMap.put(wakenAtTimeKey, wakenAtTimePendingIntent);
@@ -526,6 +526,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
     }
 
+    /**
+     * 取消定时唤醒
+     */
     private static void unsetWakenAtTimeAlarm() {
         try {
             for (Map.Entry<String, PendingIntent> entry : wakenAtTimeAlarmMap.entrySet()) {
@@ -567,9 +570,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.record(TAG, "💤 模块休眠中,停止初始化");
                 return false;
             }
-            destroyHandler(force);
+            destroyHandler(force); // 销毁之前的处理程序
             if (force) {
                 String userId = getUserId();
+                Log.runtime(TAG, "DDDDDDDDDD");
+                AlipayServiceHelper.INSTANCE.getUserInfo(classLoader);
+                Log.runtime(TAG, "EEEEEEEEEE");
                 if (userId == null) {
                     Log.record(TAG, "initHandler:用户未登录");
                     Toast.show("initHandler:用户未登录");
@@ -581,14 +587,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.record(TAG, startMsg);
                 Log.record(TAG, "⚙️模块版本：" + modelVersion);
                 Log.record(TAG, "📦应用版本：" + alipayVersion.getVersionString());
-                Config.load(userId);
+                Config.load(userId);//加载配置
                 if (!Config.isLoaded()) {
                     Log.record(TAG, "用户模块配置加载失败");
                     Toast.show("用户模块配置加载失败");
                     return false;
                 }
-                // ！！所有权限申请应该放在加载配置之后
-
                 //闹钟权限申请
                 if (!PermissionUtil.checkAlarmPermissions()) {
                     Log.record(TAG, "❌ 支付宝无闹钟权限");
@@ -638,7 +642,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         Log.printStackTrace(t);
                     }
                 }
+
                 setWakenAtTimeAlarm();
+
                 if (BaseModel.getNewRpc().getValue()) {
                     rpcBridge = new NewRpcBridge();
                 } else {
@@ -647,81 +653,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 rpcBridge.load();
                 rpcVersion = rpcBridge.getVersion();
                 if (BaseModel.getNewRpc().getValue() && BaseModel.getDebugMode().getValue()) {
-                    try {
-                        rpcRequestUnhook = XposedHelpers.findAndHookMethod(
-                                "com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension", classLoader
-                                , "rpc"
-                                , String.class, boolean.class, boolean.class, String.class,
-                                classLoader.loadClass(General.JSON_OBJECT_NAME), String.class,
-                                classLoader.loadClass(General.JSON_OBJECT_NAME), boolean.class, boolean.class, int.class, boolean.class, String.class,
-                                classLoader.loadClass("com.alibaba.ariver.app.api.App"),
-                                classLoader.loadClass("com.alibaba.ariver.app.api.Page"),
-                                classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"),
-                                classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback")
-                                , new XC_MethodHook() {
-                                    @SuppressLint("WakelockTimeout")
-                                    @Override
-                                    protected void beforeHookedMethod(MethodHookParam param) {
-                                        Object[] args = param.args;
-                                        Object object = args[15];
-                                        Object[] recordArray = new Object[4];
-                                        recordArray[0] = System.currentTimeMillis();
-                                        recordArray[1] = args[0];
-                                        recordArray[2] = args[4];
-                                        rpcHookMap.put(object, recordArray);
-                                    }
+                    Log.runtime(TAG, "FFFFFFFFFF");
+                    HookUtil.INSTANCE.hookRpcBridgeExtension(appLloadPackageParam, BaseModel.getSendHookData().getValue());
+                    Log.runtime(TAG, "GGGGGGGGGG");
+                    HookUtil.INSTANCE.hookDefaultBridgeCallback(appLloadPackageParam);
+                    Log.runtime(TAG, "HHHHHHHHHH");
 
-                                    @SuppressLint("WakelockTimeout")
-                                    @Override
-                                    protected void afterHookedMethod(MethodHookParam param) {
-                                        Object object = param.args[15];
-                                        Object[] recordArray = rpcHookMap.remove(object);
-                                        if (recordArray != null) {
-                                            try {
-                                                JSONObject Res = new JSONObject();
-                                                Res.put("TimeStamp", recordArray[0]);
-                                                Res.put("Method", recordArray[1]);
-                                                Res.put("Params", recordArray[2]);
-                                                Res.put("Data", recordArray[3]);
-                                                if (BaseModel.getSendHookData().getValue()) {
-                                                    HookSender.sendHookData(Res);
-                                                }
-                                                if (recordArray[3] != null && !recordArray[3].equals("null")) {
-                                                    Log.capture(Res.toString());
-                                                }
-                                            } catch (JSONException j) {
-                                                Log.runtime(TAG, "JSON Exception: " + j.getMessage());
-                                            }
-                                        } else {
-                                            Log.capture("delete record ID: " + object.hashCode());
-                                        }
-                                    }
-                                });
-                        Log.runtime(TAG, "hook record request successfully");
-                    } catch (Throwable t) {
-                        Log.runtime(TAG, "hook record request err:");
-                        Log.printStackTrace(TAG, t);
-                    }
-                    try {
-                        rpcResponseUnhook = XposedHelpers.findAndHookMethod("com.alibaba.ariver.engine.common.bridge.internal.DefaultBridgeCallback", classLoader
-                                , "sendJSONResponse"
-                                , classLoader.loadClass(General.JSON_OBJECT_NAME)
-                                , new XC_MethodHook() {
-                                    @SuppressLint("WakelockTimeout")
-                                    @Override
-                                    protected void beforeHookedMethod(MethodHookParam param) {
-                                        Object object = param.thisObject;
-                                        Object[] recordArray = rpcHookMap.get(object);
-                                        if (recordArray != null) {
-                                            recordArray[3] = String.valueOf(param.args[0]);
-                                        }
-                                    }
-                                });
-                        Log.runtime(TAG, "hook record response successfully");
-                    } catch (Throwable t) {
-                        Log.runtime(TAG, "hook record response err:");
-                        Log.printStackTrace(TAG, t);
-                    }
                 }
                 Model.bootAllModel(classLoader);
                 Status.load();
@@ -743,6 +680,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
     }
 
+    /**
+     * 销毁处理程序
+     *
+     * @param force 是否强制销毁
+     */
     static synchronized void destroyHandler(Boolean force) {
         try {
             if (force) {
@@ -951,7 +893,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     public static Object getUserObject() {
         try {
             return XposedHelpers.callMethod(
-                    getServiceObject(XposedHelpers.findClass("com.alipay.mobile.personalbase.service.SocialSdkContactService", classLoader).getName()),
+                    getServiceObject(
+                            XposedHelpers.findClass("com.alipay.mobile.personalbase.service.SocialSdkContactService", classLoader).getName()
+                    ),
                     "getMyAccountInfoModelByLocal");
         } catch (Throwable th) {
             Log.runtime(TAG, "getUserObject err");
@@ -963,6 +907,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     public static String getUserId() {
         try {
             Object userObject = getUserObject();
+            Log.runtime(TAG, "getUserObject:" + userObject);
             if (userObject != null) {
                 return (String) XposedHelpers.getObjectField(userObject, "userId");
             }
