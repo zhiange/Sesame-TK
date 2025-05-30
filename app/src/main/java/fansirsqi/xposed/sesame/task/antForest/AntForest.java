@@ -1534,12 +1534,8 @@ public class AntForest extends ModelTask {
     private void receiveTaskAward() {
         try {
             // 修复：使用new HashSet包装从缓存获取的数据，兼容List/Set类型
-            Set<String> taskList = new HashSet<>(Objects.requireNonNull(DataCache.INSTANCE.getData(
-                    "forestTaskList",
-                    Arrays.asList(
-                            "TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK",
-                            "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"
-                    ))));
+            Set<String> taskList = new HashSet<>(List.of("TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK", "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"));
+            taskList = DataCache.INSTANCE.getSet("forestTaskList", taskList);
             while (true) {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
@@ -1601,13 +1597,13 @@ public class AntForest extends ModelTask {
                     }
                 }
                 if (!doubleCheck) break;
-                DataCache.INSTANCE.saveData("forestTaskList", taskList);
+                DataCache.INSTANCE.saveSet("forestTaskList", taskList);
             }
         } catch (JSONException e) {
-            Log.record(TAG, "JSON解析错误: " + e.getMessage());
+            Log.error(TAG, "JSON解析错误: " + e.getMessage());
             Log.printStackTrace(TAG, e);
         } catch (Throwable t) {
-            Log.runtime(TAG, "receiveTaskAward 错误:");
+            Log.error(TAG, "receiveTaskAward 错误:");
             Log.printStackTrace(TAG, t); // 打印异常栈
         }
     }
