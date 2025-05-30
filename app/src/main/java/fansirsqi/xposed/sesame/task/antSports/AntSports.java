@@ -138,7 +138,7 @@ public class AntSports extends ModelTask {
                     int step = tmpStepCount();
                     try {
                         ClassLoader classLoader = ApplicationHook.getClassLoader();
-                        if ((Boolean) XposedHelpers.callMethod(XposedHelpers.callStaticMethod(classLoader.loadClass("c.RpcManager"), "a"), "a", new Object[]{step, Boolean.FALSE, "system"})) {
+                        if ((Boolean) XposedHelpers.callMethod(XposedHelpers.callStaticMethod(classLoader.loadClass("com.alibaba.health.pedometer.intergation.rpc.RpcManager"), "a"), "a", new Object[]{step, Boolean.FALSE, "system"})) {
                             Log.other(TAG, "同步步数🏃🏻‍♂️[" + step + "步]");
                         } else {
                             Log.error(TAG, "同步运动步数失败:" + step);
