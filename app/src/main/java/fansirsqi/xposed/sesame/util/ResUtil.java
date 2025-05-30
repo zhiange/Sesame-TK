@@ -153,11 +153,12 @@ public class ResUtil {
     }
 
     public static Boolean checkSuccess(String tag, JSONObject jo) {
-        if (!jo.optBoolean("success") && !jo.optBoolean("isSuccess")) {
+        if (jo.optBoolean("success") || jo.optBoolean("isSuccess")) {
             logErrorDetails(tag, jo);
-            return false;
+            return true; // 任意一个为 true 就算成功
+        } else {
+            return false; // 否则失败
         }
-        return true;
     }
 
     private static void recordError(String TAG, JSONObject jo, String key, String prefix) throws JSONException {
