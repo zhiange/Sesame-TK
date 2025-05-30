@@ -5,9 +5,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -614,7 +616,7 @@ public class AntOcean extends ModelTask {
 
     private static void receiveTaskAward() {
         try {
-            Set<String> taskList = new HashSet<>(Objects.requireNonNull(DataCache.INSTANCE.getData("oceanTaskList", new ArrayList<>())));
+            Set<String> taskList = DataCache.INSTANCE.getSet("oceanTaskList", new HashSet<>(List.of("DEMO", "DEMO1")));
             while (true) {
                 boolean done = false;
                 String s = AntOceanRpcCall.queryTaskList();
@@ -635,17 +637,15 @@ public class AntOcean extends ModelTask {
                         JSONObject joAward = new JSONObject(AntOceanRpcCall.receiveTaskAward(sceneCode, taskType));
                         if (ResUtil.checkSuccess(TAG, joAward)) {
                             Log.forest("海洋奖励🌊[" + taskTitle + "]# " + awardCount + "拼图");
-
                             done = true;
                         } else {
-                            Log.error(joAward.getString("desc"));
-                            Log.runtime(joAward.toString());
+                            Log.error(TAG, "海洋奖励🌊" + joAward);
                         }
                     } else if (TaskStatus.TODO.name().equals(taskStatus)) {
                         if (!taskList.contains(taskType)) {
                             if (taskTitle.contains("答题")) {
                                 answerQuestion();
-                            }else {
+                            } else {
                                 JSONObject joFinishTask = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
                                 if (ResUtil.checkSuccess(TAG, joFinishTask)) {
                                     Log.forest("海洋任务🧾️完成[" + taskTitle + "]");
@@ -662,11 +662,11 @@ public class AntOcean extends ModelTask {
 
                 }
                 if (!done) break;
-                DataCache.INSTANCE.saveData("oceanTaskList", taskList);
+                DataCache.INSTANCE.saveSet("oceanTaskList", taskList);
                 Log.runtime("海洋任务列表已保存");
             }
         } catch (JSONException e) {
-            Log.record(TAG, "JSON解析错误: " + e.getMessage());
+            Log.runtime(TAG, "JSON解析错误: " + e.getMessage());
             Log.printStackTrace(TAG, e);
         } catch (
                 Throwable t) {
@@ -681,7 +681,7 @@ public class AntOcean extends ModelTask {
             String questionResponse = AntOceanRpcCall.getQuestion();
             JSONObject questionJson = new JSONObject(questionResponse);
             if (questionJson.getBoolean("answered")) {
-                Log.record(TAG, "问题已经被回答过，跳过答题流程");
+                Log.runtime(TAG, "问题已经被回答过，跳过答题流程");
                 return;
             }
             if (questionJson.getInt("resultCode") == 200) {
@@ -692,12 +692,12 @@ public class AntOcean extends ModelTask {
                 GlobalThreadPools.sleep(500);
                 JSONObject submitJson = new JSONObject(submitResponse);
                 if (submitJson.getInt("resultCode") == 200) {
-                    Log.record(TAG, "海洋答题成功");
+                    Log.record(TAG, "🌊海洋答题成功");
                 } else {
-                    Log.record(TAG, "答题失败：" + submitJson.getString("resultMsg"));
+                    Log.runtime(TAG, "海洋答题失败：" + submitJson);
                 }
             } else {
-                Log.record(TAG, "获取问题失败：" + questionJson.getString("resultMsg"));
+                Log.record(TAG, "海洋获取问题失败：" + questionJson);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "answerQuestion err:");
