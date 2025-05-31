@@ -636,7 +636,7 @@ public class AntFarm extends ModelTask {
                 parseSyncAnimalStatusResponse(joFarmVO);
 
                 userId = joFarmVO.getJSONObject("masterUserInfoVO").getString("userId");
-                familyGroupId = familyInfoVO.getString("groupId");
+                familyGroupId = familyInfoVO.optString("groupId",null);
 
                 if (useSpecialFood.getValue()) {//使用特殊食品
                     JSONArray cuisineList = jo.getJSONArray("cuisineList");
