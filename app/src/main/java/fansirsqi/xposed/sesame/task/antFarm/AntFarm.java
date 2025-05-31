@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -414,7 +415,7 @@ public class AntFarm extends ModelTask {
 
                     Log.runtime(TAG, "DEBUG:" + ownerAnimal.toString());
 
-                    syncAnimalStatusAtOtherFarm(ownerAnimal.currentFarmId);
+                    syncAnimalStatus(ownerFarmId);
                     boolean guest = false;
                     switch (SubAnimalType.valueOf(ownerAnimal.subAnimalType)) {
                         case GUEST:
@@ -637,7 +638,21 @@ public class AntFarm extends ModelTask {
 
                 userId = joFarmVO.getJSONObject("masterUserInfoVO").getString("userId");
                 familyGroupId = familyInfoVO.optString("groupId",null);
-
+                // 领取活动食物
+                JSONObject activityData = jo.optJSONObject("activityData");
+                if (activityData != null) {
+                    for (Iterator<String> it = activityData.keys(); it.hasNext(); ) {
+                        String key = it.next();
+                        if (key.contains("Gifts")) {
+                            JSONArray gifts = activityData.optJSONArray(key);
+                            if (gifts == null) continue;
+                            for (int i = 0; i < gifts.length(); i++) {
+                                JSONObject gift = gifts.optJSONObject(i);
+                                clickForGiftV2(gift);
+                            }
+                        }
+                    }
+                }
                 if (useSpecialFood.getValue()) {//使用特殊食品
                     JSONArray cuisineList = jo.getJSONArray("cuisineList");
                     if (!AnimalFeedStatus.SLEEPY.name().equals(ownerAnimal.animalFeedStatus))
@@ -1672,8 +1687,9 @@ public class AntFarm extends ModelTask {
                         }
                     }
                 }
-
             }
+
+
 
             ownerFarmId = subFarmVO.getString("farmId");
 
@@ -1701,6 +1717,9 @@ public class AntFarm extends ModelTask {
                 JSONObject animalJson = jaAnimals.getJSONObject(i);
                 Animal animal = objectMapper.readValue(animalJson.toString(), Animal.class);
                 animalList.add(animal);
+                if (animal.masterFarmId.equals(ownerFarmId)) {
+                    ownerAnimal = animal;
+                }
                 Log.record(TAG, "当前动物：" + animal.toString());
             }
             animals = animalList.toArray(new Animal[0]);
@@ -2468,10 +2487,8 @@ public class AntFarm extends ModelTask {
         @JsonProperty("currentFarmMasterUserId")
         public String currentFarmMasterUserId;
 
-        @JsonProperty("animalStatusVO.animalFeedStatus")
         public String animalFeedStatus;
 
-        @JsonProperty("animalStatusVO.animalInteractStatus")
         public String animalInteractStatus;
 
         @JsonProperty("locationType")
@@ -2485,6 +2502,14 @@ public class AntFarm extends ModelTask {
 
         @JsonProperty("foodHaveEatten")
         public Double foodHaveEatten;
+
+        @JsonProperty("animalStatusVO")
+        private void unmarshalAnimalStatusVO(Map<String,Object> map) {
+            if (map != null) {
+                this.animalFeedStatus = (String) map.get("animalFeedStatus");
+                this.animalInteractStatus = (String) map.get("animalInteractStatus");
+            }
+        }
     }
 
     private static class RewardFriend {
@@ -3045,7 +3070,23 @@ public class AntFarm extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
+    /**
+     * 点击领取活动食物
+     *
+     * @param gift
+     */
+    private void clickForGiftV2(JSONObject gift) {
+        if (gift == null) return;
+        try {
+            String result = AntFarmRpcCall.clickForGiftV2(gift.getString("foodType"), gift.getInt("giftIndex"));
+            if (ResUtil.checkSuccess(TAG, result)) {
+                Log.farm("领取活动食物成功,"+ "已领取" + new JSONObject(result).optInt("foodCount"));
+            }
+        } catch (Exception e) {
+            Log.runtime(TAG, "clickForGiftV2 err:");
+            Log.printStackTrace(TAG, e);
+        }
+    }
     static class AntFarmFamilyOption extends MapperEntity {
         public AntFarmFamilyOption(String i, String n) {
             id = i;
