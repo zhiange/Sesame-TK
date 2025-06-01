@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
@@ -200,6 +203,8 @@ public class AntFarm extends ModelTask {
     private BooleanModelField acceptGift;
     private SelectAndCountModelField visitFriendList;
     private BooleanModelField chickenDiary;
+    private BooleanModelField diaryTietie;
+    private ChoiceModelField collectChickenDiary;
     private BooleanModelField enableChouchoule;
     private BooleanModelField listOrnaments;
     private BooleanModelField hireAnimal;
@@ -254,6 +259,8 @@ public class AntFarm extends ModelTask {
         modelFields.addField(harvestProduce = new BooleanModelField("harvestProduce", "收获爱心鸡蛋", false));
         modelFields.addField(kitchen = new BooleanModelField("kitchen", "小鸡厨房", false));
         modelFields.addField(chickenDiary = new BooleanModelField("chickenDiary", "小鸡日记", false));
+        modelFields.addField(diaryTietie = new BooleanModelField("diaryTietie", "小鸡日记 | 贴贴", false));
+        modelFields.addField(collectChickenDiary = new ChoiceModelField("collectChickenDiary", "小鸡日记 | 点赞", collectChickenDiaryType.ONCE, collectChickenDiaryType.nickNames));
         modelFields.addField(enableChouchoule = new BooleanModelField("enableChouchoule", "开启小鸡抽抽乐", false));
         modelFields.addField(listOrnaments = new BooleanModelField("listOrnaments", "小鸡每日换装", false));
         modelFields.addField(enableDdrawGameCenterAward = new BooleanModelField("enableDdrawGameCenterAward", "开宝箱", false));
@@ -325,9 +332,11 @@ public class AntFarm extends ModelTask {
                 collectDailyLimitedFoodMaterial();
                 cook(userId);
             }
+
             if (chickenDiary.getValue()) {
-                queryChickenDiaryList();
+                doChickenDiary();
             }
+
             if (useNewEggCard.getValue()) {
                 useFarmTool(ownerFarmId, ToolType.NEWEGGTOOL);
                 syncAnimalStatus(ownerFarmId);
@@ -1366,6 +1375,7 @@ public class AntFarm extends ModelTask {
      */
     private Boolean feedAnimal(String farmId) {
         try {
+
             if (foodStock < 180) {
                 Log.record(TAG, "喂鸡饲料不足");
             } else {
@@ -1966,25 +1976,31 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private void queryChickenDiary(String queryDayStr) {
+    /**
+     * 贴贴小鸡
+     * @param queryDayStr
+     */
+    private void diaryTietie(String queryDayStr) {
+        String diaryDateStr;
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiary(queryDayStr));
             if (ResUtil.checkResultCode(jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 JSONObject chickenDiary = data.getJSONObject("chickenDiary");
-                String diaryDateStr = chickenDiary.getString("diaryDateStr");
+                diaryDateStr = chickenDiary.getString("diaryDateStr");
                 if (data.has("hasTietie")) {
                     if (!data.optBoolean("hasTietie", true)) {
                         jo = new JSONObject(AntFarmRpcCall.diaryTietie(diaryDateStr, "NEW"));
                         if ("SUCCESS".equals(jo.getString("memo"))) {
                             String prizeType = jo.getString("prizeType");
                             int prizeNum = jo.optInt("prizeNum", 0);
-                            Log.farm("贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
+                            Log.farm("[" + diaryDateStr + "]" + "贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
                         } else {
+                            Log.runtime(TAG, "贴贴小鸡失败:" );
                             Log.runtime(jo.getString("memo"), jo.toString());
                         }
                         if (!chickenDiary.has("statisticsList"))
-                            return;
+                            return ;
                         JSONArray statisticsList = chickenDiary.getJSONArray("statisticsList");
                         if (statisticsList.length() > 0) {
                             for (int i = 0; i < statisticsList.length(); i++) {
@@ -1994,15 +2010,18 @@ public class AntFarm extends ModelTask {
                                 if ("SUCCESS".equals(jo.getString("memo"))) {
                                     String prizeType = jo.getString("prizeType");
                                     int prizeNum = jo.optInt("prizeNum", 0);
-                                    Log.farm("贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
+                                    Log.farm("[" + diaryDateStr + "]" + "贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
                                 } else {
+                                    Log.runtime(TAG, "贴贴小鸡失败:" );
                                     Log.runtime(jo.getString("memo"), jo.toString());
                                 }
                             }
                         }
                     }
                 }
+
             } else {
+                Log.runtime(TAG, "贴贴小鸡-获取小鸡日记详情 err:");
                 Log.runtime(jo.getString("resultDesc"), jo.toString());
             }
         } catch (Throwable t) {
@@ -2011,17 +2030,62 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private void queryChickenDiaryList() {
+    /**
+     * 点赞小鸡日记
+     * @param queryDayStr
+     * @return
+     */
+    private String collectChickenDiary(String queryDayStr) {
+        String diaryDateStr = null;
         try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList());
+            JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiary(queryDayStr));
             if (ResUtil.checkResultCode(jo)) {
-                JSONArray chickenDiaryBriefList = jo.getJSONObject("data").optJSONArray("chickenDiaryBriefList");
+                JSONObject data = jo.getJSONObject("data");
+                JSONObject chickenDiary = data.getJSONObject("chickenDiary");
+                diaryDateStr = chickenDiary.getString("diaryDateStr");
+                // 点赞小鸡日记
+                if (!chickenDiary.optBoolean("collectStatus", true)) {
+                    String diaryId = chickenDiary.getString("diaryId");
+                    jo = new JSONObject(AntFarmRpcCall.collectChickenDiary(diaryId));
+                    if (jo.optBoolean("success", true)) {
+                        Log.farm("[" + diaryDateStr + "]" + "点赞小鸡日记💞成功");
+                    }
+                }
+
+            } else {
+                Log.runtime(TAG, "日记点赞-获取小鸡日记详情 err:");
+                Log.runtime(jo.getString("resultDesc"), jo.toString());
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "queryChickenDiary err:");
+            Log.printStackTrace(TAG, t);
+        } finally {
+            return diaryDateStr;
+        }
+    }
+
+    private boolean queryChickenDiaryList(String queryMonthStr, Function<String, String> fun) {
+        boolean hasPreviousMore = false;
+        try {
+            JSONObject jo = null;
+            if (StringUtil.isEmpty(queryMonthStr)) {
+                jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList());
+            } else {
+                jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList(queryMonthStr));
+//                Log.runtime(TAG, "获取小鸡日记列表:"+jo.toString());
+            }
+            if (ResUtil.checkResultCode(TAG, jo)) {
+                jo = jo.getJSONObject("data");
+                hasPreviousMore = jo.optBoolean("hasPreviousMore", false);
+                JSONArray chickenDiaryBriefList = jo.optJSONArray("chickenDiaryBriefList");
                 if (chickenDiaryBriefList != null && chickenDiaryBriefList.length() > 0) {
-                    for (int i = 0; i < chickenDiaryBriefList.length(); i++) {
+                    for (int i = chickenDiaryBriefList.length()-1; i >= 0; i--) {
                         jo = chickenDiaryBriefList.getJSONObject(i);
-                        if (!jo.optBoolean("read", true)) {
+                        if (!jo.optBoolean("read", true) ||
+                                !jo.optBoolean("collectStatus")
+                        ) {
                             String dateStr = jo.getString("dateStr");
-                            queryChickenDiary(dateStr);
+                            fun.apply(dateStr);
                             GlobalThreadPools.sleep(300);
                         }
                     }
@@ -2030,8 +2094,48 @@ public class AntFarm extends ModelTask {
                 Log.runtime(jo.getString("resultDesc"), jo.toString());
             }
         } catch (Throwable t) {
+            hasPreviousMore = false;
             Log.runtime(TAG, "queryChickenDiaryList err:");
             Log.printStackTrace(TAG, t);
+        } finally {
+            return hasPreviousMore;
+        }
+    }
+
+    private void doChickenDiary() {
+
+        if (diaryTietie.getValue()) { // 贴贴小鸡
+            diaryTietie("");
+        }
+
+        // 小鸡日记点赞
+        String dateStr = null;
+        YearMonth yearMonth = YearMonth.now();
+        boolean previous = false;
+        try {
+            if (collectChickenDiary.getValue() >= collectChickenDiaryType.ONCE) {
+                GlobalThreadPools.sleep(300);
+                dateStr = collectChickenDiary("");
+            }
+            if (collectChickenDiary.getValue() >= collectChickenDiaryType.MONTH) {
+                if (dateStr == null) {
+                    Log.error(TAG, "小鸡日记点赞-dateStr为空，使用当前日期");
+                } else {
+                    yearMonth = YearMonth.from(LocalDate.parse(dateStr));
+                }
+                GlobalThreadPools.sleep(300);
+                previous = queryChickenDiaryList(yearMonth.toString(), this::collectChickenDiary);
+            }
+            if (collectChickenDiary.getValue() >= collectChickenDiaryType.ALL) {
+                while (previous) {
+                    GlobalThreadPools.sleep(300);
+                    yearMonth = yearMonth.minusMonths(1);
+                    previous = queryChickenDiaryList(yearMonth.toString(), this::collectChickenDiary);
+                }
+            }
+        } catch (Exception e) {
+            Log.runtime(TAG, "doChickenDiary err:");
+            Log.printStackTrace(TAG, e);
         }
     }
 
@@ -2430,6 +2534,14 @@ public class AntFarm extends ModelTask {
         String[] nickNames = {"选中遣返", "选中不遣返"};
     }
 
+    public interface collectChickenDiaryType {
+        int CLOSE = 0;
+        int ONCE = 0;
+        int MONTH = 1;
+        int ALL = 2;
+        String[] nickNames = {"不开启", "一次", "当月", "所有"};
+    }
+
     public enum AnimalBuff {
         ACCELERATING, INJURED, NONE
     }
@@ -2464,6 +2576,8 @@ public class AntFarm extends ModelTask {
             return gameNames[ordinal()];
         }
     }
+
+
 
 
     @ToString
