@@ -625,4 +625,15 @@ public static String enterFarm(String farmId, String userId) {
         String data = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"ignoreHoldLimit\":false,\"itemId\":\"" + spuId + "\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"subItemId\":\"" + skuId + "\"}]";
         return RequestManager.requestString("com.alipay.charitygamecenter.buyMallItem", data);
     }
+
+    /**
+     * 领取活动食物
+     * @param foodType
+     * @param giftIndex
+     * @return
+     */
+    public static String clickForGiftV2(String foodType, int giftIndex) {
+        String data = "[{\"foodType\":\""+ foodType + "\",\"giftIndex\":" + giftIndex + ",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"ANTFOREST\",\"version\":\"" + VERSION + "\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.clickForGiftV2", data);
+    }
 }
