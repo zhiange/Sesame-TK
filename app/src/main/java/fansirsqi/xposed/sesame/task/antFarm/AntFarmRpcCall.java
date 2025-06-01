@@ -381,10 +381,22 @@ public static String enterFarm(String farmId, String userId) {
                         + VERSION + "\"}]");
     }
 
-    /* 小鸡日记 */
+    /**
+     * 小鸡日志当月日期查询
+     * @return
+     */
     public static String queryChickenDiaryList() {
         return RequestManager.requestString("com.alipay.antfarm.queryChickenDiaryList",
                 "[{\"requestType\":\"NORMAL\",\"sceneCode\":\"DIARY\",\"source\":\"antfarm_icon\"}]");
+    }
+    /**
+     * 小鸡日志指定月份日期查询
+     * @param yearMonth 日期格式：yyyy-MM
+     * @return
+     */
+    public static String queryChickenDiaryList(String yearMonth) {
+        return RequestManager.requestString("com.alipay.antfarm.queryChickenDiaryList",
+                "[{\"queryMonthStr\":\"" + yearMonth +"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"DIARY\",\"source\":\"antfarm_icon\"}]");
     }
 
     public static String queryChickenDiary(String queryDayStr) {
@@ -397,6 +409,16 @@ public static String enterFarm(String farmId, String userId) {
         return RequestManager.requestString("com.alipay.antfarm.diaryTietie",
                 "[{\"diaryDate\":\"" + diaryDate + "\",\"requestType\":\"NORMAL\",\"roleId\":\"" + roleId
                         + "\",\"sceneCode\":\"DIARY\",\"source\":\"antfarm_icon\"}]");
+    }
+
+    /**
+     * 小鸡日记点赞
+     * @param DiaryId 日记id
+     * @return
+     */
+    public static String collectChickenDiary(String DiaryId) {
+        return RequestManager.requestString("com.alipay.antfarm.collectChickenDiary",
+                "[{\"collectStatus\":true,\"diaryId\":\""+DiaryId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"MOOD\",\"source\":\"H5\"}]");
     }
 
     public static String visitAnimal() {

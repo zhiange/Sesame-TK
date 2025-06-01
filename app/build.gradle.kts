@@ -101,6 +101,7 @@ android {
     }
     compileOptions {
         // 全局默认设置
+        isCoreLibraryDesugaringEnabled = true // 启用脱糖
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -201,6 +202,8 @@ dependencies {
     annotationProcessor(libs.lombok)
     implementation(libs.okhttp)
     implementation(libs.dexkit)
+
+    coreLibraryDesugaring(libs.desugar)
 
     add("normalImplementation", libs.jackson.core)
     add("normalImplementation", libs.jackson.databind)

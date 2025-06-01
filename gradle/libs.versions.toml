@@ -17,6 +17,7 @@ jackson-compatible = "2.13.5"
 webkit = "1.14.0-alpha01"
 core-ktx = "1.16.0"
 dexkit = "2.0.4"
+desugar = "2.1.5"
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin-stdlib" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
@@ -37,6 +38,7 @@ jackson-core-compatible = { module = "com.fasterxml.jackson.core:jackson-core", 
 jackson-databind-compatible = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-compatible" }
 jackson-annotations-compatible = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-compatible" }
 dexkit = { module = "org.luckypray:dexkit", version.ref = "dexkit" }
+desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-plugin" }
