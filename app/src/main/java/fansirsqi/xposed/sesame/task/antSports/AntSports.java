@@ -133,7 +133,7 @@ public class AntSports extends ModelTask {
         Log.record(TAG, "执行开始-" + getName());
         try {
 
-            if (Status.hasFlagToday("sport::syncStep") && TimeUtil.isNowAfterOrCompareTimeStr("0600")) {
+            if (!Status.hasFlagToday("sport::syncStep") && TimeUtil.isNowAfterOrCompareTimeStr("0600")) {
                 addChildTask(new ChildModelTask("syncStep", () -> {
                     int step = tmpStepCount();
                     try {
