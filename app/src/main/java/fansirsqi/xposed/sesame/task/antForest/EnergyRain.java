@@ -29,8 +29,8 @@ public class EnergyRain {
                     sum += bubbleEnergyList.getInt(i);
                 }
                 GlobalThreadPools.sleep(5000);
-                String result = AntForestRpcCall.energyRainSettlement(sum, token);
-                if (ResUtil.checkResultCode(result)) {
+                JSONObject resultJson = new JSONObject(AntForestRpcCall.energyRainSettlement(sum, token));
+                if (ResUtil.checkResultCode(resultJson)) {
                     String s = "收获能量雨🌧️[" + sum + "g]";
                     Toast.show(s);
                     Log.forest(s);

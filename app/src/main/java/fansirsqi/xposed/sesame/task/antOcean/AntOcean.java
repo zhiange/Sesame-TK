@@ -635,7 +635,7 @@ public class AntOcean extends ModelTask {
                     String taskStatus = task.getString("taskStatus");
                     if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                         JSONObject joAward = new JSONObject(AntOceanRpcCall.receiveTaskAward(sceneCode, taskType));
-                        if (ResUtil.checkSuccess(TAG, joAward)) {
+                        if (ResUtil.checkSuccess( joAward)) {
                             Log.forest("海洋奖励🌊[" + taskTitle + "]# " + awardCount + "拼图");
                             done = true;
                         } else {
@@ -647,7 +647,7 @@ public class AntOcean extends ModelTask {
                                 answerQuestion();
                             } else {
                                 JSONObject joFinishTask = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
-                                if (ResUtil.checkSuccess(TAG, joFinishTask)) {
+                                if (ResUtil.checkSuccess( joFinishTask)) {
                                     Log.forest("海洋任务🧾️完成[" + taskTitle + "]");
                                     done = true;
                                 } else {

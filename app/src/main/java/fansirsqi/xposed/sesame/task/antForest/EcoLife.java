@@ -213,20 +213,20 @@ public class EcoLife {
             }
             str = AntForestRpcCall.ecolifeUploadDishImage("BEFORE_MEALS", photo.get("before"), 0.16571736, 0.07448776, 0.7597949, dayPoint);
             jo = new JSONObject(str);
-            if (!ResUtil.checkSuccess(TAG, jo)) {
+            if (!ResUtil.checkSuccess( jo)) {
                 return;
             }
             GlobalThreadPools.sleep(3000);
             str = AntForestRpcCall.ecolifeUploadDishImage("AFTER_MEALS", photo.get("after"), 0.00040030346, 0.99891376, 0.0006858421, dayPoint);
             jo = new JSONObject(str);
-            if (!ResUtil.checkSuccess(TAG, jo)) {
+            if (!ResUtil.checkSuccess( jo)) {
                 return;
             }
             // 提交任务
             str = AntForestRpcCall.ecolifeTick("photoguangpan", dayPoint, source);
             jo = new JSONObject(str);
             // 如果提交失败，记录错误信息并返回
-            if (!ResUtil.checkSuccess(TAG, jo)) {
+            if (!ResUtil.checkSuccess( jo)) {
                 return;
             }
             // 任务完成，输出完成日志

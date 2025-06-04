@@ -187,7 +187,7 @@ public class AntSports extends ModelTask {
     private void coinExchangeItem(String itemId) {
         try {
             JSONObject jo = new JSONObject(AntSportsRpcCall.queryItemDetail(itemId));
-            if (!ResUtil.checkSuccess(TAG, jo)) {
+            if (!ResUtil.checkSuccess( jo)) {
                 return;
             }
             jo = jo.getJSONObject("data");
@@ -198,7 +198,7 @@ public class AntSports extends ModelTask {
             String itemTitle = jo.getString("itemTitle");
             int valueCoinCount = jo.getInt("valueCoinCount");
             jo = new JSONObject(AntSportsRpcCall.exchangeItem(itemId, valueCoinCount));
-            if (!ResUtil.checkSuccess(TAG, jo)) {
+            if (!ResUtil.checkSuccess( jo)) {
                 return;
             }
             jo = jo.getJSONObject("data");

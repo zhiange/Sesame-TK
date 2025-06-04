@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -562,6 +563,9 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     @SuppressLint("WakelockTimeout")
     private synchronized Boolean initHandler(Boolean force) {
         try {
+            destroyHandler(force); // 销毁之前的处理程序
+            Model.initAllModel(); //在所有服务启动前装模块配置
+            Log.runtime(TAG, "USER_LOGIN_STATUS: " + AlipayLoginMonitor.INSTANCE.isUserLoggedIn(appLloadPackageParam));
             TaskCommon.update();
             if (service == null) {
                 return false;
@@ -570,7 +574,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.record(TAG, "💤 模块休眠中,停止初始化");
                 return false;
             }
-            destroyHandler(force); // 销毁之前的处理程序
             if (force) {
                 String userId = getUserId();
                 Log.runtime(TAG, "DDDDDDDDDD");
@@ -582,7 +585,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     return false;
                 }
                 UserMap.initUser(userId);
-                Model.initAllModel();
+
                 String startMsg = "芝麻粒-TK 开始初始化...";
                 Log.record(TAG, startMsg);
                 Log.record(TAG, "⚙️模块版本：" + modelVersion);
@@ -653,12 +656,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 rpcBridge.load();
                 rpcVersion = rpcBridge.getVersion();
                 if (BaseModel.getNewRpc().getValue() && BaseModel.getDebugMode().getValue()) {
-                    Log.runtime(TAG, "FFFFFFFFFF");
-                    HookUtil.INSTANCE.hookRpcBridgeExtension(appLloadPackageParam, BaseModel.getSendHookData().getValue());
-                    Log.runtime(TAG, "GGGGGGGGGG");
+                    HookUtil.INSTANCE.hookRpcBridgeExtension(appLloadPackageParam, BaseModel.getSendHookData().getValue(), BaseModel.getSendHookDataUrl().getValue());
                     HookUtil.INSTANCE.hookDefaultBridgeCallback(appLloadPackageParam);
-                    Log.runtime(TAG, "HHHHHHHHHH");
-
                 }
                 Model.bootAllModel(classLoader);
                 Status.load();
@@ -673,8 +672,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             execHandler();
             return true;
         } catch (Throwable th) {
-            Log.runtime(TAG, "startHandler err:");
-            Log.printStackTrace(TAG, th);
+            Log.printStackTrace(TAG, "startHandler", th);
             Toast.show("芝麻粒加载失败 🎃");
             return false;
         }
@@ -695,7 +693,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     Notify.stop();
                     RpcIntervalLimit.clearIntervalLimit();
                     Config.unload();
-                    Model.destroyAllModel();
                     UserMap.unload();
                 }
                 if (rpcResponseUnhook != null) {
