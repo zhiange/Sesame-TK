@@ -68,7 +68,7 @@ public class GlobalThreadPools {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Log.error(TAG, "Thread sleep interrupted " + e.getMessage());
-//            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();
         } catch (Exception e1) {
             Log.printStackTrace(e1);
 //            Thread.currentThread().interrupt();
