@@ -38,7 +38,7 @@ public class Privilege {
 
     public static boolean youthPrivilege() {
         try {
-            if (!Status.hasFlagToday(Flag)) return false;
+            if (Status.hasFlagToday(Flag)) return false;
             List<String> processResults = new ArrayList<>();
             for (List<String> task : YOUTH_TASKS) {
                 processResults.addAll(processYouthPrivilegeTask(task));
@@ -127,7 +127,7 @@ public class Privilege {
                 return;
             }
 
-            if (!Status.hasFlagToday(Flag2)) {
+            if (Status.hasFlagToday(Flag2)) {
                 Log.record(STUDENT_SIGN_PREFIX + "今日已完成签到");
                 return;
             }
