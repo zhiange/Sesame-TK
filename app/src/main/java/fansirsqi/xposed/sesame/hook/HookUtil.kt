@@ -4,7 +4,6 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import fansirsqi.xposed.sesame.data.General
-import fansirsqi.xposed.sesame.hook.AlipayServiceHelper.getServiceObject
 import fansirsqi.xposed.sesame.hook.AlipayServiceHelper.getUserInfo
 import fansirsqi.xposed.sesame.util.Log
 import org.json.JSONObject
@@ -20,7 +19,7 @@ object HookUtil {
     /**
      * Hook RpcBridgeExtension.rpc 方法，记录请求信息
      */
-    fun hookRpcBridgeExtension(lpparam: XC_LoadPackage.LoadPackageParam, isdebug: Boolean) {
+    fun hookRpcBridgeExtension(lpparam: XC_LoadPackage.LoadPackageParam, isdebug: Boolean, debugUrl: String) {
         try {
             val className = "com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension"
             val jsonClassName = General.JSON_OBJECT_NAME // 替换为你项目中的实际 JSON 类名
@@ -80,17 +79,47 @@ object HookUtil {
                             val recordArray = rpcHookMap.remove(callback)
                             recordArray?.let {
                                 try {
+                                    val time = it[0]
+                                    val method = it[1].toString()
+                                    val paramsStr = it[2].toString()
+                                    val dataStr = it.getOrNull(3)?.toString() ?: "null"
+
                                     val res = JSONObject().apply {
-                                        put("TimeStamp", it[0])
-                                        put("Method", it[1].toString())
-                                        put("Params", it[2].toString())
-                                        put("Data", it.getOrNull(3)?.toString() ?: "null")
+                                        put("TimeStamp", time)
+                                        put("Method", method)
+                                        put("Params", paramsStr)
+                                        put("Data", dataStr)
                                     }
+
+                                    val paramsJson = try {
+                                        JSONObject(paramsStr).toString(4)
+                                    } catch (e: Exception) {
+                                        paramsStr
+                                    }
+                                    val dataJson = if (dataStr == "null") {
+                                        "null"
+                                    } else {
+                                        try {
+                                            JSONObject(dataStr).toString(4)
+                                        } catch (e: Exception) {
+                                            dataStr
+                                        }
+                                    }
+
+                                    val prettyRecord = """
+{
+"TimeStamp": $time,
+"Method": "$method",
+"Params": $paramsJson,
+"Data": $dataJson
+}
+""".trimIndent()
+
                                     if (isdebug) {
-                                        HookSender.sendHookData(res)
+                                        HookSender.sendHookData(res,debugUrl)
                                     }
-                                    if (it[3] != null && it[3] != "null") {
-                                        Log.capture(res.toString())
+                                    if (!it.getOrNull(3).toString().equals(null) && it.getOrNull(3).toString() != "null") {
+                                        Log.capture(prettyRecord)
                                     }
                                 } catch (e: Exception) {
                                     Log.runtime(TAG, "JSON 构建失败: ${e.message}")
@@ -190,11 +219,6 @@ object AlipayLoginMonitor {
     var isLoggedIn = false
         private set
 
-    fun watchLoginStatus(lpparam: XC_LoadPackage.LoadPackageParam) {
-        hookSetLoginResult(lpparam)
-        hookGetUserInfo(lpparam)
-    }
-
     private fun hookSetLoginResult(lpparam: XC_LoadPackage.LoadPackageParam) {
         XposedHelpers.findAndHookMethod(
             "com.ali.user.mobile.loginupgrade.activity.LoginActivity",
@@ -213,22 +237,8 @@ object AlipayLoginMonitor {
         )
     }
 
-    private fun hookGetUserInfo(lpparam: XC_LoadPackage.LoadPackageParam) {
-        XposedHelpers.findAndHookMethod(
-            "com.ali.user.mobile.loginupgrade.activity.LoginActivity",
-            lpparam.classLoader,
-            "onResume",
-            object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam?) {
-                    val user = getUserInfo(lpparam.classLoader)
-                    isLoggedIn = user != null
-                    Log.runtime(TAG, "支付宝登录状态更新：${isLoggedIn}")
-                }
-            }
-        )
-    }
-
-    fun isUserLoggedIn(): Boolean {
+    fun isUserLoggedIn(lpparam: XC_LoadPackage.LoadPackageParam): Boolean {
+        hookSetLoginResult(lpparam)
         return isLoggedIn
     }
 }
@@ -272,7 +282,7 @@ object AlipayServiceHelper {
             field.isAccessible = true
             try {
                 Log.runtime(TAG, "Field: ${field.name} = ${field.get(obj)}")
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 Log.runtime(TAG, "Field: ${field.name} [无法读取]")
             }
         }
