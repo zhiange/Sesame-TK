@@ -42,7 +42,7 @@ public class ChouChouLe {
 
             JSONObject drawMachineInfo = jo.optJSONObject("drawMachineInfo");
             if (drawMachineInfo == null) {
-                Log.farm("抽抽乐🎁[获取抽抽乐活动信息失败]");
+                Log.error(TAG, "抽抽乐🎁[获取抽抽乐活动信息失败]");
                 return;
             }
 
@@ -58,6 +58,12 @@ public class ChouChouLe {
         }
     }
 
+    /**
+     * 执行抽抽乐
+     *
+     * @param drawType "dailyDraw" or "ipDraw" 普通装扮或者IP装扮
+     */
+
     private void doChouchoule(String drawType) {
         boolean doubleCheck;
         do {
@@ -65,28 +71,25 @@ public class ChouChouLe {
             try {
                 JSONObject jo = new JSONObject(AntFarmRpcCall.chouchouleListFarmTask(drawType));
                 if (!ResUtil.checkResultCode(TAG, jo)) {
-                    Log.record(TAG, drawType.equals("ipDraw") ? "IP抽抽乐任务列表获取失败" : "抽抽乐任务列表获取失败");
+                    Log.error(TAG, drawType.equals("ipDraw") ? "IP抽抽乐任务列表获取失败" : "抽抽乐任务列表获取失败");
                     continue;
                 }
-
-                JSONArray farmTaskList = jo.getJSONArray("farmTaskList");
+                JSONArray farmTaskList = jo.getJSONArray("farmTaskList");//获取任务列表
                 List<TaskInfo> tasks = parseTasks(farmTaskList);
-
                 for (TaskInfo task : tasks) {
+                    GlobalThreadPools.sleep(5 * 1000L);
                     if (TaskStatus.FINISHED.name().equals(task.taskStatus)) {
-                        if (receiveTaskAward(drawType, task.taskId)) {
+                        if (receiveTaskAward(drawType, task.taskId)) {//领取奖励
                             doubleCheck = true;
-                        }
-                        if (task.getRemainingTimes() > 0) {
-                            doChouTask(drawType, task);
                         }
                     } else if (TaskStatus.TODO.name().equals(task.taskStatus)) {
-                        if (doChouTask(drawType, task)) {
-                            doubleCheck = true;
+                        if (task.getRemainingTimes() > 0) {
+                            if (doChouTask(drawType, task)) {
+                                doubleCheck = true;
+                            }
                         }
                     }
                 }
-
             } catch (Throwable t) {
                 Log.printStackTrace("doChouchoule err:", t);
             }
@@ -115,21 +118,19 @@ public class ChouChouLe {
         return list;
     }
 
-    private boolean doChouTask(String drawType, TaskInfo task) {
+    private Boolean doChouTask(String drawType, TaskInfo task) {
         try {
-            GlobalThreadPools.sleep(800L);
             String s = AntFarmRpcCall.chouchouleDoFarmTask(drawType, task.taskId);
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResultCode(TAG, jo)) {
                 Log.farm((drawType.equals("ipDraw") ? "IP抽抽乐" : "抽抽乐") + "🧾️[任务: " + task.title + "]");
-                GlobalThreadPools.sleep(100L);
-                receiveTaskAward(drawType, task.taskId);
                 return true;
             }
+            return false;
         } catch (Throwable t) {
             Log.printStackTrace("执行抽抽乐任务 err:", t);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -170,7 +171,7 @@ public class ChouChouLe {
             int drawTimes = jo.optInt("drawTimes", 0);
             for (int i = 0; i < drawTimes; i++) {
                 drawPrize("IP抽抽乐", AntFarmRpcCall.drawMachine());
-                GlobalThreadPools.sleep(800L);
+                GlobalThreadPools.sleep(5 * 1000L);
             }
 
         } catch (Throwable t) {
@@ -203,7 +204,7 @@ public class ChouChouLe {
             for (int i = 0; i < leftDrawTimes; i++) {
                 String call = activityId.equals("null") ? AntFarmRpcCall.DrawPrize() : AntFarmRpcCall.DrawPrize(activityId);
                 drawPrize("抽抽乐", call);
-                GlobalThreadPools.sleep(800L);
+                GlobalThreadPools.sleep(5 * 1000L);
             }
 
         } catch (Throwable t) {
