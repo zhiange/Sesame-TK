@@ -39,11 +39,10 @@ object HookSender {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        Log.error(TAG, "Failed to receive response: $response")
-                    } else {
-                        Log.runtime(TAG, "Hook data sent successfully.")
-                    }
+                    if (!response.isSuccessful) Log.error(TAG, "Failed to receive response: $response")
+//                    } else {
+//                        Log.runtime(TAG, "Hook data sent successfully.")
+//                    }
                 }
             })
         } catch (_: Exception) {
