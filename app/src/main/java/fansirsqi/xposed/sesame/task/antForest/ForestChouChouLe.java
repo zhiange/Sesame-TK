@@ -35,6 +35,7 @@ public class ForestChouChouLe {
 
                         GlobalThreadPools.sleep(1000L);
                         JSONObject listTaskopengreen = new JSONObject(AntForestRpcCall.listTaskopengreen(activityId, sceneCode, source));
+
                         if (ResUtil.checkSuccess(listTaskopengreen)) {
                             JSONArray taskList = listTaskopengreen.getJSONArray("taskInfoList");
                             // 处理任务列表
@@ -47,7 +48,22 @@ public class ForestChouChouLe {
                                 String taskStatus = taskBaseInfo.getString("taskStatus");
                                 String taskType = taskBaseInfo.getString("taskType");
                                 String taskName = taskBaseInfo.getString("taskName");
+
+                                JSONObject taskRights = taskInfo.getJSONObject("taskRights");
+
+                                int rightsTimes = taskRights.getInt("rightsTimes");//当完成行次数
+                                int rightsTimesLimit = taskRights.getInt("rightsTimesLimit");//可完成行次数
+
+                                GlobalThreadPools.sleep(1000L * 3);
+
+
                                 if (taskStatus.equals(TaskStatus.TODO.name())) {//适配签到任务
+                                    if (taskType.equals("NORMAL_DRAW_EXCHANGE_VITALITY")) {//活力值兑换次数
+                                        String sginRes = AntForestRpcCall.exchangeTimesFromTaskopengreen(activityId, sceneCode, source, taskSceneCode, taskType);
+                                        if (ResUtil.checkSuccess(sginRes)) {
+                                            Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                        }
+                                    }
 
                                 } else if (taskStatus.equals(TaskStatus.FINISHED.name())) {//适配领奖任务
                                     if (taskType.equals("FOREST_NORMAL_DRAW_DAILY_SIGN")) {//适配签到任务
@@ -56,6 +72,9 @@ public class ForestChouChouLe {
                                             Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
                                         }
                                     }
+                                }
+                                if (rightsTimesLimit - rightsTimes > 0) {
+                                    doublecheck = true;
                                 }
                             }
 

@@ -174,6 +174,8 @@ public class AntForest extends ModelTask {
      * 加速器定时
      */
     private ListModelField.ListJoinCommaToStringModelField bubbleBoostTime;
+
+    private  BooleanModelField forestChouChouLe;//森林抽抽乐
     private static boolean canConsumeAnimalProp;
     private static int totalCollected = 0;
     private static int totalHelpCollected = 0;
@@ -292,6 +294,8 @@ public class AntForest extends ModelTask {
         modelFields.addField(ecoLifeOpen = new BooleanModelField("ecoLifeOpen", "绿色任务 |  自动开通", false));
         modelFields.addField(ecoLifeOption = new SelectModelField("ecoLifeOption", "绿色行动 | 选项", new LinkedHashSet<>(), OtherEntity::listEcoLifeOptions,
                 "光盘行动需要先完成一次光盘打卡"));
+
+        modelFields.addField(forestChouChouLe = new BooleanModelField("forestChouChouLe", "森林寻宝任务-未完成", false));
 
         modelFields.addField(queryInterval = new StringModelField("queryInterval", "查询间隔(毫秒或毫秒范围)", "1000-2000"));
         modelFields.addField(collectInterval = new StringModelField("collectInterval", "收取间隔(毫秒或毫秒范围)", "1000-1500"));
@@ -480,6 +484,10 @@ public class AntForest extends ModelTask {
                 //青春特权每日签到红包
                 if (dailyCheckIn.getValue()) {
                     Privilege.studentSignInRedEnvelope();
+                }
+                if (forestChouChouLe.getValue()){
+                    ForestChouChouLe chouChouLe = new ForestChouChouLe();
+                    chouChouLe.chouChouLe();
                 }
             }
         } catch (Throwable t) {
