@@ -645,4 +645,65 @@ public class AntForestRpcCall {
                 "[{\"activityCode\":\"harvest_forest_energy\",\"activityId\":\"2024052300762676\",\"body\":{\"bubbles\":" + bubbles + ",\"scene\":\"" + scene + "\"},\"version\":\"2.0\"}]";
         return RequestManager.requestString("alipay.iblib.channel.data", args);
     }
+
+
+    /**
+     * 森林抽抽乐-活动列表
+     */
+    public static String enterDrawActivityopengreen(String source) throws JSONException {
+        JSONObject params = new JSONObject();
+        params.put("activityId", "2025060301");
+        params.put("requestType", "RPC");
+        params.put("sceneCode", "ANTFOREST_NORMAL_DRAW");
+        params.put("source", source);
+        return RequestManager.requestString("com.alipay.antiepdrawprod.enterDrawActivityopengreen", params.toString());
+    }
+
+    /**
+     * 森林抽抽乐-请求任务列表
+     */
+    public static String listTaskopengreen(String activityId, String sceneCode, String source) throws JSONException {
+//        [{"requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"task_entry"}]
+        JSONObject params = new JSONObject();
+        params.put("activityId", activityId);
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", source);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antiepdrawprod.listTaskopengreen", args);
+    }
+
+    /**
+     * 森林抽抽乐-签到领取次数-访问即算签到，所以直接领取？？
+     */
+    public static String receiveTaskAwardopengreen(String source, String sceneCode, String taskType) throws JSONException {
+        JSONObject params = new JSONObject();
+        params.put("ignoreLimit", true);
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", source);
+        params.put("taskType", taskType);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antieptask.receiveTaskAwardopengreen", args);
+    }
+
+    /**
+     * 森林抽抽乐-任务-活力值兑换抽奖次数
+     */
+    public static String exchangeTimesFromTaskopengreen(String activityId, String sceneCode, String source, String taskSceneCode, String taskType) throws JSONException {
+//        [{"activityId":"2025060301","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW","source":"task_entry","taskSceneCode":"ANTFOREST_NORMAL_DRAW_TASK","taskType":"NORMAL_DRAW_EXCHANGE_VITALITY"}]
+        JSONObject params = new JSONObject();
+        params.put("activityId", activityId);
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", source);
+        params.put("taskSceneCode", taskSceneCode);
+        params.put("taskType", taskType);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antiepdrawprod.exchangeTimesFromTaskopengreen", args);
+    }
+
 }
+
+
+
