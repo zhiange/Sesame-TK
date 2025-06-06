@@ -353,18 +353,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 TaskCommon.update();
                                 mainHandler = new Handler(Looper.getMainLooper());
                                 AtomicReference<String> UserId = new AtomicReference<>();
-//                                if (!MMKV.isInitialized()) {
-//                                    MMKV.initialize(AndroidAppHelper.currentApplication());
-//                                }
-                                Log.runtime(TAG, "是否休眠时间 " + TaskCommon.IS_MODULE_SLEEP_TIME);
-
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> {
                                     try {
-
-                                        if (TaskCommon.IS_MODULE_SLEEP_TIME) {
-                                            Log.record(TAG, "️💤跳过执行-休眠时间");
-                                            return;
-                                        }
                                         if (!init) {
                                             Log.record(TAG, "️🐣跳过执行-未初始化");
                                             return;
@@ -565,7 +555,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         try {
             destroyHandler(force); // 销毁之前的处理程序
             Model.initAllModel(); //在所有服务启动前装模块配置
-            Log.runtime(TAG, "USER_LOGIN_STATUS: " + AlipayLoginMonitor.INSTANCE.isUserLoggedIn(appLloadPackageParam));
             TaskCommon.update();
             if (service == null) {
                 return false;
@@ -576,9 +565,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             }
             if (force) {
                 String userId = getUserId();
-                Log.runtime(TAG, "DDDDDDDDDD");
-                AlipayServiceHelper.INSTANCE.getUserInfo(classLoader);
-                Log.runtime(TAG, "EEEEEEEEEE");
                 if (userId == null) {
                     Log.record(TAG, "initHandler:用户未登录");
                     Toast.show("initHandler:用户未登录");
