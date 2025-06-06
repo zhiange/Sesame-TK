@@ -4,7 +4,6 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import fansirsqi.xposed.sesame.data.General
-import fansirsqi.xposed.sesame.hook.AlipayServiceHelper.getUserInfo
 import fansirsqi.xposed.sesame.util.Log
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
@@ -25,110 +24,68 @@ object HookUtil {
             val jsonClassName = General.JSON_OBJECT_NAME // 替换为你项目中的实际 JSON 类名
 
             val jsonClass = Class.forName(jsonClassName, false, lpparam.classLoader)
-            val appClass =
-                XposedHelpers.findClass("com.alibaba.ariver.app.api.App", lpparam.classLoader)
-            val pageClass =
-                XposedHelpers.findClass("com.alibaba.ariver.app.api.Page", lpparam.classLoader)
-            val apiContextClass = XposedHelpers.findClass(
-                "com.alibaba.ariver.engine.api.bridge.model.ApiContext",
-                lpparam.classLoader
-            )
-            val bridgeCallbackClass = XposedHelpers.findClass(
-                "com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback",
-                lpparam.classLoader
-            )
+            val appClass = XposedHelpers.findClass("com.alibaba.ariver.app.api.App", lpparam.classLoader)
+            val pageClass = XposedHelpers.findClass("com.alibaba.ariver.app.api.Page", lpparam.classLoader)
+            val apiContextClass = XposedHelpers.findClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext", lpparam.classLoader)
+            val bridgeCallbackClass = XposedHelpers.findClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback", lpparam.classLoader)
 
-            XposedHelpers.findAndHookMethod(
-                className,
-                lpparam.classLoader,
-                "rpc",
-                String::class.java,
-                Boolean::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType,
-                String::class.java,
-                jsonClass,
-                String::class.java,
-                jsonClass,
-                Boolean::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType,
-                Int::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType,
-                String::class.java,
-                appClass,
-                pageClass,
-                apiContextClass,
-                bridgeCallbackClass,
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        val args = param.args
-                        if (args.size > 15) {
-                            val callback = args[15]
-                            val recordArray = arrayOfNulls<Any>(4).apply {
-                                this[0] = System.currentTimeMillis()
-                                this[1] = args[0] ?: "null" // method name
-                                this[2] = args[4] ?: "null" // params
-                            }
-                            rpcHookMap[callback] = recordArray
+            XposedHelpers.findAndHookMethod(className, lpparam.classLoader, "rpc", String::class.java, Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType, String::class.java, jsonClass, String::class.java, jsonClass, Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType, Int::class.javaPrimitiveType, Boolean::class.javaPrimitiveType, String::class.java, appClass, pageClass, apiContextClass, bridgeCallbackClass, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val args = param.args
+                    if (args.size > 15) {
+                        val callback = args[15]
+                        val recordArray = arrayOfNulls<Any>(4).apply {
+                            this[0] = System.currentTimeMillis()
+                            this[1] = args[0] ?: "null" // method name
+                            this[2] = args[4] ?: "null" // params
                         }
+                        rpcHookMap[callback] = recordArray
                     }
+                }
 
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val args = param.args
-                        if (args.size > 15) {
-                            val callback = args[15]
-                            val recordArray = rpcHookMap.remove(callback)
-                            recordArray?.let {
-                                try {
-                                    val time = it[0]
-                                    val method = it[1].toString()
-                                    val paramsStr = it[2].toString()
-                                    val dataStr = it.getOrNull(3)?.toString() ?: "null"
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val args = param.args
+                    if (args.size > 15) {
+                        val callback = args[15]
+                        val recordArray = rpcHookMap.remove(callback)
+                        recordArray?.let {
+                            try {
+                                val time = it[0]
+                                val method = it.getOrNull(1)
+                                val params = it.getOrNull(2)
+                                val data = it.getOrNull(3)
+
+                                val dataIsNullValue: Boolean = data == null
+                                if (!dataIsNullValue) {
 
                                     val res = JSONObject().apply {
                                         put("TimeStamp", time)
                                         put("Method", method)
-                                        put("Params", paramsStr)
-                                        put("Data", dataStr)
-                                    }
-
-                                    val paramsJson = try {
-                                        JSONObject(paramsStr).toString(4)
-                                    } catch (e: Exception) {
-                                        paramsStr
-                                    }
-                                    val dataJson = if (dataStr == "null") {
-                                        "null"
-                                    } else {
-                                        try {
-                                            JSONObject(dataStr).toString(4)
-                                        } catch (e: Exception) {
-                                            dataStr
-                                        }
+                                        put("Params", params)
+                                        put("Data", data)
                                     }
 
                                     val prettyRecord = """
 {
 "TimeStamp": $time,
 "Method": "$method",
-"Params": $paramsJson,
-"Data": $dataJson
+"Params": $params,
+"Data": $data
 }
 """.trimIndent()
 
                                     if (isdebug) {
-                                        HookSender.sendHookData(res,debugUrl)
+                                        HookSender.sendHookData(res, debugUrl)
                                     }
-                                    if (!it.getOrNull(3).toString().equals(null) && it.getOrNull(3).toString() != "null") {
-                                        Log.capture(prettyRecord)
-                                    }
-                                } catch (e: Exception) {
-                                    Log.runtime(TAG, "JSON 构建失败: ${e.message}")
+                                    Log.capture(prettyRecord)
                                 }
+                            } catch (e: Exception) {
+                                Log.runtime(TAG, "JSON 构建失败: ${e.message}")
                             }
                         }
                     }
-                })
-
+                }
+            })
             Log.runtime(TAG, "Hook RpcBridgeExtension#rpc 成功")
         } catch (t: Throwable) {
             Log.printStackTrace(TAG, "Hook RpcBridgeExtension#rpc 失败", t)
@@ -145,21 +102,16 @@ object HookUtil {
 
             val jsonClass = Class.forName(jsonClassName, false, lpparam.classLoader)
 
-            XposedHelpers.findAndHookMethod(
-                className,
-                lpparam.classLoader,
-                "sendJSONResponse",
-                jsonClass,
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        val callback = param.thisObject
-                        val recordArray = rpcHookMap[callback]
+            XposedHelpers.findAndHookMethod(className, lpparam.classLoader, "sendJSONResponse", jsonClass, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val callback = param.thisObject
+                    val recordArray = rpcHookMap[callback]
 
-                        if (recordArray != null && param.args.isNotEmpty()) {
-                            recordArray[3] = param.args[0].toString()
-                        }
+                    if (recordArray != null && param.args.isNotEmpty()) {
+                        recordArray[3] = param.args[0].toString()
                     }
-                })
+                }
+            })
 
             Log.runtime(TAG, "Hook DefaultBridgeCallback#sendJSONResponse 成功")
         } catch (t: Throwable) {
@@ -173,18 +125,13 @@ object HookUtil {
      */
     fun fuckAccounLimit(lpparam: XC_LoadPackage.LoadPackageParam) {
         Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount")
-        XposedHelpers.findAndHookMethod(
-            "com.alipay.mobile.security.accountmanager.data.AccountManagerListAdapter",  // target class
-            lpparam.classLoader,
-            "getCount",  // method name
+        XposedHelpers.findAndHookMethod("com.alipay.mobile.security.accountmanager.data.AccountManagerListAdapter",  // target class
+            lpparam.classLoader, "getCount",  // method name
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     // 获取真实账号列表大小
                     try {
-                        val list = XposedHelpers.getObjectField(
-                            param.thisObject,
-                            "queryAccountList"
-                        ) as? List<*>
+                        val list = XposedHelpers.getObjectField(param.thisObject, "queryAccountList") as? List<*>
                         if (list != null) {
                             param.result = list.size  // 设置返回值为真实数量
                             val now = System.currentTimeMillis()
@@ -193,55 +140,20 @@ object HookUtil {
                                 lastToastTime = now
                             }
                         }
-                        Log.runtime(
-                            TAG,
-                            "Hook AccountManagerListAdapter#getCount but return is null"
-                        )
+                        Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount but return is null")
                     } catch (e: Throwable) {
                         // 错误日志处理（你可以替换为自己的日志方法）
                         e.printStackTrace()
-                        Log.error(
-                            TAG,
-                            "Hook AccountManagerListAdapter#getCount failed: ${e.message}"
-                        )
+                        Log.error(TAG, "Hook AccountManagerListAdapter#getCount failed: ${e.message}")
                     }
                 }
-            }
-        )
+            })
         Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount END")
     }
 
 
 }
 
-object AlipayLoginMonitor {
-    const val TAG = "AlipayLoginMonitor"
-    var isLoggedIn = false
-        private set
-
-    private fun hookSetLoginResult(lpparam: XC_LoadPackage.LoadPackageParam) {
-        XposedHelpers.findAndHookMethod(
-            "com.ali.user.mobile.loginupgrade.activity.LoginActivity",
-            lpparam.classLoader,
-            "setLoginResult",
-            Boolean::class.javaPrimitiveType,
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam?) {
-                    val result = param?.args?.get(0) as? Boolean ?: return
-                    if (result) {
-                        isLoggedIn = true
-                        Log.runtime(TAG, "支付宝登录成功（setLoginResult）")
-                    }
-                }
-            }
-        )
-    }
-
-    fun isUserLoggedIn(lpparam: XC_LoadPackage.LoadPackageParam): Boolean {
-        hookSetLoginResult(lpparam)
-        return isLoggedIn
-    }
-}
 
 object AlipayServiceHelper {
 
@@ -250,12 +162,8 @@ object AlipayServiceHelper {
     fun getMicroApplicationContext(classLoader: ClassLoader): Any? {
         if (microAppCtx != null) return microAppCtx
         return try {
-            val appClass = XposedHelpers.findClass(
-                "com.alipay.mobile.framework.AlipayApplication",
-                classLoader
-            )
-            val appInstance =
-                XposedHelpers.callStaticMethod(appClass, "getInstance") ?: return null
+            val appClass = XposedHelpers.findClass("com.alipay.mobile.framework.AlipayApplication", classLoader)
+            val appInstance = XposedHelpers.callStaticMethod(appClass, "getInstance") ?: return null
 
             val ctx = XposedHelpers.callMethod(appInstance, "getMicroApplicationContext")
             microAppCtx = ctx
