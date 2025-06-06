@@ -229,8 +229,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(recallAnimalType = new ChoiceModelField("recallAnimalType", "召回小鸡", RecallAnimalType.ALWAYS, RecallAnimalType.nickNames));
         modelFields.addField(rewardFriend = new BooleanModelField("rewardFriend", "打赏好友", false));
         modelFields.addField(feedAnimal = new BooleanModelField("feedAnimal", "自动喂小鸡", false));
-        modelFields.addField(feedFriendAnimalList = new SelectAndCountModelField("feedFriendAnimalList", "喂小鸡好友列表", new LinkedHashMap<>(),
-                AlipayUser::getList));
+        modelFields.addField(feedFriendAnimalList = new SelectAndCountModelField("feedFriendAnimalList", "喂小鸡好友列表", new LinkedHashMap<>(), AlipayUser::getList));
         modelFields.addField(getFeed = new BooleanModelField("getFeed", "一起拿饲料", false));
         modelFields.addField(getFeedType = new ChoiceModelField("getFeedType", "一起拿饲料 | 动作", GetFeedType.GIVE, GetFeedType.nickNames));
         modelFields.addField(getFeedlList = new SelectModelField("getFeedlList", "一起拿饲料 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
@@ -241,8 +240,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(hireAnimalList = new SelectModelField("hireAnimalList", "雇佣小鸡 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(sendBackAnimal = new BooleanModelField("sendBackAnimal", "遣返 | 开启", false));
         modelFields.addField(sendBackAnimalWay = new ChoiceModelField("sendBackAnimalWay", "遣返 | 方式", SendBackAnimalWay.NORMAL, SendBackAnimalWay.nickNames));
-        modelFields.addField(sendBackAnimalType = new ChoiceModelField("sendBackAnimalType", "遣返 | 动作", SendBackAnimalType.NOT_BACK,
-                SendBackAnimalType.nickNames));
+        modelFields.addField(sendBackAnimalType = new ChoiceModelField("sendBackAnimalType", "遣返 | 动作", SendBackAnimalType.NOT_BACK, SendBackAnimalType.nickNames));
         modelFields.addField(sendBackAnimalList = new SelectModelField("dontSendFriendList", "遣返 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(notifyFriend = new BooleanModelField("notifyFriend", "通知赶鸡 | 开启", false));
         modelFields.addField(notifyFriendType = new ChoiceModelField("notifyFriendType", "通知赶鸡 | 动作", NotifyFriendType.NOTIFY, NotifyFriendType.nickNames));
@@ -271,8 +269,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(farmGameTime = new ListModelField.ListJoinCommaToStringModelField("farmGameTime", "小鸡游戏时间(范围)", farmGameTimeList));
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
-        modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(),
-                AlipayUser::getList));
+        modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         modelFields.addField(paradiseCoinExchangeBenefit = new BooleanModelField("paradiseCoinExchangeBenefit", "小鸡乐园 | 兑换权益", false));
         modelFields.addField(paradiseCoinExchangeBenefitList = new SelectModelField("paradiseCoinExchangeBenefitList", "小鸡乐园 | 权益列表", new LinkedHashSet<>(), ParadiseCoinBenefit::getList));
@@ -633,7 +630,7 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.enterFarm("", UserMap.getCurrentUid());
             JSONObject jo = new JSONObject(s);
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
 
                 rewardProductNum = jo.getJSONObject("dynamicGlobalConfig").getString("rewardProductNum");
 
@@ -1204,6 +1201,9 @@ public class AntFarm extends ModelTask {
         }
     }
 
+    /**
+     * 庄园任务
+     */
     private void doFarmDailyTask() {
         try {
             String s = AntFarmRpcCall.listFarmTask();
@@ -1689,7 +1689,7 @@ public class AntFarm extends ModelTask {
                     JSONObject manurePot = manurePotList.getJSONObject(i);
                     if (manurePot.getInt("manurePotNum") >= 100) {//粪肥数量
                         JSONObject joManurePot = new JSONObject(AntFarmRpcCall.collectManurePot(manurePot.getString("manurePotNO")));
-                        if (ResUtil.checkSuccess( joManurePot)) {
+                        if (ResUtil.checkSuccess(joManurePot)) {
                             int collectManurePotNum = joManurePot.getInt("collectManurePotNum");
                             Log.farm("打扫鸡屎🧹[" + collectManurePotNum + "g]" + i + "次");
                         } else {
@@ -2885,7 +2885,7 @@ public class AntFarm extends ModelTask {
     private void syncFamilyStatusIntimacy(String groupId) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.syncFamilyStatus(groupId, "INTIMACY_VALUE", userId));
-            ResUtil.checkSuccess( jo);
+            ResUtil.checkSuccess(jo);
         } catch (Throwable t) {
             Log.runtime(TAG, "syncFamilyStatus err:");
             Log.printStackTrace(TAG, t);
@@ -2937,7 +2937,7 @@ public class AntFarm extends ModelTask {
             String activityId = familyDrawInfo.optString("activityId");
             String sceneCode = "ANTFARM_FD_VISIT_" + activityId;
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyShareP2PPanelInfo(sceneCode));
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 JSONArray p2PFriendVOList = jo.getJSONArray("p2PFriendVOList");
                 if (Objects.isNull(p2PFriendVOList) || p2PFriendVOList.length() <= 0) {
                     return;
@@ -2955,7 +2955,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
                 jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
-                if (ResUtil.checkSuccess( jo)) {
+                if (ResUtil.checkSuccess(jo)) {
                     Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
                     Status.setFlagToday("antFarm::familyBatchInviteP2P");
                     GlobalThreadPools.sleep(500);
@@ -2994,7 +2994,7 @@ public class AntFarm extends ModelTask {
                 GlobalThreadPools.sleep(1000);
             }
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryFamilyDrawActivity());
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 GlobalThreadPools.sleep(1000);
                 int drawTimes = jo.optInt("familyDrawTimes");
                 //碎片个数
@@ -3018,7 +3018,7 @@ public class AntFarm extends ModelTask {
     private void giftFamilyDrawFragment(String giftUserId, int giftNum) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.giftFamilyDrawFragment(giftUserId, giftNum));
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 Log.farm("亲密家庭🏠赠送扭蛋碎片#" + giftNum + "个#" + giftUserId);
             }
         } catch (Throwable t) {
@@ -3030,7 +3030,7 @@ public class AntFarm extends ModelTask {
     private JSONArray familyDrawListFarmTask() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawListFarmTask());
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 return jo.getJSONArray("farmTaskList");
             }
         } catch (Throwable t) {
@@ -3043,7 +3043,7 @@ public class AntFarm extends ModelTask {
     private Boolean familyDraw() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDraw());
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 JSONObject familyDrawPrize = jo.getJSONObject("familyDrawPrize");
                 String title = familyDrawPrize.optString("title");
                 String awardCount = familyDrawPrize.getString("awardCount");
@@ -3108,7 +3108,7 @@ public class AntFarm extends ModelTask {
                 friendUserIdList.put(userId);
             }
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyEatTogether(familyGroupId, friendUserIdList, array));
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 Log.farm("庄园家庭🏠" + periodName + "请客#消耗美食" + friendUserIdList.length() + "份");
                 GlobalThreadPools.sleep(500);
                 syncFamilyStatusIntimacy(familyGroupId);
@@ -3122,7 +3122,7 @@ public class AntFarm extends ModelTask {
     private void familyDrawSignReceiveFarmTaskAward(String taskId, String title) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawSignReceiveFarmTaskAward(taskId));
-            if (ResUtil.checkSuccess( jo)) {
+            if (ResUtil.checkSuccess(jo)) {
                 Log.farm("亲密家庭🏠扭蛋任务#" + title + "#奖励领取成功");
             }
         } catch (Throwable t) {
@@ -3134,7 +3134,7 @@ public class AntFarm extends ModelTask {
     private JSONArray queryRecentFarmFood(int queryNum) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryRecentFarmFood(queryNum));
-            if (!ResUtil.checkSuccess( jo)) {
+            if (!ResUtil.checkSuccess(jo)) {
                 return null;
             }
             JSONArray cuisines = jo.getJSONArray("cuisines");
@@ -3193,7 +3193,7 @@ public class AntFarm extends ModelTask {
         if (gift == null) return;
         try {
             JSONObject resultJson = new JSONObject(AntFarmRpcCall.clickForGiftV2(gift.getString("foodType"), gift.getInt("giftIndex")));
-            if (ResUtil.checkSuccess( resultJson)) {
+            if (ResUtil.checkSuccess(resultJson)) {
                 Log.farm("领取活动食物成功," + "已领取" + resultJson.optInt("foodCount"));
             }
         } catch (Exception e) {
