@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.util;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ResUtil {
@@ -71,6 +72,12 @@ public class ResUtil {
         return false;
     }
 
+    /**
+     * 检查JSON对象中的success字段，并根据其值返回处理结果。
+     *
+     * @param jo 包含success/isSuccess字段的JSON对象
+     * @return 如果success/isSuccess字段值为true，则返回true；否则返回false
+     */
     public static Boolean checkSuccess(JSONObject jo) {
 
         if (jo.optBoolean("success") || jo.optBoolean("isSuccess")) {
@@ -79,6 +86,18 @@ public class ResUtil {
             Log.error("checkSuccess err: " + jo);
             return false; // 否则失败
         }
+    }
+
+    /**
+     * 先将String转换为JSONObject，然后调用checkSuccess
+     * 检查JSON对象中的success字段，并根据其值返回处理结果。
+     *
+     * @param s 包含success/isSuccess字段的JSON对象
+     * @return 如果success/isSuccess字段值为true，则返回true；否则返回false
+     */
+    public static Boolean checkSuccess(String s) throws JSONException {
+        JSONObject jo = new JSONObject(s);
+        return checkSuccess(jo);
     }
 
 }
