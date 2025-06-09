@@ -225,7 +225,8 @@ public class AntForestRpcCall {
         jo.put("sceneCode", sceneCode);
         jo.put("source", "ANTFOREST");
         jo.put("taskType", taskType);
-        return RequestManager.requestString("com.alipay.antiep.finishTask", new JSONArray().put(jo).toString());
+        String args = "[" + jo + "]";
+        return RequestManager.requestString("com.alipay.antiep.finishTask", args);
     }
 
     public static String popupTask() throws JSONException {
@@ -656,7 +657,8 @@ public class AntForestRpcCall {
         params.put("requestType", "RPC");
         params.put("sceneCode", "ANTFOREST_NORMAL_DRAW");
         params.put("source", source);
-        return RequestManager.requestString("com.alipay.antiepdrawprod.enterDrawActivityopengreen", params.toString());
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antiepdrawprod.enterDrawActivityopengreen", args);
     }
 
     /**
@@ -665,12 +667,11 @@ public class AntForestRpcCall {
     public static String listTaskopengreen(String activityId, String sceneCode, String source) throws JSONException {
 //        [{"requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"task_entry"}]
         JSONObject params = new JSONObject();
-        params.put("activityId", activityId);
         params.put("requestType", "RPC");
         params.put("sceneCode", sceneCode);
         params.put("source", source);
         String args = "[" + params + "]";
-        return RequestManager.requestString("com.alipay.antiepdrawprod.listTaskopengreen", args);
+        return RequestManager.requestString("com.alipay.antieptask.listTaskopengreen", args);
     }
 
     /**
@@ -701,6 +702,18 @@ public class AntForestRpcCall {
         params.put("taskType", taskType);
         String args = "[" + params + "]";
         return RequestManager.requestString("com.alipay.antiepdrawprod.exchangeTimesFromTaskopengreen", args);
+    }
+
+    public static String finishTask4Chouchoule(String taskType, String sceneCode) throws JSONException {
+        //[{"outBizNo":"FOREST_NORMAL_DRAW_XLIGHT_1_1749288736354_ffba6daf","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"ADBASICLIB","taskType":"FOREST_NORMAL_DRAW_XLIGHT_1"}]
+        JSONObject params = new JSONObject();
+        params.put("outBizNo", taskType + RandomUtil.getRandomTag());
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", "ADBASICLIB");
+        params.put("taskType", taskType);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antiep.finishTask", args);
     }
 
 }
