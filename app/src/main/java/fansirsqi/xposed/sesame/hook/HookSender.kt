@@ -22,6 +22,7 @@ import java.io.IOException
  */
 object HookSender {
     private const val TAG = "HookSender"
+    var sendFlag: Boolean = true
     private val client = OkHttpClient()
 
     private val JSON_MEDIA_TYPE: MediaType? = "application/json; charset=utf-8".toMediaType()
@@ -35,7 +36,10 @@ object HookSender {
                 .build()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Log.error(TAG, "Failed to send hook data: ${e.message}")
+                    if (!sendFlag) {//避免过多冗余失败记录
+                        Log.error(TAG, "Failed to send hook data: ${e.message}")
+                        sendFlag = false
+                    }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
