@@ -9,6 +9,7 @@ import java.util.Map;
 import fansirsqi.xposed.sesame.task.TaskStatus;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 
 public class ForestChouChouLe {
@@ -89,6 +90,28 @@ public class ForestChouChouLe {
 
             } while (doublecheck);
 
+            // 执行抽奖
+            jo = new JSONObject(AntForestRpcCall.enterDrawActivityopengreen(source));
+            if (ResUtil.checkSuccess(jo)) {
+                drawScene = jo.optJSONObject("drawScene");
+                drawActivity = drawScene.optJSONObject("drawActivity");
+                activityId = drawActivity.optString("activityId");
+                sceneCode = drawActivity.optString("sceneCode");
+
+                JSONObject drawAsset = jo.optJSONObject("drawAsset");
+                int blance = drawAsset.optInt("blance", 0);
+                while (blance > 0) {
+                    jo = new JSONObject(AntForestRpcCall.drawopengreen(activityId,sceneCode,source, UserMap.getCurrentUid()));
+                    if (ResUtil.checkSuccess(jo)) {
+                        drawAsset = jo.optJSONObject("drawAsset");
+                        blance = drawAsset.optInt("blance", 0);
+                        JSONObject prizeVO = jo.optJSONObject("prizeVO");
+                        String prizeName = prizeVO.optString("prizeName");
+                        Integer prizeNum = prizeVO.optInt("prizeNum");
+                        Log.forest("森林寻宝任务🎁[领取: " + prizeName + "*" + prizeNum + "]");
+                    }
+                }
+            }
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
