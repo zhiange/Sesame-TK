@@ -140,7 +140,8 @@ object HookUtil {
                                 lastToastTime = now
                             }
                         }
-                        Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount but return is null")
+                        return
+//                        Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount but return is null")
                     } catch (e: Throwable) {
                         // 错误日志处理（你可以替换为自己的日志方法）
                         e.printStackTrace()
