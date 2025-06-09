@@ -15,9 +15,6 @@ public class ForestChouChouLe {
 
     private static final String TAG = ForestChouChouLe.class.getSimpleName();
 
-    private static final Map<String, Integer> taskFailMap = new HashMap<>();
-
-
     void chouChouLe() {
         try {
             boolean doublecheck;
@@ -32,7 +29,6 @@ public class ForestChouChouLe {
 
             long startTime = drawActivity.getLong("startTime");
             long endTime = drawActivity.getLong("endTime");
-            taskFailMap.clear();
             do {
                 doublecheck = false;
                 if (System.currentTimeMillis() > startTime && System.currentTimeMillis() < endTime) {// 时间范围内
@@ -47,7 +43,7 @@ public class ForestChouChouLe {
                             JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo"));
                             String taskName = bizInfo.getString("title");
                             String taskSceneCode = taskBaseInfo.getString("sceneCode");// == listSceneCode ==ANTFOREST_NORMAL_DRAW_TASK
-                            String taskStatus = taskBaseInfo.getString("taskStatus");
+                            String taskStatus = taskBaseInfo.getString("taskStatus"); // 任务状态: TODO => FINISHED => RECEIVED
                             String taskType = taskBaseInfo.getString("taskType");
 
                             JSONObject taskRights = taskInfo.getJSONObject("taskRights");
@@ -63,37 +59,32 @@ public class ForestChouChouLe {
                                 if (taskType.equals("NORMAL_DRAW_EXCHANGE_VITALITY")) {//活力值兑换次数
                                     String sginRes = AntForestRpcCall.exchangeTimesFromTaskopengreen(activityId, sceneCode, source, taskSceneCode, taskType);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔执行森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
+                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        doublecheck = true;
                                     }
-                                }
-                                if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
+                                } else if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
                                     String sginRes = AntForestRpcCall.finishTask4Chouchoule(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔执行森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
+                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        doublecheck = true;
                                     }
                                 }
                             }
 
                             if (taskStatus.equals(TaskStatus.FINISHED.name())) {// 领取奖励
-//                                if (taskType.equals("FOREST_NORMAL_DRAW_DAILY_SIGN")) {//
                                 String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
                                 if (ResUtil.checkSuccess(sginRes)) {
                                     Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
-                                    taskFailMap.remove(taskName);
+                                    // 检查是否需要再次检测任务
+                                    if (rightsTimesLimit - rightsTimes > 0) {
+                                        doublecheck = true;
+                                    }
                                 }
-//                                }
                             }
-                            Integer failCountObj = taskFailMap.get(taskName);
-                            int failCount = (failCountObj == null) ? 0 : failCountObj;
-                            if (rightsTimesLimit - rightsTimes > 0 && failCount < 3) {
-                                doublecheck = true;
-                            }
+
                         }
 
                     }
-
                 }
 
             } while (doublecheck);
