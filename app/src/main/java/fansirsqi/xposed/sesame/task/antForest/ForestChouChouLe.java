@@ -59,29 +59,31 @@ public class ForestChouChouLe {
 
                             //注意这里的 taskSceneCode=listSceneCode = ANTFOREST_NORMAL_DRAW_TASK， sceneCode = ANTFOREST_NORMAL_DRAW
 
-                            if (taskStatus.equals(TaskStatus.TODO.name())) {//适配签到任务
+                            if (taskStatus.equals(TaskStatus.TODO.name())) { //适配签到任务
                                 if (taskType.equals("NORMAL_DRAW_EXCHANGE_VITALITY")) {//活力值兑换次数
                                     String sginRes = AntForestRpcCall.exchangeTimesFromTaskopengreen(activityId, sceneCode, source, taskSceneCode, taskType);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                        Log.forest(TAG, "📔执行森林抽抽乐任务：" + taskName);
                                         taskFailMap.remove(taskName);
                                     }
                                 }
                                 if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
                                     String sginRes = AntForestRpcCall.finishTask4Chouchoule(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                        Log.forest(TAG, "📔执行森林抽抽乐任务：" + taskName);
                                         taskFailMap.remove(taskName);
                                     }
                                 }
-                            } else if (taskStatus.equals(TaskStatus.FINISHED.name())) {//适配领奖任务
-                                if (taskType.equals("FOREST_NORMAL_DRAW_DAILY_SIGN")) {//适配签到任务
-                                    String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
-                                    if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
-                                    }
+                            }
+
+                            if (taskStatus.equals(TaskStatus.FINISHED.name())) {// 领取奖励
+//                                if (taskType.equals("FOREST_NORMAL_DRAW_DAILY_SIGN")) {//
+                                String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
+                                if (ResUtil.checkSuccess(sginRes)) {
+                                    Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                    taskFailMap.remove(taskName);
                                 }
+//                                }
                             }
                             Integer failCountObj = taskFailMap.get(taskName);
                             int failCount = (failCountObj == null) ? 0 : failCountObj;
@@ -101,5 +103,6 @@ public class ForestChouChouLe {
         }
 
     }
+
 
 }
