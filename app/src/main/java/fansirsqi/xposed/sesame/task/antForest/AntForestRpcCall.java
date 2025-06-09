@@ -704,6 +704,9 @@ public class AntForestRpcCall {
         return RequestManager.requestString("com.alipay.antiepdrawprod.exchangeTimesFromTaskopengreen", args);
     }
 
+    /**
+     * 森林抽抽乐-任务-广告
+     */
     public static String finishTask4Chouchoule(String taskType, String sceneCode) throws JSONException {
         //[{"outBizNo":"FOREST_NORMAL_DRAW_XLIGHT_1_1749288736354_ffba6daf","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"ADBASICLIB","taskType":"FOREST_NORMAL_DRAW_XLIGHT_1"}]
         JSONObject params = new JSONObject();
@@ -714,6 +717,21 @@ public class AntForestRpcCall {
         params.put("taskType", taskType);
         String args = "[" + params + "]";
         return RequestManager.requestString("com.alipay.antiep.finishTask", args);
+    }
+
+    /**
+     * 森林抽抽乐-抽奖
+     */
+    public static String drawopengreen(String activityId, String sceneCode, String source, String userId) throws JSONException {
+        JSONObject params = new JSONObject();
+        params.put("activityId", activityId);
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", source);
+        params.put("userId", userId);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antiepdrawprod.drawopengreen", args,
+                "antiepdrawprod","draw","DrawRpc");
     }
 
 }

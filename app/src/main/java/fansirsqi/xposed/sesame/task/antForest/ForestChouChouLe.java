@@ -9,14 +9,12 @@ import java.util.Map;
 import fansirsqi.xposed.sesame.task.TaskStatus;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 
 public class ForestChouChouLe {
 
     private static final String TAG = ForestChouChouLe.class.getSimpleName();
-
-    private static final Map<String, Integer> taskFailMap = new HashMap<>();
-
 
     void chouChouLe() {
         try {
@@ -32,7 +30,6 @@ public class ForestChouChouLe {
 
             long startTime = drawActivity.getLong("startTime");
             long endTime = drawActivity.getLong("endTime");
-            taskFailMap.clear();
             do {
                 doublecheck = false;
                 if (System.currentTimeMillis() > startTime && System.currentTimeMillis() < endTime) {// 时间范围内
@@ -47,7 +44,7 @@ public class ForestChouChouLe {
                             JSONObject bizInfo = new JSONObject(taskBaseInfo.getString("bizInfo"));
                             String taskName = bizInfo.getString("title");
                             String taskSceneCode = taskBaseInfo.getString("sceneCode");// == listSceneCode ==ANTFOREST_NORMAL_DRAW_TASK
-                            String taskStatus = taskBaseInfo.getString("taskStatus");
+                            String taskStatus = taskBaseInfo.getString("taskStatus"); // 任务状态: TODO => FINISHED => RECEIVED
                             String taskType = taskBaseInfo.getString("taskType");
 
                             JSONObject taskRights = taskInfo.getJSONObject("taskRights");
@@ -59,47 +56,67 @@ public class ForestChouChouLe {
 
                             //注意这里的 taskSceneCode=listSceneCode = ANTFOREST_NORMAL_DRAW_TASK， sceneCode = ANTFOREST_NORMAL_DRAW
 
-                            if (taskStatus.equals(TaskStatus.TODO.name())) {//适配签到任务
+                            if (taskStatus.equals(TaskStatus.TODO.name())) { //适配签到任务
                                 if (taskType.equals("NORMAL_DRAW_EXCHANGE_VITALITY")) {//活力值兑换次数
                                     String sginRes = AntForestRpcCall.exchangeTimesFromTaskopengreen(activityId, sceneCode, source, taskSceneCode, taskType);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
+                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        doublecheck = true;
                                     }
-                                }
-                                if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
+                                } else if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
                                     String sginRes = AntForestRpcCall.finishTask4Chouchoule(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
-                                    }
-                                }
-                            } else if (taskStatus.equals(TaskStatus.FINISHED.name())) {//适配领奖任务
-                                if (taskType.equals("FOREST_NORMAL_DRAW_DAILY_SIGN")) {//适配签到任务
-                                    String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
-                                    if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
-                                        taskFailMap.remove(taskName);
+                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        doublecheck = true;
                                     }
                                 }
                             }
-                            Integer failCountObj = taskFailMap.get(taskName);
-                            int failCount = (failCountObj == null) ? 0 : failCountObj;
-                            if (rightsTimesLimit - rightsTimes > 0 && failCount < 3) {
-                                doublecheck = true;
+
+                            if (taskStatus.equals(TaskStatus.FINISHED.name())) {// 领取奖励
+                                String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
+                                if (ResUtil.checkSuccess(sginRes)) {
+                                    Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                    // 检查是否需要再次检测任务
+                                    if (rightsTimesLimit - rightsTimes > 0) {
+                                        doublecheck = true;
+                                    }
+                                }
                             }
+
                         }
 
                     }
-
                 }
 
             } while (doublecheck);
 
+            // 执行抽奖
+            jo = new JSONObject(AntForestRpcCall.enterDrawActivityopengreen(source));
+            if (ResUtil.checkSuccess(jo)) {
+                drawScene = jo.optJSONObject("drawScene");
+                drawActivity = drawScene.optJSONObject("drawActivity");
+                activityId = drawActivity.optString("activityId");
+                sceneCode = drawActivity.optString("sceneCode");
+
+                JSONObject drawAsset = jo.optJSONObject("drawAsset");
+                int blance = drawAsset.optInt("blance", 0);
+                while (blance > 0) {
+                    jo = new JSONObject(AntForestRpcCall.drawopengreen(activityId,sceneCode,source, UserMap.getCurrentUid()));
+                    if (ResUtil.checkSuccess(jo)) {
+                        drawAsset = jo.optJSONObject("drawAsset");
+                        blance = drawAsset.optInt("blance", 0);
+                        JSONObject prizeVO = jo.optJSONObject("prizeVO");
+                        String prizeName = prizeVO.optString("prizeName");
+                        Integer prizeNum = prizeVO.optInt("prizeNum");
+                        Log.forest("森林寻宝任务🎁[领取: " + prizeName + "*" + prizeNum + "]");
+                    }
+                }
+            }
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
 
     }
+
 
 }
