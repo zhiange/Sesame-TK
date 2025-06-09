@@ -768,6 +768,19 @@ public class AntForestRpcCall {
         return RequestManager.requestString("com.alipay.antiep.confirmShareRecall", args);
     }
 
+    public static String finishTaskopengreen(String taskType, String sceneCode) throws JSONException {
+     // [{"outBizNo":"FOREST_NORMAL_DRAW_ANTTODO_1749481064943_2dd9971d","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"task_entry","taskType":"FOREST_NORMAL_DRAW_ANTTODO"}]
+        JSONObject params = new JSONObject();
+        params.put("outBizNo", taskType + RandomUtil.getRandomTag());
+        params.put("requestType", "RPC");
+        params.put("sceneCode", sceneCode);
+        params.put("source", "task_entry");
+        params.put("taskType", taskType);
+        String args = "[" + params + "]";
+        return RequestManager.requestString("com.alipay.antieptask.finishTaskopengreen", args);
+    }
+
+
 }
 
 
