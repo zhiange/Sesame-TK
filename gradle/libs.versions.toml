@@ -22,6 +22,7 @@ webkit = "1.14.0-beta01"
 core-ktx = "1.16.0"
 dexkit = "2.0.4"
 ui-tooling-preview-android = "1.8.1"
+desugar = "2.1.5"
 [libraries]
 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin-stdlib" }
@@ -54,6 +55,7 @@ jackson-databind-compatible = { module = "com.fasterxml.jackson.core:jackson-dat
 jackson-annotations-compatible = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-compatible" }
 
 dexkit = { module = "org.luckypray:dexkit", version.ref = "dexkit" }
+desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "ui-tooling-preview-android" }
 
 [plugins]
