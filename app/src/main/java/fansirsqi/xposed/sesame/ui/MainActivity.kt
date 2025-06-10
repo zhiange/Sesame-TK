@@ -1,17 +1,11 @@
 package fansirsqi.xposed.sesame.ui
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -36,10 +30,10 @@ import fansirsqi.xposed.sesame.util.Detector
 import fansirsqi.xposed.sesame.util.FansirsqiUtil
 import fansirsqi.xposed.sesame.util.FansirsqiUtil.OneWordCallback
 import fansirsqi.xposed.sesame.util.Files
+import fansirsqi.xposed.sesame.util.GlobalThreadPools
 import fansirsqi.xposed.sesame.util.Log
 import fansirsqi.xposed.sesame.util.Maps.UserMap
 import fansirsqi.xposed.sesame.util.PermissionUtil
-import fansirsqi.xposed.sesame.util.ThreadUtil
 import fansirsqi.xposed.sesame.util.ToastUtil
 import java.util.Calendar
 import java.util.concurrent.CountDownLatch
@@ -50,26 +44,15 @@ import java.util.concurrent.TimeUnit
 //   但是如果打包改个名拿去卖钱忽悠小白
 //   那我只能说你妈死了 就当开源项目给你妈烧纸钱了
 class MainActivity : BaseActivity() {
+    private val TAG = "MainActivity"
     private var hasPermissions = false
     private var isClick = false
     private lateinit var tvStatistics: TextView
     private var userNameArray = arrayOf("默认")
     private var userEntityArray = arrayOf<UserEntity?>(null)
     private lateinit var oneWord: TextView
-    val emojiList =
-        listOf(
-            "🍅", "🍓", "🥓", "🍂", "🍚", "🌰", "🟢", "🌴",
-            "🥗", "🧀", "🥩", "🍍", "🌶️", "🍲", "🍆", "🥕",
-            "✨", "🍑", "🍘", "🍀", "🥞", "🍈", "🥝", "🧅",
-            "🌵", "🌾", "🥜", "🍇", "🌭", "🥑", "🥐", "🥖",
-            "🍊", "🌽", "🍉", "🍖", "🍄", "🥚", "🥙", "🥦",
-            "🍌", "🍱", "🍏", "🍎", "🌲", "🌿", "🍁", "🍒",
-            "🥔", "🌯", "🌱", "🍐", "🍞", "🍳", "🍙", "🍋",
-            "🍗", "🌮", "🍃", "🥘", "🥒", "🧄", "🍠", "🥥"
-        )
 
-
-    @SuppressLint("UnspecifiedRegisterReceiverFlag", "SetTextI18n", "UnsafeDynamicallyLoadedCode")
+    @SuppressLint("SetTextI18n", "UnsafeDynamicallyLoadedCode")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ToastUtil.init(this) // 初始化全局 Context
@@ -86,20 +69,19 @@ class MainActivity : BaseActivity() {
         val buildTarget = findViewById<TextView>(R.id.bulid_target)
         oneWord = findViewById(R.id.one_word)
         // 获取并设置一言句子
-        ViewAppInfo.checkRunType()
-        updateSubTitle(ViewAppInfo.runType?.nickName ?: "未激活")
         try {
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.checkerDestFile)) {
-                Log.error("checker file copy failed")
+                Log.error(TAG, "checker file copy failed")
             }
             if (!AssetUtil.copySoFileToStorage(this, AssetUtil.dexkitDestFile)) {
-                Log.error("dexkit file copy failed")
+                Log.error(TAG, "dexkit file copy failed")
             }
             Detector.loadLibrary("checker")
             Detector.initDetector(this)
         } catch (e: Exception) {
-            Log.error("load libSesame err:" + e.message)
+            Log.error(TAG, "load libSesame err:" + e.message)
         }
+        updateSubTitle(RunType.DISABLE.nickName)
 
         mainImage?.setOnLongClickListener { v: View ->
             // 当视图被长按时执行的操作
@@ -113,68 +95,6 @@ class MainActivity : BaseActivity() {
                 return@setOnLongClickListener true // 表示事件已处理
             }
             false // 如果不是目标视图，返回false
-        }
-        val broadcastReceiver: BroadcastReceiver =
-            object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    val action = intent.action
-                    Log.runtime("module got broadcast:$action intent:$intent")
-                    if (action != null) {
-                        when (action) {
-                            "fansirsqi.xposed.sesame.status" -> {
-                                // 收到来自支付宝进程的确认广播
-                                val gotRunType: String? = intent.getStringExtra("EXTRA_RUN_TYPE")
-                                if (gotRunType != null) {
-                                    when (gotRunType) {
-                                        RunType.DISABLE.nickName -> {
-                                            ViewAppInfo.runType = RunType.DISABLE // 更新状态为 DISABLE
-                                            updateSubTitle(RunType.DISABLE.nickName) // 更新 UI 显示为“未激活”
-                                            Log.runtime("MainActivity received status confirmation: DISABLE")
-                                        }
-
-                                        RunType.ACTIVE.nickName -> {
-                                            ViewAppInfo.runType = RunType.ACTIVE // 更新状态为 ACTIVE
-                                            updateSubTitle(RunType.ACTIVE.nickName) // 更新 UI 显示为“已激活”
-                                            Log.runtime("MainActivity received status confirmation: ACTIVE")
-                                        }
-
-                                        RunType.LOADED.nickName -> {
-                                            ViewAppInfo.runType = RunType.LOADED // 更新状态为 LOADED
-                                            updateSubTitle(RunType.LOADED.nickName) // 更新 UI 显示为“已加载”
-                                            Log.runtime("MainActivity received status confirmation: LOADED")
-                                        }
-                                    }
-                                }
-                                if (isClick) {
-                                    Handler(Looper.getMainLooper()).post {
-                                        Toast.makeText(
-                                            context,
-                                            "${emojiList.random()} 一切看起来都很棒！",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        Thread {
-                                            ThreadUtil.sleep(200)
-                                            runOnUiThread { isClick = false }
-                                        }.start()
-                                    }
-                                }
-                            }
-
-                            "fansirsqi.xposed.sesame.update" -> {
-                                Statistics.load()
-                                tvStatistics.text = Statistics.getText()
-                            }
-                        }
-                    }
-                }
-            }
-        val intentFilter = IntentFilter()
-        intentFilter.addAction("fansirsqi.xposed.sesame.status")
-        intentFilter.addAction("fansirsqi.xposed.sesame.update")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(broadcastReceiver, intentFilter, RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(broadcastReceiver, intentFilter)
         }
         Statistics.load()
         tvStatistics.text = Statistics.getText()
@@ -195,14 +115,6 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         if (hasPermissions) {
-            // 每次进入界面时都发送状态查询广播给支付宝进程，以确认 Hook 是否加载
-            try {
-                Log.runtime("MainActivity onResume: Sending status ping to Alipay process.")
-                sendBroadcast(Intent("com.eg.android.AlipayGphone.sesame.status"))
-            } catch (th: Throwable) {
-                Log.runtime("view sendBroadcast status err:")
-                Log.printStackTrace(th)
-            }
             try { //打开设置前需要确认设置了哪个UI
                 UIConfig.load()
             } catch (e: Exception) {
@@ -247,16 +159,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    @SuppressLint("NonConstantResourceId")
     fun onClick(v: View) {
         if (v.id == R.id.main_image) {
-            try {
-                sendBroadcast(Intent("com.eg.android.AlipayGphone.sesame.status"))
-                isClick = true
-            } catch (th: Throwable) {
-                Log.runtime("view sendBroadcast status err:")
-                Log.printStackTrace(th)
-            }
+            ToastUtil.showToastWithDelay(this, "再点就要去了.~a.e", 800)
             return
         }
         var data = "file://"
@@ -308,7 +213,7 @@ class MainActivity : BaseActivity() {
             R.id.one_word -> {
                 Thread {
                     ToastUtil.showToastWithDelay(this@MainActivity, "😡 正在获取句子，请稍后……", 800)
-                    ThreadUtil.sleep(5000)
+                    GlobalThreadPools.sleep(5000)
                     FansirsqiUtil.getOneWord(
                         object : OneWordCallback {
                             override fun onSuccess(result: String?) {
@@ -574,7 +479,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun updateSubTitle(runType: String) {
-        Log.runtime("updateSubTitle$runType")
+        Log.runtime(TAG, "updateSubTitle$runType")
         baseTitle = ViewAppInfo.appTitle + "[" + runType + "]"
         when (runType) {
             RunType.DISABLE.nickName -> setBaseTitleTextColor(

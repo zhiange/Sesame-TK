@@ -18,10 +18,23 @@ object ViewAppInfo {
     var appVersion: String = ""
     var appBuildTarget: String = ""
     var appBuildNumber: String = ""
-//    var runType: RunType? = RunType.DISABLE
+    val emojiList =
+        listOf(
+            "🍅", "🍓", "🥓", "🍂", "🍚", "🌰", "🟢", "🌴",
+            "🥗", "🧀", "🥩", "🍍", "🌶️", "🍲", "🍆", "🥕",
+            "✨", "🍑", "🍘", "🍀", "🥞", "🍈", "🥝", "🧅",
+            "🌵", "🌾", "🥜", "🍇", "🌭", "🥑", "🥐", "🥖",
+            "🍊", "🌽", "🍉", "🍖", "🍄", "🥚", "🥙", "🥦",
+            "🍌", "🍱", "🍏", "🍎", "🌲", "🌿", "🍁", "🍒",
+            "🥔", "🌯", "🌱", "🍐", "🍞", "🍳", "🍙", "🍋",
+            "🍗", "🌮", "🍃", "🥘", "🥒", "🧄", "🍠", "🥥", "📦"
+        )
+
+    //    var runType: RunType? = RunType.DISABLE
     @Volatile
     internal var runType: RunType? = RunType.DISABLE
-    @Synchronized set
+        @Synchronized set
+
     @JvmStatic
     fun setRunType(type: RunType) {
         runType = type
@@ -42,56 +55,11 @@ object ViewAppInfo {
             appTitle = context.getString(R.string.app_name) //+ BuildConfig.VERSION_NAME
             appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME + " ⏰"
             try {
-                appVersion = BuildConfig.VERSION_NAME.replace(
-                    BuildConfig.BUILD_TIME.replace(":", "."),
-                    BuildConfig.BUILD_NUMBER
-                ) + " 📦"
+                appVersion = "${BuildConfig.VERSION_NAME} " + emojiList.random()
             } catch (e: Exception) {
                 Log.printStackTrace(e)
             }
         }
-    }
-
-    /**
-     * 检查当前应用的运行类型，判断是否启用或禁用 通过与 content provider 交互来检查应用是否处于激活状态
-     */
-    fun checkRunType() {
-        try {
-            if (context == null) {
-                Log.runtime(TAG, "context 为空，设置 runType 为 DISABLE")
-                runType = RunType.DISABLE
-                return
-            }
-            val contentResolver = context!!.contentResolver
-            val uri = "content://me.weishu.exposed.CP/".toUri()
-            var result: Bundle? = null
-            try {
-                result = contentResolver.call(uri, "active", null, null)
-            } catch (_: RuntimeException) {
-                try {
-                    val intent = Intent("me.weishu.exp.ACTION_ACTIVE")
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context!!.startActivity(intent)
-                } catch (_: Throwable) {
-                    runType = RunType.DISABLE
-                    return
-                }
-            }
-            if (result == null) {
-                result = contentResolver.call(uri, "active", null, null)
-            }
-            if (result == null) {
-                runType = RunType.DISABLE
-                return
-            }
-            if (result.getBoolean("active", false)) {
-                runType = RunType.ACTIVE // 激活状态
-                return
-            }
-        } catch (_: Throwable) {
-            Log.runtime(TAG, "捕获异常，设置 runType 为 DISABLE")
-        }
-        runType = RunType.DISABLE
     }
 
 

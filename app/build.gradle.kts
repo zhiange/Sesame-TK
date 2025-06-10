@@ -5,7 +5,6 @@ import java.util.*
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 tasks.register("testClasses") {
     description = "Dummy task for compatibility"
@@ -30,10 +29,10 @@ android {
         // 版本配置
         val major = 0
         val minor = 2
-        val patch = 5
-        val buildTag = "beta.8"
+        val patch = 6
+        val buildTag = "alpha"
         
-        val buildDate = SimpleDateFormat("yy-MM-dd", Locale.CHINA).apply {
+        val buildDate = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).apply {
             timeZone = TimeZone.getTimeZone("GMT+8")
         }.format(Date())
         
@@ -42,11 +41,7 @@ android {
         }.format(Date())
         
         val buildTargetCode = try {
-            MessageDigest.getInstance("MD5")
-                .digest(buildTime.toByteArray())
-                //noinspection WrongGradleMethod
-                .joinToString("") { "%02x".format(it) }
-                .substring(0, 4)
+            buildDate.replace("-",".")+"."+buildTime.replace(":",".")
         } catch (_: Exception) {
             "0000"
         }
@@ -91,9 +86,7 @@ android {
 
     buildFeatures {
         buildConfig = true
-        compose = true
     }
-
 
     flavorDimensions += "default"
     productFlavors {
@@ -108,6 +101,7 @@ android {
     }
     compileOptions {
         // 全局默认设置
+        isCoreLibraryDesugaringEnabled = true // 启用脱糖
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -187,24 +181,13 @@ android {
         val variant = this
         variant.outputs.all {
             val flavorName = variant.flavorName.replaceFirstChar { it.uppercase() }
-            val fileName = "Sesame-$flavorName-${variant.versionName}.apk"
+            val fileName = "Sesame-TK-$flavorName-${variant.versionName}.apk"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = fileName
         }
     }
 }
 
 dependencies {
-    implementation(libs.ui.tooling.preview.android)
-    val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
-    implementation(composeBom)
-    testImplementation(composeBom)
-    androidTestImplementation(composeBom)
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-
-    implementation(libs.activity.compose)
-
     implementation(libs.core.ktx)
     implementation(libs.kotlin.stdlib)
     implementation(libs.slf4j.api)
@@ -219,6 +202,8 @@ dependencies {
     annotationProcessor(libs.lombok)
     implementation(libs.okhttp)
     implementation(libs.dexkit)
+
+    coreLibraryDesugaring(libs.desugar)
 
     add("normalImplementation", libs.jackson.core)
     add("normalImplementation", libs.jackson.databind)
