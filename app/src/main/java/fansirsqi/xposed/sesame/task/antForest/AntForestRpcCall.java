@@ -735,41 +735,13 @@ public class AntForestRpcCall {
     }
 
     /**
-     * 获取邀请链接对应的用户ID
+     *   完成森林抽抽乐 任务
+     * @param taskType 任务类型
+     * @param sceneCode 场景Code
+     * @return s
      */
-    public static String shareComponentRecall(String shareId) throws JSONException{
-        JSONObject params = new JSONObject();
-        params.put("iepShareChannelType", "qrcode");
-        params.put("requestType", "RPC");
-        params.put("sceneCode", "FOREST_NORMAL_20250510_SHARE");
-        params.put("shareId", shareId);
-        params.put("source", "chouchoule");
-        String args = "[" + params + "]";
-        return RequestManager.requestString("com.alipay.antiep.shareComponentRecall", args);
-
-    }
-
-    /**
-     *
-     * 确认邀请
-     */
-    public static String confirmShareRecall(String userId, String shareId ) throws JSONException {
-        JSONObject params = new JSONObject();
-        JSONObject beSharedBizExtInfo = new JSONObject();
-        beSharedBizExtInfo.put("drawActivityId", "2025060301");
-        beSharedBizExtInfo.put("inviterUid", userId);
-        params.put("beSharedBizExtInfo", beSharedBizExtInfo);
-        params.put("requestType", "RPC");
-        params.put("sceneCode", "FOREST_NORMAL_20250510_SHARE");
-        params.put("shareId", shareId);
-        params.put("source", "chouchoule");
-        params.put("userId", userId);
-        String args = "[" + params + "]";
-        return RequestManager.requestString("com.alipay.antiep.confirmShareRecall", args);
-    }
-
     public static String finishTaskopengreen(String taskType, String sceneCode) throws JSONException {
-     // [{"outBizNo":"FOREST_NORMAL_DRAW_ANTTODO_1749481064943_2dd9971d","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"task_entry","taskType":"FOREST_NORMAL_DRAW_ANTTODO"}]
+        // [{"outBizNo":"FOREST_NORMAL_DRAW_ANTTODO_1749481064943_2dd9971d","requestType":"RPC","sceneCode":"ANTFOREST_NORMAL_DRAW_TASK","source":"task_entry","taskType":"FOREST_NORMAL_DRAW_ANTTODO"}]
         JSONObject params = new JSONObject();
         params.put("outBizNo", taskType + RandomUtil.getRandomTag());
         params.put("requestType", "RPC");
@@ -779,7 +751,6 @@ public class AntForestRpcCall {
         String args = "[" + params + "]";
         return RequestManager.requestString("com.alipay.antieptask.finishTaskopengreen", args);
     }
-
 
 }
 
