@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit
 class MainActivity : BaseActivity() {
     private val TAG = "MainActivity"
     private var hasPermissions = false
-    private var isClick = false
     private lateinit var tvStatistics: TextView
     private var userNameArray = arrayOf("默认")
     private var userEntityArray = arrayOf<UserEntity?>(null)
