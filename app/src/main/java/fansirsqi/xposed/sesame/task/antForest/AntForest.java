@@ -176,7 +176,6 @@ public class AntForest extends ModelTask {
     private ListModelField.ListJoinCommaToStringModelField bubbleBoostTime;
 
     private BooleanModelField forestChouChouLe;//森林抽抽乐
-    private ListModelField.ListJoinCommaToStringModelField forestChouChouLeShareIds; // 森林抽抽乐邀请id列表
     private static boolean canConsumeAnimalProp;
     private static int totalCollected = 0;
     private static int totalHelpCollected = 0;
@@ -283,6 +282,9 @@ public class AntForest extends ModelTask {
         modelFields.addField(combineAnimalPiece = new BooleanModelField("combineAnimalPiece", "合成动物碎片", false));
         modelFields.addField(consumeAnimalProp = new BooleanModelField("consumeAnimalProp", "派遣动物伙伴", false));
         modelFields.addField(receiveForestTaskAward = new BooleanModelField("receiveForestTaskAward", "森林任务", false));
+
+        modelFields.addField(forestChouChouLe = new BooleanModelField("forestChouChouLe", "森林寻宝任务", false));
+
         modelFields.addField(collectGiftBox = new BooleanModelField("collectGiftBox", "领取礼盒", false));
 
         modelFields.addField(medicalHealth = new BooleanModelField("medicalHealth", "健康医疗任务 | 开关", false));
@@ -298,9 +300,6 @@ public class AntForest extends ModelTask {
         modelFields.addField(ecoLifeOption = new SelectModelField("ecoLifeOption", "绿色行动 | 选项", new LinkedHashSet<>(), OtherEntity::listEcoLifeOptions,
                 "光盘行动需要先完成一次光盘打卡"));
 
-        modelFields.addField(forestChouChouLe = new BooleanModelField("forestChouChouLe", "森林寻宝任务", false));
-        modelFields.addField(forestChouChouLeShareIds = new ListModelField.ListJoinCommaToStringModelField("forestChouChouLeShareIds", "森林寻宝任务|分享ID列表-不好用", ListUtil.newArrayList(
-                "")));
 
         modelFields.addField(queryInterval = new StringModelField("queryInterval", "查询间隔(毫秒或毫秒范围)", "1000-2000"));
         modelFields.addField(collectInterval = new StringModelField("collectInterval", "收取间隔(毫秒或毫秒范围)", "1000-1500"));
@@ -366,7 +365,7 @@ public class AntForest extends ModelTask {
             collectFriendEnergy();// 优先收取好友能量
 
             JSONObject selfHomeObj = querySelfHome();
-            handleUserProps(selfHomeObj);
+            handleUserProps(selfHomeObj);//收取动物派遣能量
 
             selfHomeObj = collectUserEnergy(UserMap.getCurrentUid(), selfHomeObj); //收取自己的能量
 
@@ -463,11 +462,8 @@ public class AntForest extends ModelTask {
                 if (dailyCheckIn.getValue()) {
                     Privilege.studentSignInRedEnvelope();
                 }
-
-                // 森林抽抽乐
                 if (forestChouChouLe.getValue()) {
                     ForestChouChouLe chouChouLe = new ForestChouChouLe();
-                    chouChouLe.confirmShareRecall(forestChouChouLeShareIds.getValue()); // 执行助力(确认分享)操作
                     chouChouLe.chouChouLe();
                 }
             }
@@ -1062,6 +1058,8 @@ public class AntForest extends ModelTask {
             if (!idList.isEmpty()) {
                 processBatchFriends(idList);
             }
+
+            Log.runtime(TAG, "收取好友能量完成！");
 
         } catch (JSONException e) {
             Log.printStackTrace(TAG, "解析好友排行榜 JSON 异常", e);

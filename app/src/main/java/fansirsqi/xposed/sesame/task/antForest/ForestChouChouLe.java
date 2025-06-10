@@ -123,45 +123,11 @@ public class ForestChouChouLe {
                     }
                 }
             }
-
-
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
 
     }
 
-    void confirmShareRecall(List<String> shareIds) {
-        try {
-            if (shareIds == null || shareIds.isEmpty()) {
-                return;
-            }
-            for (String shareId : shareIds) {
-                if (StringUtil.isEmpty(shareId)) continue;
-                GlobalThreadPools.sleep(5 * 1000L);
-                String shareUserId = null;
-                JSONObject shareComponentRecall = new JSONObject(AntForestRpcCall.shareComponentRecall(shareId));
-                if (ResUtil.checkSuccess(shareComponentRecall)) {
-                    JSONObject inviterInfoVo = shareComponentRecall.optJSONObject("inviterInfoVo");
-                    if (inviterInfoVo != null) {
-                        shareUserId = inviterInfoVo.optString("userId");
-                        if (UserMap.getCurrentUid().equals(shareUserId)) {
-                            continue;
-                        }
-                    }
-                } else {
-                    Log.error(TAG, "森林寻宝助力-获取邀请用户ID失败"+shareComponentRecall.getString("desc"));
-                    continue;
-                }
-                GlobalThreadPools.sleep(5 * 1000L);
-                JSONObject confirmShareRecall = new JSONObject(AntForestRpcCall.confirmShareRecall(UserMap.getCurrentUid(), shareId));
-                Log.forest( "助力" + shareUserId + ",结果：" + confirmShareRecall.getString("desc")); // 暂时这样吧，后面再改
-                if (!ResUtil.checkSuccess(confirmShareRecall)) {
-                    Log.runtime(confirmShareRecall.toString());
-                }
-            }
-        } catch (Exception e) {
-            Log.printStackTrace(e);
-        }
-    }
+
 }
