@@ -1,12 +1,14 @@
 package fansirsqi.xposed.sesame.hook
 
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import fansirsqi.xposed.sesame.data.General
 import fansirsqi.xposed.sesame.util.Log
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
+
 
 object HookUtil {
     private const val TAG = "HookUtil"
@@ -150,6 +152,28 @@ object HookUtil {
                 }
             })
         Log.runtime(TAG, "Hook AccountManagerListAdapter#getCount END")
+    }
+
+    fun hookActive(lpparam: XC_LoadPackage.LoadPackageParam){
+        try {
+            XposedBridge.log("Hooking fansirsqi.xposed.sesame.ui.MainActivity...")
+
+            // Hook updateSubTitle 方法
+            XposedHelpers.findAndHookMethod(
+                "fansirsqi.xposed.sesame.ui.MainActivity",
+                lpparam.classLoader,
+                "updateSubTitle",
+                String::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        // 强制将 runType 参数替换为 RunType.ACTIVE.nickName（"已激活"）
+                        param.args[0] = "已激活"
+                    }
+                }
+            )
+        } catch (e: java.lang.Exception) {
+            XposedBridge.log("Error hooking MainActivity: $e")
+        }
     }
 
 

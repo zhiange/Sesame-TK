@@ -3,7 +3,6 @@ package fansirsqi.xposed.sesame.hook;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.AndroidAppHelper;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -19,17 +18,11 @@ import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.io.File;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,9 +77,7 @@ import lombok.Getter;
 
 public class ApplicationHook implements IXposedHookLoadPackage {
     static final String TAG = ApplicationHook.class.getSimpleName();
-    @Getter
     private static final String modelVersion = BuildConfig.VERSION_NAME;
-    private static final Map<Object, Object[]> rpcHookMap = new ConcurrentHashMap<>();
     private static final Map<String, PendingIntent> wakenAtTimeAlarmMap = new ConcurrentHashMap<>();
     @Getter
     private static ClassLoader classLoader = null;
@@ -252,10 +243,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
         if (General.MODULE_PACKAGE_NAME.equals(loadPackageParam.packageName)) {
             try {
-                ViewAppInfo.setRunType(RunType.ACTIVE);
-                modelLoadPackageParam = loadPackageParam;
-                Log.runtime(TAG, "handleLoadPackage setRunType: " + ViewAppInfo.getRunType());
-
+                HookUtil.INSTANCE.hookActive(loadPackageParam);
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
