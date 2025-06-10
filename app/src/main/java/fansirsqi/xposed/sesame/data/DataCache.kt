@@ -178,8 +178,7 @@ object DataCache {
                 Files.write2File(JsonUtil.formatJson(this), targetFile)
             }
         } catch (e: Exception) {
-            reset(targetFile)
-            Log.error(TAG, "重置缓存，会影响光盘等配置${e.message}")
+            Log.error(TAG, "加载缓存数据失败：${e.message}")
         }
         init = true
     }
