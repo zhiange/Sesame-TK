@@ -66,8 +66,16 @@ public class ForestChouChouLe {
                                         Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
                                         doublecheck = true;
                                     }
-                                } else if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
+                                }
+                                if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
                                     String sginRes = AntForestRpcCall.finishTask4Chouchoule(taskType, taskSceneCode);
+                                    if (ResUtil.checkSuccess(sginRes)) {
+                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        doublecheck = true;
+                                    }
+                                }
+                                if (taskType.equals("FOREST_NORMAL_DRAW_ANTTODO")) {
+                                    String sginRes = AntForestRpcCall.finishTaskopengreen(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
                                         Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
                                         doublecheck = true;
