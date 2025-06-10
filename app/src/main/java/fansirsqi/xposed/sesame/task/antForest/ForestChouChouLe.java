@@ -63,21 +63,21 @@ public class ForestChouChouLe {
                                 if (taskType.equals("NORMAL_DRAW_EXCHANGE_VITALITY")) {//活力值兑换次数
                                     String sginRes = AntForestRpcCall.exchangeTimesFromTaskopengreen(activityId, sceneCode, source, taskSceneCode, taskType);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        Log.forest(TAG, "森林寻宝🧾：" + taskName);
                                         doublecheck = true;
                                     }
                                 }
                                 if (taskType.equals("FOREST_NORMAL_DRAW_XLIGHT_1")) {
                                     String sginRes = AntForestRpcCall.finishTask4Chouchoule(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        Log.forest(TAG, "森林寻宝🧾：" + taskName);
                                         doublecheck = true;
                                     }
                                 }
                                 if (taskType.equals("FOREST_NORMAL_DRAW_ANTTODO")) {
                                     String sginRes = AntForestRpcCall.finishTaskopengreen(taskType, taskSceneCode);
                                     if (ResUtil.checkSuccess(sginRes)) {
-                                        Log.forest(TAG, "执行森林抽抽乐任务：" + taskName);
+                                        Log.forest(TAG, "森林寻宝🧾：" + taskName);
                                         doublecheck = true;
                                     }
                                 }
@@ -86,7 +86,7 @@ public class ForestChouChouLe {
                             if (taskStatus.equals(TaskStatus.FINISHED.name())) {// 领取奖励
                                 String sginRes = AntForestRpcCall.receiveTaskAwardopengreen(source, taskSceneCode, taskType);
                                 if (ResUtil.checkSuccess(sginRes)) {
-                                    Log.forest(TAG, "📔完成森林抽抽乐任务：" + taskName);
+                                    Log.forest(TAG, "森林寻宝🧾：" + taskName);
                                     // 检查是否需要再次检测任务
                                     if (rightsTimesLimit - rightsTimes > 0) {
                                         doublecheck = true;
@@ -104,22 +104,22 @@ public class ForestChouChouLe {
             // 执行抽奖
             jo = new JSONObject(AntForestRpcCall.enterDrawActivityopengreen(source));
             if (ResUtil.checkSuccess(jo)) {
-                drawScene = jo.optJSONObject("drawScene");
-                drawActivity = drawScene.optJSONObject("drawActivity");
-                activityId = drawActivity.optString("activityId");
-                sceneCode = drawActivity.optString("sceneCode");
+                drawScene = jo.getJSONObject("drawScene");
+                drawActivity = drawScene.getJSONObject("drawActivity");
+                activityId = drawActivity.getString("activityId");
+                sceneCode = drawActivity.getString("sceneCode");
 
-                JSONObject drawAsset = jo.optJSONObject("drawAsset");
+                JSONObject drawAsset = jo.getJSONObject("drawAsset");
                 int blance = drawAsset.optInt("blance", 0);
                 while (blance > 0) {
-                    jo = new JSONObject(AntForestRpcCall.drawopengreen(activityId,sceneCode,source, UserMap.getCurrentUid()));
+                    jo = new JSONObject(AntForestRpcCall.drawopengreen(activityId, sceneCode, source, UserMap.getCurrentUid()));
                     if (ResUtil.checkSuccess(jo)) {
-                        drawAsset = jo.optJSONObject("drawAsset");
-                        blance = drawAsset.optInt("blance", 0);
-                        JSONObject prizeVO = jo.optJSONObject("prizeVO");
-                        String prizeName = prizeVO.optString("prizeName");
-                        Integer prizeNum = prizeVO.optInt("prizeNum");
-                        Log.forest("森林寻宝任务🎁[领取: " + prizeName + "*" + prizeNum + "]");
+                        drawAsset = jo.getJSONObject("drawAsset");
+                        blance = drawAsset.getInt("blance");
+                        JSONObject prizeVO = jo.getJSONObject("prizeVO");
+                        String prizeName = prizeVO.getString("prizeName");
+                        int prizeNum = prizeVO.getInt("prizeNum");
+                        Log.forest("森林寻宝🎁[领取: " + prizeName + "*" + prizeNum + "]");
                     }
                 }
             }
@@ -137,34 +137,30 @@ public class ForestChouChouLe {
                 return;
             }
             for (String shareId : shareIds) {
-                if(StringUtil.isEmpty(shareId)) continue;
+                if (StringUtil.isEmpty(shareId)) continue;
                 GlobalThreadPools.sleep(5 * 1000L);
                 String shareUserId = null;
                 JSONObject shareComponentRecall = new JSONObject(AntForestRpcCall.shareComponentRecall(shareId));
                 if (ResUtil.checkSuccess(shareComponentRecall)) {
-
                     JSONObject inviterInfoVo = shareComponentRecall.optJSONObject("inviterInfoVo");
                     if (inviterInfoVo != null) {
                         shareUserId = inviterInfoVo.optString("userId");
                         if (UserMap.getCurrentUid().equals(shareUserId)) {
-                            Log.forest(TAG, "森林抽抽乐助力-跳过当前号的邀请码");
                             continue;
                         }
                     }
                 } else {
-                    Log.forest(TAG, "森林抽抽乐助力-获取邀请用户ID失败");
-                    Log.error(TAG, shareComponentRecall.getString("desc"));
+                    Log.error(TAG, "森林寻宝助力-获取邀请用户ID失败"+shareComponentRecall.getString("desc"));
                     continue;
                 }
                 GlobalThreadPools.sleep(5 * 1000L);
                 JSONObject confirmShareRecall = new JSONObject(AntForestRpcCall.confirmShareRecall(UserMap.getCurrentUid(), shareId));
-                Log.forest(TAG, "助力" + shareUserId + ",结果：" + confirmShareRecall.getString("desc")); // 暂时这样吧，后面再改
+                Log.forest( "助力" + shareUserId + ",结果：" + confirmShareRecall.getString("desc")); // 暂时这样吧，后面再改
                 if (!ResUtil.checkSuccess(confirmShareRecall)) {
                     Log.runtime(confirmShareRecall.toString());
                 }
             }
-        }catch (Exception e) {
-            Log.forest(TAG,"森林抽抽乐-出错");
+        } catch (Exception e) {
             Log.printStackTrace(e);
         }
     }
