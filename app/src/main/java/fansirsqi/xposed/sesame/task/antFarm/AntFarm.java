@@ -1074,7 +1074,7 @@ public class AntFarm extends ModelTask {
                             case TODO:
                                 s = DadaDailyRpcCall.home("100");
                                 jo = new JSONObject(s);
-                                if (jo.optBoolean("success")) {
+                                if (ResUtil.checkSuccess(jo)) {
                                     JSONObject question = jo.getJSONObject("question");
                                     Log.runtime(TAG, "题目:" + question);
                                     long questionId = question.getLong("questionId");
@@ -1093,7 +1093,7 @@ public class AntFarm extends ModelTask {
                                         existsResult = true;
                                     }
                                     if (!existsResult) {
-                                        answer = AnswerAI.getAnswer(question.getString("title"), JsonUtil.jsonArrayToList(labels));
+                                        answer = AnswerAI.getAnswer(question.getString("title"), JsonUtil.jsonArrayToList(labels), "farm");
                                         if (answer == null || answer.isEmpty()) {
                                             answer = labels.getString(0);
                                         }
@@ -1101,7 +1101,7 @@ public class AntFarm extends ModelTask {
                                     }
                                     s = DadaDailyRpcCall.submit("100", answer, questionId);
                                     JSONObject joDailySubmit = new JSONObject(s);
-                                    if (joDailySubmit.optBoolean("success")) {
+                                    if (ResUtil.checkSuccess(joDailySubmit)) {
                                         dadaDailySet = new HashSet<>();
                                         JSONObject extInfo = joDailySubmit.getJSONObject("extInfo");
                                         boolean correct = joDailySubmit.getBoolean("correct");
@@ -1110,15 +1110,13 @@ public class AntFarm extends ModelTask {
                                         } else {
                                             dadaDailySet.add(TimeUtil.getDateStr() + answer);
                                         }
-                                        Log.other("饲料任务答题：" + (correct ? "正确" : "错误") + "领取饲料［" + extInfo.getString("award") + "g］");
+                                        Log.farm("饲料任务答题：" + (correct ? "正确" : "错误") + "领取饲料［" + extInfo.getString("award") + "g］");
                                         Status.answerQuestionToday();
-                                        JSONArray operationConfigList = joDailySubmit
-                                                .getJSONArray("operationConfigList");
+                                        JSONArray operationConfigList = joDailySubmit.getJSONArray("operationConfigList");
                                         for (int j = 0; j < operationConfigList.length(); j++) {
                                             JSONObject operationConfig = operationConfigList.getJSONObject(j);
                                             if ("PREVIEW_QUESTION".equals(operationConfig.getString("type"))) {
-                                                JSONArray actionTitle = new JSONArray(
-                                                        operationConfig.getString("actionTitle"));
+                                                JSONArray actionTitle = new JSONArray(operationConfig.getString("actionTitle"));
                                                 for (int k = 0; k < actionTitle.length(); k++) {
                                                     JSONObject joActionTitle = actionTitle.getJSONObject(k);
                                                     if (joActionTitle.getBoolean("correct")) {
@@ -1128,20 +1126,16 @@ public class AntFarm extends ModelTask {
                                             }
                                         }
                                         Status.setDadaDailySet(dadaDailySet);
-                                    } else {
-                                        Log.runtime(s);
                                     }
                                     return;
-                                } else {
-                                    Log.runtime(s);
                                 }
                                 break;
                             case RECEIVED:
-                                Log.record(TAG, "今日答题已完成");
+                                Log.farm("小鸡答题已完成");
                                 Status.answerQuestionToday();
                                 break;
                             case FINISHED:
-                                Log.record(TAG, "已经答过题了，饲料待领取");
+                                Log.farm("小鸡已答题，饲料待领取");
                                 Status.answerQuestionToday();
                                 break;
                         }
@@ -1693,7 +1687,7 @@ public class AntFarm extends ModelTask {
                             int collectManurePotNum = joManurePot.getInt("collectManurePotNum");
                             Log.farm("打扫鸡屎🧹[" + collectManurePotNum + "g]" + i + "次");
                         } else {
-                            Log.runtime(TAG, "打扫鸡屎失败: 第" + i + "次" + joManurePot.toString());
+                            Log.runtime(TAG, "打扫鸡屎失败: 第" + i + "次" + joManurePot);
                         }
                     }
                 }
