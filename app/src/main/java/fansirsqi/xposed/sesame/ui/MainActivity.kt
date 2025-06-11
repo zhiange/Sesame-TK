@@ -80,7 +80,8 @@ class MainActivity : BaseActivity() {
         } catch (e: Exception) {
             Log.error(TAG, "load libSesame err:" + e.message)
         }
-        updateSubTitle(RunType.DISABLE.nickName)
+
+
 
         mainImage?.setOnLongClickListener { v: View ->
             // 当视图被长按时执行的操作
@@ -156,10 +157,12 @@ class MainActivity : BaseActivity() {
                 Log.printStackTrace(e)
             }
         }
+        updateSubTitle(RunType.LOADED.nickName)
     }
 
     fun onClick(v: View) {
         if (v.id == R.id.main_image) {
+            updateSubTitle(RunType.LOADED.nickName)
             ToastUtil.showToastWithDelay(this, "再点就要去了.~a.e", 800)
             return
         }
