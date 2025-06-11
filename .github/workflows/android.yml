@@ -2,9 +2,12 @@ name: Develop CI
 
 on:
   push:
-    branches-ignore: ["main"]
+    #    branches-ignore: ["main"]
+    branches: [ "develop","main" ]
   pull_request:
-    branches: ["develop"]
+    branches: [ "develop","main" ]
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 jobs:
@@ -90,6 +93,11 @@ jobs:
           name: apk-normal
           path: ${{ steps.extract_apks.outputs.signed_normal }}
 
+      - name: Generate APKS Checksum
+        run: |
+          sha256sum ${{ steps.extract_apks.outputs.signed_normal }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+          sha256sum ${{ steps.extract_apks.outputs.signed_compatible }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+
       - name: Get Commit Details
         id: commit_details
         run: |
@@ -132,10 +140,15 @@ jobs:
           to: ${{ secrets.TG_CHAT_ID }}
           token: ${{ secrets.TG_BOT_TOKEN }}
           message: |
-            📦 *New Normal Build!*
-            File: `${{ steps.file_names.outputs.normal_file }}`
-            Branch: `${{ github.ref_name }}`
-            Triggered by: `${{ github.actor }}`
+            ## 📦 *New Normal Build!*
+            
+            - File: `${{ steps.file_names.outputs.normal_file }}`
+            - Branch: `${{ github.ref_name }}`
+            - Triggered by: `${{ github.actor }}`
+            
+            ### 下载说明
+              * Normal 为正常版本,适用于`Android 8.0`及以上的系统
+              * Compatible 为兼容版本,适用于`Android 7.0`及以下的系统,最低支持`Android 5.1`
             
             ${{ steps.commit_details.outputs.COMMIT_MESSAGE_BODY }}
           document: ${{ steps.extract_apks.outputs.signed_normal }}
@@ -147,11 +160,62 @@ jobs:
           to: ${{ secrets.TG_CHAT_ID }}
           token: ${{ secrets.TG_BOT_TOKEN }}
           message: |
-            📦 *New Compatible Build!*
-            File: `${{ steps.file_names.outputs.compatible_file }}`
-            Branch: `${{ github.ref_name }}`
-            Triggered by: `${{ github.actor }}`
+            ## 📦 *New Compatible Build!*
+            
+            - File: `${{ steps.file_names.outputs.compatible_file }}`
+            - Branch: `${{ github.ref_name }}`
+            - Triggered by: `${{ github.actor }}`
+            
+            ### 下载说明
+              * Normal 为正常版本,适用于`Android 8.0`及以上的系统
+              * Compatible 为兼容版本,适用于`Android 7.0`及以下的系统,最低支持`Android 5.1`
             
             ${{ steps.commit_details.outputs.COMMIT_MESSAGE_BODY }}
           document: ${{ steps.extract_apks.outputs.signed_compatible }}
           format: markdown
+
+
+      - name: Upload Assets to Source Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
+          files: |
+            ${{ steps.extract_apks.outputs.signed_compatible }}
+            ${{ steps.extract_apks.outputs.signed_normal }}
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          append_body: true
+          generate_release_notes: true
+          body: |
+            ## ✨What Change
+            
+            ${{ steps.commit_details.outputs.COMMIT_MESSAGE_BODY }}
+            > ## 下载说明
+              * Normal 为正常版本,适用于`Android 8.0`及以上的系统
+              * Compatible 为兼容版本,适用于`Android 7.0`及以下的系统,最低支持`Android 5.1`
+            
+            > ~~墙内不再更新~~ 倒卖必死全家
+
+      - name: Sync Release to Target Repository
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Xposed-Modules-Repo/fansirsqi.xposed.sesame # 目标仓库的拥有者和仓库名称
+          name: ${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
+          files: |
+            ${{ steps.sign_normal_apk.outputs.signedFile }}
+            ${{ steps.sign_compatible_apk.outputs.signedFile }}
+            CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+            CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.${{ env.SHORT_SHA }}-signed.apk.sha256
+          token: ${{ secrets.TARGET_REPO_PAT }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ steps.pre_release.outputs.IS_PRERELEASE }}
+          append_body: false
+          make_latest: true
+          body: |
+            📦 本 Release 同步自源仓库 [Sesame-TK](https://github.com/${{ github.repository }})
+            ✨ **更新内容**:
+            ${{ github.event.release.body || '无更新说明' }}
+
