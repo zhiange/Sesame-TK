@@ -130,7 +130,6 @@ public class AntForest extends ModelTask {
     private BooleanModelField stealthCardConstant; // 隐身卡永动机
     private ChoiceModelField shieldCard; // 保护罩
     private BooleanModelField shieldCardConstant;// 限时保护永动机
-    private BooleanModelField helpFriendCollect;
     private ChoiceModelField helpFriendCollectType;
     private SelectModelField helpFriendCollectList;
     private SelectAndCountModelField vitalityExchangeList;
@@ -170,6 +169,8 @@ public class AntForest extends ModelTask {
      * 能量炸弹卡
      */
     private ChoiceModelField energyBombCardType;
+
+    private final Set<String> cacheCollectedList = new HashSet<>();
     /**
      * 加速器定时
      */
@@ -264,20 +265,14 @@ public class AntForest extends ModelTask {
         modelFields.addField(returnWater10 = new IntegerModelField("returnWater10", "返水 | 10克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater18 = new IntegerModelField("returnWater18", "返水 | 18克需收能量(关闭:0)", 0));
         modelFields.addField(returnWater33 = new IntegerModelField("returnWater33", "返水 | 33克需收能量(关闭:0)", 0));
-        modelFields.addField(waterFriendList = new SelectAndCountModelField("waterFriendList", "浇水 | 好友列表", new LinkedHashMap<>(), AlipayUser::getList,
-                "设置浇水次数"));
+        modelFields.addField(waterFriendList = new SelectAndCountModelField("waterFriendList", "浇水 | 好友列表", new LinkedHashMap<>(), AlipayUser::getList, "设置浇水次数"));
         modelFields.addField(waterFriendCount = new IntegerModelField("waterFriendCount", "浇水 | 克数(10 18 33 66)", 66));
-        modelFields.addField(whoYouWantToGiveTo = new SelectModelField("whoYouWantToGiveTo", "赠送 | 道具", new LinkedHashSet<>(), AlipayUser::getList,
-                "所有可赠送的道具将全部赠"));
+        modelFields.addField(whoYouWantToGiveTo = new SelectModelField("whoYouWantToGiveTo", "赠送 | 道具", new LinkedHashSet<>(), AlipayUser::getList, "所有可赠送的道具将全部赠"));
         modelFields.addField(collectProp = new BooleanModelField("collectProp", "收集道具", false));
-        modelFields.addField(helpFriendCollect = new BooleanModelField("helpFriendCollect", "复活能量 | 开关", false));
-        modelFields.addField(helpFriendCollectType = new ChoiceModelField("helpFriendCollectType", "复活能量 | 动作", HelpFriendCollectType.HELP, HelpFriendCollectType.nickNames));
+        modelFields.addField(helpFriendCollectType = new ChoiceModelField("helpFriendCollectType", "复活能量 | 选项", HelpFriendCollectType.HELP, HelpFriendCollectType.nickNames));
         modelFields.addField(helpFriendCollectList = new SelectModelField("helpFriendCollectList", "复活能量 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(vitalityExchange = new BooleanModelField("vitalityExchange", "活力值 | 兑换开关", false));
-        modelFields.addField(vitalityExchangeList = new SelectAndCountModelField("vitalityExchangeList", "活力值 | 兑换列表", new LinkedHashMap<>(),
-                VitalityStore::getList, "兑换次数"));
-//        modelFields.addField(vitalityExchangeMaxList = new SelectAndCountModelField("vitalityExchangeMaxList", "活力值 | 兑换限制", new LinkedHashMap<>(),
-//        VitalityStore::getList, "如果背包中已经有该数量的道具，则不进行兑换"));
+        modelFields.addField(vitalityExchangeList = new SelectAndCountModelField("vitalityExchangeList", "活力值 | 兑换列表", new LinkedHashMap<>(), VitalityStore::getList, "兑换次数"));
         modelFields.addField(userPatrol = new BooleanModelField("userPatrol", "保护地巡护", false));
         modelFields.addField(combineAnimalPiece = new BooleanModelField("combineAnimalPiece", "合成动物碎片", false));
         modelFields.addField(consumeAnimalProp = new BooleanModelField("consumeAnimalProp", "派遣动物伙伴", false));
@@ -468,8 +463,7 @@ public class AntForest extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "AntForest.run err:");
-            Log.printStackTrace(TAG, t);
+            Log.printStackTrace(TAG, "执行蚂蚁森林任务时发生错误: ", t);
         } finally {
             try {
                 synchronized (AntForest.this) {
@@ -490,6 +484,7 @@ public class AntForest extends ModelTask {
                 Log.record(TAG, "执行中断-蚂蚁森林");
             }
             Statistics.save();
+            cacheCollectedList.clear();
             FriendWatch.save(selfId);
             String str_totalCollected = "收:" + totalCollected + "g 帮:" + totalHelpCollected + "g 浇:" + totalWatered + "g";
             Notify.updateLastExecText(str_totalCollected);
@@ -875,17 +870,17 @@ public class AntForest extends ModelTask {
                 return userHomeObj;
             }
 
+
             long serverTime = userHomeObj.getLong("now");
             boolean isSelf = Objects.equals(userId, selfId);
             String userName = UserMap.getMaskName(userId);
 
-            Log.record(TAG, "进入[" + userName + "]的蚂蚁森林");
-
-            // 2. 如果是自己，更新首页信息
-            if (isSelf) {
-                updateSelfHomePage(userHomeObj);
+            if (cacheCollectedList.contains(userId)) {
+                Log.runtime(TAG, userName + "已缓存，跳过");
                 return userHomeObj;
-            }
+            } //该次已缓存，标记为已收取
+
+            Log.record(TAG, "进入[" + userName + "]的蚂蚁森林");
 
             // 3. 判断是否允许收取能量
             if (!collectEnergy.getValue() || dontCollectMap.contains(userId)) {
@@ -893,7 +888,7 @@ public class AntForest extends ModelTask {
             }
 
             // 4. 检查是否有能量罩保护
-            if (hasEnergyShieldProtection(userHomeObj, serverTime)) {
+            if (hasEnergyShieldProtection(userHomeObj, serverTime) && !isSelf) {
                 Log.record(TAG, "[" + userName + "]被能量罩保护着哟");
                 return userHomeObj;
             }
@@ -909,6 +904,8 @@ public class AntForest extends ModelTask {
 
             // 7. 收集可直接收取的能量
             collectAvailableEnergy(userId, userHomeObj, availableBubbles);
+
+            cacheCollectedList.add(userId);
 
             return userHomeObj;
 
@@ -960,18 +957,18 @@ public class AntForest extends ModelTask {
         for (int i = 0; i < jaBubbles.length(); i++) {
             JSONObject bubble = jaBubbles.getJSONObject(i);
             long bubbleId = bubble.getLong("id");
-            long produceTime = bubble.getLong("produceTime");
+            long produceTime = bubble.getLong("produceTime");//成熟时间
             String statusStr = bubble.getString("collectStatus");
             CollectStatus status = CollectStatus.valueOf(statusStr);
             switch (status) {
                 case AVAILABLE:
                     availableBubbles.add(bubbleId);
                     break;
-                case WAITING:
+                case WAITING://此处适合增加加速卡的处理，但是需要注意 需要 userid==selfId
                     if (checkInterval > produceTime - serverTime) {
                         waitingBubbles.add(new Pair<>(bubbleId, produceTime));
                     } else {
-                        Log.runtime(TAG, "用户[" + UserMap.getMaskName(userId) + "]能量成熟时间: " + TimeUtil.getCommonDate(produceTime));
+                        Log.runtime(TAG, "用户[" + UserMap.getMaskName(userId) + "]能量id: [" + bubbleId + "]成熟时间: " + TimeUtil.getCommonDate(produceTime));
                     }
                     break;
             }
@@ -1035,7 +1032,7 @@ public class AntForest extends ModelTask {
                 return;
             }
 
-            // 处理排名靠前的好友（通常自己也在其中）
+            // 处理排名靠前的好友（通常自己也在其中） 20个
             collectFriendsEnergy(friendsObject);
 
             // 分批处理其他好友（从第20位开始）
@@ -1047,7 +1044,7 @@ public class AntForest extends ModelTask {
                 JSONObject friend = totalDatas.getJSONObject(pos);
                 String userId = friend.getString("userId");
 
-                if (Objects.equals(userId, selfId)) continue;
+                if (Objects.equals(userId, selfId)) continue; //如果是自己则跳过
 
                 idList.add(userId);
                 if (idList.size() == 20) {
@@ -1101,7 +1098,7 @@ public class AntForest extends ModelTask {
         try {
             String userId = friendObj.getString("userId");
             String userName = UserMap.getMaskName(userId);
-            if (Objects.equals(userId, selfId)) return;
+            if (Objects.equals(userId, selfId)) return;//如果是自己，则跳过
             boolean needCollectEnergy = collectEnergy.getValue() && !dontCollectMap.contains(userId); //开启了收能量功能并且不在排除名单中
             boolean needHelpProtect = helpFriendCollectType.getValue() != HelpFriendCollectType.NONE && friendObj.optBoolean("canProtectBubble") && Status.hasFlagToday("help_friend_collect_protect::" + selfId);
 
