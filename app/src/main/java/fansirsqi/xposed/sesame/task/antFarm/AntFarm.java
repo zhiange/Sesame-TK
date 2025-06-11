@@ -470,13 +470,16 @@ public class AntFarm extends ModelTask {
 
     private void paradiseCoinExchangeBenefit() {
         try {
-            JSONArray mallHomeItemList = getMallHomeItemList();
-            if (mallHomeItemList == null) {
-                Log.record(TAG, "小鸡乐园币💸[未获取到可兑换权益]");
+
+            JSONObject jo = new JSONObject(AntFarmRpcCall.getMallHome());
+
+            if (ResUtil.checkSuccess(jo)) {
+                Log.error(TAG, "小鸡乐园币💸[未获取到可兑换权益]");
                 return;
             }
-            for (int i = 0; i < mallHomeItemList.length(); i++) {
-                JSONObject mallItemInfo = mallHomeItemList.getJSONObject(i);
+            JSONArray mallItemSimpleList = jo.getJSONArray("mallItemSimpleList");
+            for (int i = 0; i < mallItemSimpleList.length(); i++) {
+                JSONObject mallItemInfo = mallItemSimpleList.getJSONObject(i);
                 String spuName = mallItemInfo.getString("spuName");
                 String spuId = mallItemInfo.getString("spuId");
                 IdMapManager.getInstance(ParadiseCoinBenefitIdMap.class).add(spuId, spuName);
@@ -558,20 +561,6 @@ public class AntFarm extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
         return false;
-    }
-
-    private JSONArray getMallHomeItemList() {
-        JSONArray mallItemSimpleList = null;
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.getMallHome());
-            if (ResUtil.checkResultCode(TAG, jo)) {
-                mallItemSimpleList = jo.optJSONArray("mallItemSimpleList");
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "getMallHomeItemList err:");
-            Log.printStackTrace(TAG, t);
-        }
-        return mallItemSimpleList;
     }
 
     private void animalSleepAndWake() {
@@ -1972,7 +1961,7 @@ public class AntFarm extends ModelTask {
     /**
      * 贴贴小鸡
      *
-     * @param queryDayStr
+     * @param queryDayStr 日期，格式：yyyy-MM-dd
      */
     private void diaryTietie(String queryDayStr) {
         String diaryDateStr;
@@ -2046,7 +2035,6 @@ public class AntFarm extends ModelTask {
                         Log.farm("[" + diaryDateStr + "]" + "点赞小鸡日记💞成功");
                     }
                 }
-
             } else {
                 Log.runtime(TAG, "日记点赞-获取小鸡日记详情 err:");
                 Log.runtime(jo.getString("resultDesc"), jo.toString());
@@ -2054,9 +2042,8 @@ public class AntFarm extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "queryChickenDiary err:");
             Log.printStackTrace(TAG, t);
-        } finally {
-            return diaryDateStr;
         }
+        return diaryDateStr;
     }
 
     private boolean queryChickenDiaryList(String queryMonthStr, Function<String, String> fun) {
@@ -2067,7 +2054,6 @@ public class AntFarm extends ModelTask {
                 jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList());
             } else {
                 jo = new JSONObject(AntFarmRpcCall.queryChickenDiaryList(queryMonthStr));
-//                Log.runtime(TAG, "获取小鸡日记列表:"+jo.toString());
             }
             if (ResUtil.checkResultCode(TAG, jo)) {
                 jo = jo.getJSONObject("data");
@@ -2077,8 +2063,7 @@ public class AntFarm extends ModelTask {
                     for (int i = chickenDiaryBriefList.length() - 1; i >= 0; i--) {
                         jo = chickenDiaryBriefList.getJSONObject(i);
                         if (!jo.optBoolean("read", true) ||
-                                !jo.optBoolean("collectStatus")
-                        ) {
+                                !jo.optBoolean("collectStatus")) {
                             String dateStr = jo.getString("dateStr");
                             fun.apply(dateStr);
                             GlobalThreadPools.sleep(300);
@@ -2092,9 +2077,8 @@ public class AntFarm extends ModelTask {
             hasPreviousMore = false;
             Log.runtime(TAG, "queryChickenDiaryList err:");
             Log.printStackTrace(TAG, t);
-        } finally {
-            return hasPreviousMore;
         }
+        return hasPreviousMore;
     }
 
     private void doChickenDiary() {
