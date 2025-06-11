@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.ui
+package fansirsqi.xposed.sesame.newui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
