@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -794,7 +795,7 @@ public class AntFarm extends ModelTask {
 
     private void syncAnimalStatus(String farmId) {
         try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.syncAnimalStatus(farmId));
+            JSONObject jo = new JSONObject(AntFarmRpcCall.syncAnimalStatus(farmId, "SYNC_RESUME", "QUERY_ALL"));
             parseSyncAnimalStatusResponse(jo);
         } catch (Throwable t) {
             Log.runtime(TAG, "syncAnimalStatus err:");
@@ -836,8 +837,7 @@ public class AntFarm extends ModelTask {
                     if ("SUCCESS".equals(memo)) {
                         double rewardCount = benevolenceScore - jo.getDouble("farmProduct");
                         benevolenceScore -= rewardCount;
-                        Log.farm("打赏好友💰[" + UserMap.getMaskName(rewardFriend.friendId) + "]#得" + rewardCount
-                                + "颗爱心鸡蛋");
+                        Log.farm(String.format(Locale.CHINA, "打赏好友💰[%s]# 得%.2f颗爱心鸡蛋", UserMap.getMaskName(rewardFriend.friendId), rewardCount));
                     } else {
                         Log.record(memo);
                         Log.runtime(s);
@@ -1358,7 +1358,6 @@ public class AntFarm extends ModelTask {
      */
     private Boolean feedAnimal(String farmId) {
         try {
-
             if (foodStock < 180) {
                 Log.record(TAG, "喂鸡饲料不足");
             } else {
@@ -1371,8 +1370,7 @@ public class AntFarm extends ModelTask {
                 return true;
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "feedAnimal err:");
-            Log.printStackTrace(TAG, t);
+            Log.printStackTrace(TAG, "feedAnimal err:", t);
         }
         return false;
     }

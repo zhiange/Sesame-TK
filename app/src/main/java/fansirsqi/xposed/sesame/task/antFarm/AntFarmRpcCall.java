@@ -41,12 +41,19 @@ public class AntFarmRpcCall {
         return RequestManager.requestString("com.alipay.antiep.inviteP2P", args1);
     }
 
-    public static String syncAnimalStatus(String farmId) {
-        String args1 = "[{\"farmId\":\"" + farmId +
-                "\",\"operType\":\"FEEDSYNC\",\"queryFoodStockInfo\":false,\"recall\":false,\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"userId\":\""
-                + farmId2UserId(farmId) + "\",\"version\":\"" + VERSION + "\"}]";
-        return RequestManager.requestString("com.alipay.antfarm.syncAnimalStatus", args1);
+    public static String syncAnimalStatus(String farmId, String operTag, String operType) throws JSONException {
+        JSONObject args = new JSONObject();
+        args.put("farmId", farmId);
+        args.put("operTag", operTag);
+        args.put("operType", operType);
+        args.put("requestType", "NORMAL");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", "H5");
+        args.put("version", VERSION);
+        String params = "[" + args + "]";
+        return RequestManager.requestString("com.alipay.antfarm.syncAnimalStatus", params);
     }
+
 
     public static String sleep() {
         String args1 = "[{\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"LOVECABIN\",\"version\":\"unknown\"}]";
@@ -153,11 +160,18 @@ public class AntFarmRpcCall {
         return RequestManager.requestString("com.alipay.antfarm.receiveToolTaskReward", args1);
     }
 
-    public static String feedAnimal(String farmId) {
-        String args1 = "[{\"animalType\":\"CHICK\",\"canMock\":true,\"farmId\":\"" + farmId +
-                "\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"version\":\""
-                + VERSION + "\"}]";
-        return RequestManager.requestString("com.alipay.antfarm.feedAnimal", args1);
+    public static String feedAnimal(String farmId) throws JSONException {
+//        [{"animalType":"CHICK","canMock":true,"farmId":"xxxxxxxxxx","requestType":"NORMAL","sceneCode":"ANTFARM","source":"chInfo_ch_appcenter__chsub_9patch","version":"1.8.2302070202.46"}]
+        JSONObject args = new JSONObject();
+        args.put("animalType", "CHICK");
+        args.put("canMock", true);
+        args.put("farmId", farmId);
+        args.put("requestType", "NORMAL");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", "chInfo_ch_appcenter__chsub_9patch");
+        args.put("version", VERSION);
+        String params = "[" + args + "]";
+        return RequestManager.requestString("com.alipay.antfarm.feedAnimal", params);
     }
 
     public static String listFarmTool() {
