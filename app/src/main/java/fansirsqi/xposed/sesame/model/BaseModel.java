@@ -13,13 +13,13 @@ import fansirsqi.xposed.sesame.task.reserve.Reserve;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.ListUtil;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.BeachMap;
-import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.MemberBenefitsMap;
-import fansirsqi.xposed.sesame.util.Maps.ParadiseCoinBenefitIdMap;
-import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
-import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
+import fansirsqi.xposed.sesame.util.maps.BeachMap;
+import fansirsqi.xposed.sesame.util.maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.maps.MemberBenefitsMap;
+import fansirsqi.xposed.sesame.util.maps.ParadiseCoinBenefitIdMap;
+import fansirsqi.xposed.sesame.util.maps.ReserveaMap;
+import fansirsqi.xposed.sesame.util.maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import lombok.Getter;
 
@@ -29,7 +29,7 @@ import lombok.Getter;
 public class BaseModel extends Model {
     private static final String TAG = "BaseModel";
 
-    public static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getScheduledExecutor();
+    public static final ExecutorService MAIN_THREAD_POOL = fansirsqi.xposed.sesame.util.GlobalThreadPools.getGeneralPurposeExecutor();
     /**
      * 是否保持唤醒状态
      */
@@ -213,11 +213,11 @@ public class BaseModel extends Model {
         try {
             Log.runtime(TAG,"🧹清理所有数据");
             IdMapManager.getInstance(BeachMap.class).clear();
-            IdMapManager.getInstance(ReserveaMap.class).clear();
-            IdMapManager.getInstance(CooperateMap.class).clear();
-            IdMapManager.getInstance(MemberBenefitsMap.class).clear();
-            IdMapManager.getInstance(ParadiseCoinBenefitIdMap.class).clear();
-            IdMapManager.getInstance(VitalityRewardsMap.class).clear();
+//            IdMapManager.getInstance(ReserveaMap.class).clear();
+//            IdMapManager.getInstance(CooperateMap.class).clear();
+//            IdMapManager.getInstance(MemberBenefitsMap.class).clear();
+//            IdMapManager.getInstance(ParadiseCoinBenefitIdMap.class).clear();
+//            IdMapManager.getInstance(VitalityRewardsMap.class).clear();
             //其他也可以清理清理
         } catch (Exception e) {
             Log.printStackTrace(e);
