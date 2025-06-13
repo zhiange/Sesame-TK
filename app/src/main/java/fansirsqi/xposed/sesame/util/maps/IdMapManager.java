@@ -19,6 +19,7 @@ import fansirsqi.xposed.sesame.util.Log;
 public abstract class IdMapManager {
     private static final String TAG = IdMapManager.class.getSimpleName();
 
+    private static final File OLD_CONFIG_DIR = Files.MAIN_DIR; // 旧配置目录
     private static final File CONFIG_DIR = Files.CONFIG_DIR; // 配置目录
     /**
      * 存储ID映射的并发HashMap。
@@ -95,7 +96,7 @@ public abstract class IdMapManager {
      */
     public synchronized void load(String userId) {
         if (userId == null || userId.isEmpty()) {
-            Log.runtime(TAG,"Skip loading map for empty userId");
+            Log.runtime(TAG, "Skip loading map for empty userId");
             load();
         } else {
             idMap.clear();
@@ -105,7 +106,8 @@ public abstract class IdMapManager {
                 String body = Files.readFromFile(file);
                 if (!body.isEmpty()) {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {});
+                    Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {
+                    });
                     idMap.putAll(newMap);
                 }
             } catch (Exception e) {
@@ -117,15 +119,54 @@ public abstract class IdMapManager {
     public synchronized void load() {
         idMap.clear();
         try {
-            File file = Files.getTargetFileofDir(CONFIG_DIR, thisFileName());
-            String body = Files.readFromFile(file);
-            if (!body.isEmpty()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {});
-                idMap.putAll(newMap);
+            File newFile = Files.getTargetFileofDir(CONFIG_DIR, thisFileName());
+            File oldFile = Files.getTargetFileofDir(OLD_CONFIG_DIR, thisFileName());
+            // 1. 新文件存在，直接加载
+            if (newFile.exists()) {
+                String body = Files.readFromFile(newFile);
+                if (!body.isEmpty()) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {
+                    });
+                    idMap.putAll(newMap);
+                }
+                if(oldFile.exists()){
+                    oldFile.delete();
+                }
+                return;
+            }
+            // 2. 新文件不存在，检查旧文件是否存在
+            if (oldFile.exists()) {
+                Log.runtime(TAG, "Old configuration file found, migrating to new path...");
+
+                try {
+                    String body = Files.readFromFile(oldFile);
+                    if (!body.isEmpty()) {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        Map<String, String> newMap = objectMapper.readValue(body, new TypeReference<>() {
+                        });
+                        String json = JsonUtil.formatJson(newMap);
+                        if (json != null && !json.isEmpty()) {
+                            Files.write2File(json, newFile);
+                            oldFile.delete();
+                            idMap.putAll(newMap);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.error(TAG, "Migration of old configuration files failed：" + e.getMessage());
+                }
+            }
+
+            // 3. 新旧文件都不存在，初始化默认配置
+            if (!newFile.exists()) {
+                Log.runtime(TAG, "Configuration file not found, initializing an empty configuration file...");
+                String json = JsonUtil.formatJson(idMap);
+                if (json != null && !json.isEmpty()) {
+                    Files.write2File(json, newFile);
+                }
             }
         } catch (Exception e) {
-            Log.printStackTrace(e);
+            Log.printStackTrace(TAG, "ID映射管理器初始化失败：", e);
         }
     }
 
