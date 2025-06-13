@@ -253,6 +253,13 @@ public class AntForestRpcCall {
         return RequestManager.requestString("com.alipay.antiep.sign", new JSONArray().put(jo).toString());
     }
 
+    /**
+     * 查询背包道具列表
+     *
+     * @param onlyGive 是否只显示可赠送道具
+     * @return 道具列表
+     * @throws JSONException JSON 解析异常
+     */
     public static String queryPropList(boolean onlyGive) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("onlyGive", onlyGive ? "Y" : "");
@@ -731,12 +738,13 @@ public class AntForestRpcCall {
         params.put("userId", userId);
         String args = "[" + params + "]";
         return RequestManager.requestString("com.alipay.antiepdrawprod.drawopengreen", args,
-                "antiepdrawprod","draw","DrawRpc");
+                "antiepdrawprod", "draw", "DrawRpc");
     }
 
     /**
-     *   完成森林抽抽乐 任务
-     * @param taskType 任务类型
+     * 完成森林抽抽乐 任务
+     *
+     * @param taskType  任务类型
      * @param sceneCode 场景Code
      * @return s
      */

@@ -29,8 +29,8 @@ import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.CollectEnergyEntity;
 import fansirsqi.xposed.sesame.entity.FriendWatch;
-import fansirsqi.xposed.sesame.entity.KVNode;
-import fansirsqi.xposed.sesame.entity.OtherEntity;
+import fansirsqi.xposed.sesame.entity.KVMap;
+import fansirsqi.xposed.sesame.entity.OtherEntityProvider;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.entity.VitalityStore;
 import fansirsqi.xposed.sesame.hook.RequestManager;
@@ -55,7 +55,7 @@ import fansirsqi.xposed.sesame.util.Average;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.ListUtil;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
@@ -68,7 +68,6 @@ import lombok.Getter;
 public class AntForest extends ModelTask {
     public static final String TAG = AntForest.class.getSimpleName();
 
-    ExecutorService executorService = GlobalThreadPools.getGeneralPurposeExecutor();
     private static final Average offsetTimeMath = new Average(5);
 
     private final AtomicInteger taskCount = new AtomicInteger(0);
@@ -283,8 +282,7 @@ public class AntForest extends ModelTask {
         modelFields.addField(collectGiftBox = new BooleanModelField("collectGiftBox", "领取礼盒", false));
 
         modelFields.addField(medicalHealth = new BooleanModelField("medicalHealth", "健康医疗任务 | 开关", false));
-        modelFields.addField(medicalHealthOption = new SelectModelField("medicalHealthOption", "健康医疗 | 选项", new LinkedHashSet<>(),
-                OtherEntity::listHealthcareOptions));
+        modelFields.addField(medicalHealthOption = new SelectModelField("medicalHealthOption", "健康医疗 | 选项", new LinkedHashSet<>(), OtherEntityProvider.listHealthcareOptions(), "医疗健康需要先完成一次医疗打卡"));
 
         modelFields.addField(ForestMarket = new BooleanModelField("ForestMarket", "森林集市", false));
         modelFields.addField(youthPrivilege = new BooleanModelField("youthPrivilege", "青春特权 | 森林道具", false));
@@ -292,8 +290,7 @@ public class AntForest extends ModelTask {
 
         modelFields.addField(ecoLife = new BooleanModelField("ecoLife", "绿色行动 | 开关", false));
         modelFields.addField(ecoLifeOpen = new BooleanModelField("ecoLifeOpen", "绿色任务 |  自动开通", false));
-        modelFields.addField(ecoLifeOption = new SelectModelField("ecoLifeOption", "绿色行动 | 选项", new LinkedHashSet<>(), OtherEntity::listEcoLifeOptions,
-                "光盘行动需要先完成一次光盘打卡"));
+        modelFields.addField(ecoLifeOption = new SelectModelField("ecoLifeOption", "绿色行动 | 选项", new LinkedHashSet<>(), OtherEntityProvider.listEcoLifeOptions(), "光盘行动需要先完成一次光盘打卡"));
 
 
         modelFields.addField(queryInterval = new StringModelField("queryInterval", "查询间隔(毫秒或毫秒范围)", "1000-2000"));
@@ -696,7 +693,7 @@ public class AntForest extends ModelTask {
                         JSONObject jo = new JSONObject(response);
                         if (ResUtil.checkResultCode(jo)) {
                             String bizNo = jo.getString("bizNo");
-                            KVNode<Integer, Boolean> waterCountKVNode = returnFriendWater(uid, bizNo, waterCount, waterFriendCount.getValue());
+                            KVMap<Integer, Boolean> waterCountKVNode = returnFriendWater(uid, bizNo, waterCount, waterFriendCount.getValue());
                             int actualWaterCount = waterCountKVNode.getKey();
                             if (actualWaterCount > 0) {
                                 Status.waterFriendToday(uid, actualWaterCount);
@@ -1561,10 +1558,10 @@ public class AntForest extends ModelTask {
      * @param waterEnergy 每次浇水的能量值
      * @return KVNode 包含浇水次数和是否可以继续浇水的状态
      */
-    private KVNode<Integer, Boolean> returnFriendWater(String userId, String bizNo, int count, int waterEnergy) {
+    private KVMap<Integer, Boolean> returnFriendWater(String userId, String bizNo, int count, int waterEnergy) {
         // 如果业务编号为空，则直接返回默认值
         if (bizNo == null || bizNo.isEmpty()) {
-            return new KVNode<>(0, true);
+            return new KVMap<>(0, true);
         }
         int wateredTimes = 0; // 已浇水次数
         boolean isContinue = true; // 是否可以继续浇水
@@ -1604,7 +1601,7 @@ public class AntForest extends ModelTask {
             Log.runtime(TAG, "returnFriendWater err");
             Log.printStackTrace(TAG, t);
         }
-        return new KVNode<>(wateredTimes, isContinue);
+        return new KVMap<>(wateredTimes, isContinue);
     }
 
     /**
@@ -1781,7 +1778,7 @@ public class AntForest extends ModelTask {
 
             if (needDouble || needStealth || needShield || needEnergyBombCard || needrobExpand) {
                 synchronized (doubleCardLockObj) {
-                    JSONObject bagObject = getBag();
+                    JSONObject bagObject = queryPropList();
                     if (needDouble) useDoubleCard(bagObject);
                     if (needrobExpand) {
 //                        userobExpandCard(bagObject);
@@ -2196,19 +2193,15 @@ public class AntForest extends ModelTask {
     /**
      * 获取背包信息
      */
-    private JSONObject getBag() {
+    private JSONObject queryPropList() {
         try {
-            // 获取背包信息
             JSONObject bagObject = new JSONObject(AntForestRpcCall.queryPropList(false));
-            if (!ResUtil.checkResultCode(bagObject)) {
-                Log.record(bagObject.getString("resultDesc"));
-                Log.runtime(bagObject.toString());
-                return null;
+            if (ResUtil.checkSuccess(bagObject)) {
+                return bagObject;
             }
-            return bagObject;
-        } catch (Throwable th) {
-            Log.runtime(TAG, "获取背包信息错误");
-            Log.printStackTrace(TAG, th);
+            Log.error(TAG, "获取背包信息失败: " + bagObject);
+        } catch (Exception e) {
+            Log.printStackTrace(TAG, "获取背包信息失败:", e);
         }
         return null;
     }
@@ -2227,7 +2220,9 @@ public class AntForest extends ModelTask {
             JSONArray forestPropVOList = bagObject.getJSONArray("forestPropVOList");
             for (int i = 0; i < forestPropVOList.length(); i++) {
                 JSONObject forestPropVO = forestPropVOList.getJSONObject(i);
-                String currentPropType = forestPropVO.getString("propType");
+                JSONObject propConfigVO = forestPropVO.getJSONObject("propConfigVO");
+                String currentPropType = propConfigVO.getString("propType");
+                String propName = propConfigVO.getString("propName");
                 if (propType.equals(currentPropType)) {
                     return forestPropVO; // 找到后直接返回
                 }
@@ -2251,8 +2246,7 @@ public class AntForest extends ModelTask {
             return false;
         }
         try {
-            JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(propJsonObj.getJSONArray("propIdList").getString(0),
-                    propJsonObj.getString("propType")));
+            JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(propJsonObj.getJSONArray("propIdList").getString(0), propJsonObj.getString("propType")));
             if (ResUtil.checkSuccess(jo)) {
                 String propName = propJsonObj.getJSONObject("propConfigVO").getString("propName");
                 String tag = propEmoji(propName);
@@ -2299,11 +2293,11 @@ public class AntForest extends ModelTask {
         try {
             if (hasDoubleCardTime() && Status.canDoubleToday()) {
                 JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
-                if (jo == null && doubleCardConstant.getValue()) {
-                    if (Vitality.handleVitalityExchange("SK20240805004754")) {
-                        jo = findPropBag(getBag(), "ENERGY_DOUBLE_CLICK_31DAYS");
+                if (jo == null && doubleCardConstant.getValue()) {//如果背包内没有双击卡
+                    if (Vitality.handleVitalityExchange("SK20240805004754")) {//就鸡巴兑换
+                        jo = findPropBag(queryPropList(), "ENERGY_DOUBLE_CLICK_31DAYS");
                     } else if (Vitality.handleVitalityExchange("CR20230516000363")) {
-                        jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
+                        jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
                     }
                 }
                 if (jo == null) jo = findPropBag(bagObject, "ENERGY_DOUBLE_CLICK");
@@ -2331,7 +2325,7 @@ public class AntForest extends ModelTask {
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_STEALTH_CARD");
             if (jo == null && stealthCardConstant.getValue()) {
                 if (exchangeStealthCard()) {
-                    jo = findPropBag(getBag(), "LIMIT_TIME_STEALTH_CARD");
+                    jo = findPropBag(queryPropList(), "LIMIT_TIME_STEALTH_CARD");
                 }
             }
             if (jo == null) {
@@ -2358,11 +2352,11 @@ public class AntForest extends ModelTask {
             if (jo == null) {
                 if (youthPrivilege.getValue()) {
                     if (Privilege.youthPrivilege()) {
-                        jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_SHIELD_TREE");
+                        jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_SHIELD_TREE");
                     } // 重新查找
                 } else if (shieldCardConstant.getValue()) {
                     if (exchangeEnergyShield()) {
-                        jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_SHIELD");
+                        jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_SHIELD");
                     }
                 } else {
                     jo = findPropBag(bagObject, "ENERGY_SHIELD"); // 尝试查找 普通保护罩，一般用不到
@@ -2403,11 +2397,11 @@ public class AntForest extends ModelTask {
     }
 
     private void useBubbleBoostCard() {
-        useBubbleBoostCard(getBag());
+        useBubbleBoostCard(queryPropList());
     }
 
     private void userobExpandCard() {
-        userobExpandCard(getBag());
+        userobExpandCard(queryPropList());
     }
 
     private void useBubbleBoostCard(JSONObject bag) {
@@ -2416,7 +2410,7 @@ public class AntForest extends ModelTask {
             JSONObject jo = findPropBag(bag, "LIMIT_TIME_ENERGY_BUBBLE_BOOST");
             if (jo == null) {
                 Privilege.youthPrivilege();
-                jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
+                jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
                 if (jo == null) {
                     jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
                 }
@@ -2449,7 +2443,7 @@ public class AntForest extends ModelTask {
                 return;
             }
             // 背包查找 限时能量雨机会
-            JSONObject jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
+            JSONObject jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
             // 活力值商店兑换
             if (jo == null) {
                 JSONObject skuInfo = Vitality.findSkuInfoBySkuName("能量雨次卡");
@@ -2458,7 +2452,7 @@ public class AntForest extends ModelTask {
                 }
                 String skuId = skuInfo.getString("skuId");
                 if (Status.canVitalityExchangeToday(skuId, 1) && Vitality.VitalityExchange(skuInfo.getString("spuId"), skuId, "限时能量雨机会")) {
-                    jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
+                    jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
                 }
             }
             // 使用 道具
@@ -2486,7 +2480,7 @@ public class AntForest extends ModelTask {
                 }
                 String skuId = skuInfo.getString("skuId");
                 if (Status.canVitalityExchangeToday(skuId, 1) && Vitality.VitalityExchange(skuInfo.getString("spuId"), skuId, "能量炸弹卡")) {
-                    jo = findPropBag(getBag(), "ENERGY_BOMB_CARD");
+                    jo = findPropBag(queryPropList(), "ENERGY_BOMB_CARD");
                 }
             }
             if (jo != null && usePropBag(jo)) {
