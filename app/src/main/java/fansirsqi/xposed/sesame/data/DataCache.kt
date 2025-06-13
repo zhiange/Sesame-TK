@@ -16,6 +16,7 @@ import java.io.File
 object DataCache {
     private const val TAG: String = "DataCache"
     private const val FILENAME = "dataCache.json"
+    private val FILE_PATH = Files.CONFIG_DIR
 
     @get:JsonIgnore
     private var init = false
@@ -155,14 +156,15 @@ object DataCache {
         Log.record(TAG, "save DataCache")
         return Files.write2File(
             JsonUtil.formatJson(this),
-            Files.getTargetFileofDir(Files.MAIN_DIR, FILENAME)
+            Files.getTargetFileofDir(FILE_PATH, FILENAME)
         )
     }
 
     @Synchronized
     fun load() {
-        if (init) return // 避免重复加载
-        val targetFile = Files.getTargetFileofDir(Files.MAIN_DIR, FILENAME)
+        if (init) return
+        val oldFile = Files.getTargetFileofDir(Files.MAIN_DIR, FILENAME)
+        val targetFile = Files.getTargetFileofDir(FILE_PATH, FILENAME)
         try {
             if (targetFile.exists()) {
                 val json = Files.readFromFile(targetFile)
@@ -172,6 +174,10 @@ object DataCache {
                     Log.runtime(TAG, "format $TAG config")
                     Files.write2File(formatted, targetFile)
                 }
+                oldFile.delete()
+            } else if (oldFile.exists()) {
+                Files.copy(oldFile, targetFile)
+                oldFile.delete()
             } else {
                 Log.runtime(TAG, "init $TAG config")
                 JsonUtil.copyMapper().updateValue(this, DataCache)
