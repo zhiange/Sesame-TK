@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.util.Maps;
+package fansirsqi.xposed.sesame.util.maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -247,7 +247,7 @@ public class UserMap {
         try {
             String body = Files.readFromFile(Files.getSelfIdFile(userId));
             if (!body.isEmpty()) {
-                UserEntity.UserDto dto = JsonUtil.parseObject(body, new TypeReference<UserEntity.UserDto>() {
+                UserEntity.UserDto dto = JsonUtil.parseObject(body, new TypeReference<>() {
                 });
                 userMap.put(dto.getUserId(), dto.toEntity());
             }

@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import fansirsqi.xposed.sesame.entity.VitalityStore.ExchangeStatus;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
-import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
+import fansirsqi.xposed.sesame.util.maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.maps.UserMap;
+import fansirsqi.xposed.sesame.util.maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.data.Status;
 /**
@@ -100,6 +100,7 @@ public class Vitality {
             Log.printStackTrace(TAG, th);
         }
     }
+
     /*
      * 兑换活力值商品
      * sku

@@ -32,7 +32,7 @@ import fansirsqi.xposed.sesame.util.FansirsqiUtil.OneWordCallback
 import fansirsqi.xposed.sesame.util.Files
 import fansirsqi.xposed.sesame.util.GlobalThreadPools
 import fansirsqi.xposed.sesame.util.Log
-import fansirsqi.xposed.sesame.util.Maps.UserMap
+import fansirsqi.xposed.sesame.util.maps.UserMap
 import fansirsqi.xposed.sesame.util.PermissionUtil
 import fansirsqi.xposed.sesame.util.ToastUtil
 import java.util.Calendar
