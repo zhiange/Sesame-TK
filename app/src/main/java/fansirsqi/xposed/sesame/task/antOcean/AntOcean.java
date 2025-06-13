@@ -4,8 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -31,17 +29,43 @@ import fansirsqi.xposed.sesame.task.TaskStatus;
 import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
 import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.BeachMap;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.maps.BeachMap;
+import fansirsqi.xposed.sesame.util.maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
+import lombok.Getter;
 
 /**
  * @author Constanline
  * @since 2023/08/01
  */
 public class AntOcean extends ModelTask {
+
+    @Getter
+    public enum ApplyAction {
+        AVAILABLE(0, "可用"),
+        NO_STOCK(1, "无库存");
+
+        private final int code;
+        private final String desc;
+
+        ApplyAction(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+
+        // 根据 Map 或 DB 返回的字符串获取对应枚举
+        public static ApplyAction fromString(String value) {
+            for (ApplyAction action : values()) {
+                if (action.name().equalsIgnoreCase(value)) {
+                    return action;
+                }
+            }
+            throw new IllegalArgumentException("Invalid ApplyAction: " + value);
+        }
+    }
+
     private static final String TAG = AntOcean.class.getSimpleName();
 
 
@@ -96,6 +120,21 @@ public class AntOcean extends ModelTask {
 
     private BooleanModelField PDL_task;
 
+    /**
+     * 保护类型
+     */
+    private static ChoiceModelField userprotectType;
+
+    public interface protectType {
+
+        int DONT_PROTECT = 0;
+        int PROTECT_ALL = 1;
+        int PROTECT_BEACH = 2;
+
+        String[] nickNames = {"不保护", "保护全部", "仅保护沙滩"};
+    }
+
+
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -105,7 +144,7 @@ public class AntOcean extends ModelTask {
         modelFields.addField(cleanOceanList = new SelectModelField("cleanOceanList", "清理 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(exchangeProp = new BooleanModelField("exchangeProp", "神奇海洋 | 制作万能拼图", false));
         modelFields.addField(usePropByType = new BooleanModelField("usePropByType", "神奇海洋 | 使用万能拼图", false));
-        modelFields.addField(protectOcean = new BooleanModelField("protectOcean", "保护 | 开启", false));
+        modelFields.addField(userprotectType = new ChoiceModelField("userprotectType", "保护 | 类型", protectType.DONT_PROTECT, protectType.nickNames));
         modelFields.addField(protectOceanList = new SelectAndCountModelField("protectOceanList", "保护 | 海洋列表", new LinkedHashMap<>(), AlipayBeach::getList));
         modelFields.addField(PDL_task = new BooleanModelField("PDL_task", "潘多拉任务", false));
         return modelFields;
@@ -137,7 +176,7 @@ public class AntOcean extends ModelTask {
                 receiveTaskAward();//日常任务
             }
 
-            if (protectOcean.getValue()) {
+            if (!userprotectType.getValue().equals(protectType.DONT_PROTECT)) {
                 protectOcean();//保护
             }
 
@@ -173,48 +212,46 @@ public class AntOcean extends ModelTask {
         try {
             String response = AntOceanRpcCall.queryCultivationList();
             JSONObject jsonResponse = new JSONObject(response);
-            if ("SUCCESS".equals(jsonResponse.optString("resultCode", ""))) {
-                // 获取 cultivationItemVOList 列表，包含所有养成项目
+            if (ResUtil.checkSuccess(jsonResponse)) {
                 JSONArray cultivationList = jsonResponse.optJSONArray("cultivationItemVOList");
                 if (cultivationList != null) {
                     for (int i = 0; i < cultivationList.length(); i++) {
                         JSONObject item = cultivationList.getJSONObject(i);
-                        // 跳过未定义 templateSubType 字段的项目
-                        if (!item.has("templateSubType")) {
-                            continue;
-                        }
-                        // 检查 templateSubType 是否符合指定类型
                         String templateSubType = item.getString("templateSubType");
-                        if (!"BEACH".equals(templateSubType) && !"COOPERATE_SEA_TREE".equals(templateSubType) && !"SEA_ANIMAL".equals(templateSubType)) {
-                            continue;
-                        }
                         // 检查 applyAction 是否为 AVAILABLE
-                        if (!"AVAILABLE".equals(item.getString("applyAction"))) {
-                            continue;
+                        String actionStr = item.getString("applyAction");
+                        ApplyAction action = ApplyAction.fromString(actionStr);
+                        if (action.equals(ApplyAction.AVAILABLE)) {
+                            String templateCode = item.getString("templateCode");//业务id
+                            String cultivationName = item.getString("cultivationName");
+                            int energy = item.getInt("energy");
+                            switch (userprotectType.getValue()) {
+                                case protectType.PROTECT_ALL:
+                                    IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
+                                    break;
+                                case protectType.PROTECT_BEACH:
+                                    if (!templateSubType.equals("BEACH")) {
+                                        IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
                         }
-                        // 将符合条件的项目添加到 BeachMap
-                        String templateCode = item.getString("templateCode");
-                        String cultivationName = item.getString("cultivationName");
-                        int energy = item.getInt("energy");
-                        IdMapManager.getInstance(BeachMap.class).add(templateCode, cultivationName + "(" + energy + "g)");
                     }
                     Log.runtime(TAG, "初始化沙滩数据成功。");
                 }
                 // 将所有筛选结果保存到 BeachMap
                 IdMapManager.getInstance(BeachMap.class).save();
             } else {
-                // 若 resultCode 不为 SUCCESS，记录错误描述
                 Log.runtime(jsonResponse.optString("resultDesc", "未知错误"));
             }
         } catch (JSONException e) {
-            // 记录 JSON 解析过程中的异常
-            Log.runtime(TAG, "JSON 解析错误：" + e.getMessage());
-            Log.printStackTrace(e);
+            Log.printStackTrace(TAG, "JSON 解析错误：", e);
             IdMapManager.getInstance(BeachMap.class).load(); // 若出现异常则加载保存的 BeachMap 备份
         } catch (Exception e) {
-            // 捕获所有其他异常并记录
-            Log.runtime(TAG, "初始化沙滩任务时出错：" + e.getMessage());
-            Log.printStackTrace(e);
+            Log.printStackTrace(TAG, "初始化沙滩任务时出错", e);
             IdMapManager.getInstance(BeachMap.class).load(); // 加载保存的 BeachMap 备份
         }
     }
@@ -635,7 +672,7 @@ public class AntOcean extends ModelTask {
                     String taskStatus = task.getString("taskStatus");
                     if (TaskStatus.FINISHED.name().equals(taskStatus)) {
                         JSONObject joAward = new JSONObject(AntOceanRpcCall.receiveTaskAward(sceneCode, taskType));
-                        if (ResUtil.checkSuccess( joAward)) {
+                        if (ResUtil.checkSuccess(joAward)) {
                             Log.forest("海洋奖励🌊[" + taskTitle + "]# " + awardCount + "拼图");
                             done = true;
                         } else {
@@ -647,7 +684,7 @@ public class AntOcean extends ModelTask {
                                 answerQuestion();
                             } else {
                                 JSONObject joFinishTask = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
-                                if (ResUtil.checkSuccess( joFinishTask)) {
+                                if (ResUtil.checkSuccess(joFinishTask)) {
                                     Log.forest("海洋任务🧾️完成[" + taskTitle + "]");
                                     done = true;
                                 } else {
@@ -692,16 +729,15 @@ public class AntOcean extends ModelTask {
                 GlobalThreadPools.sleep(500);
                 JSONObject submitJson = new JSONObject(submitResponse);
                 if (submitJson.getInt("resultCode") == 200) {
-                    Log.record(TAG, "🌊海洋答题成功");
+                    Log.forest(TAG, "🌊海洋答题成功");
                 } else {
-                    Log.runtime(TAG, "海洋答题失败：" + submitJson);
+                    Log.error(TAG, "海洋答题失败：" + submitJson);
                 }
             } else {
-                Log.record(TAG, "海洋获取问题失败：" + questionJson);
+                Log.error(TAG, "海洋获取问题失败：" + questionJson);
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "answerQuestion err:");
-            Log.printStackTrace(TAG, t);
+            Log.printStackTrace(TAG, "海洋答题错误", t);
         }
     }
 
@@ -759,16 +795,8 @@ public class AntOcean extends ModelTask {
                 JSONArray ja = jo.getJSONArray("cultivationItemVOList");
                 for (int i = 0; i < ja.length(); i++) {
                     jo = ja.getJSONObject(i);
-                    if (!jo.has("templateSubType")) {
-                        continue;
-                    }
-                    if (!"BEACH".equals(jo.getString("templateSubType"))
-                            && !"COOPERATE_SEA_TREE".equals(jo.getString("templateSubType")) && !"SEA_ANIMAL".equals(jo.getString("templateSubType"))) {
-                        continue;
-                    }
-                    if (!"AVAILABLE".equals(jo.getString("applyAction"))) {
-                        continue;
-                    }
+                    String templateSubType = jo.getString("templateSubType");
+                    String applyAction = jo.getString("applyAction");
                     String cultivationName = jo.getString("cultivationName");
                     String templateCode = jo.getString("templateCode");
                     JSONObject projectConfig = jo.getJSONObject("projectConfigVO");
@@ -810,12 +838,10 @@ public class AntOcean extends ModelTask {
                         jo = awardInfos.getJSONObject(i);
                         award.append(jo.getString("name")).append("*").append(jo.getInt("num"));
                     }
-                    String str = "保护海洋🏖️[" + itemName + "]#第" + appliedTimes + "次" + "-获得奖励" + award;
+                    String str = "保护海洋生态🏖️[" + itemName + "]#第" + appliedTimes + "次" + "-获得奖励" + award;
                     Log.forest(str);
                 } else {
-                    Log.record(jo.getString("resultDesc"));
-                    Log.runtime(jo.toString());
-                    Log.forest("保护海洋🏖️[" + itemName + "]#发生未知错误，停止申请");
+                    Log.error("保护海洋生态🏖️[" + itemName + "]#发生未知错误，停止申请");
                     break;
                 }
                 GlobalThreadPools.sleep(300);
@@ -827,8 +853,7 @@ public class AntOcean extends ModelTask {
                 }
             }
         } catch (Throwable t) {
-            Log.runtime(TAG, "oceanExchangeTree err:");
-            Log.printStackTrace(TAG, t);
+            Log.printStackTrace(TAG, "海洋保护错误:", t);
         }
     }
 
