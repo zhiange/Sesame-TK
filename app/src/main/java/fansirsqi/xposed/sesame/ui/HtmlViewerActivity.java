@@ -203,7 +203,7 @@ public class HtmlViewerActivity extends BaseActivity {
                 String path = uri.getPath();
                 Log.runtime(TAG, "URI path: " + path);
                 if (path != null) {
-                    File exportFile = Files.exportFile(new File(path));
+                    File exportFile = Files.exportFile(new File(path),true);
                     if (exportFile != null && exportFile.exists()) {
                         ToastUtil.showToast(getString(R.string.file_exported) + exportFile.getPath());
                     } else {

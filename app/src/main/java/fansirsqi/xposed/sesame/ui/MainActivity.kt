@@ -317,7 +317,7 @@ class MainActivity : BaseActivity() {
             }
 
             5 -> {
-                val statisticsFile = Files.exportFile(Files.getStatisticsFile())
+                val statisticsFile = Files.exportFile(Files.getStatisticsFile(), false)
                 if (statisticsFile != null) {
                     ToastUtil.makeText(
                         this,
@@ -327,7 +327,7 @@ class MainActivity : BaseActivity() {
                 }
             }
 
-            6 -> if (Files.copyTo(Files.getExportedStatisticsFile(), Files.getStatisticsFile())) {
+            6 -> if (Files.copy(Files.getExportedStatisticsFile(), Files.getStatisticsFile())) {
                 tvStatistics.text = Statistics.getText()
                 ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show()
             }
