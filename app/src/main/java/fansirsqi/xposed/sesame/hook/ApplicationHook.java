@@ -27,13 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,12 +57,10 @@ import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.task.BaseTask;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
 import fansirsqi.xposed.sesame.util.AssetUtil;
 import fansirsqi.xposed.sesame.util.Detector;
-import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
@@ -107,10 +99,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     private static RpcVersion rpcVersion;
     private static PowerManager.WakeLock wakeLock;
     private static PendingIntent alarm0Pi;
-    private static XC_MethodHook.Unhook rpcRequestUnhook;
-    private static XC_MethodHook.Unhook rpcResponseUnhook;
-    private final ExecutorService MAIN_THREAD_POOL = GlobalThreadPools.getGeneralPurposeExecutor();
-
     public static void setOffline(boolean offline) {
         ApplicationHook.offline = offline;
     }
@@ -128,62 +116,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         dayCalendar.set(Calendar.SECOND, 0);
     }
 
-    /**
-     * 执行检查方法
-     *
-     * @return true表示检查失败，false表示检查成功
-     */
-    private boolean executeCheckTask(long lastExecTime) {
-        FutureTask<Boolean> checkTask = new FutureTask<>(AntMemberRpcCall::check);
-        MAIN_THREAD_POOL.submit(checkTask); // Submit the task
-
-        try {
-            boolean taskResult = checkTask.get(10, TimeUnit.SECONDS);
-            if (!taskResult) {
-                Log.record(TAG, "执行失败：检查逻辑返回false");
-                long waitTime = 10000 - System.currentTimeMillis() + lastExecTime;
-                if (waitTime > 0) {
-                    try {
-                        Thread.sleep(waitTime);
-                    } catch (InterruptedException ie) {
-                        Log.record(TAG, "执行失败：在额外等待期间被中断");
-                        Thread.currentThread().interrupt(); // Preserve interrupt status
-                        return true; // Treat as failure
-                    }
-                }
-                return true; // Failure because check() returned false
-            }
-            reLoginCount.set(0);
-            return false; // Success
-
-        } catch (InterruptedException e) {
-            Log.record(TAG, "执行失败：等待检查结果时被中断");
-            Thread.currentThread().interrupt(); // Preserve interrupt status
-            checkTask.cancel(true); // Attempt to cancel the underlying task as well
-            return true; // Treat as failure
-        } catch (TimeoutException e) {
-            Log.record(TAG, "执行失败：检查操作超时 (10秒)");
-            checkTask.cancel(true); // Attempt to cancel the underlying task
-            return true; // Treat as failure
-        } catch (ExecutionException e) {
-            Log.record(TAG, "执行失败：检查操作内部抛出异常");
-            Throwable cause = e.getCause();
-            Log.printStackTrace(TAG, cause != null ? cause : e);
-            if (cause instanceof InterruptedException) {
-                // If the wrapped exception was InterruptedException, ensure current thread is interrupted
-                Thread.currentThread().interrupt();
-            }
-            return true; // Treat as failure
-        } catch (
-                Exception e) { // Catch-all for other unexpected errors, e.g. submitting task or CancellationException
-            Log.record(TAG, "执行失败：处理检查任务时发生未知错误");
-            Log.printStackTrace(TAG, e);
-            if (e instanceof CancellationException) {
-                Log.record(TAG, "执行失败：检查任务已被取消");
-            }
-            return true; // Treat as failure
-        }
-    }
 
     /**
      * 调度定时执行
@@ -668,20 +600,6 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     RpcIntervalLimit.clearIntervalLimit();
                     Config.unload();
                     UserMap.unload();
-                }
-                if (rpcResponseUnhook != null) {
-                    try {
-                        rpcResponseUnhook.unhook();
-                    } catch (Exception e) {
-                        Log.printStackTrace(e);
-                    }
-                }
-                if (rpcRequestUnhook != null) {
-                    try {
-                        rpcRequestUnhook.unhook();
-                    } catch (Exception e) {
-                        Log.printStackTrace(e);
-                    }
                 }
                 if (wakeLock != null) {
                     wakeLock.release();
