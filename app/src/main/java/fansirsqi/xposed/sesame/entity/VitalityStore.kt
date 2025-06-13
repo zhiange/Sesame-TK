@@ -1,59 +1,55 @@
-package fansirsqi.xposed.sesame.entity;
+package fansirsqi.xposed.sesame.entity
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
-import lombok.Getter;
+import fansirsqi.xposed.sesame.util.maps.IdMapManager
+import fansirsqi.xposed.sesame.util.maps.VitalityRewardsMap
+import lombok.Getter
 
 /**
  * @author Byseven
  * @date 2025/1/20
  * @apiNote
  */
-public class VitalityStore extends MapperEntity {
-    private static Map<String, String> idNameMap;
-    public VitalityStore(String i, String n) {
-        this.id = i;
-        this.name = n;
-    }
-    public static List<VitalityStore> getList() {
-        List<VitalityStore> list = new ArrayList<>();
-        Map<String, String> idSet = IdMapManager.getInstance(VitalityRewardsMap.class).getMap();
-        for (Map.Entry<String, String> entry : idSet.entrySet()) {
-            list.add(new VitalityStore(entry.getKey(), entry.getValue()));
-        }
-        return list;
-    }
-
-    public static String getNameById(String id) {
-        if (idNameMap == null) {
-            idNameMap = new HashMap<>();
-            for (VitalityStore store : getList()) {
-                idNameMap.put(store.id, store.name);
-            }
-        }
-        // 直接 get，若 key 不存在会返回 null
-        return idNameMap.get(id);
+class VitalityStore(i: String, n: String) : MapperEntity() {
+    init {
+        this.id = i
+        this.name = n
     }
 
     @Getter
-    public enum ExchangeStatus {
+    enum class ExchangeStatus(val nickName: String) {
         NO_ENOUGH_POINT("活力值不足"),
         NO_ENOUGH_STOCK("库存量不足"),
         REACH_LIMIT("兑换达上限"),
         SECKILL_NOT_BEGIN("秒杀未开始"),
         SECKILL_HAS_END("秒杀已结束"),
         HAS_NEVER_EXPIRE_DRESS("不限时皮肤");
+    }
 
-        private final String nickName;
+    companion object {
+        private var idNameMap: MutableMap<String?, String?>? = null
 
-        ExchangeStatus(String nickName) {
-            this.nickName = nickName;
+        @JvmStatic
+        val list: MutableList<VitalityStore>
+            get() {
+                val list: MutableList<VitalityStore> = ArrayList()
+                val instance = IdMapManager.getInstance<VitalityRewardsMap>(VitalityRewardsMap::class.java)
+                val entries = instance?.map?.entries ?: emptySet()
+
+                for (entry in entries) {
+                    list.add(VitalityStore(entry.key!!, entry.value!!))
+                }
+                return list
+            }
+
+        @JvmStatic
+        fun getNameById(id: String?): String? {
+            if (idNameMap == null) {
+                idNameMap = HashMap()
+                for (store in list) {
+                    idNameMap!!.put(store.id, store.name)
+                }
+            }
+            return idNameMap!![id]
         }
-
     }
 }
