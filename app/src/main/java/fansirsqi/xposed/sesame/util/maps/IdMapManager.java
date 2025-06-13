@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.util.Maps;
+package fansirsqi.xposed.sesame.util.maps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +18,8 @@ import fansirsqi.xposed.sesame.util.Log;
  */
 public abstract class IdMapManager {
     private static final String TAG = IdMapManager.class.getSimpleName();
+
+    private static final File CONFIG_DIR = Files.CONFIG_DIR; // 配置目录
     /**
      * 存储ID映射的并发HashMap。
      */
@@ -115,7 +117,7 @@ public abstract class IdMapManager {
     public synchronized void load() {
         idMap.clear();
         try {
-            File file = Files.getTargetFileofDir(Files.MAIN_DIR, thisFileName());
+            File file = Files.getTargetFileofDir(CONFIG_DIR, thisFileName());
             String body = Files.readFromFile(file);
             if (!body.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -151,7 +153,7 @@ public abstract class IdMapManager {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = JsonUtil.formatJson(idMap);
 //            String json = objectMapper.writeValueAsString(idMap);
-            File file = Files.getTargetFileofDir(Files.MAIN_DIR, thisFileName());
+            File file = Files.getTargetFileofDir(CONFIG_DIR, thisFileName());
             return Files.write2File(json, file);
         } catch (Exception e) {
             Log.printStackTrace(e);
