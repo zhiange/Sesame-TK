@@ -8,19 +8,7 @@ import java.util.regex.Pattern;
 public class ResChecker {
     private static final String TAG = ResChecker.class.getSimpleName();
 
-    /**
-     * 检查JSON对象是否表示成功
-     * <p>
-     * 成功条件包括：<br/>
-     * - success == true<br/>
-     * - isSuccess == true<br/>
-     * - resultCode == 200 或 "SUCCESS" 或 "100"<br/>
-     * - memo == "SUCCESS"<br/>
-     *
-     * @param jo JSON对象
-     * @return true 如果成功
-     */
-    public static boolean checkRes(JSONObject jo) {
+    private static boolean core(String TAG, JSONObject jo) {
         try {
             // 检查 success 或 isSuccess 字段为 true
             if (jo.optBoolean("success") || jo.optBoolean("isSuccess")) {
@@ -52,11 +40,71 @@ public class ResChecker {
         }
     }
 
+    /**
+     * 检查JSON对象是否表示成功
+     * <p>
+     * 成功条件包括：<br/>
+     * - success == true<br/>
+     * - isSuccess == true<br/>
+     * - resultCode == 200 或 "SUCCESS" 或 "100"<br/>
+     * - memo == "SUCCESS"<br/>
+     *
+     * @param jo JSON对象
+     * @return true 如果成功
+     */
+    public static boolean checkRes(JSONObject jo) {
+        return core(TAG, jo);
+    }
+
+    /**
+     * 检查JSON对象是否表示成功
+     * <p>
+     * 成功条件包括：<br/>
+     * - success == true<br/>
+     * - isSuccess == true<br/>
+     * - resultCode == 200 或 "SUCCESS" 或 "100"<br/>
+     * - memo == "SUCCESS"<br/>
+     *
+     * @param jo JSON对象
+     * @return true 如果成功
+     */
+    public static boolean checkRes(String TAG, JSONObject jo) {
+        return core(TAG, jo);
+    }
+
+    /**
+     * 检查JSON对象是否表示成功
+     * <p>
+     * 成功条件包括：<br/>
+     * - success == true<br/>
+     * - isSuccess == true<br/>
+     * - resultCode == 200 或 "SUCCESS" 或 "100"<br/>
+     * - memo == "SUCCESS"<br/>
+     *
+     * @param jsonStr JSON对象的字符串表示
+     * @return true 如果成功
+     */
     public static boolean checkRes(String jsonStr) throws JSONException {
         JSONObject jo = new JSONObject(jsonStr);
         return checkRes(jo);
     }
 
+    /**
+     * 检查JSON对象是否表示成功
+     * <p>
+     * 成功条件包括：<br/>
+     * - success == true<br/>
+     * - isSuccess == true<br/>
+     * - resultCode == 200 或 "SUCCESS" 或 "100"<br/>
+     * - memo == "SUCCESS"<br/>
+     *
+     * @param jsonStr JSON对象的字符串表示
+     * @return true 如果成功
+     */
+    public static boolean checkRes(String TAG, String jsonStr) throws JSONException {
+        JSONObject jo = new JSONObject(jsonStr);
+        return checkRes(TAG, jo);
+    }
 
 
 }

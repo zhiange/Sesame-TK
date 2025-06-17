@@ -723,7 +723,7 @@ public class AntStall extends ModelTask {
             }
             Set<String> friendSet = assistFriendList.getValue();
             for (String uid : friendSet) {
-                String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandom(5) + "ANUTSALTML_2PA_SHARE").getBytes(), Base64.NO_WRAP);
+                String shareId = Base64.encodeToString((uid + "-" + RandomUtil.getRandomInt(5) + "ANUTSALTML_2PA_SHARE").getBytes(), Base64.NO_WRAP);
                 String str = AntStallRpcCall.achieveBeShareP2P(shareId);
                 JSONObject jsonObject = new JSONObject(str);
                 GlobalThreadPools.sleep(5000);
