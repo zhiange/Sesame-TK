@@ -474,7 +474,7 @@ public class AntFarm extends ModelTask {
 
             JSONObject jo = new JSONObject(AntFarmRpcCall.getMallHome());
 
-            if (ResUtil.checkSuccess(jo)) {
+            if (!ResUtil.checkSuccess(jo)) {
                 Log.error(TAG, "小鸡乐园币💸[未获取到可兑换权益]");
                 return;
             }
