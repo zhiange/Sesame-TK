@@ -1525,9 +1525,10 @@ public class AntFarm extends ModelTask {
                     JSONArray jaAnimals = subFarmVOjo.getJSONArray("animals");
                     for (int j = 0; j < jaAnimals.length(); j++) {
                         JSONObject animalsjo = jaAnimals.getJSONObject(j);
+
                         String masterFarmId = animalsjo.getString("masterFarmId");
                         if (masterFarmId.equals(friendFarmId)) { //遍历到的鸡 如果在自己的庄园
-                            JSONObject animalStatusVO = jo.getJSONObject("animalStatusVO");
+                            JSONObject animalStatusVO = animalsjo.getJSONObject("animalStatusVO");
                             String animalInteractStatus = animalStatusVO.getString("animalInteractStatus");//动物互动状态
                             String animalFeedStatus = animalStatusVO.getString("animalFeedStatus");//动物饲料状态
                             if (AnimalInteractStatus.HOME.name().equals(animalInteractStatus) && AnimalFeedStatus.HUNGRY.name().equals(animalFeedStatus)) { //状态是饥饿 并且在庄园
@@ -2468,7 +2469,7 @@ public class AntFarm extends ModelTask {
                         if (getFeedSet.contains(userId)) {
                             jo = new JSONObject(AntFarmRpcCall.giftOfFeed(bizTraceId, userId));
                             if (jo.optBoolean("success")) {
-                                Log.record(TAG, "一起拿小鸡饲料🥡 [送饲料：" + UserMap.getMaskName(userId) + "]");
+                                Log.farm("一起拿小鸡饲料🥡 [送饲料：" + UserMap.getMaskName(userId) + "]");
                                 invitesToSend--; // 每成功发送一次邀请，减少一次邀请次数
                             } else {
                                 Log.record(TAG, "邀请失败：" + jo);
@@ -2483,7 +2484,7 @@ public class AntFarm extends ModelTask {
                         String userId = userIdList.get(randomIndex);
                         jo = new JSONObject(AntFarmRpcCall.giftOfFeed(bizTraceId, userId));
                         if (jo.optBoolean("success")) {
-                            Log.record(TAG, "一起拿小鸡饲料🥡 [送饲料：" + UserMap.getMaskName(userId) + "]");
+                            Log.farm( "一起拿小鸡饲料🥡 [送饲料：" + UserMap.getMaskName(userId) + "]");
                         } else {
                             Log.record(TAG, "邀请失败：" + jo);
                             break;
