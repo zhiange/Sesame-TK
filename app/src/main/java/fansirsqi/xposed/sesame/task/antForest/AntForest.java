@@ -1676,7 +1676,8 @@ public class AntForest extends ModelTask {
         try {
             // 修复：使用new HashSet包装从缓存获取的数据，兼容List/Set类型
             Set<String> taskList = new HashSet<>(List.of("TEST_LEAF_TASK", "ENERGYRAIN", "FOREST_CONTINUOUS_COLLECT_ENERGY_7", "SHARETASK", "GYG_jinritoutiao_202505", "mokuai_senlin_hlz", "DAOLIU_SLLXX_GAME_2025"));
-            taskList = DataCache.INSTANCE.getSet("forestTaskList", taskList);
+            Set<String> cachedSet = DataCache.INSTANCE.getSet("forestTaskList", taskList);
+            taskList = new HashSet<>(cachedSet); // ✅ 关键：确保是可变集合
             while (true) {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
