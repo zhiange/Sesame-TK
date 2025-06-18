@@ -47,11 +47,11 @@ object DataCache {
      * 安全获取 Set<String> 类型的缓存值，自动处理 List
      * @/Set 类型兼容问题
      */
-    fun getSet(key: String, defaultValue: Set<String> = emptySet()): Set<String> {
+    fun getSet(key: String, defaultValue: Set<String> = emptySet()): MutableSet<String> {
         val value = dataMap[key]
         return when (value) {
-            is Set<*> -> value.mapNotNull { it as? String }.toSet()
-            is List<*> -> value.mapNotNull { it as? String }.toSet()
+            is Set<*> -> value.mapNotNull { it as? String }.toMutableSet()
+            is List<*> -> value.mapNotNull { it as? String }.toMutableSet()
             else -> defaultValue.toMutableSet()
         }
     }
