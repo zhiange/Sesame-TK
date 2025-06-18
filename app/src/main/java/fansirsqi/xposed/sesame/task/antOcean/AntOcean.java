@@ -656,7 +656,9 @@ public class AntOcean extends ModelTask {
 
     private static void receiveTaskAward() {
         try {
-            Set<String> taskList = DataCache.INSTANCE.getSet("oceanTaskList", new HashSet<>(List.of("DEMO", "DEMO1")));
+            Set<String> taskList = new HashSet<>(List.of("DEMO", "DEMO1"));
+            Set<String> cachedSet = DataCache.INSTANCE.getSet("oceanTaskList",taskList );
+            taskList = new HashSet<>(cachedSet); // ✅ 关键：确保是可变集合
             while (true) {
                 boolean done = false;
                 String s = AntOceanRpcCall.queryTaskList();
