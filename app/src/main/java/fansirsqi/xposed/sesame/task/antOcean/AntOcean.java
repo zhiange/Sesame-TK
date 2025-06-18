@@ -240,7 +240,6 @@ public class AntOcean extends ModelTask {
                                 default:
                                     break;
                             }
-
                         }
                     }
                     Log.runtime(TAG, "初始化沙滩数据成功。");
@@ -269,6 +268,7 @@ public class AntOcean extends ModelTask {
                     Log.record("请先开启神奇海洋，并完成引导教程");
                     return false;
                 }
+                initBeach();
                 return true;
             }
         } catch (Throwable t) {
