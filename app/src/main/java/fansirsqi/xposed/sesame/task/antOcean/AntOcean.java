@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -656,9 +657,9 @@ public class AntOcean extends ModelTask {
 
     private static void receiveTaskAward() {
         try {
-            Set<String> taskList = new HashSet<>(List.of("DEMO", "DEMO1"));
-            Set<String> cachedSet = DataCache.INSTANCE.getSet("oceanTaskList",taskList );
-            taskList = new HashSet<>(cachedSet); // ✅ 关键：确保是可变集合
+            List<String> taskList = new ArrayList<>(List.of("DEMO", "DEMO1"));
+            List<String> cachedSet = DataCache.INSTANCE.getData("oceanTaskList", taskList);
+            taskList = new ArrayList<>(new LinkedHashSet<>(cachedSet)); // ✅ 关键：确保是可变集合
             while (true) {
                 boolean done = false;
                 String s = AntOceanRpcCall.queryTaskList();
@@ -704,7 +705,7 @@ public class AntOcean extends ModelTask {
 
                 }
                 if (!done) break;
-                DataCache.INSTANCE.saveSet("oceanTaskList", taskList);
+                DataCache.INSTANCE.saveData("oceanTaskList", taskList);
                 Log.runtime("海洋任务列表已保存");
             }
         } catch (JSONException e) {
