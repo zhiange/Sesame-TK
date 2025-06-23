@@ -1684,15 +1684,15 @@ public class AntForest extends ModelTask {
     private void receiveTaskAward() {
         try {
             // 修复：使用new HashSet包装从缓存获取的数据，兼容List/Set类型
-            Set<String> taskList = new HashSet<>(List.of(
+            List<String> taskList = new ArrayList<>(List.of(
                     "ENERGYRAIN", //能量雨
                     "ENERGY_XUANJIAO", //践行绿色行为
                     "FOREST_TOTAL_COLLECT_ENERGY_3",//累积3天收自己能量
                     "TEST_LEAF_TASK",//逛农场得落叶肥料
                     "SHARETASK"//邀请好友助力
             ));
-            Set<String> cachedSet = DataCache.INSTANCE.getSet("forestTaskList", taskList);
-            taskList = new HashSet<>(cachedSet); // ✅ 关键：确保是可变集合
+            List<String> cachedSet = DataCache.INSTANCE.getData("forestTaskList", taskList);
+            taskList = new ArrayList<>(new LinkedHashSet<>(cachedSet)); // ✅ 关键：确保是可变集合
             while (true) {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
@@ -1754,7 +1754,7 @@ public class AntForest extends ModelTask {
                     }
                 }
                 if (!doubleCheck) break;
-                DataCache.INSTANCE.saveSet("forestTaskList", taskList);
+                DataCache.INSTANCE.saveData("forestTaskList", taskList);
             }
         } catch (JSONException e) {
             Log.error(TAG, "JSON解析错误: " + e.getMessage());
