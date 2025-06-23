@@ -339,7 +339,7 @@ public class AntFarmRpcCall {
 
 
     /**
-     * 小鸡厨房 - 做美食
+     * 小鸡厨房 - 进厨房
      *
      * @param userId 用户id
      * @return 返回结果
@@ -358,7 +358,7 @@ public class AntFarmRpcCall {
 
     public static String collectDailyFoodMaterial(int dailyFoodMaterialAmount) {
         return RequestManager.requestString("com.alipay.antfarm.collectDailyFoodMaterial",
-                "[{\"collectDailyFoodMaterialAmount\":" + dailyFoodMaterialAmount + ",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"version\":\"unknown\"}]");
+                "[{\"collectDailyFoodMaterialAmount\":" + dailyFoodMaterialAmount + ",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"VILLA\",\"version\":\"unknown\"}]");
     }
 
     public static String queryFoodMaterialPack() {
@@ -377,10 +377,22 @@ public class AntFarmRpcCall {
                 "[{\"collect\":true,\"requestType\":\"RPC\",\"sceneCode\":\"ORCHARD\",\"source\":\"VILLA\",\"version\":\"unknown\"}]");
     }
 
-    public static String cook(String userId) {
-        return RequestManager.requestString("com.alipay.antfarm.cook",
-                "[{\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"userId\":\""
-                        + userId + "\",\"version\":\"unknown\"}]");
+    /**
+     * 小鸡厨房 - 做菜
+     * @param userId
+     * @param source
+     * @return
+     * @throws JSONException
+     */
+    public static String cook(String userId, String source) throws JSONException {
+        JSONObject args = new JSONObject();
+        args.put("requestType", "RPC");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", source);
+        args.put("userId", userId);
+        args.put("version", "unknown");
+        String params = "[" + args + "]";
+        return RequestManager.requestString("com.alipay.antfarm.cook", params);
     }
 
     public static String useFarmFood(String cookbookId, String cuisineId) {
