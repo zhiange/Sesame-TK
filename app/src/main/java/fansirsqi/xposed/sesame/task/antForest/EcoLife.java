@@ -3,6 +3,8 @@ package fansirsqi.xposed.sesame.task.antForest;
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOpen;
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOption;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -157,6 +159,10 @@ public class EcoLife {
             if (Status.hasFlagToday("EcoLife::photoGuangPan")) return;
 
             String source = "renwuGD"; // 任务来源标识
+
+            TypeReference<List<Map<String, String>>> typeRef = new TypeReference<>() {};
+            List<Map<String, String>> allPhotos = DataCache.INSTANCE.getDataWithType("guangPanPhoto", typeRef, new ArrayList<>());
+            Log.runtime(TAG + " [DEBUG] guangPanPhoto 数据内容: " + allPhotos);
             // 查询今日任务状态
             String str = AntForestRpcCall.ecolifeQueryDish(source, dayPoint);
             JSONObject jo = new JSONObject(str);
@@ -182,28 +188,26 @@ public class EcoLife {
                     if (afterMatcher.find()) {
                         photo.put("after", afterMatcher.group(1));
                     }
-                    List<Map<String, String>> guangPanPhotos = DataCache.INSTANCE.getData("guangPanPhoto", new ArrayList<>());
-                    if (guangPanPhotos == null) {
-                        guangPanPhotos = new ArrayList<>();
+                    if (allPhotos == null) {
+                        allPhotos = new ArrayList<>();
                     }
                     // 避免重复添加相同的照片信息
                     boolean exists = false;
-                    for (Map<String, String> p : guangPanPhotos) {
+                    for (Map<String, String> p : allPhotos) {
                         if (Objects.equals(p.get("before"), photo.get("before")) && Objects.equals(p.get("after"), photo.get("after"))) {
                             exists = true;
                             break;
                         }
                     }
                     if (!exists) {
-                        guangPanPhotos.add(photo);
-                        DataCache.INSTANCE.saveData("guangPanPhoto", guangPanPhotos);
+                        allPhotos.add(photo);
+                        DataCache.INSTANCE.saveData("guangPanPhoto", allPhotos);
                     }
                 }
             }
             if ("SUCCESS".equals(JsonUtil.getValueByPath(jo, "data.status"))) {
                 return;
             }
-            List<Map<String, String>> allPhotos = DataCache.INSTANCE.getData("guangPanPhoto", new ArrayList<>());
             if (allPhotos == null || allPhotos.isEmpty()) {
                 Log.forest("光盘行动🍛缓存中没有照片数据");
                 photo = null;
