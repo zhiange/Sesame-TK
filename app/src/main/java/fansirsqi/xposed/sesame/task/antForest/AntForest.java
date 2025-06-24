@@ -423,11 +423,11 @@ public class AntForest extends ModelTask {
                 }
                 //青春特权森林道具领取
                 if (youthPrivilege.getValue()) {
-                    Privilege.youthPrivilege();
+                    Privilege.INSTANCE.youthPrivilege();
                 }
                 //青春特权每日签到红包
                 if (dailyCheckIn.getValue()) {
-                    Privilege.studentSignInRedEnvelope();
+                    Privilege.INSTANCE.studentSignInRedEnvelope();
                 }
                 if (forestChouChouLe.getValue()) {
                     ForestChouChouLe chouChouLe = new ForestChouChouLe();
@@ -701,7 +701,7 @@ public class AntForest extends ModelTask {
                     try {
                         String response = AntForestRpcCall.queryFriendHomePage(uid);
                         JSONObject jo = new JSONObject(response);
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             String bizNo = jo.getString("bizNo");
                             KVMap<Integer, Boolean> waterCountKVNode = returnFriendWater(uid, bizNo, waterCount, waterFriendCount.getValue());
                             int actualWaterCount = waterCountKVNode.getKey();
@@ -1497,7 +1497,7 @@ public class AntForest extends ModelTask {
                                 String propId = userUsingProp.getString("propId");
                                 String propType = userUsingProp.getString("propType");
                                 JSONObject jo = new JSONObject(AntForestRpcCall.collectRobExpandEnergy(propId, propType));
-                                if (ResChecker.checkRes(TAG,jo)) {
+                                if (ResChecker.checkRes(TAG, jo)) {
                                     int collectEnergy = jo.optInt("collectEnergy");
                                     Log.forest("额外能量🌳[" + collectEnergy + "g][1.1倍能量卡]");
                                 }
@@ -1697,7 +1697,7 @@ public class AntForest extends ModelTask {
                 boolean doubleCheck = false; // 标记是否需要再次检查任务
                 String s = AntForestRpcCall.queryTaskList(); // 查询任务列表
                 JSONObject jo = new JSONObject(s); // 解析响应为 JSON 对象
-                if (!ResChecker.checkRes(TAG,jo)) {
+                if (!ResChecker.checkRes(TAG, jo)) {
                     Log.record(jo.getString("resultDesc")); // 记录失败描述
                     Log.runtime(s); // 打印响应内容
                     break;
@@ -1898,7 +1898,7 @@ public class AntForest extends ModelTask {
                 JSONObject jo = new JSONObject(AntForestRpcCall.queryUserPatrol());
                 GlobalThreadPools.sleep(waitTime);
                 // 如果查询成功
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     // 查询我的巡护记录
                     JSONObject resData = new JSONObject(AntForestRpcCall.queryMyPatrolRecord());
                     GlobalThreadPools.sleep(waitTime);
@@ -1942,7 +1942,7 @@ public class AntForest extends ModelTask {
                         } else if (leftStep >= 2000 && usedStep < 10000) {// 如果没有剩余的巡护次数但步数足够，则兑换巡护次数
                             jo = new JSONObject(AntForestRpcCall.exchangePatrolChance(leftStep));
                             GlobalThreadPools.sleep(waitTime);
-                            if (ResChecker.checkRes(TAG,jo)) {// 兑换成功，增加巡护次数
+                            if (ResChecker.checkRes(TAG, jo)) {// 兑换成功，增加巡护次数
                                 int addedChance = jo.optInt("addedChance", 0);
                                 Log.forest("步数兑换⚖️[巡护次数*" + addedChance + "]");
                                 continue; // 跳过当前循环
@@ -1987,7 +1987,7 @@ public class AntForest extends ModelTask {
                     Log.printStackTrace(TAG, e);
                     return; // 解析失败，退出循环
                 }
-                if (!ResChecker.checkRes(TAG,jo)) {
+                if (!ResChecker.checkRes(TAG, jo)) {
                     Log.runtime(TAG, jo.getString("resultDesc"));
                     break;
                 }
@@ -2032,7 +2032,7 @@ public class AntForest extends ModelTask {
         try {
             // 查询动物属性列表
             JSONObject jo = new JSONObject(AntForestRpcCall.queryAnimalPropList());
-            if (!ResChecker.checkRes(TAG,jo)) {
+            if (!ResChecker.checkRes(TAG, jo)) {
                 Log.runtime(TAG, jo.getString("resultDesc"));
                 return;
             }
@@ -2067,7 +2067,7 @@ public class AntForest extends ModelTask {
             String name = animalProp.getJSONObject("partner").getString("name");
             // 调用API进行伙伴派遣
             JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(propGroup, propType, false));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 Log.forest("巡护派遣🐆[" + name + "]");
             } else {
                 Log.runtime(TAG, jo.getString("resultDesc"));
@@ -2263,7 +2263,7 @@ public class AntForest extends ModelTask {
         }
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.consumeProp(propJsonObj.getJSONArray("propIdList").getString(0), propJsonObj.getString("propType")));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 String propName = propJsonObj.getJSONObject("propConfigVO").getString("propName");
                 String tag = propEmoji(propName);
                 Log.forest("使用道具" + tag + "[" + propName + "]");
@@ -2367,7 +2367,7 @@ public class AntForest extends ModelTask {
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE");
             if (jo == null) {
                 if (youthPrivilege.getValue()) {
-                    if (Privilege.youthPrivilege()) {
+                    if (Privilege.INSTANCE.youthPrivilege()) {
                         jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_SHIELD_TREE");
                     } // 重新查找
                 } else if (shieldCardConstant.getValue()) {
@@ -2425,7 +2425,7 @@ public class AntForest extends ModelTask {
             // 在背包中查询限时加速器
             JSONObject jo = findPropBag(bag, "LIMIT_TIME_ENERGY_BUBBLE_BOOST");
             if (jo == null) {
-                Privilege.youthPrivilege();
+                Privilege.INSTANCE.youthPrivilege();
                 jo = findPropBag(queryPropList(), "LIMIT_TIME_ENERGY_BUBBLE_BOOST"); // 重新查找
                 if (jo == null) {
                     jo = findPropBag(bag, "BUBBLE_BOOST"); // 尝试查找 普通加速器，一般用不到
