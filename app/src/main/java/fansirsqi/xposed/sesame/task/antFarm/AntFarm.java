@@ -1064,25 +1064,23 @@ public class AntFarm extends ModelTask {
         try {
             String today = TimeUtil.getDateStr2();
             String tomorrow = TimeUtil.getDateStr2(1);
-            // 获取缓存中的题目答案映射
             Map<String, String> farmAnswerCache = DataCache.INSTANCE.getData(FARM_ANSWER_CACHE_KEY, new HashMap<>());
             cleanOldAnswers(farmAnswerCache, today);
+
             // 检查是否今天已经答过题
             if (Status.hasFlagToday(ANSWERED_FLAG)) {
-                // 如果今天已经答过题，检查是否已经缓存了明日答案
                 if (!Status.hasFlagToday(CACHED_FLAG)) {
-                    // 未缓存明日答案，调用 home 接口解析并缓存
                     JSONObject jo = new JSONObject(DadaDailyRpcCall.home(activityId));
                     if (ResChecker.checkRes(TAG, jo)) {
                         JSONArray operationConfigList = jo.getJSONArray("operationConfigList");
                         updateTomorrowAnswerCache(operationConfigList, tomorrow);
-                        Status.setFlagToday(CACHED_FLAG); // 标记为已缓存
+                        Status.setFlagToday(CACHED_FLAG);
                     }
                 }
                 return;
             }
 
-            // 今日尚未答题，开始答题流程
+            // 获取题目信息
             JSONObject jo = new JSONObject(DadaDailyRpcCall.home(activityId));
             if (!ResChecker.checkRes(TAG, jo)) return;
 
@@ -1091,25 +1089,49 @@ public class AntFarm extends ModelTask {
             JSONArray labels = question.getJSONArray("label");
             String title = question.getString("title");
 
-
             String answer = null;
-            boolean existsResult = false;
-            String cacheKey = title + "|" + today; // 使用 today ，因为答题发生在当天
+            boolean cacheHit = false;
+            String cacheKey = title + "|" + today;
+
+            // 改进的缓存匹配逻辑
             if (farmAnswerCache != null && farmAnswerCache.containsKey(cacheKey)) {
-                answer = farmAnswerCache.get(cacheKey);
-                Log.farm("🎉 答案[" + answer + "]命中缓存题目：" + cacheKey);
-                if (answer != null && labels.toString().contains(answer)) {
-                    existsResult = true;
+                String cachedAnswer = farmAnswerCache.get(cacheKey);
+                Log.farm("🎉 缓存[" + cachedAnswer + "] 🎯 题目：" + cacheKey);
+
+                // 1. 首先尝试精确匹配
+                for (int i = 0; i < labels.length(); i++) {
+                    String option = labels.getString(i);
+                    if (option.equals(cachedAnswer)) {
+                        answer = option;
+                        cacheHit = true;
+                        break;
+                    }
                 }
+
+                // 2. 如果精确匹配失败，尝试模糊匹配
+                if (!cacheHit) {
+                    for (int i = 0; i < labels.length(); i++) {
+                        String option = labels.getString(i);
+                        if (option.contains(cachedAnswer) || cachedAnswer.contains(option)) {
+                            answer = option;
+                            cacheHit = true;
+                            Log.farm("⚠️ 缓存模糊匹配成功：" + cachedAnswer + " → " + option);
+                            break;
+                        }
+                    }
+                }
+
             }
-            // 缓存未命中时调用 AI 获取答案
-            if (!existsResult) {
-                Log.farm("缓存未命中，尝试使用AI答题：" + title);
+
+            // 缓存未命中时调用AI
+            if (!cacheHit) {
+                Log.record(TAG, "缓存未命中，尝试使用AI答题：" + title);
                 answer = AnswerAI.getAnswer(title, JsonUtil.jsonArrayToList(labels), "farm");
                 if (answer == null || answer.isEmpty()) {
-                    answer = labels.getString(0);
+                    answer = labels.getString(0); // 默认选择第一个选项
                 }
             }
+
             // 提交答案
             JSONObject joDailySubmit = new JSONObject(DadaDailyRpcCall.submit(activityId, answer, questionId));
             Status.setFlagToday(ANSWERED_FLAG);
@@ -1117,10 +1139,9 @@ public class AntFarm extends ModelTask {
                 JSONObject extInfo = joDailySubmit.getJSONObject("extInfo");
                 boolean correct = joDailySubmit.getBoolean("correct");
                 Log.farm("饲料任务答题：" + (correct ? "正确" : "错误") + "领取饲料［" + extInfo.getString("award") + "g］");
-                // 更新缓存明日答案
                 JSONArray operationConfigList = joDailySubmit.getJSONArray("operationConfigList");
                 updateTomorrowAnswerCache(operationConfigList, tomorrow);
-                Status.setFlagToday(CACHED_FLAG); // 标记为已缓存明日答案
+                Status.setFlagToday(CACHED_FLAG);
             }
         } catch (Exception e) {
             Log.printStackTrace(TAG, "答题出错", e);
