@@ -95,23 +95,56 @@ object DataCache {
     }
 
     private fun cleanUpDataMap() {
-        for ((key, value) in dataMap) {
-            Log.runtime(TAG, "【CLEANUP】处理 key: $key, value type: ${value.javaClass}")
-            when (value) {
-                is List<*> -> {
-                    // 只处理 String 类型的列表
-                    if (value.all { it is String }) {
-                        val cleaned = value.mapNotNull { it as? String }.distinct().filter { it.isNotEmpty() }
-                        dataMap[key] = cleaned
+        fun Any.deepClean(): Any? {
+            return when (this) {
+                is Map<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val mutable = (this as? MutableMap<Any?, Any?>) ?: this.toMutableMap()
+                    val entries = mutable.toList() // 复制一份避免并发修改
+                    for ((key, value) in entries) {
+                        val cleanedValue = value?.deepClean()
+                        if (cleanedValue == null) {
+                            mutable.remove(key)
+                        } else {
+                            mutable[key] = cleanedValue
+                        }
+                    }
+                    mutable
+                }
+
+                is Collection<*> -> {
+                    // 处理 List 和 Set
+                    val list = this.filterNotNull().mapNotNull { it.deepClean() }
+                    if (list.isNotEmpty()) {
+                        if (list.all { it is String }) {
+                            // 如果全是字符串，做去重和过滤空值
+                            list.distinct().filter { it is String && it.isNotEmpty() }
+                        } else {
+                            // 否则只保留非空且已清理的元素
+                            list.distinct()
+                        }
                     } else {
-                        Log.runtime(TAG, "【CLEANUP SKIP】跳过非纯字符串列表: $key")
+                        emptyList<Any>()
                     }
                 }
 
-                is Set<*> -> {
-                    val cleaned = value.mapNotNull { it as? String }.toSet()
-                    dataMap[key] = cleaned
+                is String -> if (isNotEmpty()) this else null
+                else -> this
+            }
+        }
+
+        for ((key, value) in dataMap.toMap()) {
+            Log.runtime(TAG, "【CLEANUP】处理 key: $key, value type: ${value.javaClass}")
+            try {
+                val cleanedValue = value.deepClean()
+                if (cleanedValue == null || (cleanedValue is Collection<*> && cleanedValue.isEmpty())) {
+                    dataMap.remove(key)
+                } else {
+                    dataMap[key] = cleanedValue
                 }
+            } catch (e: Exception) {
+                Log.error(TAG, "清理键 '$key' 时出错: ${e.message}")
+                dataMap.remove(key)
             }
         }
     }
