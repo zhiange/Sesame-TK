@@ -385,6 +385,7 @@ public class AntFarmRpcCall {
      * @throws JSONException
      */
     public static String cook(String userId, String source) throws JSONException {
+//[{"requestType":"RPC","sceneCode":"ANTFARM","source":"VILLA","userId":"2088522730162798","version":"unknown"}]
         JSONObject args = new JSONObject();
         args.put("requestType", "RPC");
         args.put("sceneCode", "ANTFARM");

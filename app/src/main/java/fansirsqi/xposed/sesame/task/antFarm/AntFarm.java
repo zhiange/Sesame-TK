@@ -64,7 +64,6 @@ import javax.net.ssl.SSLEngineResult;
 public class AntFarm extends ModelTask {
     private static final String TAG = AntFarm.class.getSimpleName();
     private String ownerFarmId;
-    private String userId;
     private Animal[] animals;
     private Animal ownerAnimal = new Animal();
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -284,6 +283,7 @@ public class AntFarm extends ModelTask {
     @Override
     public void run() {
         try {
+            String userId = UserMap.getCurrentUid();
             Log.record(TAG, "执行开始-蚂蚁" + getName());
             if (enterFarm() == null) {
                 return;
@@ -312,9 +312,9 @@ public class AntFarm extends ModelTask {
                 }
             }
             if (kitchen.getValue()) {
-                collectDailyFoodMaterial(userId);
+                collectDailyFoodMaterial();
                 collectDailyLimitedFoodMaterial();
-                cook(userId);
+                cook();
             }
 
             if (chickenDiary.getValue()) {
@@ -457,7 +457,7 @@ public class AntFarm extends ModelTask {
 
             JSONObject jo = new JSONObject(AntFarmRpcCall.getMallHome());
 
-            if (!ResChecker.checkRes(TAG,jo)) {
+            if (!ResChecker.checkRes(TAG, jo)) {
                 Log.error(TAG, "小鸡乐园币💸[未获取到可兑换权益]");
                 return;
             }
@@ -608,7 +608,7 @@ public class AntFarm extends ModelTask {
         try {
             String userId = UserMap.getCurrentUid();
             JSONObject jo = new JSONObject(AntFarmRpcCall.enterFarm(userId, userId));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 rewardProductNum = jo.getJSONObject("dynamicGlobalConfig").getString("rewardProductNum");
                 JSONObject joFarmVO = jo.getJSONObject("farmVO");
                 JSONObject familyInfoVO = jo.getJSONObject("familyInfoVO");
@@ -736,12 +736,12 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.queryLoveCabin(UserMap.getCurrentUid());
             JSONObject jo = new JSONObject(s);
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject sleepNotifyInfo = jo.getJSONObject("sleepNotifyInfo");
                 if (sleepNotifyInfo.optBoolean("canSleep", false)) {
                     s = AntFarmRpcCall.sleep();
                     jo = new JSONObject(s);
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         Log.farm("小鸡睡觉🛌");
                         Status.animalSleep();
                     }
@@ -759,12 +759,12 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.queryLoveCabin(UserMap.getCurrentUid());
             JSONObject jo = new JSONObject(s);
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject sleepNotifyInfo = jo.getJSONObject("sleepNotifyInfo");
                 if (!sleepNotifyInfo.optBoolean("canSleep", true)) {
                     s = AntFarmRpcCall.wakeUp();
                     jo = new JSONObject(s);
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         Log.farm("小鸡起床 🛏");
                     }
                 } else {
@@ -843,7 +843,7 @@ public class AntFarm extends ModelTask {
                             rewardProductNum, rewardFriend.time);
                     JSONObject jo = new JSONObject(s);
                     String memo = jo.getString("memo");
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         double rewardCount = benevolenceScore - jo.getDouble("farmProduct");
                         benevolenceScore -= rewardCount;
                         Log.farm(String.format(Locale.CHINA, "打赏好友💰[%s]# 得%.2f颗爱心鸡蛋", UserMap.getMaskName(rewardFriend.friendId), rewardCount));
@@ -865,7 +865,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.recallAnimal(animalId, currentFarmId, masterFarmId);
             JSONObject jo = new JSONObject(s);
             String memo = jo.getString("memo");
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 double foodHaveStolen = jo.getDouble("foodHaveStolen");
                 Log.farm("召回小鸡📣，偷吃[" + user + "]#" + foodHaveStolen + "g");
                 // 这里不需要加
@@ -905,7 +905,7 @@ public class AntFarm extends ModelTask {
                             animal.currentFarmId, animal.masterFarmId);
                     JSONObject jo = new JSONObject(s);
                     String memo = jo.getString("memo");
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         if (sendTypeInt == SendBackAnimalWay.HIT) {
                             if (jo.has("hitLossFood")) {
                                 s = "胖揍小鸡🤺[" + user + "]，掉落[" + jo.getInt("hitLossFood") + "g]";
@@ -934,7 +934,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.listToolTaskDetails();
             JSONObject jo = new JSONObject(s);
             String memo = jo.getString("memo");
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray jaList = jo.getJSONArray("list");
                 for (int i = 0; i < jaList.length(); i++) {
                     JSONObject joItem = jaList.getJSONObject(i);
@@ -962,7 +962,7 @@ public class AntFarm extends ModelTask {
                         s = AntFarmRpcCall.receiveToolTaskReward(awardType, awardCount, taskType);
                         jo = new JSONObject(s);
                         memo = jo.getString("memo");
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             Log.farm("领取道具🎖️[" + taskTitle + "-" + toolType.nickName() + "]#" + awardCount + "张");
                         } else {
                             memo = memo.replace("道具", toolType.nickName());
@@ -986,7 +986,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.harvestProduce(farmId);
             JSONObject jo = new JSONObject(s);
             String memo = jo.getString("memo");
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 double harvest = jo.getDouble("harvestBenevolenceScore");
                 harvestBenevolenceScore = jo.getDouble("finalBenevolenceScore");
                 Log.farm("收取鸡蛋🥚[" + harvest + "颗]#剩余" + harvestBenevolenceScore + "颗");
@@ -1006,7 +1006,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.listActivityInfo();
             JSONObject jo = new JSONObject(s);
             String memo = jo.getString("memo");
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray jaActivityInfos = jo.getJSONArray("activityInfos");
                 String activityId = null, activityName;
                 boolean isDonation = false;
@@ -1024,6 +1024,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
                 if (isDonation) {
+                    String userId = UserMap.getCurrentUid();
                     Status.donationEgg(userId);
                 }
                 if (activityId == null) {
@@ -1044,7 +1045,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.donation(activityId, 1);
             JSONObject donationResponse = new JSONObject(s);
             String memo = donationResponse.getString("memo");
-            if (ResChecker.checkRes(TAG,donationResponse)) {
+            if (ResChecker.checkRes(TAG, donationResponse)) {
                 JSONObject donationDetails = donationResponse.getJSONObject("donation");
                 harvestBenevolenceScore = donationDetails.getDouble("harvestBenevolenceScore");
                 Log.farm("捐赠活动❤️[" + activityName + "]#累计捐赠" + donationDetails.getInt("donationTimesStat") + "次");
@@ -1072,7 +1073,7 @@ public class AntFarm extends ModelTask {
                 if (!Status.hasFlagToday(CACHED_FLAG)) {
                     // 未缓存明日答案，调用 home 接口解析并缓存
                     JSONObject jo = new JSONObject(DadaDailyRpcCall.home(activityId));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         JSONArray operationConfigList = jo.getJSONArray("operationConfigList");
                         updateTomorrowAnswerCache(operationConfigList, tomorrow);
                         Status.setFlagToday(CACHED_FLAG); // 标记为已缓存
@@ -1083,7 +1084,7 @@ public class AntFarm extends ModelTask {
 
             // 今日尚未答题，开始答题流程
             JSONObject jo = new JSONObject(DadaDailyRpcCall.home(activityId));
-            if (!ResChecker.checkRes(TAG,jo)) return;
+            if (!ResChecker.checkRes(TAG, jo)) return;
 
             JSONObject question = jo.getJSONObject("question");
             long questionId = question.getLong("questionId");
@@ -1230,7 +1231,7 @@ public class AntFarm extends ModelTask {
             do {
                 try {
                     JSONObject jo = new JSONObject(AntFarmRpcCall.initFarmGame(gameType.name()));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         if (jo.getJSONObject("gameAward").getBoolean("level3Get")) {
                             return;
                         }
@@ -1238,7 +1239,7 @@ public class AntFarm extends ModelTask {
                             return;
                         }
                         jo = new JSONObject(AntFarmRpcCall.recordFarmGame(gameType.name()));
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             JSONArray awardInfos = jo.getJSONArray("awardInfos");
                             StringBuilder award = new StringBuilder();
                             for (int i = 0; i < awardInfos.length(); i++) {
@@ -1284,7 +1285,7 @@ public class AntFarm extends ModelTask {
             List<String> cachedList = DataCache.INSTANCE.getData("farmCompletedTaskSet", taskList);
             taskList = new ArrayList<>(new LinkedHashSet<>(cachedList)); // 去重可选
             JSONObject jo = new JSONObject(AntFarmRpcCall.listFarmTask());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray farmTaskList = jo.getJSONArray("farmTaskList");
                 for (int i = 0; i < farmTaskList.length(); i++) {
                     JSONObject task = farmTaskList.getJSONObject(i);
@@ -1343,7 +1344,7 @@ public class AntFarm extends ModelTask {
             do {
                 doubleCheck = false;
                 JSONObject jo = new JSONObject(AntFarmRpcCall.listFarmTask());
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     JSONArray farmTaskList = jo.getJSONArray("farmTaskList");
                     JSONObject signList = jo.getJSONObject("signList");
                     farmSign(signList);
@@ -1437,7 +1438,7 @@ public class AntFarm extends ModelTask {
     private void listFarmTool() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.listFarmTool());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray jaToolList = jo.getJSONArray("toolList");
                 farmTools = new FarmTool[jaToolList.length()];
                 for (int i = 0; i < jaToolList.length(); i++) {
@@ -1504,7 +1505,7 @@ public class AntFarm extends ModelTask {
             String s = AntFarmRpcCall.listFarmTool();
             JSONObject jo = new JSONObject(s);
             String memo = jo.getString("memo");
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray jaToolList = jo.getJSONArray("toolList");
                 for (int i = 0; i < jaToolList.length(); i++) {
                     jo = jaToolList.getJSONObject(i);
@@ -1517,7 +1518,7 @@ public class AntFarm extends ModelTask {
                             s = AntFarmRpcCall.useFarmTool(targetFarmId, toolId, toolType.name());
                             jo = new JSONObject(s);
                             memo = jo.getString("memo");
-                            if (ResChecker.checkRes(TAG,jo)) {
+                            if (ResChecker.checkRes(TAG, jo)) {
                                 Log.farm("使用道具🎭[" + toolType.nickName() + "]#剩余" + (toolCount - 1) + "张");
                                 return true;
                             } else {
@@ -1550,7 +1551,7 @@ public class AntFarm extends ModelTask {
                     continue;
                 JSONObject jo = new JSONObject(AntFarmRpcCall.enterFarm(userId, userId));
                 GlobalThreadPools.sleep(3 * 1000L);//延迟3秒
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     JSONObject subFarmVOjo = jo.getJSONObject("farmVO").getJSONObject("subFarmVO");
                     String friendFarmId = subFarmVOjo.getString("farmId");
                     JSONArray jaAnimals = subFarmVOjo.getJSONArray("animals");
@@ -1611,7 +1612,7 @@ public class AntFarm extends ModelTask {
                 s = AntFarmRpcCall.rankingList(pageStartSum);
                 jo = new JSONObject(s);
                 String memo = jo.getString("memo");
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     hasNext = jo.getBoolean("hasNext");
                     JSONArray jaRankingList = jo.getJSONArray("rankingList");
                     pageStartSum += jaRankingList.length();
@@ -1631,7 +1632,7 @@ public class AntFarm extends ModelTask {
                             s = AntFarmRpcCall.enterFarm(userId, userId);
                             jo = new JSONObject(s);
                             memo = jo.getString("memo");
-                            if (ResChecker.checkRes(TAG,jo)) {
+                            if (ResChecker.checkRes(TAG, jo)) {
                                 jo = jo.getJSONObject("farmVO").getJSONObject("subFarmVO");
                                 String friendFarmId = jo.getString("farmId");
                                 JSONArray jaAnimals = jo.getJSONArray("animals");
@@ -1672,7 +1673,7 @@ public class AntFarm extends ModelTask {
                 String s = AntFarmRpcCall.notifyFriend(animalId, friendFarmId);
                 JSONObject jo = new JSONObject(s);
                 String memo = jo.getString("memo");
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     double rewardCount = jo.getDouble("rewardCount");
                     if (jo.getBoolean("refreshFoodStock"))
                         foodStock = (int) jo.getDouble("finalFoodStock");
@@ -1717,9 +1718,9 @@ public class AntFarm extends ModelTask {
                         JSONObject joManurePot = new JSONObject(AntFarmRpcCall.collectManurePot(manurePot.getString("manurePotNO")));
                         if (ResChecker.checkRes(TAG, joManurePot)) {
                             int collectManurePotNum = joManurePot.getInt("collectManurePotNum");
-                            Log.farm("打扫鸡屎🧹[" + collectManurePotNum + "g]" + i+1 + "次");
+                            Log.farm("打扫鸡屎🧹[" + collectManurePotNum + "g]" + i + 1 + "次");
                         } else {
-                            Log.runtime(TAG, "打扫鸡屎失败: 第" + i+1 + "次" + joManurePot);
+                            Log.runtime(TAG, "打扫鸡屎失败: 第" + i + 1 + "次" + joManurePot);
                         }
                     }
                 }
@@ -1777,11 +1778,10 @@ public class AntFarm extends ModelTask {
 
     /**
      * 收集每日食材
-     *
-     * @param userId
      */
-    private void collectDailyFoodMaterial(String userId) {
+    private void collectDailyFoodMaterial() {
         try {
+            String userId = UserMap.getCurrentUid();
             JSONObject jo = new JSONObject(AntFarmRpcCall.enterKitchen(userId));
             if (ResChecker.checkRes(TAG, jo)) {
                 boolean canCollectDailyFoodMaterial = jo.getBoolean("canCollectDailyFoodMaterial");
@@ -1791,20 +1791,20 @@ public class AntFarm extends ModelTask {
                     JSONObject orchardFoodMaterialStatus = jo.getJSONObject("orchardFoodMaterialStatus");
                     if ("FINISHED".equals(orchardFoodMaterialStatus.optString("foodStatus"))) {
                         jo = new JSONObject(AntFarmRpcCall.farmFoodMaterialCollect());
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             Log.farm("小鸡厨房👨🏻‍🍳[领取农场食材]#" + jo.getInt("foodMaterialAddCount") + "g");
                         }
                     }
                 }
                 if (canCollectDailyFoodMaterial) {
                     jo = new JSONObject(AntFarmRpcCall.collectDailyFoodMaterial(dailyFoodMaterialAmount));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         Log.farm("小鸡厨房👨🏻‍🍳[领取今日食材]#" + dailyFoodMaterialAmount + "g");
                     }
                 }
                 if (garbageAmount > 0) {
                     jo = new JSONObject(AntFarmRpcCall.collectKitchenGarbage());
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         Log.farm("小鸡厨房👨🏻‍🍳[领取肥料]#" + jo.getInt("recievedKitchenGarbageAmount") + "g");
                     }
                 }
@@ -1820,12 +1820,12 @@ public class AntFarm extends ModelTask {
     private void collectDailyLimitedFoodMaterial() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryFoodMaterialPack());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 boolean canCollectDailyLimitedFoodMaterial = jo.getBoolean("canCollectDailyLimitedFoodMaterial");
                 if (canCollectDailyLimitedFoodMaterial) {
                     int dailyLimitedFoodMaterialAmount = jo.getInt("dailyLimitedFoodMaterialAmount");
                     jo = new JSONObject(AntFarmRpcCall.collectDailyLimitedFoodMaterial(dailyLimitedFoodMaterialAmount));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         Log.farm("小鸡厨房👨🏻‍🍳[领取爱心食材店食材]#" + dailyLimitedFoodMaterialAmount + "g");
                     }
                 }
@@ -1835,16 +1835,17 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private void cook(String userId) {
+    private void cook() {
         try {
+            String userId = UserMap.getCurrentUid();
             JSONObject jo = new JSONObject(AntFarmRpcCall.enterKitchen(userId));
             Log.runtime(TAG, "cook userid :" + userId);
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 int cookTimesAllowed = jo.getInt("cookTimesAllowed");
                 if (cookTimesAllowed > 0) {
                     for (int i = 0; i < cookTimesAllowed; i++) {
                         jo = new JSONObject(AntFarmRpcCall.cook(userId, "VILLA"));
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             JSONObject cuisineVO = jo.getJSONObject("cuisineVO");
                             Log.farm("小鸡厨房👨🏻‍🍳[" + cuisineVO.getString("name") + "]制作成功");
                         } else {
@@ -1876,7 +1877,7 @@ public class AntFarm extends ModelTask {
                 cuisineId = jo.getString("cuisineId");
                 name = jo.getString("name");
                 jo = new JSONObject(AntFarmRpcCall.useFarmFood(cookbookId, cuisineId));
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     double deltaProduce = jo.getJSONObject("foodEffect").getDouble("deltaProduce");
                     Log.farm("使用美食🍱[" + name + "]#加速" + deltaProduce + "颗爱心鸡蛋");
                 }
@@ -1947,7 +1948,7 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.enterFarm(userId, userId);
             JSONObject jo = new JSONObject(s);
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject farmVO = jo.getJSONObject("farmVO");
                 foodStock = farmVO.getInt("foodStock");
                 JSONObject subFarmVO = farmVO.getJSONObject("subFarmVO");
@@ -1958,7 +1959,7 @@ public class AntFarm extends ModelTask {
                     if (foodStock < 10)
                         break;
                     jo = new JSONObject(AntFarmRpcCall.visitFriend(farmId));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         foodStock = jo.getInt("foodStock");
                         Log.farm("赠送麦子🌾[" + UserMap.getMaskName(userId) + "]#" + jo.getInt("giveFoodNum") + "g");
                         visitedTimes++;
@@ -1987,7 +1988,7 @@ public class AntFarm extends ModelTask {
     private void acceptGift() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.acceptGift());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 int receiveFoodNum = jo.getInt("receiveFoodNum");
                 Log.farm("收取麦子🌾[" + receiveFoodNum + "g]");
             }
@@ -2006,14 +2007,14 @@ public class AntFarm extends ModelTask {
         String diaryDateStr;
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiary(queryDayStr));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 JSONObject chickenDiary = data.getJSONObject("chickenDiary");
                 diaryDateStr = chickenDiary.getString("diaryDateStr");
                 if (data.has("hasTietie")) {
                     if (!data.optBoolean("hasTietie", true)) {
                         jo = new JSONObject(AntFarmRpcCall.diaryTietie(diaryDateStr, "NEW"));
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             String prizeType = jo.getString("prizeType");
                             int prizeNum = jo.optInt("prizeNum", 0);
                             Log.farm("[" + diaryDateStr + "]" + "贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
@@ -2029,7 +2030,7 @@ public class AntFarm extends ModelTask {
                                 JSONObject tietieStatus = statisticsList.getJSONObject(i);
                                 String tietieRoleId = tietieStatus.getString("tietieRoleId");
                                 jo = new JSONObject(AntFarmRpcCall.diaryTietie(diaryDateStr, tietieRoleId));
-                                if (ResChecker.checkRes(TAG,jo)) {
+                                if (ResChecker.checkRes(TAG, jo)) {
                                     String prizeType = jo.getString("prizeType");
                                     int prizeNum = jo.optInt("prizeNum", 0);
                                     Log.farm("[" + diaryDateStr + "]" + "贴贴小鸡💞[" + prizeType + "*" + prizeNum + "]");
@@ -2062,7 +2063,7 @@ public class AntFarm extends ModelTask {
         String diaryDateStr = null;
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryChickenDiary(queryDayStr));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject data = jo.getJSONObject("data");
                 JSONObject chickenDiary = data.getJSONObject("chickenDiary");
                 diaryDateStr = chickenDiary.getString("diaryDateStr");
@@ -2160,7 +2161,7 @@ public class AntFarm extends ModelTask {
     private void visitAnimal() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.visitAnimal());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 if (!jo.has("talkConfigs"))
                     return;
                 JSONArray talkConfigs = jo.getJSONArray("talkConfigs");
@@ -2168,14 +2169,14 @@ public class AntFarm extends ModelTask {
                 JSONObject data = talkConfigs.getJSONObject(0);
                 String farmId = data.getString("farmId");
                 jo = new JSONObject(AntFarmRpcCall.feedFriendAnimalVisit(farmId));
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     for (int i = 0; i < talkNodes.length(); i++) {
                         jo = talkNodes.getJSONObject(i);
                         if (!"FEED".equals(jo.getString("type")))
                             continue;
                         String consistencyKey = jo.getString("consistencyKey");
                         jo = new JSONObject(AntFarmRpcCall.visitAnimalSendPrize(consistencyKey));
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             String prizeName = jo.getString("prizeName");
                             Log.farm("小鸡到访💞[" + prizeName + "]");
                         } else {
@@ -2257,7 +2258,7 @@ public class AntFarm extends ModelTask {
                 s = AntFarmRpcCall.rankingList(pageStartSum);
                 jo = new JSONObject(s);
                 String memo = jo.getString("memo");
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     hasNext = jo.getBoolean("hasNext");
                     JSONArray jaRankingList = jo.getJSONArray("rankingList");
                     pageStartSum += jaRankingList.length();
@@ -2298,7 +2299,7 @@ public class AntFarm extends ModelTask {
         try {
             String s = AntFarmRpcCall.enterFarm(userId, userId);
             JSONObject jo = new JSONObject(s);
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject farmVO = jo.getJSONObject("farmVO");
                 JSONObject subFarmVO = farmVO.getJSONObject("subFarmVO");
                 String farmId = subFarmVO.getString("farmId");
@@ -2308,7 +2309,7 @@ public class AntFarm extends ModelTask {
                     if (Objects.equals(animal.getJSONObject("masterUserInfoVO").getString("userId"), userId)) {
                         String animalId = animal.getString("animalId");
                         jo = new JSONObject(AntFarmRpcCall.hireAnimal(farmId, animalId));
-                        if (ResChecker.checkRes(TAG,jo)) {
+                        if (ResChecker.checkRes(TAG, jo)) {
                             Log.farm("雇佣小鸡👷[" + UserMap.getMaskName(userId) + "] 成功");
                             JSONArray newAnimals = jo.getJSONArray("animals");
                             for (int ii = 0, newLen = newAnimals.length(); ii < newLen; ii++) {
@@ -2901,8 +2902,9 @@ public class AntFarm extends ModelTask {
 
     private void syncFamilyStatusIntimacy(String groupId) {
         try {
+            String userId = UserMap.getCurrentUid();
             JSONObject jo = new JSONObject(AntFarmRpcCall.syncFamilyStatus(groupId, "INTIMACY_VALUE", userId));
-            ResChecker.checkRes(TAG,jo);
+            ResChecker.checkRes(TAG, jo);
         } catch (Throwable t) {
             Log.runtime(TAG, "syncFamilyStatus err:");
             Log.printStackTrace(TAG, t);
@@ -2954,7 +2956,7 @@ public class AntFarm extends ModelTask {
             String activityId = familyDrawInfo.optString("activityId");
             String sceneCode = "ANTFARM_FD_VISIT_" + activityId;
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyShareP2PPanelInfo(sceneCode));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONArray p2PFriendVOList = jo.getJSONArray("p2PFriendVOList");
                 if (Objects.isNull(p2PFriendVOList) || p2PFriendVOList.length() <= 0) {
                     return;
@@ -2972,7 +2974,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
                 jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
-                if (ResChecker.checkRes(TAG,jo)) {
+                if (ResChecker.checkRes(TAG, jo)) {
                     Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
                     Status.setFlagToday("antFarm::familyBatchInviteP2P");
                     GlobalThreadPools.sleep(500);
@@ -3011,7 +3013,7 @@ public class AntFarm extends ModelTask {
                 GlobalThreadPools.sleep(1000);
             }
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryFamilyDrawActivity());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 GlobalThreadPools.sleep(1000);
                 int drawTimes = jo.optInt("familyDrawTimes");
                 //碎片个数
@@ -3035,7 +3037,7 @@ public class AntFarm extends ModelTask {
     private void giftFamilyDrawFragment(String giftUserId, int giftNum) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.giftFamilyDrawFragment(giftUserId, giftNum));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 Log.farm("亲密家庭🏠赠送扭蛋碎片#" + giftNum + "个#" + giftUserId);
             }
         } catch (Throwable t) {
@@ -3047,7 +3049,7 @@ public class AntFarm extends ModelTask {
     private JSONArray familyDrawListFarmTask() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawListFarmTask());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 return jo.getJSONArray("farmTaskList");
             }
         } catch (Throwable t) {
@@ -3060,7 +3062,7 @@ public class AntFarm extends ModelTask {
     private Boolean familyDraw() {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDraw());
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 JSONObject familyDrawPrize = jo.getJSONObject("familyDrawPrize");
                 String title = familyDrawPrize.optString("title");
                 String awardCount = familyDrawPrize.getString("awardCount");
@@ -3125,7 +3127,7 @@ public class AntFarm extends ModelTask {
                 friendUserIdList.put(userId);
             }
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyEatTogether(familyGroupId, friendUserIdList, array));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 Log.farm("庄园家庭🏠" + periodName + "请客#消耗美食" + friendUserIdList.length() + "份");
                 GlobalThreadPools.sleep(500);
                 syncFamilyStatusIntimacy(familyGroupId);
@@ -3139,7 +3141,7 @@ public class AntFarm extends ModelTask {
     private void familyDrawSignReceiveFarmTaskAward(String taskId, String title) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawSignReceiveFarmTaskAward(taskId));
-            if (ResChecker.checkRes(TAG,jo)) {
+            if (ResChecker.checkRes(TAG, jo)) {
                 Log.farm("亲密家庭🏠扭蛋任务#" + title + "#奖励领取成功");
             }
         } catch (Throwable t) {
@@ -3151,7 +3153,7 @@ public class AntFarm extends ModelTask {
     private JSONArray queryRecentFarmFood(int queryNum) {
         try {
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryRecentFarmFood(queryNum));
-            if (!ResChecker.checkRes(TAG,jo)) {
+            if (!ResChecker.checkRes(TAG, jo)) {
                 return null;
             }
             JSONArray cuisines = jo.getJSONArray("cuisines");
@@ -3186,7 +3188,7 @@ public class AntFarm extends ModelTask {
                         continue;
                     }
                     JSONObject jo = new JSONObject(AntFarmRpcCall.feedFriendAnimal(farmId, groupId));
-                    if (ResChecker.checkRes(TAG,jo)) {
+                    if (ResChecker.checkRes(TAG, jo)) {
                         int feedFood = foodStock - jo.getInt("foodStock");
                         if (feedFood > 0) {
                             add2FoodStock(-feedFood);
