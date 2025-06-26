@@ -24,6 +24,8 @@ import java.util.function.Function;
 import fansirsqi.xposed.sesame.data.DataCache;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
+import fansirsqi.xposed.sesame.entity.OtherEntity;
+import fansirsqi.xposed.sesame.entity.OtherEntityProvider;
 import fansirsqi.xposed.sesame.entity.ParadiseCoinBenefit;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.model.BaseModel;
@@ -253,7 +255,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(recordFarmGame = new BooleanModelField("recordFarmGame", "游戏改分(星星球、登山赛、飞行赛、揍小鸡)", false));
         modelFields.addField(farmGameTime = new ListModelField.ListJoinCommaToStringModelField("farmGameTime", "小鸡游戏时间(范围)", ListUtil.newArrayList("2200-2400")));
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
-        modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
+        modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), OtherEntityProvider.farmFamilyOption()));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         modelFields.addField(paradiseCoinExchangeBenefit = new BooleanModelField("paradiseCoinExchangeBenefit", "小鸡乐园 | 兑换权益", false));
@@ -368,7 +370,8 @@ public class AntFarm extends ModelTask {
             //家庭
             if (family.getValue()) {
 
-                family();
+//                family();
+                AntFarmFamily.INSTANCE.run(familyOptions);
             }
             // 开宝箱
             if (enableDdrawGameCenterAward.getValue()) {
@@ -1596,7 +1599,7 @@ public class AntFarm extends ModelTask {
                                 if (foodStock >= 180) {
                                     JSONObject feedFriendAnimaljo = new JSONObject(AntFarmRpcCall.feedFriendAnimal(friendFarmId));
                                     if (ResChecker.checkRes(TAG, feedFriendAnimaljo)) {
-                                        int feedFood = foodStock - jo.getInt("foodStock");
+                                        int feedFood = foodStock - feedFriendAnimaljo.getInt("foodStock");
                                         if (feedFood > 0) {
                                             add2FoodStock(-feedFood);
                                             Log.farm("帮喂好友🥣[" + user + "]的小鸡[" + feedFood + "g]#剩余" + foodStock + "g");
@@ -2709,10 +2712,8 @@ public class AntFarm extends ModelTask {
             return;
         }
         try {
-            JSONObject jo = enterFamily();
-            if (jo == null) {
-                return;
-            }
+            JSONObject jo = new JSONObject(AntFarmRpcCall.enterFamily());
+            if (!ResChecker.checkRes(TAG, jo)) return;
             familyGroupId = jo.getString("groupId");
             int familyAwardNum = jo.getInt("familyAwardNum");
             boolean familySignTips = jo.getBoolean("familySignTips");
@@ -2725,22 +2726,24 @@ public class AntFarm extends ModelTask {
             JSONArray familyInteractActions = jo.getJSONArray("familyInteractActions");
             JSONArray animals = jo.getJSONArray("animals");
             List<String> familyUserIds = new ArrayList<>();
+
             for (int i = 0; i < animals.length(); i++) {
                 jo = animals.getJSONObject(i);
                 String userId = jo.getString("userId");
                 familyUserIds.add(userId);
             }
             if (familySignTips && familyOptions.getValue().contains("familySign")) {
-                familySign();
+                AntFarmFamily.INSTANCE.familySign();
             }
             if (familyAwardNum > 0 && familyOptions.getValue().contains("familyClaimReward")) {
-                familyClaimRewardList();
+                AntFarmFamily.INSTANCE.familyClaimRewardList();
             }
             //顶梁柱特权
             if (!Objects.isNull(assignFamilyMemberInfo) && familyOptions.getValue().contains("assignRights")) {
                 JSONObject assignRights = assignFamilyMemberInfo.getJSONObject("assignRights");
-                if (Objects.equals(assignRights.getString("assignRightsOwner"), UserMap.getCurrentUid()) && Objects.equals(assignRights.getString("status"),
-                        "NOT_USED")) {
+                if (
+                        Objects.equals(assignRights.getString("assignRightsOwner"), UserMap.getCurrentUid())
+                                && Objects.equals(assignRights.getString("status"), "NOT_USED")) {
                     assignFamilyMember(assignFamilyMemberInfo, familyUserIds);
                 }
             }
@@ -2771,70 +2774,6 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private JSONObject enterFamily() {
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.enterFamily());
-            if ("SUCCESS".equals(jo.optString("memo"))) {
-                return jo;
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "庄园家庭异常:");
-            Log.printStackTrace(TAG, t);
-        }
-        return null;
-    }
-
-    //签到
-    private void familySign() {
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.familyReceiveFarmTaskAward("FAMILY_SIGN_TASK"));
-            if ("SUCCESS".equals(jo.optString("memo"))) {
-                Log.farm("庄园家庭🏠提交任务[每日签到]");
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "庄园家庭每日签到异常:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
-
-    //领取奖励
-    public void familyClaimRewardList() {
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.familyAwardList());
-            if (!"SUCCESS".equals(jo.optString("memo"))) {
-                return;
-            }
-            JSONArray ja = jo.getJSONArray("familyAwardRecordList");
-            for (int i = 0; i < ja.length(); i++) {
-                jo = ja.getJSONObject(i);
-                if (jo.optBoolean("expired")
-                        || jo.optBoolean("received", true)
-                        || jo.has("linkUrl")
-                        || (jo.has("operability") && !jo.getBoolean("operability"))) {
-                    continue;
-                }
-                String rightId = jo.getString("rightId");
-                String awardName = jo.getString("awardName");
-                int count = jo.optInt("count", 1);
-                familyClaimReward(rightId, awardName, count);
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "家庭领取奖励:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
-
-    private void familyClaimReward(String rightId, String awardName, int count) {
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.receiveFamilyAward(rightId));
-            if ("SUCCESS".equals(jo.optString("memo"))) {
-                Log.farm("亲密家庭🏠领取奖励[" + awardName + "*" + count + "]");
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "领取奖励异常:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
 
     private void assignFamilyMember(JSONObject jsonObject, List<String> userIds) {
         try {
@@ -2885,7 +2824,7 @@ public class AntFarm extends ModelTask {
             if (Objects.isNull(familyGroupId)) {
                 return;
             }
-            // 先移除当前用户ID，否则下面接口报错
+            // 先移除当前用户自己的ID，否则下面接口报错
             friendUserIds.remove(UserMap.getCurrentUid());
             if (friendUserIds.isEmpty()) {
                 return;
