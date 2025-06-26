@@ -1,6 +1,7 @@
 package fansirsqi.xposed.sesame.task.antFarm
 
 import fansirsqi.xposed.sesame.data.Status
+import fansirsqi.xposed.sesame.entity.AlipayUser
 import fansirsqi.xposed.sesame.extensions.JSONExtensions.toJSONArray
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.AnimalFeedStatus
@@ -51,9 +52,9 @@ data object AntFarmFamily {
     private var eatTogetherConfig: JSONObject = JSONObject()
 
 
-    fun run(familyOptions: SelectModelField) {
+    fun run(familyOptions: SelectModelField, notInviteList: SelectModelField) {
         try {
-            enterFamily(familyOptions)
+            enterFamily(familyOptions, notInviteList)
         } catch (e: Exception) {
             Log.printStackTrace(TAG, e.message, e)
         }
@@ -62,7 +63,7 @@ data object AntFarmFamily {
     /**
      * 进入家庭
      */
-    fun enterFamily(familyOptions: SelectModelField) {
+    fun enterFamily(familyOptions: SelectModelField, notInviteList: SelectModelField) {
         try {
             var enterRes = JSONObject(AntFarmRpcCall.enterFamily());
             if (ResChecker.checkRes(TAG, enterRes)) {
@@ -79,7 +80,7 @@ data object AntFarmFamily {
                 eatTogetherConfig = enterRes.getJSONObject("eatTogetherConfig")//美食配置对象
 
 
-                if (familyOptions.value.contains("familySign")  && familySignTips) {
+                if (familyOptions.value.contains("familySign") && familySignTips) {
                     familySign()
                 }
 
@@ -109,6 +110,10 @@ data object AntFarmFamily {
 
                 if (familyOptions.value.contains("deliverMsgSend")) {
                     deliverMsgSend(familyUserIds)
+                }
+
+                if (familyOptions.value.contains("shareToFriends")) {
+                    familyShareToFriends(familyUserIds, notInviteList)
                 }
             }
         } catch (e: Exception) {
@@ -202,8 +207,8 @@ data object AntFarmFamily {
                     val farmId = animal.getString("farmId")
                     val userId = animal.getString("userId")
                     if (!UserMap.getUserIdSet().contains(userId)) {
-                        continue
                         Log.error(TAG, "$userId 不是你的好友！")
+                        continue
                     }
                     val jo = JSONObject(AntFarmRpcCall.feedFriendAnimal(farmId, groupId))
                     if (ResChecker.checkRes(TAG, jo)) {
@@ -229,7 +234,7 @@ data object AntFarmFamily {
             var isEat = false
             val periodItemList = eatTogetherConfig.optJSONArray("periodItemList")
             if (periodItemList == null || periodItemList.length() == 0) {
-                Log.error(TAG, "家庭 美食配置为空,无法请客")
+                Log.error(TAG, "美食不足,无法请客,请检查小鸡厨房")
                 return
             }
             if (familyInteractActions.length() > 0) {
@@ -296,19 +301,16 @@ data object AntFarmFamily {
                 return null
             }
             val cuisines = jo.getJSONArray("cuisines")
-            if (Objects.isNull(cuisines) || cuisines.length() == 0) {
-                return null
-            }
             var count = 0
             for (i in 0..<cuisines.length()) {
-                count += cuisines.getJSONObject(i).optInt("count")
+                val cuisine = cuisines.getJSONObject(i)
+                count += cuisine.optInt("count")
             }
-            if (count >= queryNum) {
+            if (cuisines != null && queryNum <= count) {
                 return cuisines
             }
         } catch (t: Throwable) {
-            Log.runtime(TAG, "queryRecentFarmFood err:")
-            Log.printStackTrace(TAG, t)
+            Log.printStackTrace(TAG, "queryRecentFarmFood err:", t)
         }
         return null
     }
@@ -316,9 +318,9 @@ data object AntFarmFamily {
 
     /**
      * 发送道早安
-     * @param friendUserIds 家庭成员列表
+     * @param familyUserIds 家庭成员列表
      */
-    fun deliverMsgSend(friendUserIds: MutableList<String>) {
+    fun deliverMsgSend(familyUserIds: MutableList<String>) {
         try {
             val currentTime = Calendar.getInstance()
             currentTime.get(Calendar.HOUR_OF_DAY)
@@ -337,15 +339,15 @@ data object AntFarmFamily {
                 return
             }
             // 先移除当前用户自己的ID，否则下面接口报错
-            friendUserIds.remove(UserMap.currentUid)
-            if (friendUserIds.isEmpty()) {
+            familyUserIds.remove(UserMap.currentUid)
+            if (familyUserIds.isEmpty()) {
                 return
             }
             if (Status.hasFlagToday("antFarm::deliverMsgSend")) {
                 return
             }
             val userIds = JSONArray()
-            for (userId in friendUserIds) {
+            for (userId in familyUserIds) {
                 userIds.put(userId)
             }
             val requestString = AntFarmRpcCall.deliverSubjectRecommend(userIds)
@@ -366,6 +368,46 @@ data object AntFarmFamily {
             }
         } catch (t: Throwable) {
             Log.printStackTrace(TAG, "deliverMsgSend err:", t)
+        }
+    }
+
+
+    /**
+     * 好友分享家庭
+     * @param familyUserIds 好友列表
+     * @param notInviteList 不邀请列表
+     */
+    private fun familyShareToFriends(familyUserIds: MutableList<String>, notInviteList: SelectModelField) {
+        try {
+            if (Status.hasFlagToday("antFarm::familyShareToFriends")) {
+                return
+            }
+            val familyValue: MutableSet<String?> = notInviteList.value
+            val allUser: List<AlipayUser> = AlipayUser.getList()
+            if (familyValue.isEmpty() || allUser.isEmpty()) {
+                Log.error(TAG, "notInviteList or allUser is empty")
+                return
+            }
+            val inviteList = JSONArray()
+            for (u in allUser) {
+                if (
+                    !familyUserIds.contains(u.id)
+                    && !familyValue.contains(u.id)
+                    && inviteList.length() < 6
+                ) {
+                    inviteList.put(u)
+                }
+                if (inviteList.length() >= 6) {
+                    break
+                }
+            }
+            val jo = JSONObject(AntFarmRpcCall.inviteFriendVisitFamily(inviteList))
+            if (ResChecker.checkRes(TAG, jo)) {
+                Log.farm("家庭任务🏠分享好友")
+                Status.setFlagToday("antFarm::familyShareToFriends")
+            }
+        } catch (t: Throwable) {
+            Log.printStackTrace(TAG, "familyShareToFriends err:", t)
         }
     }
 
