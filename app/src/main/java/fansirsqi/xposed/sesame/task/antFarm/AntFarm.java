@@ -9,7 +9,6 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -24,7 +23,6 @@ import java.util.function.Function;
 import fansirsqi.xposed.sesame.data.DataCache;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
-import fansirsqi.xposed.sesame.entity.OtherEntity;
 import fansirsqi.xposed.sesame.entity.OtherEntityProvider;
 import fansirsqi.xposed.sesame.entity.ParadiseCoinBenefit;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
@@ -60,8 +58,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.net.ssl.SSLEngineResult;
 
 public class AntFarm extends ModelTask {
     private static final String TAG = AntFarm.class.getSimpleName();
@@ -206,7 +202,7 @@ public class AntFarm extends ModelTask {
     private ChoiceModelField getFeedType;
     private BooleanModelField family;
     private SelectModelField familyOptions;
-    private SelectModelField inviteFriendVisitFamily;
+    private SelectModelField notInviteList;
     private StringModelField giftFamilyDrawFragment;
     private BooleanModelField paradiseCoinExchangeBenefit;
     private SelectModelField paradiseCoinExchangeBenefitList;
@@ -256,8 +252,8 @@ public class AntFarm extends ModelTask {
         modelFields.addField(farmGameTime = new ListModelField.ListJoinCommaToStringModelField("farmGameTime", "小鸡游戏时间(范围)", ListUtil.newArrayList("2200-2400")));
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), OtherEntityProvider.farmFamilyOption()));
-        modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
-        modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
+        modelFields.addField(notInviteList = new SelectModelField("notInviteList", "家庭 | 好友分享排除列表", new LinkedHashSet<>(), AlipayUser::getList));
+//        modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         modelFields.addField(paradiseCoinExchangeBenefit = new BooleanModelField("paradiseCoinExchangeBenefit", "小鸡乐园 | 兑换权益", false));
         modelFields.addField(paradiseCoinExchangeBenefitList = new SelectModelField("paradiseCoinExchangeBenefitList", "小鸡乐园 | 权益列表", new LinkedHashSet<>(), ParadiseCoinBenefit::getList));
         return modelFields;
@@ -371,7 +367,7 @@ public class AntFarm extends ModelTask {
             if (family.getValue()) {
 
 //                family();
-                AntFarmFamily.INSTANCE.run(familyOptions);
+                AntFarmFamily.INSTANCE.run(familyOptions, notInviteList);
             }
             // 开宝箱
             if (enableDdrawGameCenterAward.getValue()) {
@@ -467,9 +463,13 @@ public class AntFarm extends ModelTask {
             JSONArray mallItemSimpleList = jo.getJSONArray("mallItemSimpleList");
             for (int i = 0; i < mallItemSimpleList.length(); i++) {
                 JSONObject mallItemInfo = mallItemSimpleList.getJSONObject(i);
+                String oderInfo;
                 String spuName = mallItemInfo.getString("spuName");
+                int minPrice = mallItemInfo.getInt("minPrice");
+                String controlTag = mallItemInfo.getString("controlTag");
                 String spuId = mallItemInfo.getString("spuId");
-                IdMapManager.getInstance(ParadiseCoinBenefitIdMap.class).add(spuId, spuName);
+                oderInfo = spuName + "\n价格" + minPrice + "乐园币\n" + controlTag;
+                IdMapManager.getInstance(ParadiseCoinBenefitIdMap.class).add(spuId, oderInfo);
                 JSONArray itemStatusList = mallItemInfo.getJSONArray("itemStatusList");
                 if (!Status.canParadiseCoinExchangeBenefitToday(spuId) || !paradiseCoinExchangeBenefitList.getValue().contains(spuId) || isExchange(itemStatusList, spuId, spuName)) {
                     continue;
@@ -477,7 +477,6 @@ public class AntFarm extends ModelTask {
                 int exchangedCount = 0;
                 while (exchangeBenefit(spuId)) {
                     exchangedCount += 1;
-                    int minPrice = mallItemInfo.getInt("minPrice");
                     Log.farm("乐园币兑换💸#花费[" + minPrice + "乐园币]" + "#第" + exchangedCount + "次兑换" + "[" + spuName + "]");
                     TimeUtil.sleep(3000);
                 }
@@ -677,10 +676,6 @@ public class AntFarm extends ModelTask {
                     needReload = true;
                 }
             }
-//            else {
-//                Log.farm("小鸡在挨饿~Tk 自动喂食功能关闭");
-//                Notify.sendNewNotification(ApplicationHook.getContext(), "TK提醒您", "小鸡在挨饿", RandomUtil.nextInt(0, 1000));
-//            }
         }
 
         // 2. 判断是否需要使用加速道具
@@ -800,8 +795,7 @@ public class AntFarm extends ModelTask {
             JSONObject jo = syncAnimalStatus(farmId, "SYNC_RESUME", "QUERY_ALL");
             parseSyncAnimalStatusResponse(jo);
         } catch (Throwable t) {
-            Log.runtime(TAG, "syncAnimalStatus err:");
-            Log.printStackTrace(TAG, t);
+            Log.printStackTrace(TAG, "syncAnimalStatus err:", t);
         }
     }
 
@@ -810,8 +804,17 @@ public class AntFarm extends ModelTask {
             return syncAnimalStatus(farmId, "SYNC_AFTER_FEED_ANIMAL", "QUERY_EMOTION_INFO|QUERY_ORCHARD_RIGHTS");
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
-            return null;
         }
+        return null;
+    }
+
+    private JSONObject syncAnimalStatusQueryFamilyAnimals(String farmId) {
+        try {
+            return syncAnimalStatus(farmId, "SYNC_RESUME_FAMILY", "QUERY_ALL|QUERY_FAMILY_ANIMAL");
+        } catch (Exception e) {
+            Log.printStackTrace(TAG, e);
+        }
+        return null;
     }
 
 
@@ -1442,9 +1445,7 @@ public class AntFarm extends ModelTask {
             if (foodStock < 180) {
                 Log.record(TAG, "喂鸡饲料不足");
             } else {
-                String s = AntFarmRpcCall.feedAnimal(farmId);
-                GlobalThreadPools.sleep(500);
-                JSONObject jo = new JSONObject(s);
+                JSONObject jo = new JSONObject(AntFarmRpcCall.feedAnimal(farmId));
                 int feedFood = foodStock - jo.getInt("foodStock");
                 add2FoodStock(-feedFood);
                 Log.farm("投喂小鸡🥣[" + feedFood + "g]#剩余" + foodStock + "g");
@@ -2738,15 +2739,7 @@ public class AntFarm extends ModelTask {
             if (familyAwardNum > 0 && familyOptions.getValue().contains("familyClaimReward")) {
                 AntFarmFamily.INSTANCE.familyClaimRewardList();
             }
-            //顶梁柱特权
-            if (!Objects.isNull(assignFamilyMemberInfo) && familyOptions.getValue().contains("assignRights")) {
-                JSONObject assignRights = assignFamilyMemberInfo.getJSONObject("assignRights");
-                if (
-                        Objects.equals(assignRights.getString("assignRightsOwner"), UserMap.getCurrentUid())
-                                && Objects.equals(assignRights.getString("status"), "NOT_USED")) {
-                    assignFamilyMember(assignFamilyMemberInfo, familyUserIds);
-                }
-            }
+
             //帮喂成员
             if (familyOptions.getValue().contains("feedFriendAnimal")) {
                 familyFeedFriendAnimal(animals);
@@ -2755,10 +2748,7 @@ public class AntFarm extends ModelTask {
             if (familyOptions.getValue().contains("eatTogetherConfig")) {
                 familyEatTogether(eatTogetherConfig, familyInteractActions, familyUserIds);
             }
-            //道早安
-            if (familyOptions.getValue().contains("deliverMsgSend")) {
-                deliverMsgSend(familyUserIds);
-            }
+
             //好友分享
             if (familyOptions.getValue().contains("inviteFriendVisitFamily")) {
                 inviteFriendVisitFamily(familyUserIds);
@@ -2774,91 +2764,6 @@ public class AntFarm extends ModelTask {
         }
     }
 
-
-    private void assignFamilyMember(JSONObject jsonObject, List<String> userIds) {
-        try {
-            userIds.remove(UserMap.getCurrentUid());
-            //随机选一个家庭成员
-            if (userIds.isEmpty()) {
-                return;
-            }
-            String beAssignUser = userIds.get(RandomUtil.nextInt(0, userIds.size() - 1));
-            //随机获取一个任务类型
-            JSONArray assignConfigList = jsonObject.getJSONArray("assignConfigList");
-            JSONObject assignConfig = assignConfigList.getJSONObject(RandomUtil.nextInt(0, assignConfigList.length() - 1));
-            JSONObject jo = new JSONObject(AntFarmRpcCall.assignFamilyMember(assignConfig.getString("assignAction"), beAssignUser));
-            if ("SUCCESS".equals(jo.optString("memo"))) {
-                Log.farm("亲密家庭🏠提交任务[使用顶梁柱特权]");
-                GlobalThreadPools.sleep(500);
-                jo = new JSONObject(AntFarmRpcCall.sendChat(assignConfig.getString("chatCardType"), beAssignUser));
-                if ("SUCCESS".equals(jo.optString("memo"))) {
-                    GlobalThreadPools.sleep(500);
-                    syncFamilyStatusIntimacy(familyGroupId);
-                }
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "assignFamilyMember err:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
-
-    private void deliverMsgSend(List<String> friendUserIds) {
-        try {
-            Calendar currentTime = Calendar.getInstance();
-            currentTime.get(Calendar.HOUR_OF_DAY);
-            currentTime.get(Calendar.MINUTE);
-            // 6-10点早安时间
-            final int START_HOUR = 6;
-            final int START_MINUTE = 0;
-            final int END_HOUR = 10;
-            final int END_MINUTE = 0;
-            Calendar startTime = Calendar.getInstance();
-            startTime.set(Calendar.HOUR_OF_DAY, START_HOUR);
-            startTime.set(Calendar.MINUTE, START_MINUTE);
-            Calendar endTime = Calendar.getInstance();
-            endTime.set(Calendar.HOUR_OF_DAY, END_HOUR);
-            endTime.set(Calendar.MINUTE, END_MINUTE);
-            if (currentTime.before(startTime) || currentTime.after(endTime)) {
-                return;
-            }
-            if (Objects.isNull(familyGroupId)) {
-                return;
-            }
-            // 先移除当前用户自己的ID，否则下面接口报错
-            friendUserIds.remove(UserMap.getCurrentUid());
-            if (friendUserIds.isEmpty()) {
-                return;
-            }
-            if (Status.hasFlagToday("antFarm::deliverMsgSend")) {
-                return;
-            }
-            JSONArray userIds = new JSONArray();
-            for (String userId : friendUserIds) {
-                userIds.put(userId);
-            }
-            String requestString = AntFarmRpcCall.deliverSubjectRecommend(userIds);
-            JSONObject jo = new JSONObject(requestString);
-            if (jo.optBoolean("success")) {
-                GlobalThreadPools.sleep(500);
-                jo = new JSONObject(AntFarmRpcCall.deliverContentExpand(userIds, jo.toString().substring(1, jo.toString().length() - 1)));
-                if (jo.optBoolean("success")) {
-                    GlobalThreadPools.sleep(500);
-                    String content = jo.getString("content");
-                    String deliverId = jo.getString("deliverId");
-                    jo = new JSONObject(AntFarmRpcCall.deliverMsgSend(familyGroupId, userIds, content, deliverId));
-                    if (jo.optBoolean("success")) {
-                        Log.farm("亲密家庭🏠提交任务[道早安]");
-                        Status.setFlagToday("antFarm::deliverMsgSend");
-                        GlobalThreadPools.sleep(500);
-                        syncFamilyStatusIntimacy(familyGroupId);
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "deliverMsgSend err:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
 
     private void syncFamilyStatusIntimacy(String groupId) {
         try {
@@ -2876,7 +2781,7 @@ public class AntFarm extends ModelTask {
             if (Status.hasFlagToday("antFarm::inviteFriendVisitFamily")) {
                 return;
             }
-            Set<String> familyValue = inviteFriendVisitFamily.getValue();
+            Set<String> familyValue = notInviteList.getValue();
             if (familyValue.isEmpty()) {
                 return;
             }
