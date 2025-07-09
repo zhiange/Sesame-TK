@@ -266,7 +266,7 @@ public class AntForest extends ModelTask {
         modelFields.addField(waterFriendCount = new IntegerModelField("waterFriendCount", "浇水 | 克数(10 18 33 66)", 66));
         modelFields.addField(whoYouWantToGiveTo = new SelectModelField("whoYouWantToGiveTo", "赠送 | 道具", new LinkedHashSet<>(), AlipayUser::getList, "所有可赠送的道具将全部赠"));
         modelFields.addField(collectProp = new BooleanModelField("collectProp", "收集道具", false));
-        modelFields.addField(helpFriendCollectType = new ChoiceModelField("helpFriendCollectType", "复活能量 | 选项", HelpFriendCollectType.HELP, HelpFriendCollectType.nickNames));
+        modelFields.addField(helpFriendCollectType = new ChoiceModelField("helpFriendCollectType", "复活能量 | 选项", HelpFriendCollectType.NONE, HelpFriendCollectType.nickNames));
         modelFields.addField(helpFriendCollectList = new SelectModelField("helpFriendCollectList", "复活能量 | 好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(vitalityExchange = new BooleanModelField("vitalityExchange", "活力值 | 兑换开关", false));
         modelFields.addField(vitalityExchangeList = new SelectAndCountModelField("vitalityExchangeList", "活力值 | 兑换列表", new LinkedHashMap<>(), VitalityStore::getList, "兑换次数"));
